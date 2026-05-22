@@ -23,7 +23,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     minPasswordLength: 8,
     maxPasswordLength: 256,
     revokeSessionsOnPasswordReset: true,
@@ -37,7 +37,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({ to: user.email, subject: "Verify your Dime email", html: `<a href="${url}">Verify Email</a>` })
     },
-    sendOnSignUp: true,
+    sendOnSignUp: false,
   },
 
   socialProviders: {
