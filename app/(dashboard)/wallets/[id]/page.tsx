@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { notFound, redirect } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
-import { getWalletById, getSingleWalletBalanceHistory } from "@/lib/queries/wallets"
+import { getWalletById, getSingleWalletBalanceDailyHistory } from "@/lib/queries/wallets"
 import { getFilteredTransactions } from "@/lib/queries/transactions"
 import { getCategories } from "@/lib/queries/categories"
 import { WalletDetailChart } from "@/components/wallets/wallet-detail-chart"
@@ -47,7 +47,7 @@ export default async function WalletDetailPage({ params }: PageProps) {
     // Fetch transactions and history in parallel
     const [fetchedTransactions, fetchedHistory] = await Promise.all([
       getFilteredTransactions(userId, { walletIds: [id] }, { limit: 10 }),
-      getSingleWalletBalanceHistory(userId, id, 6)
+      getSingleWalletBalanceDailyHistory(userId, id, 90)
     ])
     transactions = fetchedTransactions
     history = fetchedHistory
@@ -71,19 +71,19 @@ export default async function WalletDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Header / Back Link */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" asChild className="rounded-xl border-border/40 bg-card shadow-sm hover:bg-muted/50">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <Button variant="outline" size="icon" asChild className="rounded-xl border-border/40 bg-card shadow-sm hover:bg-muted/50 shrink-0 mt-0.5">
             <Link href="/wallets">
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{wallet.name}</h1>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground wrap-break-word">{wallet.name}</h1>
               <Badge
                 variant="outline"
-                className="rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize border-border/40 shadow-sm"
+                className="rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize border-border/40 shadow-sm shrink-0"
                 style={{
                   backgroundColor: wallet.color + "15",
                   color: wallet.color,
@@ -93,7 +93,7 @@ export default async function WalletDetailPage({ params }: PageProps) {
                 {wallet.type.replace("_", " ")}
               </Badge>
               {wallet.isArchived && (
-                <Badge variant="destructive" className="rounded-full px-2.5 py-0.5 text-xs font-semibold">
+                <Badge variant="destructive" className="rounded-full px-2.5 py-0.5 text-xs font-semibold shrink-0">
                   Archived
                 </Badge>
               )}
@@ -103,9 +103,9 @@ export default async function WalletDetailPage({ params }: PageProps) {
             </p>
           </div>
         </div>
-        <div className="text-right">
+        <div className="text-left pl-14 sm:pl-0 sm:text-right">
           <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">Current Balance</p>
-          <p className="text-3xl font-black text-foreground mt-0.5">
+          <p className="text-2xl sm:text-3xl font-black text-foreground mt-0.5">
             {formatCurrency(wallet.balance, wallet.currency)}
           </p>
         </div>
@@ -208,7 +208,7 @@ export default async function WalletDetailPage({ params }: PageProps) {
                             </Badge>
                           )}
                         </td>
-                        <td className="py-4 px-4 text-muted-foreground">
+                        <td className="py-4 px-4 text-muted-foreground whitespace-nowrap">
                           {formatDate(tx.date)}
                         </td>
                         <td className="py-4 px-4 text-right font-mono font-bold">
@@ -217,8 +217,8 @@ export default async function WalletDetailPage({ params }: PageProps) {
                               isIncome
                                 ? "text-emerald-500"
                                 : isExpense
-                                ? "text-rose-500"
-                                : "text-amber-500"
+                                  ? "text-rose-500"
+                                  : "text-amber-500"
                             }
                           >
                             <span className="inline-flex items-center gap-1">

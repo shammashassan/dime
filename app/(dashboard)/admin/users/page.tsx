@@ -6,7 +6,7 @@ import { AdminStats } from "@/components/admin/admin-stats"
 import { UsersTable } from "@/components/admin/users-table"
 import { PendingTable } from "@/components/admin/pending-table"
 import { BannedTable } from "@/components/admin/banned-table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AdminUsersTabs } from "@/components/admin/admin-users-tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
 
@@ -61,15 +61,8 @@ export default async function AdminUsersPage() {
       </Suspense>
 
       {/* Tabs list */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="w-full border-b border-border/40 overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <TabsTrigger value="all">All Users</TabsTrigger>
-          <TabsTrigger value="pending">Pending Approval</TabsTrigger>
-          <TabsTrigger value="banned">Banned Users</TabsTrigger>
-          <TabsTrigger value="admins">Administrators</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="mt-4">
+      <AdminUsersTabs
+        allTab={
           <Suspense fallback={<TableSkeleton />}>
             <UsersTable
               users={users}
@@ -77,21 +70,18 @@ export default async function AdminUsersPage() {
               currentUserId={currentUserId}
             />
           </Suspense>
-        </TabsContent>
-
-        <TabsContent value="pending" className="mt-4">
+        }
+        pendingTab={
           <Suspense fallback={<TableSkeleton />}>
             <PendingTable users={users} />
           </Suspense>
-        </TabsContent>
-
-        <TabsContent value="banned" className="mt-4">
+        }
+        bannedTab={
           <Suspense fallback={<TableSkeleton />}>
             <BannedTable users={users} />
           </Suspense>
-        </TabsContent>
-
-        <TabsContent value="admins" className="mt-4">
+        }
+        adminsTab={
           <Suspense fallback={<TableSkeleton />}>
             <UsersTable
               users={adminUsers}
@@ -99,8 +89,8 @@ export default async function AdminUsersPage() {
               currentUserId={currentUserId}
             />
           </Suspense>
-        </TabsContent>
-      </Tabs>
+        }
+      />
     </div>
   )
 }

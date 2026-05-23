@@ -181,44 +181,59 @@ export function TransactionForm({
     setLoading(true)
     setError(null)
 
+    const savePromise = new Promise(async (resolve, reject) => {
+      try {
+        const tagsArray = data.tags
+          ? data.tags
+              .split(",")
+              .map((t: string) => t.trim())
+              .filter(Boolean)
+          : []
+
+        const amountInCents = Math.round(data.amount * 100)
+
+        const payload = {
+          walletId: data.walletId,
+          categoryId: data.categoryId,
+          type: data.type,
+          amount: amountInCents,
+          currency: walletCurrency,
+          description: data.description,
+          notes: data.notes || undefined,
+          date: data.date,
+          tags: tagsArray,
+          targetWalletId: data.type === "transfer" ? data.targetWalletId : undefined,
+          isRecurring: data.isRecurring,
+        }
+
+        if (isEditing && initialTransaction) {
+          await updateTransaction(initialTransaction._id.toString(), payload)
+        } else {
+          await createTransaction(payload)
+        }
+
+        router.refresh()
+        if (onSuccess) onSuccess()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(savePromise, {
+      loading: isEditing ? "Saving changes..." : "Creating transaction...",
+      success: isEditing ? "Transaction updated successfully" : "Transaction created successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Something went wrong. Please try again."
+        setError(errMsg)
+        return errMsg
+      },
+    })
+
     try {
-      const tagsArray = data.tags
-        ? data.tags
-            .split(",")
-            .map((t: string) => t.trim())
-            .filter(Boolean)
-        : []
-
-      const amountInCents = Math.round(data.amount * 100)
-
-      const payload = {
-        walletId: data.walletId,
-        categoryId: data.categoryId,
-        type: data.type,
-        amount: amountInCents,
-        currency: walletCurrency,
-        description: data.description,
-        notes: data.notes || undefined,
-        date: data.date,
-        tags: tagsArray,
-        targetWalletId: data.type === "transfer" ? data.targetWalletId : undefined,
-        isRecurring: data.isRecurring,
-      }
-
-      if (isEditing && initialTransaction) {
-        await updateTransaction(initialTransaction._id.toString(), payload)
-        toast.success("Transaction updated successfully")
-      } else {
-        await createTransaction(payload)
-        toast.success("Transaction created successfully")
-      }
-
-      router.refresh()
-      if (onSuccess) onSuccess()
-    } catch (err: any) {
-      const errMsg = err.message || "Something went wrong. Please try again."
-      setError(errMsg)
-      toast.error(errMsg)
+      await savePromise
+    } catch (err) {
+      console.error("Form submit error:", err)
     } finally {
       setLoading(false)
     }

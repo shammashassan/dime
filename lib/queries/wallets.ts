@@ -74,3 +74,57 @@ export const getSingleWalletBalanceHistory = cache(async (userId: string, wallet
     balance: (recordedBalances[monthEnd.getTime().toString()] || 0) / 100,
   }))
 })
+
+export const getSingleWalletBalanceDailyHistory = cache(async (userId: string, walletId: string, daysCount: number = 90) => {
+  const walletsColl = await getCollection<Wallet>("wallets")
+  const wallet = await walletsColl.findOne({ _id: new ObjectId(walletId), userId })
+  if (!wallet) return []
+
+  const transactionsColl = await getCollection<Transaction>("transactions")
+  const { endOfDay, subDays, startOfDay, format } = require("date-fns")
+
+  // Generate day end dates
+  const days: Date[] = []
+  for (let i = 0; i < daysCount; i++) {
+    days.push(endOfDay(subDays(new Date(), i)))
+  }
+  days.sort((a, b) => a.getTime() - b.getTime())
+
+  const oldestStartDate = startOfDay(subDays(new Date(), daysCount - 1))
+  const transactions = await transactionsColl.find({
+    userId,
+    walletId,
+    date: { $gte: oldestStartDate },
+  }).sort({ date: -1 }).toArray()
+
+  let currentBalance = wallet.balance
+  const recordedBalances: Record<string, number> = {}
+  let txIndex = 0
+
+  const reverseDays = [...days].reverse()
+
+  reverseDays.forEach((dayEnd: Date) => {
+    while (txIndex < transactions.length && transactions[txIndex].date > dayEnd) {
+      const tx = transactions[txIndex]
+      if (tx.type === "expense") {
+        currentBalance += tx.amount
+      } else if (tx.type === "income") {
+        currentBalance -= tx.amount
+      } else if (tx.type === "transfer") {
+        if (tx.transferType === "debit") {
+          currentBalance += tx.amount
+        } else if (tx.transferType === "credit") {
+          currentBalance -= tx.amount
+        }
+      }
+      txIndex++
+    }
+    recordedBalances[dayEnd.getTime().toString()] = currentBalance
+  })
+
+  return days.map((dayEnd) => ({
+    date: format(dayEnd, "yyyy-MM-dd"),
+    balance: (recordedBalances[dayEnd.getTime().toString()] || 0) / 100,
+  }))
+})
+

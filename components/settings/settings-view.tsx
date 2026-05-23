@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition, useRef } from "react"
 import { useSession, authClient } from "@/lib/auth-client"
 import { updatePreferences } from "@/lib/actions/preferences"
+import { toast } from "sonner"
 import { deleteUserAccount, getUserExportData } from "@/lib/actions/user"
 import { UserPreferences } from "@/lib/queries/preferences"
 import { Wallet } from "@/types"
@@ -104,23 +105,35 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     setProfileMessage(null)
     setProfileError(null)
 
-    startTransition(async () => {
-      try {
-        const { error } = await authClient.updateUser({
-          name: profileName,
-          username: profileUsername,
-        })
-        if (error) {
-          setProfileError(error.message || "Failed to update profile")
-        } else {
-          setProfileMessage("Profile updated successfully")
-          setOriginalProfileName(profileName)
-          setOriginalProfileUsername(profileUsername)
-          await refreshSession()
+    const updatePromise = new Promise(async (resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.updateUser({
+            name: profileName,
+            username: profileUsername,
+          })
+          if (error) {
+            reject(error)
+          } else {
+            setOriginalProfileName(profileName)
+            setOriginalProfileUsername(profileUsername)
+            await refreshSession()
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
         }
-      } catch (err: any) {
-        setProfileError(err.message || "An unexpected error occurred")
-      }
+      })
+    })
+
+    toast.promise(updatePromise, {
+      loading: "Saving profile changes...",
+      success: "Profile updated successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to update profile"
+        setProfileError(errMsg)
+        return errMsg
+      },
     })
   }
 
@@ -196,21 +209,36 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
       return
     }
 
-    startTransition(async () => {
-      const { error } = await authClient.changePassword({
-        newPassword,
-        currentPassword,
-        revokeOtherSessions: true,
+    const changePromise = new Promise(async (resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.changePassword({
+            newPassword,
+            currentPassword,
+            revokeOtherSessions: true,
+          })
+          if (error) {
+            reject(error)
+          } else {
+            setCurrentPassword("")
+            setNewPassword("")
+            setConfirmPassword("")
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
+        }
       })
+    })
 
-      if (error) {
-        setPasswordError(error.message || "Failed to change password")
-      } else {
-        setPasswordSuccess("Password changed successfully. Other sessions revoked.")
-        setCurrentPassword("")
-        setNewPassword("")
-        setConfirmPassword("")
-      }
+    toast.promise(changePromise, {
+      loading: "Updating password...",
+      success: "Password updated successfully. Other sessions revoked.",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to change password"
+        setPasswordError(errMsg)
+        return errMsg
+      },
     })
   }
 
@@ -219,27 +247,58 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     e.preventDefault()
     setPasskeyError(null)
 
-    startTransition(async () => {
-      const { error } = await authClient.passkey.addPasskey({
-        name: passkeyName || `${user?.name || "User"}'s Passkey`,
+    const registerPromise = new Promise(async (resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.passkey.addPasskey({
+            name: passkeyName || `${user?.name || "User"}'s Passkey`,
+          })
+          if (error) {
+            reject(error)
+          } else {
+            setShowAddPasskey(false)
+            setPasskeyName("")
+            await fetchSecurityData()
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
+        }
       })
+    })
 
-      if (error) {
-        setPasskeyError(error.message || "Failed to register passkey")
-      } else {
-        setShowAddPasskey(false)
-        setPasskeyName("")
-        await fetchSecurityData()
-      }
+    toast.promise(registerPromise, {
+      loading: "Registering passkey...",
+      success: "Passkey registered successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to register passkey"
+        setPasskeyError(errMsg)
+        return errMsg
+      },
     })
   }
 
   const handleDeletePasskey = async (id: string) => {
-    startTransition(async () => {
-      const { error } = await authClient.passkey.deletePasskey({ id })
-      if (!error) {
-        await fetchSecurityData()
-      }
+    const deletePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.passkey.deletePasskey({ id })
+          if (error) {
+            reject(error)
+          } else {
+            await fetchSecurityData()
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(deletePromise, {
+      loading: "Deleting passkey...",
+      success: "Passkey deleted successfully",
+      error: "Failed to delete passkey",
     })
   }
 
@@ -248,19 +307,37 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     e.preventDefault()
     setTotpVerifyError(null)
 
-    startTransition(async () => {
-      const { data, error } = await authClient.twoFactor.enable({
-        password: hasCredentials ? twoFactorPassword : undefined,
+    const setupPromise = new Promise(async (resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { data, error } = await authClient.twoFactor.enable({
+            password: hasCredentials ? twoFactorPassword : undefined,
+          })
+          if (error) {
+            reject(error)
+          } else if (data) {
+            setTotpUri(data.totpURI)
+            setBackupCodes(data.backupCodes)
+            setShowTotpEnrollment(true)
+            setTwoFactorPassword("")
+            resolve(true)
+          } else {
+            reject(new Error("Failed to configure 2FA"))
+          }
+        } catch (err) {
+          reject(err)
+        }
       })
+    })
 
-      if (error) {
-        setTotpVerifyError(error.message || "Failed to generate 2FA credentials")
-      } else if (data) {
-        setTotpUri(data.totpURI)
-        setBackupCodes(data.backupCodes)
-        setShowTotpEnrollment(true)
-        setTwoFactorPassword("")
-      }
+    toast.promise(setupPromise, {
+      loading: "Generating 2FA setup credentials...",
+      success: "Scan QR code to verify setup",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to generate 2FA credentials"
+        setTotpVerifyError(errMsg)
+        return errMsg
+      },
     })
   }
 
@@ -268,19 +345,35 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     e.preventDefault()
     setTotpVerifyError(null)
 
-    startTransition(async () => {
-      const { error } = await authClient.twoFactor.verifyTotp({
-        code: totpCode,
-        trustDevice: true,
+    const verifyPromise = new Promise(async (resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.twoFactor.verifyTotp({
+            code: totpCode,
+            trustDevice: true,
+          })
+          if (error) {
+            reject(error)
+          } else {
+            setTotpVerifySuccess(true)
+            await refreshSession()
+            await fetchSecurityData()
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
+        }
       })
+    })
 
-      if (error) {
-        setTotpVerifyError(error.message || "Invalid verification code")
-      } else {
-        setTotpVerifySuccess(true)
-        await refreshSession()
-        await fetchSecurityData()
-      }
+    toast.promise(verifyPromise, {
+      loading: "Verifying code...",
+      success: "Two-Factor Authentication activated successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Invalid verification code"
+        setTotpVerifyError(errMsg)
+        return errMsg
+      },
     })
   }
 
@@ -288,39 +381,85 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     e.preventDefault()
     setDisableError(null)
 
-    startTransition(async () => {
-      const { error } = await authClient.twoFactor.disable({
-        password: hasCredentials ? disablePassword : undefined,
+    const disablePromise = new Promise(async (resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.twoFactor.disable({
+            password: hasCredentials ? disablePassword : undefined,
+          })
+          if (error) {
+            reject(error)
+          } else {
+            setShowDisable2FA(false)
+            setDisablePassword("")
+            await refreshSession()
+            await fetchSecurityData()
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
+        }
       })
+    })
 
-      if (error) {
-        setDisableError(error.message || "Failed to disable 2FA")
-      } else {
-        setShowDisable2FA(false)
-        setDisablePassword("")
-        await refreshSession()
-        await fetchSecurityData()
-      }
+    toast.promise(disablePromise, {
+      loading: "Deactivating 2FA...",
+      success: "Two-Factor Authentication deactivated",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to disable 2FA"
+        setDisableError(errMsg)
+        return errMsg
+      },
     })
   }
 
   // Revoke Sessions
   const handleRevokeSession = async (token: string) => {
-    startTransition(async () => {
-      const { error } = await authClient.revokeSession({ token })
-      if (!error) {
-        await fetchSecurityData()
-        await refreshSession()
-      }
+    const revokePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.revokeSession({ token })
+          if (error) {
+            reject(error)
+          } else {
+            await fetchSecurityData()
+            await refreshSession()
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(revokePromise, {
+      loading: "Terminating session...",
+      success: "Session terminated successfully",
+      error: "Failed to terminate session",
     })
   }
 
   const handleRevokeOtherSessions = async () => {
-    startTransition(async () => {
-      const { error } = await authClient.revokeOtherSessions()
-      if (!error) {
-        await fetchSecurityData()
-      }
+    const revokePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const { error } = await authClient.revokeOtherSessions()
+          if (error) {
+            reject(error)
+          } else {
+            await fetchSecurityData()
+            resolve(true)
+          }
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(revokePromise, {
+      loading: "Terminating other active sessions...",
+      success: "Other sessions terminated successfully",
+      error: "Failed to terminate other sessions",
     })
   }
 
@@ -342,19 +481,29 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     e.preventDefault()
     setPrefMessage(null)
 
-    startTransition(async () => {
-      try {
-        const res = await updatePreferences({
-          defaultCurrency: prefCurrency,
-          defaultWalletId: prefWallet === "none" ? undefined : prefWallet,
-          dateFormat: prefDateFormat,
-        })
-        if (res.success) {
-          setPrefMessage("Preferences saved successfully")
+    const prefPromise = new Promise(async (resolve, reject) => {
+      startTransition(async () => {
+        try {
+          const res = await updatePreferences({
+            defaultCurrency: prefCurrency,
+            defaultWalletId: prefWallet === "none" ? undefined : prefWallet,
+            dateFormat: prefDateFormat,
+          })
+          if (res.success) {
+            resolve(true)
+          } else {
+            reject(new Error("Failed to save preferences"))
+          }
+        } catch (err) {
+          reject(err)
         }
-      } catch (err: any) {
-        console.error(err)
-      }
+      })
+    })
+
+    toast.promise(prefPromise, {
+      loading: "Saving preferences...",
+      success: "Preferences saved successfully",
+      error: "Failed to save preferences",
     })
   }
 
@@ -376,8 +525,10 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
       document.body.appendChild(downloadAnchor)
       downloadAnchor.click()
       downloadAnchor.remove()
+      toast.success("JSON data export initiated")
     } catch (err) {
       console.error("Export JSON failed:", err)
+      toast.error("Failed to export JSON data")
     }
   }
 
@@ -385,7 +536,7 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     try {
       const data = await getUserExportData()
       const txs = data.transactions
-      
+
       const headersList = ["ID", "Type", "Amount", "Category", "Wallet", "Date", "Description", "Recurring"]
       const csvRows = [headersList.join(",")]
 
@@ -395,7 +546,7 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
         const amount = (tx.amount / 100).toFixed(2)
         const dateStr = tx.date.split("T")[0]
         const desc = tx.description ? `"${tx.description.replace(/"/g, '""')}"` : ""
-        
+
         csvRows.push([
           tx._id,
           tx.type,
@@ -415,20 +566,31 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
       document.body.appendChild(downloadAnchor)
       downloadAnchor.click()
       downloadAnchor.remove()
+      toast.success("CSV transaction export initiated")
     } catch (err) {
       console.error("Export CSV failed:", err)
+      toast.error("Failed to export CSV transactions")
     }
   }
 
   const handleDeleteAccount = async () => {
-    startTransition(async () => {
-      try {
-        await deleteUserAccount()
-        await authClient.signOut()
-        window.location.href = "/sign-up"
-      } catch (err) {
-        console.error("Failed to delete account", err)
-      }
+    const deletePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await deleteUserAccount()
+          await authClient.signOut()
+          window.location.href = "/sign-up"
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(deletePromise, {
+      loading: "Deleting account and wiping data...",
+      success: "Account deleted successfully",
+      error: "Failed to delete account",
     })
   }
 
@@ -466,30 +628,30 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
         value={activeTab}
         onValueChange={setActiveTab}
         orientation="vertical"
-        className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start w-full"
+        className="flex flex-col lg:flex-row gap-6 items-start w-full"
       >
         {/* Navigation Tabs List */}
-        <TabsList className="md:col-span-1 border border-border/40 bg-card rounded-2xl p-1.5 shadow-md flex-col w-full text-left space-y-0.5">
-          <TabsTrigger value="profile" className="flex items-center gap-2 justify-start w-full">
+        <TabsList className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-visible w-full lg:w-60 lg:shrink-0 border border-border/40 bg-card rounded-2xl p-1.5 shadow-md space-x-1 lg:space-x-0 space-y-0 lg:space-y-0.5 scrollbar-none">
+          <TabsTrigger value="profile" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
             <User className="size-4" />
             Profile Details
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2 justify-start w-full">
+          <TabsTrigger value="security" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
             <Shield className="size-4" />
             Security & Login
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2 justify-start w-full">
+          <TabsTrigger value="preferences" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
             <SettingsIcon className="size-4" />
             Preferences
           </TabsTrigger>
-          <TabsTrigger value="data" className="flex items-center gap-2 justify-start w-full text-rose-500 hover:text-rose-600 dark:hover:text-rose-400">
+          <TabsTrigger value="data" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400">
             <Database className="size-4" />
             Data Management
           </TabsTrigger>
         </TabsList>
 
         {/* Tabs Contents Panel */}
-        <div className="md:col-span-3 w-full">
+        <div className="flex-1 w-full">
           {/* PROFILE DETAILS */}
           <TabsContent value="profile" className="outline-none">
             <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
@@ -778,9 +940,8 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
                   return (
                     <div
                       key={s.id}
-                      className={`flex items-center justify-between p-3.5 border rounded-xl bg-muted/5 ${
-                        isCurrent ? "border-primary/20 bg-primary/5 dark:bg-primary/10" : "border-border/40"
-                      }`}
+                      className={`flex items-center justify-between p-3.5 border rounded-xl bg-muted/5 ${isCurrent ? "border-primary/20 bg-primary/5 dark:bg-primary/10" : "border-border/40"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${isCurrent ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>

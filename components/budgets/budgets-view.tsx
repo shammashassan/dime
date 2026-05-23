@@ -1,12 +1,10 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { Budget, Category, Wallet } from "@/types"
 import { BudgetWithSpending } from "@/lib/queries/budgets"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -21,18 +19,20 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { BudgetForm } from "./budget-form"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import {
   Edit,
   Trash2,
   Plus,
   Target,
   AlertTriangle,
-  Calendar,
+  CalendarDays,
   Wallet as WalletIcon,
   ShieldAlert,
   Loader2,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface BudgetsViewProps {
   budgets: BudgetWithSpending[]
@@ -40,302 +40,219 @@ interface BudgetsViewProps {
   wallets: Wallet[]
 }
 
+function BudgetCard({
+  b,
+  onEdit,
+  onDelete,
+}: {
+  b: BudgetWithSpending
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const [animated, setAnimated] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 80)
+    return () => clearTimeout(t)
+  }, [])
+
+  const percent = b.amount > 0 ? (b.spent / b.amount) * 100 : 0
+  const remaining = Math.max(b.amount - b.spent, 0)
+  const isOverBudget = percent >= 100
+  const isOverThreshold = percent >= b.alertThreshold && !isOverBudget
+
+  const barColor = isOverBudget ? "#f43f5e" : percent >= 70 ? "#f59e0b" : "#10b981"
+  const pctColor = isOverBudget ? "text-rose-500" : percent >= 70 ? "text-amber-500" : "text-emerald-500"
+
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col">
+      {/* Top accent bar */}
+      <div className="h-[3px] w-full" style={{ backgroundColor: b.categoryColor }} />
+
+      {/* Inactive pill */}
+      {!b.isActive && (
+        <div className="absolute top-3 right-3 z-10">
+          <Badge variant="secondary" className="text-[9px] rounded-full px-2 font-bold uppercase tracking-wider h-4">Inactive</Badge>
+        </div>
+      )}
+
+      {/* Main content */}
+      <div className="px-4 pt-3.5 pb-3 flex flex-col gap-3">
+
+        {/* Title + badges + actions */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1.5 min-w-0 flex-1 pr-2">
+            <p className="text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+              {b.name}
+            </p>
+            <div className="flex flex-wrap gap-1">
+              <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4"
+                style={{ backgroundColor: b.categoryColor + "15", color: b.categoryColor, borderColor: b.categoryColor + "30" }}>
+                {b.categoryName}
+              </Badge>
+              {b.walletName && (
+                <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider text-muted-foreground border-border/50 h-4 gap-1">
+                  <WalletIcon className="size-2" />{b.walletName}
+                </Badge>
+              )}
+              <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4">{b.period}</Badge>
+            </div>
+          </div>
+          {/* Actions - slide in */}
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 translate-x-1.5 group-hover:translate-x-0 transition-all duration-200 shrink-0 mt-0.5">
+            <Button variant="ghost" size="icon" className="size-6 rounded-md hover:bg-muted/70" onClick={onEdit}><Edit className="size-3 text-muted-foreground" /></Button>
+            <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500 hover:bg-rose-500/10" onClick={onDelete}><Trash2 className="size-3" /></Button>
+          </div>
+        </div>
+
+        {/* Spent + Used % */}
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5">Spent</p>
+            <p className="text-[1.5rem] font-black tabular-nums text-foreground leading-none select-all">
+              {formatCurrency(b.spent, b.currency)}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5">Used</p>
+            <p className={cn("text-[1.5rem] font-black tabular-nums leading-none", pctColor)}>
+              {Math.min(percent, 999).toFixed(0)}%
+            </p>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div>
+          <div className="w-full h-2 bg-muted/60 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-[width] duration-1000 ease-out"
+              style={{ width: animated ? `${Math.min(percent, 100)}%` : "0%", backgroundColor: barColor }}
+            />
+          </div>
+          <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
+            <span className="text-foreground/60">{formatCurrency(remaining, b.currency)} remaining</span>
+            <span>Limit: {formatCurrency(b.amount, b.currency)}</span>
+          </div>
+        </div>
+
+        {/* Alert */}
+        {(isOverThreshold || isOverBudget) && (
+          <div className={cn(
+            "flex items-center gap-1.5 px-2.5 py-2 rounded-xl border text-[10px] font-semibold",
+            isOverBudget
+              ? "bg-rose-500/8 border-rose-500/20 text-rose-600 dark:text-rose-400"
+              : "bg-amber-500/8 border-amber-500/20 text-amber-600 dark:text-amber-400"
+          )}>
+            {isOverBudget
+              ? <><ShieldAlert className="size-3 shrink-0" /><span>Over budget — limit reached</span></>
+              : <><AlertTriangle className="size-3 shrink-0" /><span>Alert: exceeded {b.alertThreshold}% threshold</span></>
+            }
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-border/20 px-4 py-2.5 flex items-center gap-1.5">
+        <CalendarDays className="size-3 text-muted-foreground shrink-0" />
+        <span className="text-[10px] text-muted-foreground font-medium">
+          Started {formatDate(b.startDate)}
+          {b.endDate && <span className="text-muted-foreground/60"> · ends {formatDate(b.endDate)}</span>}
+        </span>
+      </div>
+    </div>
+  )
+}
+
 export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
   const [deletingBudgetId, setDeletingBudgetId] = useState<string | null>(null)
 
   const handleDelete = async () => {
     if (!deletingBudgetId) return
-
-    startTransition(async () => {
-      try {
-        await deleteBudget(deletingBudgetId)
-        setDeletingBudgetId(null)
-        router.refresh()
-      } catch (err) {
-        console.error(err)
-      }
+    const deletePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await deleteBudget(deletingBudgetId)
+          setDeletingBudgetId(null)
+          router.refresh()
+          resolve(true)
+        } catch (err) { reject(err) }
+      })
     })
+    toast.promise(deletePromise, { loading: "Deleting...", success: "Budget deleted", error: "Failed to delete" })
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-7 w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="p-3.5 bg-primary/10 text-primary rounded-2xl shadow-xs shrink-0">
-            <Target className="h-7 w-7" />
-          </div>
-
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0"><Target className="size-6" /></div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-              Budgets
-            </h1>
-
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Establish spending limits and track your performance relative to thresholds.
-            </p>
+            <h1 className="text-2xl font-extrabold tracking-tight">Budgets</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Set spending limits and track performance.</p>
           </div>
         </div>
-
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-lg shadow-primary/10 flex items-center gap-2"
-        >
-          <Plus className="size-4" />
-          Create Budget
+        <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">
+          <Plus className="size-4" />Create Budget
         </Button>
       </div>
 
-      {/* Grid List of Budgets */}
+      {/* Grid */}
       {budgets.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {budgets.map((b) => {
-            const percent = b.amount > 0 ? (b.spent / b.amount) * 100 : 0
-
-            const isOverThreshold = percent >= b.alertThreshold
-            const isOverBudget = percent >= 100
-
-            return (
-              <Card
-                key={b._id.toString()}
-                className="border border-border/40 bg-card shadow-xl flex flex-col justify-between overflow-hidden relative group"
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-1"
-                  style={{ backgroundColor: b.categoryColor }}
-                />
-
-                <CardHeader className="pb-3 pt-6 flex flex-row justify-between items-start">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg font-bold group-hover:text-primary transition-colors">
-                        {b.name}
-                      </CardTitle>
-
-                      {!b.isActive && (
-                        <Badge variant="secondary" className="text-[10px] rounded-full px-2">
-                          Inactive
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-1.5 items-center">
-                      <Badge
-                        variant="outline"
-                        className="rounded-full px-2 py-0 text-[10px] font-medium"
-                        style={{
-                          backgroundColor: b.categoryColor + "15",
-                          color: b.categoryColor,
-                          borderColor: b.categoryColor + "30",
-                        }}
-                      >
-                        {b.categoryName}
-                      </Badge>
-
-                      {b.walletName && (
-                        <Badge
-                          variant="outline"
-                          className="rounded-full px-2 py-0 text-[10px] font-medium text-muted-foreground flex items-center gap-1"
-                        >
-                          <WalletIcon className="size-2.5" />
-                          {b.walletName}
-                        </Badge>
-                      )}
-
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full px-2 py-0 text-[10px] font-medium uppercase"
-                      >
-                        {b.period}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 rounded-lg hover:bg-muted"
-                      onClick={() => setEditingBudget(b)}
-                    >
-                      <Edit className="size-3.5 text-muted-foreground" />
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
-                      onClick={() => setDeletingBudgetId(b._id.toString())}
-                    >
-                      <Trash2 className="size-3.5" />
-                    </Button>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-end">
-                    <div className="space-y-0.5">
-                      <p className="text-xs text-muted-foreground">Spent</p>
-
-                      <p className="text-xl font-black text-foreground">
-                        {formatCurrency(b.spent, b.currency)}
-                      </p>
-                    </div>
-
-                    <div className="text-right space-y-0.5">
-                      <p className="text-xs text-muted-foreground">Limit</p>
-
-                      <p className="text-sm font-semibold text-muted-foreground">
-                        {formatCurrency(b.amount, b.currency)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Progress
-                      value={Math.min(percent, 100)}
-                      className={`h-2.5 rounded-full ${isOverBudget
-                        ? "[&>div]:bg-rose-500"
-                        : percent >= 70
-                          ? "[&>div]:bg-amber-500"
-                          : "[&>div]:bg-emerald-500"
-                        }`}
-                    />
-
-                    <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
-                      <span>{percent.toFixed(0)}% Consumed</span>
-                      <span>Threshold: {b.alertThreshold}%</span>
-                    </div>
-                  </div>
-
-                  {(isOverThreshold || isOverBudget) && (
-                    <div
-                      className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold ${isOverBudget
-                        ? "bg-rose-500/10 border-rose-500/20 text-rose-500"
-                        : "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                        }`}
-                    >
-                      {isOverBudget ? (
-                        <>
-                          <ShieldAlert className="size-4 shrink-0" />
-                          <span>Over budget limit! Stop spending!</span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertTriangle className="size-4 shrink-0" />
-                          <span>Warning: Exceeded {b.alertThreshold}% threshold!</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-
-                <CardFooter className="pt-2 pb-4 text-[10px] text-muted-foreground border-t border-border/10 flex items-center gap-1">
-                  <Calendar className="size-3" />
-
-                  <span>
-                    Started {formatDate(b.startDate)}
-                    {b.endDate && ` • Ends ${formatDate(b.endDate)}`}
-                  </span>
-                </CardFooter>
-              </Card>
-            )
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {budgets.map((b) => (
+            <BudgetCard
+              key={b._id.toString()}
+              b={b}
+              onEdit={() => setEditingBudget(b)}
+              onDelete={() => setDeletingBudgetId(b._id.toString())}
+            />
+          ))}
         </div>
       ) : (
-        <Card className="border border-border/40 shadow-xl bg-card py-16 flex flex-col items-center justify-center text-center">
-          <Target className="size-16 text-muted-foreground/30 mb-4" />
-
-          <h2 className="text-xl font-bold">No budgets established yet</h2>
-
-          <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-            Setting budget limits keeps your spending in check. Create a budget to monitor spending limits.
-          </p>
-
-          <Button onClick={() => setIsCreateOpen(true)} className="mt-6 rounded-xl font-bold">
-            Create First Budget
+        <div className="flex flex-col items-center justify-center border border-dashed border-border/50 rounded-2xl p-12 text-center bg-muted/10">
+          <Target className="size-10 text-muted-foreground/25 mb-3" />
+          <p className="text-sm font-bold">No budgets yet</p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-xs">Create a budget to monitor your spending limits.</p>
+          <Button onClick={() => setIsCreateOpen(true)} className="mt-4 rounded-xl font-bold gap-2 h-9">
+            <Plus className="size-4" />Create First Budget
           </Button>
-        </Card>
+        </div>
       )}
 
       {/* Create Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-background border border-border/40 rounded-2xl shadow-xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-extrabold tracking-tight">
-              Create Budget
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="py-2">
-            <BudgetForm
-              categories={categories}
-              wallets={wallets}
-              onSuccess={() => setIsCreateOpen(false)}
-            />
-          </div>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
+          <DialogHeader><DialogTitle className="text-xl font-extrabold">Create Budget</DialogTitle></DialogHeader>
+          <div className="py-2"><BudgetForm categories={categories} wallets={wallets} onSuccess={() => setIsCreateOpen(false)} /></div>
         </DialogContent>
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog
-        open={!!editingBudget}
-        onOpenChange={(open) => !open && setEditingBudget(null)}
-      >
-        <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-background border border-border/40 rounded-2xl shadow-xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-extrabold tracking-tight">
-              Edit Budget
-            </DialogTitle>
-          </DialogHeader>
-
+      <Dialog open={!!editingBudget} onOpenChange={(open) => !open && setEditingBudget(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
+          <DialogHeader><DialogTitle className="text-xl font-extrabold">Edit Budget</DialogTitle></DialogHeader>
           <div className="py-2">
-            {editingBudget && (
-              <BudgetForm
-                categories={categories}
-                wallets={wallets}
-                initialBudget={editingBudget}
-                onSuccess={() => setEditingBudget(null)}
-              />
-            )}
+            {editingBudget && <BudgetForm categories={categories} wallets={wallets} initialBudget={editingBudget} onSuccess={() => setEditingBudget(null)} />}
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Delete Dialog */}
-      <AlertDialog
-        open={!!deletingBudgetId}
-        onOpenChange={(open) => !open && setDeletingBudgetId(null)}
-      >
-        <AlertDialogContent className="bg-popover border border-border/40 shadow-xl">
+      <AlertDialog open={!!deletingBudgetId} onOpenChange={(open) => !open && setDeletingBudgetId(null)}>
+        <AlertDialogContent className="rounded-2xl border border-border/50 shadow-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-bold text-rose-600 dark:text-rose-400">
-              Delete Budget
-            </AlertDialogTitle>
-
-            <AlertDialogDescription className="text-xs">
-              Are you sure you want to delete this budget? This action is permanent and cannot be undone.
-            </AlertDialogDescription>
+            <AlertDialogTitle className="font-bold text-rose-600 dark:text-rose-400">Delete Budget</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">This action is permanent and cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
-
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isPending}
-            >
-              {isPending ? (
-                <Loader2 className="size-3.5 animate-spin mr-1.5" />
-              ) : null}
-
-              Delete Permanently
+            <AlertDialogCancel className="rounded-xl font-semibold">Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isPending}
+              className="rounded-xl font-semibold bg-rose-600 hover:bg-rose-500 text-white gap-1.5">
+              {isPending && <Loader2 className="size-3.5 animate-spin" />}Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

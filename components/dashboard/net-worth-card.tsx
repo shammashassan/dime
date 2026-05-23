@@ -35,7 +35,7 @@ export async function NetWorthCard({ userId, className }: NetWorthCardProps) {
   })
 
   return (
-    <Card className={cn("relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group", className)}>
+    <Card className={cn("relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group flex flex-col gap-3 pb-0", className)}>
       <CardHeader className="pb-2">
         <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-violet-500" />
@@ -45,9 +45,9 @@ export async function NetWorthCard({ userId, className }: NetWorthCardProps) {
           {formatCurrency(totalInTarget, targetCurrency)}
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col justify-end pb-6">
         {conversions.length > 0 ? (
-          <div className="mt-2 flex flex-col gap-2">
+          <div className="mt-auto pt-3 border-t border-border/30 flex flex-col gap-2">
             <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Breakdown:</span>
             <div className="flex flex-wrap gap-1.5">
               {conversions.map((c) => (
@@ -62,7 +62,7 @@ export async function NetWorthCard({ userId, className }: NetWorthCardProps) {
             </div>
           </div>
         ) : (
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
+          <div className="mt-auto pt-3 border-t border-border/30 text-xs text-muted-foreground flex items-center gap-1">
             <span>No active wallets. Add one to see your net worth.</span>
           </div>
         )}

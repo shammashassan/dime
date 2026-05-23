@@ -105,38 +105,53 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
     setLoading(true)
     setError(null)
 
+    const savePromise = new Promise(async (resolve, reject) => {
+      try {
+        const tagsArray = data.tags
+          ? data.tags
+              .split(",")
+              .map((t: string) => t.trim())
+              .filter(Boolean)
+          : []
+
+        const amountInCents = Math.round(data.amount * 100)
+        
+        const payload = {
+          ...data,
+          amount: amountInCents,
+          currency: walletCurrency,
+          tags: tagsArray,
+          endDate: data.endDate || undefined,
+        }
+
+        if (isEditing && initialRule) {
+          await updateRecurringRule(initialRule._id.toString(), payload)
+        } else {
+          await createRecurringRule(payload)
+        }
+
+        router.refresh()
+        if (onSuccess) onSuccess()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(savePromise, {
+      loading: isEditing ? "Saving changes..." : "Creating recurring rule...",
+      success: isEditing ? "Recurring rule updated successfully" : "Recurring rule created successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to save recurring rule. Please try again."
+        setError(errMsg)
+        return errMsg
+      },
+    })
+
     try {
-      const tagsArray = data.tags
-        ? data.tags
-            .split(",")
-            .map((t: string) => t.trim())
-            .filter(Boolean)
-        : []
-
-      const amountInCents = Math.round(data.amount * 100)
-      
-      const payload = {
-        ...data,
-        amount: amountInCents,
-        currency: walletCurrency,
-        tags: tagsArray,
-        endDate: data.endDate || undefined,
-      }
-
-      if (isEditing && initialRule) {
-        await updateRecurringRule(initialRule._id.toString(), payload)
-        toast.success("Recurring rule updated successfully")
-      } else {
-        await createRecurringRule(payload)
-        toast.success("Recurring rule created successfully")
-      }
-
-      router.refresh()
-      if (onSuccess) onSuccess()
-    } catch (err: any) {
-      const errMsg = err.message || "Failed to save recurring rule. Please try again."
-      setError(errMsg)
-      toast.error(errMsg)
+      await savePromise
+    } catch (err) {
+      console.error("Recurring rule save error:", err)
     } finally {
       setLoading(false)
     }
@@ -259,26 +274,45 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
             control={control}
             name="frequency"
             render={({ field }) => (
-              <ToggleGroup
-                type="single"
-                value={field.value}
-                onValueChange={(val) => val && field.onChange(val)}
-                variant="outline"
-                spacing={0}
-                className="flex flex-wrap w-full border border-border/30 rounded-3xl overflow-hidden"
-              >
-                {["daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"].map((freq, idx, arr) => (
-                  <ToggleGroupItem
-                    key={freq}
-                    value={freq}
-                    className={`flex-1 min-w-[70px] rounded-none py-2 text-[10px] font-bold capitalize ${
-                      idx === 0 ? "rounded-l-3xl" : idx === arr.length - 1 ? "rounded-r-3xl" : ""
-                    }`}
-                  >
-                    {freq}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+              <>
+                {/* Desktop ToggleGroup (visible on sm and larger screens) */}
+                <ToggleGroup
+                  type="single"
+                  value={field.value}
+                  onValueChange={(val) => val && field.onChange(val)}
+                  variant="outline"
+                  spacing={0}
+                  className="hidden sm:flex w-full border border-border/30 rounded-3xl overflow-hidden bg-card"
+                >
+                  {["daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"].map((freq, idx, arr) => (
+                    <ToggleGroupItem
+                      key={freq}
+                      value={freq}
+                      className={`flex-1 rounded-none py-2 text-[10px] font-bold capitalize ${
+                        idx === 0 ? "rounded-l-3xl" : idx === arr.length - 1 ? "rounded-r-3xl" : ""
+                      }`}
+                    >
+                      {freq}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+
+                {/* Mobile Select (visible on smaller screens) */}
+                <div className="sm:hidden w-full">
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full h-10 rounded-xl border border-border/30 bg-card">
+                      <SelectValue placeholder="Select Frequency" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border border-border/40 rounded-xl">
+                      {["daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"].map((freq) => (
+                        <SelectItem key={freq} value={freq} className="rounded-lg capitalize">
+                          {freq}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
             )}
           />
           {errors.frequency && <FieldError>{(errors.frequency as any).message}</FieldError>}

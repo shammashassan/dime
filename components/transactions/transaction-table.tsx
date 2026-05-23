@@ -120,34 +120,51 @@ export function TransactionTable({
   const handleDelete = async () => {
     if (!deletingTxId) return
     const id = deletingTxId
-    startTransition(async () => {
-      try {
-        removeOptimisticTx(id)
-        await deleteTransaction(id)
-        setSelectedIds((prev) => prev.filter((item) => item !== id))
-        setDeletingTxId(null)
-        toast.success("Transaction deleted successfully")
-        router.refresh()
-      } catch (err) {
-        console.error("Failed to delete transaction:", err)
-        toast.error("Failed to delete transaction")
-      }
+
+    const deletePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          removeOptimisticTx(id)
+          await deleteTransaction(id)
+          setSelectedIds((prev) => prev.filter((item) => item !== id))
+          setDeletingTxId(null)
+          router.refresh()
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(deletePromise, {
+      loading: "Deleting transaction...",
+      success: "Transaction deleted successfully",
+      error: "Failed to delete transaction",
     })
   }
 
   const handleBulkDelete = () => {
     if (selectedIds.length === 0) return
-    startTransition(async () => {
-      try {
-        await Promise.all(selectedIds.map((id) => deleteTransaction(id)))
-        setSelectedIds([])
-        setShowBulkDeleteDialog(false)
-        toast.success("Selected transactions deleted successfully")
-        router.refresh()
-      } catch (err) {
-        console.error("Failed bulk deletion:", err)
-        toast.error("Failed to delete selected transactions")
-      }
+    const count = selectedIds.length
+
+    const deletePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await Promise.all(selectedIds.map((id) => deleteTransaction(id)))
+          setSelectedIds([])
+          setShowBulkDeleteDialog(false)
+          router.refresh()
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(deletePromise, {
+      loading: `Deleting ${count} transactions...`,
+      success: `${count} transactions deleted successfully`,
+      error: "Failed to delete selected transactions",
     })
   }
 

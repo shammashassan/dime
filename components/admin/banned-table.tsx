@@ -9,6 +9,7 @@ import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { formatDate } from "@/lib/utils"
 import { Search, ShieldAlert, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface BannedTableProps {
   users: AdminUser[]
@@ -33,17 +34,27 @@ export function BannedTable({ users }: BannedTableProps) {
 
   const handleUnban = (userId: string) => {
     setUnbanningUserId(userId)
-    startTransition(async () => {
-      try {
-        await authClient.admin.unbanUser({
-          userId,
-        })
-        router.refresh()
-      } catch (err) {
-        console.error("Failed to unban user:", err)
-      } finally {
-        setUnbanningUserId(null)
-      }
+
+    const unbanPromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await authClient.admin.unbanUser({
+            userId,
+          })
+          router.refresh()
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        } finally {
+          setUnbanningUserId(null)
+        }
+      })
+    })
+
+    toast.promise(unbanPromise, {
+      loading: "Unbanning user...",
+      success: "User unbanned successfully",
+      error: "Failed to unban user",
     })
   }
 

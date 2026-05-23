@@ -91,29 +91,44 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
     setLoading(true)
     setError(null)
 
+    const savePromise = new Promise(async (resolve, reject) => {
+      try {
+        const amountInCents = Math.round(data.amount * 100)
+        const payload = {
+          ...data,
+          amount: amountInCents,
+          walletId: data.walletId || undefined,
+          endDate: data.endDate || undefined,
+        }
+
+        if (isEditing && initialBudget) {
+          await updateBudget(initialBudget._id.toString(), payload)
+        } else {
+          await createBudget(payload)
+        }
+
+        router.refresh()
+        if (onSuccess) onSuccess()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(savePromise, {
+      loading: isEditing ? "Saving changes..." : "Creating budget...",
+      success: isEditing ? "Budget updated successfully" : "Budget created successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to save budget. Please try again."
+        setError(errMsg)
+        return errMsg
+      },
+    })
+
     try {
-      const amountInCents = Math.round(data.amount * 100)
-      const payload = {
-        ...data,
-        amount: amountInCents,
-        walletId: data.walletId || undefined,
-        endDate: data.endDate || undefined,
-      }
-
-      if (isEditing && initialBudget) {
-        await updateBudget(initialBudget._id.toString(), payload)
-        toast.success("Budget updated successfully")
-      } else {
-        await createBudget(payload)
-        toast.success("Budget created successfully")
-      }
-
-      router.refresh()
-      if (onSuccess) onSuccess()
-    } catch (err: any) {
-      const errMsg = err.message || "Failed to save budget. Please try again."
-      setError(errMsg)
-      toast.error(errMsg)
+      await savePromise
+    } catch (err) {
+      console.error("Budget save error:", err)
     } finally {
       setLoading(false)
     }

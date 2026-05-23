@@ -8,6 +8,7 @@ import { AdminUser } from "@/lib/queries/admin"
 import { approveUser, rejectUser, bulkApproveUsers, bulkRejectUsers } from "@/lib/actions/admin"
 import { formatDate } from "@/lib/utils"
 import { Check, X, Loader2, AlertCircle } from "lucide-react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,51 +47,90 @@ export function PendingTable({ users }: PendingTableProps) {
   }
 
   const handleApprove = (userId: string) => {
-    startTransition(async () => {
-      try {
-        await approveUser(userId)
-        setSelectedIds((prev) => prev.filter((id) => id !== userId))
-      } catch (err) {
-        console.error("Failed to approve user:", err)
-      }
+    const approvePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await approveUser(userId)
+          setSelectedIds((prev) => prev.filter((id) => id !== userId))
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(approvePromise, {
+      loading: "Approving user...",
+      success: "User approved successfully",
+      error: "Failed to approve user",
     })
   }
 
   const handleReject = async () => {
     if (!rejectingUserId) return
-    startTransition(async () => {
-      try {
-        await rejectUser(rejectingUserId)
-        setSelectedIds((prev) => prev.filter((id) => id !== rejectingUserId))
-        setRejectingUserId(null)
-      } catch (err) {
-        console.error("Failed to reject user:", err)
-      }
+
+    const rejectPromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await rejectUser(rejectingUserId)
+          setSelectedIds((prev) => prev.filter((id) => id !== rejectingUserId))
+          setRejectingUserId(null)
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(rejectPromise, {
+      loading: "Rejecting user...",
+      success: "User registration rejected",
+      error: "Failed to reject user",
     })
   }
 
   const handleBulkApprove = () => {
     if (selectedIds.length === 0) return
-    startTransition(async () => {
-      try {
-        await bulkApproveUsers(selectedIds)
-        setSelectedIds([])
-      } catch (err) {
-        console.error("Failed bulk approval:", err)
-      }
+
+    const approvePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await bulkApproveUsers(selectedIds)
+          setSelectedIds([])
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(approvePromise, {
+      loading: `Approving ${selectedIds.length} user(s)...`,
+      success: "Selected users approved successfully",
+      error: "Failed to approve selected users",
     })
   }
 
   const handleBulkReject = () => {
     if (selectedIds.length === 0) return
-    startTransition(async () => {
-      try {
-        await bulkRejectUsers(selectedIds)
-        setSelectedIds([])
-        setShowBulkRejectDialog(false)
-      } catch (err) {
-        console.error("Failed bulk rejection:", err)
-      }
+
+    const rejectPromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await bulkRejectUsers(selectedIds)
+          setSelectedIds([])
+          setShowBulkRejectDialog(false)
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(rejectPromise, {
+      loading: `Rejecting ${selectedIds.length} user(s)...`,
+      success: "Selected user registrations rejected",
+      error: "Failed to reject selected users",
     })
   }
 

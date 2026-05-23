@@ -34,6 +34,7 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { MoreHorizontal, Shield, User, Ban, ShieldAlert, Key, Trash2, Eye } from "lucide-react"
+import { toast } from "sonner"
 
 interface UserActionsMenuProps {
   user: AdminUser
@@ -55,14 +56,30 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
 
   const handleSetRole = async (role: "admin" | "user") => {
     setIsPending(true)
+
+    const rolePromise = new Promise(async (resolve, reject) => {
+      try {
+        await authClient.admin.setRole({
+          userId: user.id,
+          role,
+        })
+        router.refresh()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(rolePromise, {
+      loading: "Updating user role...",
+      success: `User role updated to ${role}`,
+      error: "Failed to update user role",
+    })
+
     try {
-      await authClient.admin.setRole({
-        userId: user.id,
-        role,
-      })
-      router.refresh()
+      await rolePromise
     } catch (err) {
-      console.error("Failed to change role:", err)
+      console.error(err)
     } finally {
       setIsPending(false)
     }
@@ -70,16 +87,32 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
 
   const handleBan = async () => {
     setIsPending(true)
+
+    const banPromise = new Promise(async (resolve, reject) => {
+      try {
+        await authClient.admin.banUser({
+          userId: user.id,
+          banReason: banReason || undefined,
+        })
+        setShowBanDialog(false)
+        setBanReason("")
+        router.refresh()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(banPromise, {
+      loading: "Banning user...",
+      success: "User banned successfully",
+      error: "Failed to ban user",
+    })
+
     try {
-      await authClient.admin.banUser({
-        userId: user.id,
-        banReason: banReason || undefined,
-      })
-      setShowBanDialog(false)
-      setBanReason("")
-      router.refresh()
+      await banPromise
     } catch (err) {
-      console.error("Failed to ban user:", err)
+      console.error(err)
     } finally {
       setIsPending(false)
     }
@@ -87,13 +120,29 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
 
   const handleUnban = async () => {
     setIsPending(true)
+
+    const unbanPromise = new Promise(async (resolve, reject) => {
+      try {
+        await authClient.admin.unbanUser({
+          userId: user.id,
+        })
+        router.refresh()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(unbanPromise, {
+      loading: "Unbanning user...",
+      success: "User unbanned successfully",
+      error: "Failed to unban user",
+    })
+
     try {
-      await authClient.admin.unbanUser({
-        userId: user.id,
-      })
-      router.refresh()
+      await unbanPromise
     } catch (err) {
-      console.error("Failed to unban user:", err)
+      console.error(err)
     } finally {
       setIsPending(false)
     }
@@ -101,14 +150,30 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
 
   const handleImpersonate = async () => {
     setIsPending(true)
+
+    const impersonatePromise = new Promise(async (resolve, reject) => {
+      try {
+        await authClient.admin.impersonateUser({
+          userId: user.id,
+        })
+        router.push("/")
+        router.refresh()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(impersonatePromise, {
+      loading: "Impersonating user...",
+      success: "Impersonating user now",
+      error: "Failed to impersonate user",
+    })
+
     try {
-      await authClient.admin.impersonateUser({
-        userId: user.id,
-      })
-      router.push("/")
-      router.refresh()
+      await impersonatePromise
     } catch (err) {
-      console.error("Failed to impersonate:", err)
+      console.error(err)
     } finally {
       setIsPending(false)
     }
@@ -116,13 +181,29 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
 
   const handleRevokeSessions = async () => {
     setIsPending(true)
+
+    const revokePromise = new Promise(async (resolve, reject) => {
+      try {
+        await authClient.admin.revokeUserSessions({
+          userId: user.id,
+        })
+        router.refresh()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(revokePromise, {
+      loading: "Revoking sessions...",
+      success: "User sessions revoked successfully",
+      error: "Failed to revoke sessions",
+    })
+
     try {
-      await authClient.admin.revokeUserSessions({
-        userId: user.id,
-      })
-      router.refresh()
+      await revokePromise
     } catch (err) {
-      console.error("Failed to revoke sessions:", err)
+      console.error(err)
     } finally {
       setIsPending(false)
     }
@@ -130,14 +211,30 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
 
   const handleDelete = async () => {
     setIsPending(true)
+
+    const deletePromise = new Promise(async (resolve, reject) => {
+      try {
+        await authClient.admin.removeUser({
+          userId: user.id,
+        })
+        setShowDeleteDialog(false)
+        router.refresh()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(deletePromise, {
+      loading: "Deleting user...",
+      success: "User deleted successfully",
+      error: "Failed to delete user",
+    })
+
     try {
-      await authClient.admin.removeUser({
-        userId: user.id,
-      })
-      setShowDeleteDialog(false)
-      router.refresh()
+      await deletePromise
     } catch (err) {
-      console.error("Failed to delete user:", err)
+      console.error(err)
     } finally {
       setIsPending(false)
     }
@@ -215,7 +312,7 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
             <SheetTitle className="text-lg font-bold">User Profile</SheetTitle>
             <SheetDescription className="text-xs">Detailed registration and status details</SheetDescription>
           </SheetHeader>
-          <div className="mt-6 flex flex-col gap-5">
+          <div className="mt-6 flex flex-col gap-5 px-6 pb-6">
             <div className="flex items-center gap-4">
               <div className="flex size-14 items-center justify-center rounded-full bg-accent text-accent-foreground font-bold text-xl border border-border/40 shadow-sm">
                 {user.name ? user.name[0].toUpperCase() : "U"}

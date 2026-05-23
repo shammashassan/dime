@@ -125,32 +125,47 @@ export function WalletForm({ initialWallet, onSuccess }: WalletFormProps) {
     setLoading(true)
     setError(null)
 
+    const savePromise = new Promise(async (resolve, reject) => {
+      try {
+        const balanceInCents = Math.round(data.balance * 100)
+        const payload = {
+          name: data.name,
+          type: data.type,
+          currency: data.currency,
+          balance: balanceInCents,
+          color: data.color,
+          icon: data.icon,
+          isArchived: data.isArchived,
+        }
+
+        if (isEditing && initialWallet) {
+          await updateWallet(initialWallet._id.toString(), payload)
+        } else {
+          await createWallet(payload)
+        }
+
+        router.refresh()
+        if (onSuccess) onSuccess()
+        resolve(true)
+      } catch (err) {
+        reject(err)
+      }
+    })
+
+    toast.promise(savePromise, {
+      loading: isEditing ? "Saving changes..." : "Creating wallet...",
+      success: isEditing ? "Wallet updated successfully" : "Wallet created successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to save wallet. Please try again."
+        setError(errMsg)
+        return errMsg
+      },
+    })
+
     try {
-      const balanceInCents = Math.round(data.balance * 100)
-      const payload = {
-        name: data.name,
-        type: data.type,
-        currency: data.currency,
-        balance: balanceInCents,
-        color: data.color,
-        icon: data.icon,
-        isArchived: data.isArchived,
-      }
-
-      if (isEditing && initialWallet) {
-        await updateWallet(initialWallet._id.toString(), payload)
-        toast.success("Wallet updated successfully")
-      } else {
-        await createWallet(payload)
-        toast.success("Wallet created successfully")
-      }
-
-      router.refresh()
-      if (onSuccess) onSuccess()
-    } catch (err: any) {
-      const errMsg = err.message || "Failed to save wallet. Please try again."
-      setError(errMsg)
-      toast.error(errMsg)
+      await savePromise
+    } catch (err) {
+      console.error("Wallet save error:", err)
     } finally {
       setLoading(false)
     }

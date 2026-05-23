@@ -143,20 +143,36 @@ export function CategoryForm({ initialCategory, onSuccess }: CategoryFormProps) 
   const onSubmit = async (data: CategoryFormInput) => {
     setLoading(true)
     setError(null)
-    try {
-      if (isEditing && initialCategory) {
-        await updateCategory(initialCategory._id.toString(), data)
-        toast.success("Category updated successfully")
-      } else {
-        await createCategory(data)
-        toast.success("Category created successfully")
+
+    const savePromise = new Promise(async (resolve, reject) => {
+      try {
+        if (isEditing && initialCategory) {
+          await updateCategory(initialCategory._id.toString(), data)
+        } else {
+          await createCategory(data)
+        }
+        router.refresh()
+        if (onSuccess) onSuccess()
+        resolve(true)
+      } catch (err) {
+        reject(err)
       }
-      router.refresh()
-      if (onSuccess) onSuccess()
-    } catch (err: any) {
-      const errMsg = err.message || "Failed to save category. Please try again."
-      setError(errMsg)
-      toast.error(errMsg)
+    })
+
+    toast.promise(savePromise, {
+      loading: isEditing ? "Saving changes..." : "Creating category...",
+      success: isEditing ? "Category updated successfully" : "Category created successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to save category. Please try again."
+        setError(errMsg)
+        return errMsg
+      },
+    })
+
+    try {
+      await savePromise
+    } catch (err) {
+      console.error("Category save error:", err)
     } finally {
       setLoading(false)
     }

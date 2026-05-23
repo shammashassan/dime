@@ -32,9 +32,9 @@ export async function MonthlySummary({ userId, className }: MonthlySummaryCardPr
   const expensePercentChange = lastMonth.expense > 0 ? (expenseDiff / lastMonth.expense) * 100 : 0
 
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-4", className)}>
+    <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6", className)}>
       {/* Income Summary */}
-      <Card className="relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full">
+      <Card className="relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full flex flex-col gap-3 pb-0">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-emerald-500" />
@@ -50,23 +50,32 @@ export async function MonthlySummary({ userId, className }: MonthlySummaryCardPr
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            {incomeDiff >= 0 ? (
-              <TrendingUp className="size-3 text-emerald-500" />
-            ) : (
-              <TrendingDown className="size-3 text-destructive" />
-            )}
-            <span>
-              {incomeDiff >= 0 ? "Up by" : "Down by"}{" "}
-              <strong className="text-foreground">{formatCurrency(Math.abs(incomeDiff) * 100, targetCurrency)}</strong> vs last month
-            </span>
+        <CardContent className="flex-1 flex flex-col justify-end pb-6">
+          <div className="mt-auto pt-3 border-t border-border/30 flex flex-col gap-2">
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Trend:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {/* Last Month Pill */}
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/60 text-secondary-foreground text-[11px] font-medium border border-border/30">
+                <span className="text-[9px] text-muted-foreground uppercase font-bold">Last Month</span>
+                <span>{formatCurrency(lastMonth.income * 100, targetCurrency)}</span>
+              </div>
+              {/* Change Pill */}
+              <div className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border",
+                incomeDiff >= 0 
+                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400" 
+                  : "bg-destructive/10 border-destructive/25 text-destructive"
+              )}>
+                {incomeDiff >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+                <span>{incomeDiff >= 0 ? "+" : ""}{formatCurrency(incomeDiff * 100, targetCurrency)}</span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Expense Summary */}
-      <Card className="relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full">
+      <Card className="relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full flex flex-col gap-3 pb-0">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-rose-500" />
@@ -82,17 +91,26 @@ export async function MonthlySummary({ userId, className }: MonthlySummaryCardPr
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-xs text-muted-foreground flex items-center gap-1">
-            {expenseDiff <= 0 ? (
-              <TrendingDown className="size-3 text-emerald-500" />
-            ) : (
-              <TrendingUp className="size-3 text-destructive" />
-            )}
-            <span>
-              {expenseDiff <= 0 ? "Down by" : "Up by"}{" "}
-              <strong className="text-foreground">{formatCurrency(Math.abs(expenseDiff) * 100, targetCurrency)}</strong> vs last month
-            </span>
+        <CardContent className="flex-1 flex flex-col justify-end pb-6">
+          <div className="mt-auto pt-3 border-t border-border/30 flex flex-col gap-2">
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Trend:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {/* Last Month Pill */}
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/60 text-secondary-foreground text-[11px] font-medium border border-border/30">
+                <span className="text-[9px] text-muted-foreground uppercase font-bold">Last Month</span>
+                <span>{formatCurrency(lastMonth.expense * 100, targetCurrency)}</span>
+              </div>
+              {/* Change Pill */}
+              <div className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border",
+                expenseDiff <= 0 
+                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400" 
+                  : "bg-destructive/10 border-destructive/25 text-destructive"
+              )}>
+                {expenseDiff <= 0 ? <TrendingDown className="size-3" /> : <TrendingUp className="size-3" />}
+                <span>{expenseDiff >= 0 ? "+" : ""}{formatCurrency(expenseDiff * 100, targetCurrency)}</span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

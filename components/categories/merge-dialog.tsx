@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { Loader2, AlertTriangle, ArrowRightLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface MergeDialogProps {
   sourceCategory: Category
@@ -45,14 +46,28 @@ export function MergeDialog({ sourceCategory, categories, onSuccess }: MergeDial
   const handleMerge = () => {
     if (!targetId) return
     setError(null)
-    startTransition(async () => {
-      try {
-        await mergeCategory(sourceCategory._id.toString(), targetId)
-        router.refresh()
-        onSuccess()
-      } catch (err: any) {
-        setError(err.message || "Failed to merge categories.")
-      }
+
+    const mergePromise = new Promise((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await mergeCategory(sourceCategory._id.toString(), targetId)
+          router.refresh()
+          onSuccess()
+          resolve(true)
+        } catch (err) {
+          reject(err)
+        }
+      })
+    })
+
+    toast.promise(mergePromise, {
+      loading: "Merging categories...",
+      success: "Categories merged successfully",
+      error: (err: any) => {
+        const errMsg = err.message || "Failed to merge categories."
+        setError(errMsg)
+        return errMsg
+      },
     })
   }
 
