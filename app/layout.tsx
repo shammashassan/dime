@@ -22,6 +22,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Dime",
   description: "The AI-Powered Expense Manager for Everyone",
+  manifest: '/site.webmanifest',
 };
 
 export default function RootLayout({
