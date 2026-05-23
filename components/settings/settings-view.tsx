@@ -196,7 +196,7 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     }
   }, [activeTab])
 
-  const hasCredentials = accounts.some((acc) => acc.providerId === "email")
+  const hasCredentials = accounts.some((acc) => acc.providerId === "credential")
 
   // Change Password Action
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -307,11 +307,21 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     e.preventDefault()
     setTotpVerifyError(null)
 
+    if (securityLoading) {
+      setTotpVerifyError("Security details are still loading. Please try again in a moment.")
+      return
+    }
+
+    if (hasCredentials && !twoFactorPassword) {
+      setTotpVerifyError("Enter your account password to set up two-factor authentication.")
+      return
+    }
+
     const setupPromise = new Promise(async (resolve, reject) => {
       startTransition(async () => {
         try {
           const { data, error } = await authClient.twoFactor.enable({
-            password: hasCredentials ? twoFactorPassword : undefined,
+            ...(hasCredentials ? { password: twoFactorPassword } : {}),
           })
           if (error) {
             reject(error)
@@ -381,11 +391,21 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
     e.preventDefault()
     setDisableError(null)
 
+    if (securityLoading) {
+      setDisableError("Security details are still loading. Please try again in a moment.")
+      return
+    }
+
+    if (hasCredentials && !disablePassword) {
+      setDisableError("Enter your account password to disable two-factor authentication.")
+      return
+    }
+
     const disablePromise = new Promise(async (resolve, reject) => {
       startTransition(async () => {
         try {
           const { error } = await authClient.twoFactor.disable({
-            password: hasCredentials ? disablePassword : undefined,
+            ...(hasCredentials ? { password: disablePassword } : {}),
           })
           if (error) {
             reject(error)
@@ -903,7 +923,7 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
                   <CardFooter className="border-t border-border/10 bg-muted/10 px-6 py-4 flex justify-end">
                     <Button
                       type="submit"
-                      disabled={isPending}
+                      disabled={isPending || securityLoading}
                       className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95 shadow-md"
                     >
                       {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -1140,45 +1160,47 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
 
       {/* 2FA Totp QR Code Enrollment Dialog */}
       <Dialog open={showTotpEnrollment} onOpenChange={(open) => !open && setShowTotpEnrollment(false)}>
-        <DialogContent className="max-w-md bg-background border border-border/40 rounded-2xl shadow-xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-extrabold tracking-tight">Configure 2FA Authenticator</DialogTitle>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-background border border-border/40 rounded-2xl shadow-xl p-4 sm:p-6 gap-4">
+          <DialogHeader className="pr-8 text-left">
+            <DialogTitle className="text-lg sm:text-xl font-extrabold tracking-tight leading-tight">Configure 2FA Authenticator</DialogTitle>
             <DialogDescription>
               Scan the code below with Google Authenticator, Authy, or your password manager.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col items-center justify-center gap-5 py-4">
+          <div className="flex flex-col items-center justify-center gap-4 sm:gap-5 py-2 sm:py-4 min-w-0">
             {/* QR Code */}
             {totpUri && (
-              <div className="p-3 bg-white rounded-2xl shadow-inner border border-muted">
+              <div className="w-full flex justify-center">
+                <div className="p-2 sm:p-3 bg-white rounded-2xl shadow-inner border border-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpUri)}`}
-                  alt="2FA QR Code"
-                  className="size-[200px]"
-                />
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpUri)}`}
+                    alt="2FA QR Code"
+                    className="size-40 sm:size-[200px]"
+                  />
+                </div>
               </div>
             )}
 
             {/* Backup Codes Section */}
             {backupCodes.length > 0 && (
               <div className="w-full space-y-2 border border-border/40 rounded-xl p-3 bg-muted/10">
-                <div className="flex items-center justify-between text-xs font-semibold text-foreground">
-                  <span>Recovery Backup Codes (Single Use Only)</span>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-xs font-semibold text-foreground">
+                  <span className="leading-snug">Recovery Backup Codes (Single Use Only)</span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={copyBackupCodesToClipboard}
-                    className="h-7 text-xs flex items-center gap-1"
+                    className="h-7 w-full sm:w-auto text-xs flex items-center gap-1"
                   >
                     {copiedCodes ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
                     Copy Codes
                   </Button>
                 </div>
-                <div className="grid grid-cols-2 gap-1.5 text-center font-mono text-xs text-muted-foreground max-h-24 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-center font-mono text-xs text-muted-foreground max-h-24 overflow-y-auto">
                   {backupCodes.map((code, index) => (
-                    <span key={index} className="bg-muted/30 py-1 rounded border border-border/10">
+                    <span key={index} className="min-w-0 break-all bg-muted/30 px-1 py-1 rounded border border-border/10">
                       {code}
                     </span>
                   ))}
@@ -1213,19 +1235,19 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
                     maxLength={6}
                   />
                 </Field>
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setShowTotpEnrollment(false)}
-                    className="rounded-xl"
+                    className="rounded-xl w-full sm:w-auto"
                   >
                     Close
                   </Button>
                   <Button
                     type="submit"
                     disabled={isPending}
-                    className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95"
+                    className="rounded-xl w-full sm:w-auto bg-primary text-primary-foreground font-bold hover:bg-primary/95"
                   >
                     {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                     Confirm Code
@@ -1280,7 +1302,7 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
               </Button>
               <Button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || securityLoading}
                 className="rounded-xl bg-destructive text-destructive-foreground font-bold hover:bg-destructive/95"
               >
                 {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}

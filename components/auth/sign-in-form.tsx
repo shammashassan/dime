@@ -6,19 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Field, FieldLabel, FieldGroup, FieldError } from "@/components/ui/field"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2 } from "lucide-react"
+import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
+import { Eye, EyeClosed, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 export function SignInForm() {
   const [activeTab, setActiveTab] = useState<string>("email")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState("")
   const [magicLinkEmail, setMagicLinkEmail] = useState("")
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   // Passkey Conditional UI / Autofill Mediation
   useEffect(() => {
@@ -33,44 +32,62 @@ export function SignInForm() {
             void authClient.signIn.passkey({ autoFill: true })
           }
         })
-        .catch(console.error)
+        .catch(() => {
+          // Conditional passkey mediation can fail quietly when no credential is available.
+        })
     }
   }, [])
 
-  const handleError = (err: any) => {
-    console.error("Sign-in error:", err)
-    if (err && typeof err === "object") {
-      console.error("Sign-in error details:", {
-        message: err.message,
-        code: err.code,
-        status: err.status,
-        statusText: err.statusText,
-        error: err.error,
-      })
-    }
-    const errMsg = err?.error?.message || err?.message || "An unexpected error occurred"
-    
-    // Redirect pending approval users
-    const isPendingApproval = 
-      errMsg.includes("PENDING_APPROVAL") || 
-      err?.error?.code === "PENDING_APPROVAL" || 
-      err?.code === "PENDING_APPROVAL" ||
-      err?.message === "PENDING_APPROVAL"
+  const getAuthErrorMessage = (err: unknown, fallback = "An unexpected error occurred") => {
+    if (typeof err === "string") return err
+    if (!err || typeof err !== "object") return fallback
 
-    if (isPendingApproval) {
-      window.location.href = "/pending-approval"
-    } else {
-      setError(errMsg)
+    const authError = err as {
+      error?: string | { message?: unknown; code?: unknown }
+      message?: unknown
+      code?: unknown
     }
+    const nestedMessage = typeof authError.error === "object" ? authError.error?.message : authError.error
+
+    if (typeof nestedMessage === "string") return nestedMessage
+    if (typeof authError.message === "string") return authError.message
+
+    return fallback
+  }
+
+  const isPendingApprovalError = (err: unknown, message = getAuthErrorMessage(err)) => {
+    const authError = err && typeof err === "object"
+      ? err as {
+          error?: { code?: unknown }
+          code?: unknown
+          message?: unknown
+        }
+      : null
+
+    return (
+      message.includes("PENDING_APPROVAL") ||
+      authError?.error?.code === "PENDING_APPROVAL" ||
+      authError?.code === "PENDING_APPROVAL" ||
+      authError?.message === "PENDING_APPROVAL"
+    )
+  }
+
+  const handleToastError = (err: unknown, fallback?: string) => {
+    const errMsg = getAuthErrorMessage(err, fallback)
+
+    if (isPendingApprovalError(err, errMsg)) {
+      window.location.href = "/pending-approval"
+      return "Your account is pending admin approval"
+    }
+
+    return errMsg
   }
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
-    setSuccessMessage(null)
 
-    try {
+    const signInPromise = (async () => {
       const { data, error: resError } = await signIn.email({
         email,
         password,
@@ -78,24 +95,28 @@ export function SignInForm() {
       })
 
       if (resError) {
-        handleError(resError)
-      } else if (data) {
+        throw resError
+      }
+
+      if (data) {
         window.location.href = "/"
       }
-    } catch (err) {
-      handleError(err)
-    } finally {
+    })().finally(() => {
       setLoading(false)
-    }
+    })
+
+    toast.promise(signInPromise, {
+      loading: "Signing in...",
+      success: "Signed in successfully",
+      error: (err) => handleToastError(err, "Failed to sign in"),
+    })
   }
 
   const handleUsernameSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
-    setSuccessMessage(null)
 
-    try {
+    const signInPromise = (async () => {
       const { data, error: resError } = await signIn.username({
         username,
         password,
@@ -103,71 +124,84 @@ export function SignInForm() {
       })
 
       if (resError) {
-        handleError(resError)
-      } else if (data) {
+        throw resError
+      }
+
+      if (data) {
         window.location.href = "/"
       }
-    } catch (err) {
-      handleError(err)
-    } finally {
+    })().finally(() => {
       setLoading(false)
-    }
+    })
+
+    toast.promise(signInPromise, {
+      loading: "Signing in...",
+      success: "Signed in successfully",
+      error: (err) => handleToastError(err, "Failed to sign in"),
+    })
   }
 
   const handleMagicLinkSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
-    setSuccessMessage(null)
 
-    try {
+    const magicLinkPromise = (async () => {
       const { error: resError } = await authClient.signIn.magicLink({
         email: magicLinkEmail,
         callbackURL: "/",
       })
 
       if (resError) {
-        handleError(resError)
-      } else {
-        setSuccessMessage("A magic sign-in link has been sent to your email.")
+        throw resError
       }
-    } catch (err) {
-      handleError(err)
-    } finally {
+    })().finally(() => {
       setLoading(false)
-    }
+    })
+
+    toast.promise(magicLinkPromise, {
+      loading: "Sending magic link...",
+      success: "A magic sign-in link has been sent to your email",
+      error: (err) => handleToastError(err, "Failed to send magic link"),
+    })
   }
 
   const handlePasskeySignIn = async () => {
     setLoading(true)
-    setError(null)
-    setSuccessMessage(null)
 
-    try {
+    const passkeyPromise = (async () => {
       const { data, error: resError } = await authClient.signIn.passkey()
 
       if (resError) {
-        handleError(resError)
-      } else if (data) {
+        throw resError
+      }
+
+      if (data) {
         window.location.href = "/"
       }
-    } catch (err) {
-      handleError(err)
-    } finally {
+    })().finally(() => {
       setLoading(false)
-    }
+    })
+
+    toast.promise(passkeyPromise, {
+      loading: "Checking passkey...",
+      success: "Signed in with passkey",
+      error: (err) => handleToastError(err, "No passkey was selected or available"),
+    })
   }
 
   const handleGoogleSignIn = async () => {
-    setError(null)
-    try {
+    const googlePromise = (async () => {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: `${window.location.origin}/`,
       })
-    } catch (err) {
-      handleError(err)
-    }
+    })()
+
+    toast.promise(googlePromise, {
+      loading: "Connecting to Google...",
+      success: "Redirecting to Google",
+      error: (err) => handleToastError(err, "Failed to continue with Google"),
+    })
   }
 
   return (
@@ -179,18 +213,6 @@ export function SignInForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {successMessage && (
-          <Alert className="border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-            <AlertDescription>{successMessage}</AlertDescription>
-          </Alert>
-        )}
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 bg-muted/60 mb-6">
             <TabsTrigger value="email">Email</TabsTrigger>
@@ -225,15 +247,30 @@ export function SignInForm() {
                       Forgot password?
                     </a>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      disabled={loading}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
+                    >
+                      {showPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                    </Button>
+                  </div>
                 </Field>
               </FieldGroup>
               <Button type="submit" className="w-full" disabled={loading}>
@@ -261,15 +298,30 @@ export function SignInForm() {
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="username-password">Password</FieldLabel>
-                  <Input
-                    id="username-password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="username-password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      disabled={loading}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
+                    >
+                      {showPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                    </Button>
+                  </div>
                 </Field>
               </FieldGroup>
               <Button type="submit" className="w-full" disabled={loading}>

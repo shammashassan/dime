@@ -17,7 +17,6 @@ import {
   Sparkles,
   LogOut,
   ChevronsUpDown,
-  BadgeCheck,
 } from "lucide-react"
 import {
   Sidebar,
@@ -32,6 +31,17 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Avatar,
   AvatarFallback,
   AvatarImage,
@@ -45,6 +55,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { toast } from "sonner"
 
 const NAV_ITEMS = [
   { title: "Overview", href: "/", icon: LayoutDashboard },
@@ -56,22 +67,45 @@ const NAV_ITEMS = [
   { title: "Categories", href: "/categories", icon: Tags },
 ]
 
+type SidebarUser = {
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  role?: string | null
+}
+
 export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { isMobile } = useSidebar()
   const { data: session } = authClient.useSession()
-  const [mounted, setMounted] = React.useState(false)
+  const mounted = React.useSyncExternalStore(
+    React.useCallback(() => () => {}, []),
+    () => true,
+    () => false
+  )
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false)
+  const [isSigningOut, setIsSigningOut] = React.useState(false)
 
-  React.useEffect(() => { setMounted(true) }, [])
-
-  const user = session?.user as any
+  const user = session?.user as SidebarUser | undefined
   const isAdmin = user?.role === "admin"
 
-  const handleSignOut = async () => {
-    await authClient.signOut({
+  const handleSignOut = () => {
+    setIsSigningOut(true)
+
+    const signOutPromise = authClient.signOut({
       fetchOptions: {
-        onSuccess: () => { window.location.href = "/sign-in" },
+        onSuccess: () => {
+          window.location.href = "/sign-in"
+        },
       },
+    }).finally(() => {
+      setIsSigningOut(false)
+    })
+
+    toast.promise(signOutPromise, {
+      loading: "Signing out...",
+      success: "Signed out successfully",
+      error: "Failed to sign out",
     })
   }
 
@@ -175,7 +209,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
                     <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage src={user.image || ""} alt={user.name} />
+                      <AvatarImage src={user.image || ""} alt={user.name ?? "User"} />
                       <AvatarFallback className="rounded-lg">
                         {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
                       </AvatarFallback>
@@ -196,7 +230,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   <DropdownMenuLabel className="p-0 font-normal">
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                       <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage src={user.image || ""} alt={user.name} />
+                        <AvatarImage src={user.image || ""} alt={user.name ?? "User"} />
                         <AvatarFallback className="rounded-lg">
                           {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
                         </AvatarFallback>
@@ -217,7 +251,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
+                  <DropdownMenuItem onSelect={() => setShowLogoutDialog(true)}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
                   </DropdownMenuItem>
@@ -229,6 +263,33 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="rounded-2xl border border-border/50 shadow-xl">
+          <AlertDialogHeader>
+            <AlertDialogMedia>
+              <LogOut />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Log out of Dime?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will need to sign in again to access your dashboard and financial data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl font-semibold" disabled={isSigningOut}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="rounded-xl font-semibold"
+            >
+              Log out
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sidebar>
   )
 }

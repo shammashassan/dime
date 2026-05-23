@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Field, FieldLabel, FieldGroup, FieldError } from "@/components/ui/field"
+import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2 } from "lucide-react"
+import { Eye, EyeClosed, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 export function SignUpForm() {
   const [activeTab, setActiveTab] = useState<string>("email")
@@ -17,21 +18,37 @@ export function SignUpForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+
+  const getAuthErrorMessage = (err: unknown, fallback = "An unexpected error occurred") => {
+    if (typeof err === "string") return err
+    if (!err || typeof err !== "object") return fallback
+
+    const authError = err as {
+      error?: string | { message?: unknown }
+      message?: unknown
+    }
+    const nestedMessage = typeof authError.error === "object" ? authError.error?.message : authError.error
+
+    if (typeof nestedMessage === "string") return nestedMessage
+    if (typeof authError.message === "string") return authError.message
+
+    return fallback
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
       setLoading(false)
+      toast.error("Passwords do not match")
       return
     }
 
-    try {
+    const signUpPromise = (async () => {
       const { data, error: resError } = await signUp.email({
         email,
         name,
@@ -41,28 +58,37 @@ export function SignUpForm() {
       })
 
       if (resError) {
-        setError(resError?.message || "An error occurred during signup")
-      } else {
+        throw resError
+      }
+
+      if (data) {
         // Redirection should happen automatically on success via callbackURL, but let's force it to make sure we land on pending-approval.
         window.location.href = "/pending-approval"
       }
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred")
-    } finally {
+    })().finally(() => {
       setLoading(false)
-    }
+    })
+
+    toast.promise(signUpPromise, {
+      loading: "Creating your account...",
+      success: "Account created. Redirecting for approval",
+      error: (err) => getAuthErrorMessage(err, "An error occurred during signup"),
+    })
   }
 
   const handleGoogleSignUp = async () => {
-    setError(null)
-    try {
+    const googlePromise = (async () => {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: `${window.location.origin}/pending-approval`,
       })
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred during Google sign-up")
-    }
+    })()
+
+    toast.promise(googlePromise, {
+      loading: "Connecting to Google...",
+      success: "Redirecting to Google",
+      error: (err) => getAuthErrorMessage(err, "An unexpected error occurred during Google sign-up"),
+    })
   }
 
   return (
@@ -74,12 +100,6 @@ export function SignUpForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         <Alert className="border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400">
           <AlertDescription>
             After signing up, your account requires admin approval before you can access the dashboard.
@@ -121,25 +141,55 @@ export function SignUpForm() {
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="email-password">Password</FieldLabel>
-                  <Input
-                    id="email-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="email-password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      disabled={loading}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
+                    >
+                      {showPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                    </Button>
+                  </div>
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="email-confirm-password">Confirm Password</FieldLabel>
-                  <Input
-                    id="email-confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="email-confirm-password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowConfirmPassword((visible) => !visible)}
+                      disabled={loading}
+                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                      aria-pressed={showConfirmPassword}
+                    >
+                      {showConfirmPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                    </Button>
+                  </div>
                 </Field>
               </FieldGroup>
               <Button type="submit" className="w-full mt-4" disabled={loading}>
@@ -190,25 +240,55 @@ export function SignUpForm() {
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="user-password">Password</FieldLabel>
-                  <Input
-                    id="user-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="user-password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      disabled={loading}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
+                    >
+                      {showPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                    </Button>
+                  </div>
                 </Field>
                 <Field>
                   <FieldLabel htmlFor="user-confirm-password">Confirm Password</FieldLabel>
-                  <Input
-                    id="user-confirm-password"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="user-confirm-password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      disabled={loading}
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowConfirmPassword((visible) => !visible)}
+                      disabled={loading}
+                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                      aria-pressed={showConfirmPassword}
+                    >
+                      {showConfirmPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                    </Button>
+                  </div>
                 </Field>
               </FieldGroup>
               <Button type="submit" className="w-full mt-4" disabled={loading}>

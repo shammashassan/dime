@@ -64,6 +64,7 @@ export const auth = betterAuth({
     }),
     twoFactor({
       issuer: "Dime",
+      allowPasswordless: true,
       totpOptions: { digits: 6, period: 30 },
       otpOptions: {
         sendOTP: async ({ user, otp }) => {
