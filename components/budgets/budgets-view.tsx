@@ -5,6 +5,7 @@ import { Budget, Category, Wallet } from "@/types"
 import { BudgetWithSpending } from "@/lib/queries/budgets"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -16,7 +17,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Badge } from "@/components/ui/badge"
 import { BudgetForm } from "./budget-form"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { cn } from "@/lib/utils"
@@ -40,6 +40,17 @@ interface BudgetsViewProps {
   wallets: Wallet[]
 }
 
+// Small chip identical to wallets
+function CardChip() {
+  return (
+    <div className="size-5 rounded-sm border border-amber-400/30 bg-amber-400/10 relative overflow-hidden flex items-center justify-center shrink-0">
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-400/25" />
+      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-400/25" />
+      <div className="size-2.5 rounded-[2px] border border-amber-400/30 bg-amber-400/10 z-10" />
+    </div>
+  )
+}
+
 function BudgetCard({
   b,
   onEdit,
@@ -50,41 +61,37 @@ function BudgetCard({
   onDelete: () => void
 }) {
   const [animated, setAnimated] = useState(false)
-  useEffect(() => {
-    const t = setTimeout(() => setAnimated(true), 80)
-    return () => clearTimeout(t)
-  }, [])
+  useEffect(() => { const t = setTimeout(() => setAnimated(true), 80); return () => clearTimeout(t) }, [])
 
   const percent = b.amount > 0 ? (b.spent / b.amount) * 100 : 0
   const remaining = Math.max(b.amount - b.spent, 0)
   const isOverBudget = percent >= 100
   const isOverThreshold = percent >= b.alertThreshold && !isOverBudget
-
   const barColor = isOverBudget ? "#f43f5e" : percent >= 70 ? "#f59e0b" : "#10b981"
   const pctColor = isOverBudget ? "text-rose-500" : percent >= 70 ? "text-amber-500" : "text-emerald-500"
 
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col">
-      {/* Top accent bar */}
+      {/* Top accent */}
       <div className="h-[3px] w-full" style={{ backgroundColor: b.categoryColor }} />
 
-      {/* Inactive pill */}
-      {!b.isActive && (
-        <div className="absolute top-3 right-3 z-10">
-          <Badge variant="secondary" className="text-[9px] rounded-full px-2 font-bold uppercase tracking-wider h-4">Inactive</Badge>
-        </div>
-      )}
+      {/* ── Header — mirrors wallet card ── */}
+      <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          {/* Category icon box */}
+          <div
+            className="size-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
+            style={{ backgroundColor: b.categoryColor + "18", color: b.categoryColor }}
+          >
+            <Target className="size-4" />
+          </div>
 
-      {/* Main content */}
-      <div className="px-4 pt-3.5 pb-3 flex flex-col gap-3">
-
-        {/* Title + badges + actions */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1.5 min-w-0 flex-1 pr-2">
-            <p className="text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          {/* Name + badges */}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
               {b.name}
             </p>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 mt-1">
               <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4"
                 style={{ backgroundColor: b.categoryColor + "15", color: b.categoryColor, borderColor: b.categoryColor + "30" }}>
                 {b.categoryName}
@@ -94,16 +101,34 @@ function BudgetCard({
                   <WalletIcon className="size-2" />{b.walletName}
                 </Badge>
               )}
-              <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4">{b.period}</Badge>
+              <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4">
+                {b.period}
+              </Badge>
+              {!b.isActive && (
+                <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4">
+                  Inactive
+                </Badge>
+              )}
             </div>
-          </div>
-          {/* Actions - slide in */}
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 translate-x-1.5 group-hover:translate-x-0 transition-all duration-200 shrink-0 mt-0.5">
-            <Button variant="ghost" size="icon" className="size-6 rounded-md hover:bg-muted/70" onClick={onEdit}><Edit className="size-3 text-muted-foreground" /></Button>
-            <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500 hover:bg-rose-500/10" onClick={onDelete}><Trash2 className="size-3" /></Button>
           </div>
         </div>
 
+        {/* Chip + actions stacked */}
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          <CardChip />
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Button variant="ghost" size="icon" className="size-6 rounded-md hover:bg-muted/70" onClick={onEdit}>
+              <Edit className="size-2.5 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500 hover:bg-rose-500/10" onClick={onDelete}>
+              <Trash2 className="size-2.5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="px-4 pb-3 flex flex-col gap-3">
         {/* Spent + Used % */}
         <div className="flex items-end justify-between">
           <div>
@@ -134,7 +159,7 @@ function BudgetCard({
           </div>
         </div>
 
-        {/* Alert */}
+        {/* Alert banner */}
         {(isOverThreshold || isOverBudget) && (
           <div className={cn(
             "flex items-center gap-1.5 px-2.5 py-2 rounded-xl border text-[10px] font-semibold",
@@ -150,8 +175,8 @@ function BudgetCard({
         )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-border/20 px-4 py-2.5 flex items-center gap-1.5">
+      {/* ── Footer ── */}
+      <div className="border-t border-border/20 px-4 py-2.5 flex items-center gap-1.5 mt-auto">
         <CalendarDays className="size-3 text-muted-foreground shrink-0" />
         <span className="text-[10px] text-muted-foreground font-medium">
           Started {formatDate(b.startDate)}
@@ -171,17 +196,13 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
 
   const handleDelete = async () => {
     if (!deletingBudgetId) return
-    const deletePromise = new Promise((resolve, reject) => {
+    const p = new Promise((resolve, reject) => {
       startTransition(async () => {
-        try {
-          await deleteBudget(deletingBudgetId)
-          setDeletingBudgetId(null)
-          router.refresh()
-          resolve(true)
-        } catch (err) { reject(err) }
+        try { await deleteBudget(deletingBudgetId); setDeletingBudgetId(null); router.refresh(); resolve(true) }
+        catch (err) { reject(err) }
       })
     })
-    toast.promise(deletePromise, { loading: "Deleting...", success: "Budget deleted", error: "Failed to delete" })
+    toast.promise(p, { loading: "Deleting...", success: "Budget deleted", error: "Failed to delete" })
   }
 
   return (
@@ -223,7 +244,7 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         </div>
       )}
 
-      {/* Create Dialog */}
+      {/* Dialogs */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
           <DialogHeader><DialogTitle className="text-xl font-extrabold">Create Budget</DialogTitle></DialogHeader>
@@ -231,7 +252,6 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
       <Dialog open={!!editingBudget} onOpenChange={(open) => !open && setEditingBudget(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
           <DialogHeader><DialogTitle className="text-xl font-extrabold">Edit Budget</DialogTitle></DialogHeader>
@@ -241,7 +261,6 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
       <AlertDialog open={!!deletingBudgetId} onOpenChange={(open) => !open && setDeletingBudgetId(null)}>
         <AlertDialogContent className="rounded-2xl border border-border/50 shadow-xl">
           <AlertDialogHeader>
