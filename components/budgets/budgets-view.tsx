@@ -40,17 +40,6 @@ interface BudgetsViewProps {
   wallets: Wallet[]
 }
 
-// Small chip identical to wallets
-function CardChip() {
-  return (
-    <div className="size-5 rounded-sm border border-amber-400/30 bg-amber-400/10 relative overflow-hidden flex items-center justify-center shrink-0">
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-400/25" />
-      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-400/25" />
-      <div className="size-2.5 rounded-[2px] border border-amber-400/30 bg-amber-400/10 z-10" />
-    </div>
-  )
-}
-
 function BudgetCard({
   b,
   onEdit,
@@ -75,18 +64,16 @@ function BudgetCard({
       {/* Top accent */}
       <div className="h-[3px] w-full" style={{ backgroundColor: b.categoryColor }} />
 
-      {/* ── Header — mirrors wallet card ── */}
+      {/* ── Header ── */}
       <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+        {/* Icon + name + badges */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          {/* Category icon box */}
           <div
             className="size-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
             style={{ backgroundColor: b.categoryColor + "18", color: b.categoryColor }}
           >
             <Target className="size-4" />
           </div>
-
-          {/* Name + badges */}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
               {b.name}
@@ -113,17 +100,22 @@ function BudgetCard({
           </div>
         </div>
 
-        {/* Chip + actions stacked */}
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <CardChip />
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Button variant="ghost" size="icon" className="size-6 rounded-md hover:bg-muted/70" onClick={onEdit}>
-              <Edit className="size-2.5 text-muted-foreground" />
-            </Button>
-            <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500 hover:bg-rose-500/10" onClick={onDelete}>
-              <Trash2 className="size-2.5" />
-            </Button>
-          </div>
+        {/* Action buttons — no chip, just buttons */}
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
+          <Button
+            variant="ghost" size="icon"
+            className="size-8 rounded-lg hover:bg-muted/70"
+            onClick={onEdit}
+          >
+            <Edit className="size-3.5 text-muted-foreground" />
+          </Button>
+          <Button
+            variant="ghost" size="icon"
+            className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
+            onClick={onDelete}
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
         </div>
       </div>
 
@@ -159,7 +151,7 @@ function BudgetCard({
           </div>
         </div>
 
-        {/* Alert banner */}
+        {/* Alert */}
         {(isOverThreshold || isOverBudget) && (
           <div className={cn(
             "flex items-center gap-1.5 px-2.5 py-2 rounded-xl border text-[10px] font-semibold",
@@ -207,7 +199,6 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
 
   return (
     <div className="flex flex-col gap-7 w-full">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0"><Target className="size-6" /></div>
@@ -221,7 +212,6 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         </Button>
       </div>
 
-      {/* Grid */}
       {budgets.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {budgets.map((b) => (
@@ -244,7 +234,6 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         </div>
       )}
 
-      {/* Dialogs */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
           <DialogHeader><DialogTitle className="text-xl font-extrabold">Create Budget</DialogTitle></DialogHeader>

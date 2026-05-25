@@ -40,17 +40,6 @@ interface RecurringViewProps {
   wallets: Wallet[]
 }
 
-// Small chip identical to wallets
-function CardChip() {
-  return (
-    <div className="size-5 rounded-sm border border-amber-400/30 bg-amber-400/10 relative overflow-hidden flex items-center justify-center shrink-0">
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-400/25" />
-      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-400/25" />
-      <div className="size-2.5 rounded-[2px] border border-amber-400/30 bg-amber-400/10 z-10" />
-    </div>
-  )
-}
-
 export function RecurringView({ rules, categories, wallets }: RecurringViewProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -139,10 +128,10 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
                 {/* Top accent */}
                 <div className="h-[3px] w-full" style={{ backgroundColor: accent }} />
 
-                {/* ── Header — mirrors wallet card ── */}
+                {/* ── Header ── */}
                 <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    {/* Type icon box */}
+                    {/* Type icon */}
                     <div
                       className="size-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
                       style={{ backgroundColor: iconColor + "18", color: iconColor }}
@@ -167,17 +156,22 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
                     </div>
                   </div>
 
-                  {/* Chip + actions */}
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <CardChip />
-                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <Button variant="ghost" size="icon" className="size-6 rounded-md hover:bg-muted/70" onClick={() => setEditingRule(rule)}>
-                        <Edit className="size-2.5 text-muted-foreground" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500 hover:bg-rose-500/10" onClick={() => setDeletingRuleId(rule._id.toString())}>
-                        <Trash2 className="size-2.5" />
-                      </Button>
-                    </div>
+                  {/* Action buttons — no chip */}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
+                    <Button
+                      variant="ghost" size="icon"
+                      className="size-8 rounded-lg hover:bg-muted/70"
+                      onClick={() => setEditingRule(rule)}
+                    >
+                      <Edit className="size-3.5 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost" size="icon"
+                      className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
+                      onClick={() => setDeletingRuleId(rule._id.toString())}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
                   </div>
                 </div>
 
@@ -209,7 +203,7 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
                     </div>
                   </div>
 
-                  {/* Flow: Wallet → Category */}
+                  {/* Flow */}
                   <div className="flex items-center gap-2 bg-muted/30 border border-border/30 rounded-xl px-3 py-2">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
                       <div className="size-6 rounded-lg bg-card border border-border/50 flex items-center justify-center shrink-0">
@@ -219,7 +213,6 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
                         {wallet?.name ?? "Wallet"}
                       </span>
                     </div>
-
                     <div className="flex items-center gap-1 shrink-0">
                       <div className="w-5 h-px bg-border/60 relative overflow-hidden">
                         {rule.isActive && (
@@ -236,7 +229,6 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
                         )}
                       </div>
                     </div>
-
                     <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
                       <span className="text-[10px] font-bold truncate" style={{ color: accent }}>
                         {category?.name ?? "Category"}

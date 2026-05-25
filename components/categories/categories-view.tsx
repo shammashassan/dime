@@ -64,10 +64,8 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
   }
 
   const systemCategories = categories.filter((c) => c.userId === null)
-  const customCategories = categories.filter((c) => c.userId !== null)
-
-  const typeList = (c: Category) =>
-    Array.isArray(c.type) ? c.type : [c.type]
+  const customCategories  = categories.filter((c) => c.userId !== null)
+  const typeList = (c: Category) => Array.isArray(c.type) ? c.type : [c.type]
 
   return (
     <div className="flex flex-col gap-7 w-full">
@@ -80,17 +78,11 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
           </div>
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">Categories</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Organize your spending with custom labels.
-            </p>
+            <p className="text-sm text-muted-foreground mt-0.5">Organize your spending with custom labels.</p>
           </div>
         </div>
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform"
-        >
-          <Plus className="size-4" />
-          Create Category
+        <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">
+          <Plus className="size-4" />Create Category
         </Button>
       </div>
 
@@ -110,12 +102,11 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
                 key={c._id.toString()}
                 className="group relative overflow-hidden rounded-xl border border-border/50 bg-card hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
               >
-                {/* Left color strip */}
+                {/* Left colour strip */}
                 <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ backgroundColor: c.color }} />
 
-                {/* Top row: icon + name + RESERVED action column */}
-                <div className="flex items-center pl-4 pr-1.5 pt-3 pb-1 gap-2.5">
-                  {/* Icon */}
+                {/* Top row: icon + name + action buttons in their own fixed row */}
+                <div className="flex items-center pl-4 pr-2 pt-3 pb-1 gap-2.5">
                   <div
                     className="size-8 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110"
                     style={{ backgroundColor: c.color + "18", color: c.color }}
@@ -123,38 +114,38 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
                     <FolderOpen className="size-3.5" />
                   </div>
 
-                  {/* Name — takes all remaining space */}
+                  {/* Name — truncates, never fights with buttons */}
                   <p className="text-[13px] font-bold text-foreground truncate leading-tight flex-1 min-w-0">
                     {c.name}
                   </p>
 
-                  {/* Action buttons — FIXED width so they never push/overlap content */}
-                  <div className="flex items-center gap-0.5 shrink-0 w-[72px] justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {/* Buttons — size-8, icon size-3.5, always visible width reserved */}
+                  <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <Button
                       variant="ghost" size="icon"
-                      className="size-[23px] rounded-md hover:bg-muted/70"
+                      className="size-8 rounded-lg hover:bg-muted/70"
                       onClick={() => setEditingCategory(c)}
                     >
-                      <Edit className="size-2.5 text-muted-foreground" />
+                      <Edit className="size-3.5 text-muted-foreground" />
                     </Button>
                     <Button
                       variant="ghost" size="icon"
-                      className="size-[23px] rounded-md text-amber-500 hover:bg-amber-500/10"
+                      className="size-8 rounded-lg text-amber-500 hover:bg-amber-500/10"
                       onClick={() => setMergingCategory(c)}
                     >
-                      <ArrowRightLeft className="size-2.5" />
+                      <ArrowRightLeft className="size-3.5" />
                     </Button>
                     <Button
                       variant="ghost" size="icon"
-                      className="size-[23px] rounded-md text-rose-500 hover:bg-rose-500/10"
+                      className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
                       onClick={() => setDeletingCategoryId(c._id.toString())}
                     >
-                      <Trash2 className="size-2.5" />
+                      <Trash2 className="size-3.5" />
                     </Button>
                   </div>
                 </div>
 
-                {/* Bottom row: type badges — free to wrap, full width, no overlap risk */}
+                {/* Type badges — own row, indented past the icon, free to wrap */}
                 <div className="flex flex-wrap gap-1 pl-[54px] pr-3 pb-3 pt-0.5">
                   {typeList(c).map((t) => (
                     <Badge
@@ -198,7 +189,6 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
             >
               <div className="absolute left-0 top-0 bottom-0 w-[3px] opacity-40" style={{ backgroundColor: c.color }} />
 
-              {/* Top row */}
               <div className="flex items-center pl-4 pr-3 pt-3 pb-1 gap-2.5">
                 <div
                   className="size-8 rounded-lg flex items-center justify-center shrink-0"
@@ -209,10 +199,9 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
                 <p className="text-[13px] font-semibold text-foreground/70 truncate leading-tight flex-1 min-w-0">
                   {c.name}
                 </p>
-                <Lock className="size-3 text-muted-foreground/30 shrink-0" />
+                <Lock className="size-3.5 text-muted-foreground/30 shrink-0" />
               </div>
 
-              {/* Type badges */}
               <div className="flex flex-wrap gap-1 pl-[54px] pr-3 pb-3 pt-0.5">
                 {typeList(c).map((t) => (
                   <Badge
@@ -269,8 +258,7 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
             <AlertDialogCancel className="rounded-xl font-semibold">Cancel</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isPending}
               className="rounded-xl font-semibold bg-rose-600 hover:bg-rose-500 text-white gap-1.5">
-              {isPending && <Loader2 className="size-3.5 animate-spin" />}
-              Delete Category
+              {isPending && <Loader2 className="size-3.5 animate-spin" />}Delete Category
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
