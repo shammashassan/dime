@@ -218,12 +218,14 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                 type="monotone"
                 fill="url(#fillExpense)"
                 stroke="var(--color-expense)"
+                isAnimationActive={true}
               />
               <Area
                 dataKey="income"
                 type="monotone"
                 fill="url(#fillIncome)"
                 stroke="var(--color-income)"
+                isAnimationActive={true}
               />
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>

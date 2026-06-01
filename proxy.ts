@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { getCookieCache, getSessionCookie } from "better-auth/cookies"
 
 const PUBLIC_PATHS = [
   "/sign-in", "/sign-up", "/forgot-password",
@@ -7,14 +8,14 @@ const PUBLIC_PATHS = [
   "/pending-approval", "/api/auth",
 ]
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (pathname === "/dashboard") {
     return NextResponse.redirect(new URL("/", request.url))
   }
-  const isPublic =
 
+  const isPublic =
     PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico" ||
@@ -23,13 +24,23 @@ export function proxy(request: NextRequest) {
 
   if (isPublic) return NextResponse.next()
 
-  const sessionCookie =
-    request.cookies.get("better-auth.session_token") ??
-    request.cookies.get("__Secure-better-auth.session_token")
+  const session = await getCookieCache(request)
 
-  if (!sessionCookie) {
-    return NextResponse.redirect(new URL("/sign-in", request.url))
+  if (!session) {
+    // Fallback: If cache is empty/expired, check if the session cookie itself exists
+    const hasToken = getSessionCookie(request)
+    if (!hasToken) {
+      return NextResponse.redirect(new URL("/sign-in", request.url))
+    }
+    return NextResponse.next()
   }
+
+  // Securely check if user is approved
+  const user = session.user as any
+  if (!user.approved && pathname !== "/pending-approval") {
+    return NextResponse.redirect(new URL("/pending-approval", request.url))
+  }
+
   return NextResponse.next()
 }
 
