@@ -1,18 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { signUp, authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeClosed, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useGSAP } from "@gsap/react"
+import gsap from "gsap"
 
 export function SignUpForm() {
-  const [activeTab, setActiveTab] = useState<string>("email")
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("")
@@ -21,6 +21,21 @@ export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  // GSAP Entrance Animation
+  useGSAP(
+    () => {
+      if (cardRef.current) {
+        gsap.fromTo(
+          cardRef.current,
+          { opacity: 0, y: 20, scale: 0.98 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" }
+        )
+      }
+    },
+    { scope: cardRef }
+  )
 
   const getAuthErrorMessage = (err: unknown, fallback = "An unexpected error occurred") => {
     if (typeof err === "string") return err
@@ -50,10 +65,10 @@ export function SignUpForm() {
 
     const signUpPromise = (async () => {
       const { data, error: resError } = await signUp.email({
-        email,
-        name,
+        email: email.trim(),
+        name: name.trim(),
         password,
-        username: activeTab === "username" ? username : undefined,
+        username: username.trim() || undefined,
         callbackURL: "/pending-approval",
       })
 
@@ -92,214 +107,121 @@ export function SignUpForm() {
   }
 
   return (
-    <Card className="w-full max-w-md border-border/40 bg-background/60 backdrop-blur-xl shadow-2xl">
-      <CardHeader className="space-y-1 text-center">
+    <Card ref={cardRef} className="w-full max-w-md border-border/40 bg-background/60 backdrop-blur-xl shadow-2xl opacity-0 translate-y-4">
+      <CardHeader className="flex flex-col gap-1 text-center">
         <CardTitle className="text-2xl font-bold tracking-tight">Create an Account</CardTitle>
         <CardDescription>
-          Sign up to begin tracking your finances with Dime
+          Already have an account?{" "}
+          <a href="/sign-in" className="text-primary font-medium hover:underline">
+            Sign in
+          </a>
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-col gap-4">
         <Alert className="border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400">
           <AlertDescription>
             After signing up, your account requires admin approval before you can access the dashboard.
           </AlertDescription>
         </Alert>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-muted/60 mb-6">
-            <TabsTrigger value="email">Email Sign Up</TabsTrigger>
-            <TabsTrigger value="username">Username Sign Up</TabsTrigger>
-          </TabsList>
+        <form onSubmit={handleSignUp} className="flex flex-col gap-4">
+          <FieldGroup className="flex flex-col gap-4">
+            <Field>
+              <FieldLabel htmlFor="name">Full Name</FieldLabel>
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="username">Username</FieldLabel>
+              <Input
+                id="username"
+                type="text"
+                placeholder="johndoe"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="email">Email address</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  disabled={loading}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                </Button>
+              </div>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowConfirmPassword((visible) => !visible)}
+                  disabled={loading}
+                  aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                  aria-pressed={showConfirmPassword}
+                >
+                  {showConfirmPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
+                </Button>
+              </div>
+            </Field>
+          </FieldGroup>
+          <Button type="submit" className="w-full mt-2" disabled={loading}>
+            {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+            Sign Up
+          </Button>
+        </form>
 
-          <TabsContent value="email">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="email-name">Full Name</FieldLabel>
-                  <Input
-                    id="email-name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="email-email">Email address</FieldLabel>
-                  <Input
-                    id="email-email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="email-password">Password</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id="email-password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowPassword((visible) => !visible)}
-                      disabled={loading}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      aria-pressed={showPassword}
-                    >
-                      {showPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
-                    </Button>
-                  </div>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="email-confirm-password">Confirm Password</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id="email-confirm-password"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowConfirmPassword((visible) => !visible)}
-                      disabled={loading}
-                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                      aria-pressed={showConfirmPassword}
-                    >
-                      {showConfirmPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
-                    </Button>
-                  </div>
-                </Field>
-              </FieldGroup>
-              <Button type="submit" className="w-full mt-4" disabled={loading}>
-                {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                Sign Up
-              </Button>
-            </form>
-          </TabsContent>
-
-          <TabsContent value="username">
-            <form onSubmit={handleSignUp} className="space-y-4">
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="user-name">Full Name</FieldLabel>
-                  <Input
-                    id="user-name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="user-username">Username</FieldLabel>
-                  <Input
-                    id="user-username"
-                    type="text"
-                    placeholder="johndoe"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="user-email">Email address</FieldLabel>
-                  <Input
-                    id="user-email"
-                    type="email"
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="user-password">Password</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id="user-password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowPassword((visible) => !visible)}
-                      disabled={loading}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      aria-pressed={showPassword}
-                    >
-                      {showPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
-                    </Button>
-                  </div>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="user-confirm-password">Confirm Password</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id="user-confirm-password"
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                      disabled={loading}
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 active:translate-y-[-50%]! text-muted-foreground hover:text-foreground"
-                      onClick={() => setShowConfirmPassword((visible) => !visible)}
-                      disabled={loading}
-                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                      aria-pressed={showConfirmPassword}
-                    >
-                      {showConfirmPassword ? <EyeClosed className="size-4" /> : <Eye className="size-4" />}
-                    </Button>
-                  </div>
-                </Field>
-              </FieldGroup>
-              <Button type="submit" className="w-full mt-4" disabled={loading}>
-                {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
-                Sign Up
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
-
-        <div className="relative my-4 flex items-center justify-center">
+        <div className="relative my-2 flex items-center justify-center">
           <span className="absolute w-full border-t border-border/40" />
           <span className="relative bg-background px-3 text-xs text-muted-foreground uppercase">
             Or continue with
@@ -335,14 +257,6 @@ export function SignUpForm() {
           Google
         </Button>
       </CardContent>
-      <CardFooter className="flex justify-center border-t border-border/40 pt-4">
-        <p className="text-xs text-muted-foreground">
-          Already have an account?{" "}
-          <a href="/sign-in" className="text-primary font-medium hover:underline">
-            Sign in
-          </a>
-        </p>
-      </CardFooter>
     </Card>
   )
 }

@@ -1,12 +1,5 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getCookieCache, getSessionCookie } from "better-auth/cookies"
-
-const PUBLIC_PATHS = [
-  "/sign-in", "/sign-up", "/forgot-password",
-  "/reset-password", "/verify-email", "/magic-link",
-  "/pending-approval", "/api/auth",
-]
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -15,37 +8,76 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url))
   }
 
-  const isPublic =
-    PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
+  // Safety fallback check matching the clean static bypass rules from the volt app
+  const isStaticAsset =
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/site.webmanifest" ||
-    pathname.endsWith(".png")
+    pathname.startsWith("/api") ||
+    pathname.includes(".") // Catches all files with extensions (.ico, .xml, .png, etc.)
 
-  if (isPublic) return NextResponse.next()
+  if (isStaticAsset) {
+    return NextResponse.next()
+  }
 
-  const session = await getCookieCache(request)
+  let session = null
+  try {
+    session = await getCookieCache(request)
+  } catch (error) {
+    // Catch invalid base64 or other malformed cookie errors to prevent app crash
+    console.error("Failed to read cookie cache in proxy:", error)
+  }
+
+  const isPublicPath =
+    pathname === "/sign-in" ||
+    pathname === "/sign-up" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname === "/verify-email" ||
+    pathname === "/magic-link" ||
+    pathname === "/pending-approval"
 
   if (!session) {
-    // Fallback: If cache is empty/expired, check if the session cookie itself exists
-    const hasToken = getSessionCookie(request)
-    if (!hasToken) {
-      return NextResponse.redirect(new URL("/sign-in", request.url))
+    // Fallback check: if the cookie cache is empty/expired, check if the session cookie itself exists
+    const sessionCookie = getSessionCookie(request)
+
+    if (sessionCookie) {
+      // Allow the request to proceed. The Server Components / Page will validate it
+      // and automatically rebuild/refresh the client's cookie cache.
+      return NextResponse.next()
+    }
+
+    if (isPublicPath) {
+      return NextResponse.next()
+    }
+    return NextResponse.redirect(new URL("/sign-in", request.url))
+  }
+
+  // Session exists, handle redirects
+  const user = session.user as any
+  const approved = user.approved
+  const role = user.role
+
+  if (!approved) {
+    if (pathname !== "/pending-approval" && !pathname.startsWith("/api/auth")) {
+      return NextResponse.redirect(new URL("/pending-approval", request.url))
     }
     return NextResponse.next()
   }
 
-  // Securely check if user is approved
-  const user = session.user as any
-  if (!user.approved && pathname !== "/pending-approval") {
-    return NextResponse.redirect(new URL("/pending-approval", request.url))
+  // Approved user
+  if (pathname === "/pending-approval" || pathname === "/sign-in" || pathname === "/sign-up") {
+    return NextResponse.redirect(new URL("/", request.url))
+  }
+
+  if (pathname.startsWith("/admin") && role !== "admin") {
+    return NextResponse.redirect(new URL("/", request.url))
   }
 
   return NextResponse.next()
 }
 
 export const config = {
+  // Ultra-clean lookahead regex pattern optimization to match the volt app
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|site\\.webmanifest|.*\\.png).*)"
+    "/((?!api(?:/|$)|_next/static|_next/image|.*\\..*).*)",
   ],
 }
