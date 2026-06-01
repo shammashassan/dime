@@ -16,16 +16,16 @@ import {
 } from "@/components/ui/breadcrumb"
 
 const PAGE_LABELS: Record<string, string> = {
-  "":             "Overview",
+  "": "Overview",
   "transactions": "Transactions",
-  "wallets":      "Wallets",
-  "budgets":      "Budgets",
-  "recurring":    "Recurring",
-  "reports":      "Reports",
-  "categories":   "Categories",
-  "settings":     "Settings",
-  "admin":        "Admin",
-  "users":        "User Management",
+  "wallets": "Wallets",
+  "budgets": "Budgets",
+  "recurring": "Recurring",
+  "reports": "Reports",
+  "categories": "Categories",
+  "settings": "Settings",
+  "admin": "Admin",
+  "users": "User Management",
 }
 
 export function DashboardHeader() {
@@ -45,7 +45,7 @@ export function DashboardHeader() {
           <SidebarTrigger className="-ml-1" />
           <Separator
             orientation="vertical"
-            className="mx-2 data-[orientation=vertical]:h-4 hidden sm:block"
+            className="mx-2 hidden lg:block"
           />
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>

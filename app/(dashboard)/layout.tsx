@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
 import { ImpersonationBanner } from "@/components/layout/impersonation-banner"
+import { SiteFooter } from "@/components/layout/site-footer"
 
 export default async function DashboardLayout({
   children,
@@ -24,6 +25,7 @@ export default async function DashboardLayout({
             </div>
           </SidebarInset>
         </div>
+        <SiteFooter />
       </SidebarProvider>
     </div>
   )
