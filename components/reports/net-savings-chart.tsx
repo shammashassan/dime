@@ -17,8 +17,11 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 
+import { formatCurrency } from "@/lib/utils"
+
 interface NetSavingsChartProps {
   data: { month: string; savings: number }[]
+  currency?: string
 }
 
 const chartConfig = {
@@ -28,7 +31,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function NetSavingsChart({ data }: NetSavingsChartProps) {
+export function NetSavingsChart({ data, currency = "USD" }: NetSavingsChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -54,7 +57,28 @@ export function NetSavingsChart({ data }: NetSavingsChartProps) {
 
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent hideLabel indicator="dot" />}
+                content={
+                  <ChartTooltipContent
+                    hideLabel
+                    indicator="dot"
+                    formatter={(value, name, item) => (
+                      <>
+                        <div
+                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                          style={{
+                            backgroundColor: item.color || item.payload?.fill,
+                          }}
+                        />
+                        <div className="flex flex-1 justify-between items-center leading-none">
+                          <span className="text-muted-foreground">Net Savings:</span>
+                          <span className="font-mono font-bold text-foreground ml-2">
+                            {formatCurrency(Number(value) * 100, currency)}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  />
+                }
               />
 
               <Bar

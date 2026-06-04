@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb"
 import { Budget, Category, Wallet, Transaction } from "@/types"
 import { getCategories } from "./categories"
 import { getWallets } from "./wallets"
+import { getCurrencyConverter } from "@/lib/currency"
 
 export interface BudgetWithSpending extends Budget {
   spent: number
@@ -47,10 +48,11 @@ export const getBudgetsWithSpending = cache(async (userId: string): Promise<Budg
       const cat = categoryMap.get(budget.categoryId)
       const wallet = budget.walletId ? walletMap.get(budget.walletId) : undefined
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query: any = {
         userId,
         categoryId: budget.categoryId,
-        type: "expense",
+        type: { $in: ["expense", "transfer"] },
         date: { $gte: budget.startDate },
       }
       if (budget.endDate) {
@@ -61,7 +63,14 @@ export const getBudgetsWithSpending = cache(async (userId: string): Promise<Budg
       }
 
       const txs = await transactionsColl.find(query).toArray()
-      const spent = txs.reduce((sum, tx) => sum + tx.amount, 0)
+      const convert = await getCurrencyConverter(budget.currency, txs.map(tx => tx.currency))
+      const spent = txs.reduce((sum, tx) => {
+        if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+          const convertedAmount = convert(tx.amount, tx.currency)
+          return sum + convertedAmount
+        }
+        return sum
+      }, 0)
 
       return {
         ...budget,

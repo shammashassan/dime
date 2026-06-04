@@ -9,6 +9,7 @@ import {
   ArrowLeftRight,
   Wallet,
   PiggyBank,
+  Target,
   Repeat,
   BarChart3,
   Tags,
@@ -58,10 +59,11 @@ import {
 import { toast } from "sonner"
 
 const NAV_ITEMS = [
-  { title: "Overview", href: "/", icon: LayoutDashboard },
+  { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { title: "Transactions", href: "/transactions", icon: ArrowLeftRight },
   { title: "Wallets", href: "/wallets", icon: Wallet },
   { title: "Budgets", href: "/budgets", icon: PiggyBank },
+  { title: "Goals", href: "/goals", icon: Target },
   { title: "Recurring", href: "/recurring", icon: Repeat },
   { title: "Reports", href: "/reports", icon: BarChart3 },
   { title: "Categories", href: "/categories", icon: Tags },
@@ -121,7 +123,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="h-12">
-              <Link href="/">
+              <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/30">
                   <Sparkles className="size-4" />
                 </div>

@@ -43,7 +43,10 @@ import {
   Loader2,
   HandCoins,
   ArchiveRestore,
+  Users,
 } from "lucide-react"
+import { authClient } from "@/lib/auth-client"
+import { ShareWalletDialog } from "./share-wallet-dialog"
 
 interface WalletsViewProps {
   wallets: Wallet[]
@@ -75,6 +78,8 @@ export function WalletsView({ wallets }: WalletsViewProps) {
   const [addOpen, setAddOpen] = useState(false)
   const [editingWallet, setEditingWallet] = useState<Wallet | null>(null)
   const [deletingWalletId, setDeletingWalletId] = useState<string | null>(null)
+  const [sharingWallet, setSharingWallet] = useState<Wallet | null>(null)
+  const { data: session } = authClient.useSession()
 
   const handleToggleArchive = (id: string) => {
     const wallet = wallets.find((w) => w._id.toString() === id)
@@ -119,6 +124,8 @@ export function WalletsView({ wallets }: WalletsViewProps) {
 
   const renderActiveCard = (w: Wallet) => {
     const Icon = iconMap[w.icon] || WalletIcon
+    const isOwner = session?.user && w.userId === session.user.id
+    
     return (
       <div
         key={w._id.toString()}
@@ -137,11 +144,25 @@ export function WalletsView({ wallets }: WalletsViewProps) {
             >
               <Icon className="size-4.5" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-foreground truncate leading-tight">{w.name}</p>
-              <Badge variant="secondary" className="mt-0.5 rounded-full text-[9px] uppercase tracking-wider font-bold px-2 py-0 h-4">
-                {w.type.replace("_", " ")}
-              </Badge>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-bold text-foreground truncate leading-tight">{w.name}</p>
+                {w.userId !== session?.user?.id && (
+                  <span title="Shared Wallet">
+                    <Users className="size-3.5 text-blue-500 shrink-0" />
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <Badge variant="secondary" className="rounded-full text-[9px] uppercase tracking-wider font-bold px-2 py-0 h-4">
+                  {w.type.replace("_", " ")}
+                </Badge>
+                {w.sharedWith && w.sharedWith.length > 0 && w.userId === session?.user?.id && (
+                  <Badge variant="outline" className="rounded-full text-[9px] uppercase tracking-wider font-bold px-2 py-0 h-4 border-blue-500/20 text-blue-500 bg-blue-500/5">
+                    Shared
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
           <CardChip />
@@ -160,16 +181,26 @@ export function WalletsView({ wallets }: WalletsViewProps) {
           <div className="flex items-center gap-0.5">
             <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
               onClick={() => router.push(`/wallets/${w._id.toString()}`)}><Eye className="size-3.5" /></Button>
-            <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-              onClick={() => setEditingWallet(w)}><Edit className="size-3.5" /></Button>
-            <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-              onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}><Archive className="size-3.5" /></Button>
+            {isOwner && (
+              <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                onClick={() => setEditingWallet(w)}><Edit className="size-3.5" /></Button>
+            )}
+            {isOwner && (
+              <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
+                onClick={() => setSharingWallet(w)} title="Share Wallet"><Users className="size-3.5 text-blue-500" /></Button>
+            )}
+            {isOwner && (
+              <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}><Archive className="size-3.5" /></Button>
+            )}
           </div>
-          <Button variant="ghost" size="icon"
-            className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0"
-            onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
-            <Trash2 className="size-3.5" />
-          </Button>
+          {isOwner && (
+            <Button variant="ghost" size="icon"
+              className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0"
+              onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
+              <Trash2 className="size-3.5" />
+            </Button>
+          )}
         </div>
       </div>
     )
@@ -282,6 +313,13 @@ export function WalletsView({ wallets }: WalletsViewProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Share Wallet Dialog */}
+      <ShareWalletDialog
+        open={!!sharingWallet}
+        onOpenChange={(open) => !open && setSharingWallet(null)}
+        wallet={sharingWallet}
+      />
     </div>
   )
 }

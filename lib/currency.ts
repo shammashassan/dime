@@ -84,3 +84,39 @@ export async function convertCurrency(amount: number, from: string, to: string):
 
   return Math.round(amount * rate)
 }
+
+export async function getCurrencyConverter(targetCurrency: string, sourceCurrencies: string[]) {
+  const uniqueCurrencies = Array.from(new Set(sourceCurrencies.map(c => c.toUpperCase())))
+  const ratesMap = new Map<string, Record<string, number>>()
+
+  await Promise.all(
+    uniqueCurrencies.map(async (curr) => {
+      try {
+        const rates = await getExchangeRates(curr)
+        ratesMap.set(curr, rates)
+      } catch (err) {
+        console.error(`Failed to prefetch rates for ${curr}`, err)
+      }
+    })
+  )
+
+  return (amount: number, from: string) => {
+    const fromUpper = from.toUpperCase()
+    const toUpper = targetCurrency.toUpperCase()
+    if (fromUpper === toUpper) return amount
+
+    const rates = ratesMap.get(fromUpper)
+    const rate = rates?.[toUpper]
+    if (rate !== undefined) {
+      return Math.round(amount * rate)
+    }
+
+    const targetRates = ratesMap.get(toUpper)
+    const inverseRate = targetRates?.[fromUpper]
+    if (inverseRate) {
+      return Math.round(amount / inverseRate)
+    }
+
+    return amount
+  }
+}

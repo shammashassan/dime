@@ -33,6 +33,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { CategoryIcon } from "../categories/category-icon"
 
 interface RecurringViewProps {
   rules: RecurringRule[]
@@ -235,7 +236,7 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
                       </span>
                       <div className="size-6 rounded-lg border flex items-center justify-center shrink-0"
                         style={{ backgroundColor: accent + "15", borderColor: accent + "25", color: accent }}>
-                        <FolderOpen className="size-3" />
+                        <CategoryIcon name={category?.icon ?? ""} className="size-3" />
                       </div>
                     </div>
                   </div>

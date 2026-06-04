@@ -4,6 +4,7 @@ import { Transaction, Category, Wallet } from "@/types"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUpRight, ArrowDownRight, ArrowLeftRight, Calendar, Wallet as WalletIcon, Folder, Tag, AlignLeft, RefreshCw, Clock } from "lucide-react"
+import { CategoryIcon } from "../categories/category-icon"
 
 interface TransactionDetailsProps {
   transaction: Transaction
@@ -108,7 +109,7 @@ export function TransactionDetails({
 
           {/* Category */}
           <div className="flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl border border-border/40 bg-card/40">
-            <Folder className="size-5 text-muted-foreground mt-0.5 shrink-0" />
+            <CategoryIcon name={category?.icon ?? ""} className="size-5 text-muted-foreground mt-0.5 shrink-0" fallback={Folder} />
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-semibold text-muted-foreground">Category</span>
               {category ? (

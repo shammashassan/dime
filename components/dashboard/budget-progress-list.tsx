@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress"
 import { getBudgetPerformance } from "@/lib/queries/reports"
 import { getPreferences } from "@/lib/queries/preferences"
 import { formatCurrency } from "@/lib/utils"
-import { Target } from "lucide-react"
+import { PiggyBank, Target } from "lucide-react"
 
 interface BudgetProgressListProps {
   userId: string
@@ -18,7 +18,7 @@ export async function BudgetProgressList({ userId }: BudgetProgressListProps) {
     <Card className="border border-border/40 shadow-xl bg-card">
       <CardHeader className="flex flex-col items-start gap-1 pb-4">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
-          <Target className="size-5 text-primary" />
+          <PiggyBank className="size-5 text-primary" />
           Active Budgets
         </CardTitle>
         <CardDescription className="text-xs">Current budget performance and spending</CardDescription>
@@ -44,13 +44,12 @@ export async function BudgetProgressList({ userId }: BudgetProgressListProps) {
                   </div>
                   <Progress
                     value={Math.min(percent, 100)}
-                    className={`h-2.5 rounded-full ${
-                      percent > 90
+                    className={`h-2.5 rounded-full ${percent > 90
                         ? "[&>div]:bg-rose-500"
                         : percent >= 70
-                        ? "[&>div]:bg-amber-500"
-                        : "[&>div]:bg-emerald-500"
-                    }`}
+                          ? "[&>div]:bg-amber-500"
+                          : "[&>div]:bg-emerald-500"
+                      }`}
                   />
                   <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
                     <span>{percent.toFixed(0)}% Used</span>

@@ -259,22 +259,22 @@ async function ReportsContent({
       {/* Bento grid of 6 charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 1. Cash flow Area chart */}
-        <IncomeExpenseTrendChart data={trendData} monthsCount={monthsCount} />
+        <IncomeExpenseTrendChart data={trendData} monthsCount={monthsCount} currency={currency} />
 
         {/* 2. Category Breakdown Pie chart */}
-        <CategoryBreakdownChart data={breakdownData} />
+        <CategoryBreakdownChart data={breakdownData} currency={currency} />
 
         {/* 3. Spending day Bar chart */}
-        <SpendingDayChart data={spendingDayData} />
+        <SpendingDayChart data={spendingDayData} currency={currency} />
 
         {/* 4. Wallet History line chart */}
-        <WalletHistoryChart data={walletHistoryData} wallets={wallets} />
+        <WalletHistoryChart data={walletHistoryData} wallets={wallets} currency={currency} />
 
         {/* 5. Net Savings positive/negative bar chart */}
-        <NetSavingsChart data={savingsData} />
+        <NetSavingsChart data={savingsData} currency={currency} />
 
         {/* 6. Budget Performance grouped bar chart */}
-        <BudgetPerformanceChart data={budgetPerformanceData} />
+        <BudgetPerformanceChart data={budgetPerformanceData} currency={currency} />
       </div>
 
       {/* Monthly Performance Summary Table */}

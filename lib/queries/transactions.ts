@@ -15,8 +15,11 @@ export interface TransactionFilters {
   search?: string
 }
 
-function buildQuery(userId: string, filters: TransactionFilters) {
-  const query: any = { userId }
+import { getWallets } from "./wallets"
+
+function buildQuery(userId: string, filters: TransactionFilters, allowedWalletIds: string[]) {
+  // Query transactions in wallets the user has access to
+  const query: any = { walletId: { $in: allowedWalletIds } }
 
   if (filters.startDate || filters.endDate) {
     query.date = {}
@@ -37,7 +40,9 @@ function buildQuery(userId: string, filters: TransactionFilters) {
   }
 
   if (filters.walletIds && filters.walletIds.length > 0) {
-    query.walletId = { $in: filters.walletIds }
+    // Intersect requested wallets with allowed wallets for security
+    const intersected = filters.walletIds.filter(id => allowedWalletIds.includes(id))
+    query.walletId = { $in: intersected }
   }
 
   if (filters.minAmount !== undefined || filters.maxAmount !== undefined) {
@@ -69,7 +74,12 @@ export const getFilteredTransactions = cache(
     sort?: { sortBy?: "date" | "amount" | "description"; sortOrder?: "asc" | "desc" }
   ): Promise<Transaction[]> => {
     const transactionsColl = await getCollection<Transaction>("transactions")
-    const query = buildQuery(userId, filters)
+    
+    // Resolve allowed wallet IDs (owned and shared)
+    const wallets = await getWallets(userId)
+    const allowedWalletIds = wallets.map(w => w._id.toString())
+    
+    const query = buildQuery(userId, filters, allowedWalletIds)
 
     // Build sort object: default to date desc
     const sortBy = sort?.sortBy || "date"
@@ -98,7 +108,12 @@ export const getFilteredTransactions = cache(
 export const getFilteredTransactionsCount = cache(
   async (userId: string, filters: TransactionFilters): Promise<number> => {
     const transactionsColl = await getCollection<Transaction>("transactions")
-    const query = buildQuery(userId, filters)
+    
+    // Resolve allowed wallet IDs (owned and shared)
+    const wallets = await getWallets(userId)
+    const allowedWalletIds = wallets.map(w => w._id.toString())
+    
+    const query = buildQuery(userId, filters, allowedWalletIds)
     return transactionsColl.countDocuments(query)
   }
 )
@@ -107,7 +122,13 @@ export const getTransactionById = cache(
   async (userId: string, transactionId: string): Promise<Transaction | null> => {
     try {
       const transactionsColl = await getCollection<Transaction>("transactions")
-      return transactionsColl.findOne({ _id: new ObjectId(transactionId), userId })
+      const wallets = await getWallets(userId)
+      const allowedWalletIds = wallets.map(w => w._id.toString())
+      
+      return transactionsColl.findOne({ 
+        _id: new ObjectId(transactionId),
+        walletId: { $in: allowedWalletIds }
+      })
     } catch (err) {
       return null
     }
@@ -117,6 +138,11 @@ export const getTransactionById = cache(
 export const getRecentTransactions = cache(
   async (userId: string, limit: number = 5): Promise<Transaction[]> => {
     const transactionsColl = await getCollection<Transaction>("transactions")
-    return transactionsColl.find({ userId }).sort({ date: -1, createdAt: -1 }).limit(limit).toArray()
+    const wallets = await getWallets(userId)
+    const allowedWalletIds = wallets.map(w => w._id.toString())
+
+    return transactionsColl.find({ 
+      walletId: { $in: allowedWalletIds } 
+    }).sort({ date: -1, createdAt: -1 }).limit(limit).toArray()
   }
 )

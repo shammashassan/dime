@@ -19,13 +19,15 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import { Wallet } from "@/types"
+import { formatCurrency } from "@/lib/utils"
 
 interface WalletHistoryChartProps {
   data: Record<string, any>[]
   wallets: Wallet[]
+  currency?: string
 }
 
-export function WalletHistoryChart({ data, wallets }: WalletHistoryChartProps) {
+export function WalletHistoryChart({ data, wallets, currency = "USD" }: WalletHistoryChartProps) {
   const chartConfig = wallets.reduce((acc, w, index) => {
     acc[w.name] = {
       label: w.name,
@@ -58,7 +60,27 @@ export function WalletHistoryChart({ data, wallets }: WalletHistoryChartProps) {
               />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent indicator="dot" />}
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value, name, item) => (
+                      <>
+                        <div
+                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                          style={{
+                            backgroundColor: item.color || item.payload?.fill,
+                          }}
+                        />
+                        <div className="flex flex-1 justify-between items-center leading-none">
+                          <span className="text-muted-foreground">{name}:</span>
+                          <span className="font-mono font-bold text-foreground ml-2">
+                            {formatCurrency(Number(value) * 100, currency)}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  />
+                }
               />
               {wallets.map((w, index) => (
                 <Area

@@ -183,3 +183,65 @@ export async function deleteWallet(id: string) {
   revalidatePath("/")
   return { success: true }
 }
+
+export async function shareWalletAction(walletId: string, email: string) {
+  const session = await requireApprovedUser()
+  const walletsColl = await getCollection<Wallet>("wallets")
+  const walletOid = new ObjectId(walletId)
+
+  // Verify wallet exists and is owned by the current user
+  const wallet = await walletsColl.findOne({ _id: walletOid, userId: session.user.id })
+  if (!wallet) throw new Error("Wallet not found or access denied")
+
+  const cleanEmail = email.trim().toLowerCase()
+  if (!cleanEmail) throw new Error("Email is required")
+
+  // Ensure user cannot share with themselves
+  const usersColl = await getCollection<any>("user")
+  const currentOwnerUser = await usersColl.findOne({ id: session.user.id })
+  if (currentOwnerUser && currentOwnerUser.email.toLowerCase() === cleanEmail) {
+    throw new Error("You cannot share a wallet with yourself")
+  }
+
+  // Update sharedWith array
+  await walletsColl.updateOne(
+    { _id: walletOid, userId: session.user.id },
+    { 
+      $addToSet: { sharedWith: cleanEmail },
+      $set: { updatedAt: new Date() }
+    }
+  )
+
+  revalidatePath("/wallets")
+  revalidatePath(`/wallets/${walletId}`)
+  revalidatePath("/dashboard")
+
+  return { success: true }
+}
+
+export async function unshareWalletAction(walletId: string, email: string) {
+  const session = await requireApprovedUser()
+  const walletsColl = await getCollection<Wallet>("wallets")
+  const walletOid = new ObjectId(walletId)
+
+  // Verify wallet exists and is owned by the current user
+  const wallet = await walletsColl.findOne({ _id: walletOid, userId: session.user.id })
+  if (!wallet) throw new Error("Wallet not found or access denied")
+
+  const cleanEmail = email.trim().toLowerCase()
+
+  // Remove email from sharedWith array
+  await walletsColl.updateOne(
+    { _id: walletOid, userId: session.user.id },
+    { 
+      $pull: { sharedWith: cleanEmail },
+      $set: { updatedAt: new Date() }
+    }
+  )
+
+  revalidatePath("/wallets")
+  revalidatePath(`/wallets/${walletId}`)
+  revalidatePath("/dashboard")
+
+  return { success: true }
+}

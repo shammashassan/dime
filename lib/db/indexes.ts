@@ -60,7 +60,10 @@ export async function initDatabase() {
         // Unified Other
         { name: "Other", type: ["income", "expense"], icon: "HelpCircle", color: "#6B7280" },
         // Transfers
-        { name: "Loan / Lending", type: ["transfer"], icon: "HandCoins", color: "#6366F1" }
+        { name: "Loan / Lending", type: ["transfer"], icon: "HandCoins", color: "#6366F1" },
+        // Savings & Goals
+        { name: "Savings", type: ["expense"], icon: "PiggyBank", color: "#10B981" },
+        { name: "Goals", type: ["expense"], icon: "Target", color: "#8B5CF6" }
       ]
 
       const docs = defaultCategories.map(cat => ({
@@ -86,6 +89,36 @@ export async function initDatabase() {
           createdAt: new Date()
         } as any)
         console.log("Ensured default 'Loan / Lending' category exists.")
+      }
+
+      // Ensure "Savings" category exists even if database was already initialized
+      const savingsCat = await categoriesCollection.findOne({ userId: null, name: "Savings" })
+      if (!savingsCat) {
+        await categoriesCollection.insertOne({
+          name: "Savings",
+          type: ["expense"],
+          icon: "PiggyBank",
+          color: "#10B981",
+          userId: null,
+          isDefault: true,
+          createdAt: new Date()
+        } as any)
+        console.log("Ensured default 'Savings' category exists.")
+      }
+
+      // Ensure "Goals" category exists even if database was already initialized
+      const goalsCat = await categoriesCollection.findOne({ userId: null, name: "Goals" })
+      if (!goalsCat) {
+        await categoriesCollection.insertOne({
+          name: "Goals",
+          type: ["expense"],
+          icon: "Target",
+          color: "#8B5CF6",
+          userId: null,
+          isDefault: true,
+          createdAt: new Date()
+        } as any)
+        console.log("Ensured default 'Goals' category exists.")
       }
     }
 

@@ -24,7 +24,7 @@ import {
   Edit,
   Trash2,
   Plus,
-  Target,
+  PiggyBank,
   AlertTriangle,
   CalendarDays,
   Wallet as WalletIcon,
@@ -72,7 +72,7 @@ function BudgetCard({
             className="size-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
             style={{ backgroundColor: b.categoryColor + "18", color: b.categoryColor }}
           >
-            <Target className="size-4" />
+            <PiggyBank className="size-4" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
@@ -201,7 +201,7 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
     <div className="flex flex-col gap-7 w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0"><Target className="size-6" /></div>
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0"><PiggyBank className="size-6" /></div>
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">Budgets</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Set spending limits and track performance.</p>
@@ -225,7 +225,7 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center border border-dashed border-border/50 rounded-2xl p-12 text-center bg-muted/10">
-          <Target className="size-10 text-muted-foreground/25 mb-3" />
+          <PiggyBank className="size-10 text-muted-foreground/25 mb-3" />
           <p className="text-sm font-bold">No budgets yet</p>
           <p className="text-xs text-muted-foreground mt-1 max-w-xs">Create a budget to monitor your spending limits.</p>
           <Button onClick={() => setIsCreateOpen(true)} className="mt-4 rounded-xl font-bold gap-2 h-9">

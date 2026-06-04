@@ -11,14 +11,10 @@ import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Loader2, Check, ShoppingBag, Coffee, Car, Home, Film, Heart, Gift, Briefcase,
-  DollarSign, Activity, Globe, TrendingUp, Utensils, Book, Music, HelpCircle,
-  ArrowLeftRight, Shirt, Plane, Zap, Baby, Dog, Dumbbell, Smartphone, CreditCard,
-  Building, Leaf, Star, ShoppingCart, Pizza, Beer, Bus, Train, Bike, Wifi,
-  Gamepad2, GraduationCap, Stethoscope, Wrench, Hammer, Camera, HandCoins, type LucideIcon
-} from "lucide-react"
+import { Loader2, Check } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { CATEGORY_ICON_MAP, CUSTOM_ICON_OPTIONS } from "./category-icon"
 
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Name is required").max(30, "Name must be 30 characters or less"),
@@ -48,54 +44,6 @@ const PREMIUM_COLORS = [
   "#6366f1", // Indigo
   "#64748b", // Slate
 ]
-
-// Icon map: name -> Lucide component
-const ICON_MAP: Record<string, LucideIcon> = {
-  ShoppingBag,
-  Coffee,
-  Car,
-  Home,
-  Film,
-  Heart,
-  Gift,
-  Briefcase,
-  DollarSign,
-  Activity,
-  Globe,
-  TrendingUp,
-  Utensils,
-  Book,
-  Music,
-  HelpCircle,
-  ArrowLeftRight,
-  Shirt,
-  Plane,
-  Zap,
-  Baby,
-  Dog,
-  Dumbbell,
-  Smartphone,
-  CreditCard,
-  Building,
-  Leaf,
-  Star,
-  ShoppingCart,
-  Pizza,
-  Beer,
-  Bus,
-  Train,
-  Bike,
-  Wifi,
-  Gamepad2,
-  GraduationCap,
-  Stethoscope,
-  Wrench,
-  Hammer,
-  Camera,
-  HandCoins,
-}
-
-const ICON_OPTIONS = Object.keys(ICON_MAP)
 
 export function CategoryForm({ initialCategory, onSuccess }: CategoryFormProps) {
   const router = useRouter()
@@ -255,8 +203,8 @@ export function CategoryForm({ initialCategory, onSuccess }: CategoryFormProps) 
         <Field data-invalid={!!errors.icon}>
           <FieldLabel>Category Icon</FieldLabel>
           <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 pt-1">
-            {ICON_OPTIONS.map((iconName) => {
-              const IconComp = ICON_MAP[iconName]
+            {CUSTOM_ICON_OPTIONS.map((iconName) => {
+              const IconComp = CATEGORY_ICON_MAP[iconName]
               const isSelected = selectedIcon === iconName
               return (
                 <button

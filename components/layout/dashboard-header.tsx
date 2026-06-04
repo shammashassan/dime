@@ -20,6 +20,7 @@ const PAGE_LABELS: Record<string, string> = {
   "transactions": "Transactions",
   "wallets": "Wallets",
   "budgets": "Budgets",
+  "goals": "Savings Goals",
   "recurring": "Recurring",
   "reports": "Reports",
   "categories": "Categories",
@@ -35,7 +36,7 @@ export function DashboardHeader() {
   const pageLabel =
     PAGE_LABELS[lastSegment] ??
     (lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1))
-  const isHome = pathname === "/"
+  const isHome = pathname === "/dashboard"
 
   return (
     <header className="sticky top-0 z-50 flex h-(--header-height) shrink-0 items-center gap-2 border-b bg-background/80 backdrop-blur-md transition-all ease-linear">
@@ -52,7 +53,7 @@ export function DashboardHeader() {
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link
-                    href="/"
+                    href="/dashboard"
                     className="flex items-center gap-1.5 text-muted-foreground/60 transition-colors hover:text-foreground"
                   >
                     <Home className="size-4" />

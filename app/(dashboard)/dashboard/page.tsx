@@ -10,7 +10,7 @@ import { RecentTransactions } from "@/components/dashboard/recent-transactions"
 import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/reports"
 import { getPreferences } from "@/lib/queries/preferences"
 import { Skeleton } from "@/components/ui/skeleton"
-
+import { AIInsights } from "@/components/dashboard/ai-insights"
 
 function CardSkeleton() {
   return <Skeleton className="h-40 w-full rounded-xl" />
@@ -37,7 +37,7 @@ export default async function DashboardPage() {
     <div className="flex flex-col gap-6 w-full">
       {/* Title section */}
       <div className="flex items-center gap-3.5">
-        <div className="p-3.5 bg-primary/10 text-primary rounded-2xl shadow-xs shrink-0">
+        <div className="p-3.5 bg-primary/10 text-primary rounded-2xl shadow-sm shrink-0">
           <LayoutDashboard className="h-7 w-7" />
         </div>
         <div>
@@ -62,11 +62,11 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Charts row: Cash flow and Category breakdown */}
+      {/* AI Insights and Category Breakdown Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Suspense fallback={<ChartSkeleton />}>
-            <SpendingTrendChart initialData={trendData} currency={targetCurrency} />
+            <AIInsights userId={userId} />
           </Suspense>
         </div>
         <div className="lg:col-span-1">
@@ -74,6 +74,13 @@ export default async function DashboardPage() {
             <CategoryBreakdown data={breakdownData} currency={targetCurrency} />
           </Suspense>
         </div>
+      </div>
+
+      {/* Cash flow trend chart row */}
+      <div className="grid grid-cols-1 gap-6">
+        <Suspense fallback={<ChartSkeleton />}>
+          <SpendingTrendChart initialData={trendData} currency={targetCurrency} />
+        </Suspense>
       </div>
 
       {/* Lists row: Budgets and Recent Transactions */}

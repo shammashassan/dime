@@ -29,6 +29,7 @@ import {
   Loader2,
   FolderOpen,
 } from "lucide-react"
+import { CategoryIcon } from "./category-icon"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -111,7 +112,7 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
                     className="size-8 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110"
                     style={{ backgroundColor: c.color + "18", color: c.color }}
                   >
-                    <FolderOpen className="size-3.5" />
+                    <CategoryIcon name={c.icon} className="size-3.5" />
                   </div>
 
                   {/* Name — truncates, never fights with buttons */}
@@ -194,7 +195,7 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
                   className="size-8 rounded-lg flex items-center justify-center shrink-0"
                   style={{ backgroundColor: c.color + "0d", color: c.color + "80" }}
                 >
-                  <FolderOpen className="size-3.5" />
+                  <CategoryIcon name={c.icon} className="size-3.5" />
                 </div>
                 <p className="text-[13px] font-semibold text-foreground/70 truncate leading-tight flex-1 min-w-0">
                   {c.name}

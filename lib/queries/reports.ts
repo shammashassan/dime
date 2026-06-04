@@ -3,8 +3,11 @@ import { getCollection } from "@/lib/db/collections"
 import { getWallets } from "./wallets"
 import { getCategories } from "./categories"
 import { getActiveBudgets } from "./budgets"
+import { getPreferences } from "./preferences"
+import { getCurrencyConverter } from "@/lib/currency"
 import { Transaction, Budget, Category, Wallet } from "@/types"
 import { startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths, format } from "date-fns"
+
 
 // 1. Income vs Expense Trend: Area (dual-line) - 3 / 6 / 12 months
 export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: number = 6) => {
@@ -14,8 +17,13 @@ export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: n
   const transactions = await transactionsColl.find({
     userId,
     date: { $gte: startDate },
-    type: { $in: ["income", "expense"] },
+    type: { $in: ["income", "expense", "transfer"] },
   }).sort({ date: 1 }).toArray()
+
+  const prefs = await getPreferences(userId)
+  const targetCurrency = prefs.defaultCurrency || "USD"
+  const currencies = transactions.map(tx => tx.currency)
+  const convert = await getCurrencyConverter(targetCurrency, currencies)
 
   // Initialize month maps
   const monthlyData: Record<string, { month: string; income: number; expense: number }> = {}
@@ -29,10 +37,11 @@ export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: n
   transactions.forEach((tx) => {
     const key = format(tx.date, "yyyy-MM")
     if (monthlyData[key]) {
-      if (tx.type === "income") {
-        monthlyData[key].income += tx.amount
-      } else if (tx.type === "expense") {
-        monthlyData[key].expense += tx.amount
+      const convertedAmount = convert(tx.amount, tx.currency)
+      if (tx.type === "income" || (tx.type === "transfer" && tx.transferType === "credit")) {
+        monthlyData[key].income += convertedAmount
+      } else if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+        monthlyData[key].expense += convertedAmount
       }
     }
   })
@@ -55,8 +64,13 @@ export const getDailyIncomeExpenseTrend = cache(async (userId: string) => {
   const transactions = await transactionsColl.find({
     userId,
     date: { $gte: startDate },
-    type: { $in: ["income", "expense"] },
+    type: { $in: ["income", "expense", "transfer"] },
   }).sort({ date: 1 }).toArray()
+
+  const prefs = await getPreferences(userId)
+  const targetCurrency = prefs.defaultCurrency || "USD"
+  const currencies = transactions.map(tx => tx.currency)
+  const convert = await getCurrencyConverter(targetCurrency, currencies)
 
   // Initialize day maps for the last 90 days
   const dailyData: Record<string, { date: string; income: number; expense: number }> = {}
@@ -69,10 +83,11 @@ export const getDailyIncomeExpenseTrend = cache(async (userId: string) => {
   transactions.forEach((tx) => {
     const key = format(tx.date, "yyyy-MM-dd")
     if (dailyData[key]) {
-      if (tx.type === "income") {
-        dailyData[key].income += tx.amount
-      } else if (tx.type === "expense") {
-        dailyData[key].expense += tx.amount
+      const convertedAmount = convert(tx.amount, tx.currency)
+      if (tx.type === "income" || (tx.type === "transfer" && tx.transferType === "credit")) {
+        dailyData[key].income += convertedAmount
+      } else if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+        dailyData[key].expense += convertedAmount
       }
     }
   })
@@ -98,8 +113,13 @@ export const getCategoryBreakdown = cache(async (userId: string, start?: Date, e
   const transactions = await transactionsColl.find({
     userId,
     date: { $gte: startDate, $lte: endDate },
-    type: "expense",
+    type: { $in: ["expense", "transfer"] },
   }).toArray()
+
+  const prefs = await getPreferences(userId)
+  const targetCurrency = prefs.defaultCurrency || "USD"
+  const currencies = transactions.map(tx => tx.currency)
+  const convert = await getCurrencyConverter(targetCurrency, currencies)
 
   const categoryMap = new Map<string, Category>()
   categories.forEach((cat) => categoryMap.set(cat._id.toString(), cat))
@@ -107,16 +127,19 @@ export const getCategoryBreakdown = cache(async (userId: string, start?: Date, e
   const breakdown: Record<string, { category: string; value: number; color: string; icon: string }> = {}
 
   transactions.forEach((tx) => {
-    const catId = tx.categoryId
-    const cat = categoryMap.get(catId)
-    const catName = cat ? cat.name : "Uncategorized"
-    const catColor = cat ? cat.color : "#94a3b8"
-    const catIcon = cat ? cat.icon : "HelpCircle"
+    if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+      const convertedAmount = convert(tx.amount, tx.currency)
+      const catId = tx.categoryId
+      const cat = categoryMap.get(catId)
+      const catName = cat ? cat.name : "Uncategorized"
+      const catColor = cat ? cat.color : "#94a3b8"
+      const catIcon = cat ? cat.icon : "HelpCircle"
 
-    if (!breakdown[catName]) {
-      breakdown[catName] = { category: catName, value: 0, color: catColor, icon: catIcon }
+      if (!breakdown[catName]) {
+        breakdown[catName] = { category: catName, value: 0, color: catColor, icon: catIcon }
+      }
+      breakdown[catName].value += convertedAmount
     }
-    breakdown[catName].value += tx.amount
   })
 
   return Object.values(breakdown).map((item) => ({
@@ -133,15 +156,23 @@ export const getSpendingByDayOfWeek = cache(async (userId: string) => {
   const transactions = await transactionsColl.find({
     userId,
     date: { $gte: startDate },
-    type: "expense",
+    type: { $in: ["expense", "transfer"] },
   }).toArray()
+
+  const prefs = await getPreferences(userId)
+  const targetCurrency = prefs.defaultCurrency || "USD"
+  const currencies = transactions.map(tx => tx.currency)
+  const convert = await getCurrencyConverter(targetCurrency, currencies)
 
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
   const dayData = days.map((day) => ({ day, amount: 0 }))
 
   transactions.forEach((tx) => {
-    const dayIndex = tx.date.getDay() // 0 = Sunday, 1 = Monday, etc.
-    dayData[dayIndex].amount += tx.amount
+    if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+      const convertedAmount = convert(tx.amount, tx.currency)
+      const dayIndex = tx.date.getDay() // 0 = Sunday, 1 = Monday, etc.
+      dayData[dayIndex].amount += convertedAmount
+    }
   })
 
   return dayData.map((item) => ({
@@ -154,6 +185,11 @@ export const getSpendingByDayOfWeek = cache(async (userId: string) => {
 export const getWalletBalanceHistory = cache(async (userId: string, monthsCount: number = 6) => {
   const wallets = await getWallets(userId)
   const transactionsColl = await getCollection<Transaction>("transactions")
+
+  const prefs = await getPreferences(userId)
+  const targetCurrency = prefs.defaultCurrency || "USD"
+  const walletCurrencies = wallets.map(w => w.currency)
+  const convert = await getCurrencyConverter(targetCurrency, walletCurrencies)
 
   // We want to reconstruct end-of-month balances for the last N months
   // We'll generate the month end dates
@@ -175,9 +211,6 @@ export const getWalletBalanceHistory = cache(async (userId: string, monthsCount:
   wallets.forEach((w) => {
     currentBalances[w._id.toString()] = w.balance
   })
-
-  // We will backtrack from "now" to the end of each month
-  const history: Record<string, any>[] = []
 
   // Copy current balances
   const balances = { ...currentBalances }
@@ -225,12 +258,14 @@ export const getWalletBalanceHistory = cache(async (userId: string, monthsCount:
 
   // Format into final history array (chronological order)
   return months.map((monthEnd) => {
-    const data: Record<string, any> = {
+    const data: Record<string, string | number> = {
       month: format(monthEnd, "MMM yy"),
     }
     const monthBalances = recordedBalances[monthEnd.getTime().toString()] || {}
     wallets.forEach((w) => {
-      data[w.name] = (monthBalances[w._id.toString()] || 0) / 100
+      const originalBalance = monthBalances[w._id.toString()] || 0
+      const convertedBalance = convert(originalBalance, w.currency)
+      data[w.name] = convertedBalance / 100
     })
     return data
   })
@@ -244,8 +279,13 @@ export const getMonthlyNetSavings = cache(async (userId: string) => {
   const transactions = await transactionsColl.find({
     userId,
     date: { $gte: startDate },
-    type: { $in: ["income", "expense"] },
+    type: { $in: ["income", "expense", "transfer"] },
   }).toArray()
+
+  const prefs = await getPreferences(userId)
+  const targetCurrency = prefs.defaultCurrency || "USD"
+  const currencies = transactions.map(tx => tx.currency)
+  const convert = await getCurrencyConverter(targetCurrency, currencies)
 
   const monthlyData: Record<string, { month: string; income: number; expense: number }> = {}
   for (let i = 0; i < 12; i++) {
@@ -258,10 +298,11 @@ export const getMonthlyNetSavings = cache(async (userId: string) => {
   transactions.forEach((tx) => {
     const key = format(tx.date, "yyyy-MM")
     if (monthlyData[key]) {
-      if (tx.type === "income") {
-        monthlyData[key].income += tx.amount
-      } else if (tx.type === "expense") {
-        monthlyData[key].expense += tx.amount
+      const convertedAmount = convert(tx.amount, tx.currency)
+      if (tx.type === "income" || (tx.type === "transfer" && tx.transferType === "credit")) {
+        monthlyData[key].income += convertedAmount
+      } else if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+        monthlyData[key].expense += convertedAmount
       }
     }
   })
@@ -283,6 +324,9 @@ export const getBudgetPerformance = cache(async (userId: string) => {
   const transactionsColl = await getCollection<Transaction>("transactions")
   const categories = await getCategories(userId)
 
+  const prefs = await getPreferences(userId)
+  const targetCurrency = prefs.defaultCurrency || "USD"
+
   const categoryMap = new Map<string, Category>()
   categories.forEach((cat) => categoryMap.set(cat._id.toString(), cat))
 
@@ -294,13 +338,13 @@ export const getBudgetPerformance = cache(async (userId: string) => {
 
       // Budget period dates
       const start = budget.startDate
-      const end = budget.endDate || new Date()
 
       // Find transactions in the category under the budget's duration
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query: any = {
         userId,
         categoryId: budget.categoryId,
-        type: "expense",
+        type: { $in: ["expense", "transfer"] },
         date: { $gte: start },
       }
       if (budget.endDate) {
@@ -311,13 +355,26 @@ export const getBudgetPerformance = cache(async (userId: string) => {
       }
 
       const txs = await transactionsColl.find(query).toArray()
-      const spent = txs.reduce((sum, tx) => sum + tx.amount, 0)
+      const convert = await getCurrencyConverter(budget.currency, txs.map(tx => tx.currency))
+
+      const spent = txs.reduce((sum, tx) => {
+        if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+          const convertedAmount = convert(tx.amount, tx.currency)
+          return sum + convertedAmount
+        }
+        return sum
+      }, 0)
+
+      // Convert both limit and spent from budget.currency to targetCurrency
+      const convertToTarget = await getCurrencyConverter(targetCurrency, [budget.currency])
+      const targetLimit = convertToTarget(budget.amount, budget.currency)
+      const targetSpent = convertToTarget(spent, budget.currency)
 
       return {
         name: budget.name,
         category: catName,
-        limit: budget.amount,
-        spent,
+        limit: targetLimit / 100,
+        spent: targetSpent / 100,
       }
     })
   )

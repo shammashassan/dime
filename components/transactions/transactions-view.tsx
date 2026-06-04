@@ -8,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { TransactionForm } from "./transaction-form"
 import { Category, Wallet, Transaction } from "@/types"
 import { Button } from "@/components/ui/button"
-import { Download, ArrowLeftRight } from "lucide-react"
+import { Download, ArrowLeftRight, FileSpreadsheet } from "lucide-react"
 import { formatDate } from "@/lib/utils"
+import { CSVImportModal } from "./csv-import-modal"
 
 interface TransactionsViewProps {
   transactions: Transaction[]
@@ -33,6 +34,7 @@ export function TransactionsView({
   sortOrder = "desc",
 }: TransactionsViewProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
 
   // CSV Export
   const handleExportCSV = () => {
@@ -104,6 +106,17 @@ export function TransactionsView({
             <Download className="size-4" />
             Export CSV
           </Button>
+          {wallets.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setImportOpen(true)}
+              className="flex-1 sm:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50 cursor-pointer"
+            >
+              <FileSpreadsheet className="size-4 text-emerald-500" />
+              Import CSV
+            </Button>
+          )}
           {wallets.length > 0 ? (
             <div className="flex-1 sm:flex-initial">
               <AddTransactionDialog categories={categories} wallets={wallets} />
@@ -149,6 +162,16 @@ export function TransactionsView({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import Modal */}
+      {wallets.length > 0 && (
+        <CSVImportModal
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          wallets={wallets}
+          categories={categories}
+        />
+      )}
     </div>
   )
 }

@@ -5,18 +5,46 @@ import { Wallet, Transaction } from "@/types"
 
 export const getWallets = cache(async (userId: string): Promise<Wallet[]> => {
   const walletsColl = await getCollection<Wallet>("wallets")
-  return walletsColl.find({ userId, isArchived: false }).sort({ name: 1 }).toArray()
+  const usersColl = await getCollection<any>("user")
+  const user = await usersColl.findOne({ id: userId })
+  const userEmail = user?.email || ""
+
+  return walletsColl.find({
+    $or: [
+      { userId, isArchived: false },
+      { sharedWith: userEmail, isArchived: false }
+    ]
+  }).sort({ name: 1 }).toArray()
 })
 
 export const getAllWalletsIncludingArchived = cache(async (userId: string): Promise<Wallet[]> => {
   const walletsColl = await getCollection<Wallet>("wallets")
-  return walletsColl.find({ userId }).sort({ isArchived: 1, name: 1 }).toArray()
+  const usersColl = await getCollection<any>("user")
+  const user = await usersColl.findOne({ id: userId })
+  const userEmail = user?.email || ""
+
+  return walletsColl.find({
+    $or: [
+      { userId },
+      { sharedWith: userEmail }
+    ]
+  }).sort({ isArchived: 1, name: 1 }).toArray()
 })
 
 export const getWalletById = cache(async (userId: string, walletId: string): Promise<Wallet | null> => {
   try {
     const walletsColl = await getCollection<Wallet>("wallets")
-    return walletsColl.findOne({ _id: new ObjectId(walletId), userId })
+    const usersColl = await getCollection<any>("user")
+    const user = await usersColl.findOne({ id: userId })
+    const userEmail = user?.email || ""
+
+    return walletsColl.findOne({
+      _id: new ObjectId(walletId),
+      $or: [
+        { userId },
+        { sharedWith: userEmail }
+      ]
+    })
   } catch (err) {
     return null
   }

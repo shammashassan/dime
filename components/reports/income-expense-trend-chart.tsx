@@ -19,9 +19,12 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 
+import { formatCurrency } from "@/lib/utils"
+
 interface IncomeExpenseTrendChartProps {
   data: { month: string; income: number; expense: number }[]
   monthsCount: number
+  currency?: string
 }
 
 const chartConfig = {
@@ -35,7 +38,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function IncomeExpenseTrendChart({ data, monthsCount }: IncomeExpenseTrendChartProps) {
+export function IncomeExpenseTrendChart({ data, monthsCount, currency = "USD" }: IncomeExpenseTrendChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -62,7 +65,29 @@ export function IncomeExpenseTrendChart({ data, monthsCount }: IncomeExpenseTren
               />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent indicator="dot" />}
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value, name, item) => (
+                      <>
+                        <div
+                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                          style={{
+                            backgroundColor: item.color || item.payload?.fill,
+                          }}
+                        />
+                        <div className="flex flex-1 justify-between items-center leading-none">
+                          <span className="text-muted-foreground">
+                            {name === "income" ? "Income" : "Expense"}:
+                          </span>
+                          <span className="font-mono font-bold text-foreground ml-2">
+                            {formatCurrency(Number(value) * 100, currency)}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  />
+                }
               />
               <Area
                 dataKey="income"

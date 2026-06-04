@@ -4,10 +4,6 @@ import { getCookieCache, getSessionCookie } from "better-auth/cookies"
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (pathname === "/dashboard") {
-    return NextResponse.redirect(new URL("/", request.url))
-  }
-
   // Safety fallback check matching the clean static bypass rules from the volt app
   const isStaticAsset =
     pathname.startsWith("/_next") ||
@@ -27,6 +23,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const isPublicPath =
+    pathname === "/" ||
     pathname === "/sign-in" ||
     pathname === "/sign-up" ||
     pathname === "/forgot-password" ||
@@ -64,12 +61,12 @@ export async function proxy(request: NextRequest) {
   }
 
   // Approved user
-  if (pathname === "/pending-approval" || pathname === "/sign-in" || pathname === "/sign-up") {
-    return NextResponse.redirect(new URL("/", request.url))
+  if (pathname === "/" || pathname === "/pending-approval" || pathname === "/sign-in" || pathname === "/sign-up") {
+    return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
   if (pathname.startsWith("/admin") && role !== "admin") {
-    return NextResponse.redirect(new URL("/", request.url))
+    return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
   return NextResponse.next()

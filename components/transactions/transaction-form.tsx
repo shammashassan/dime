@@ -15,9 +15,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Loader2, Sparkles } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { ReceiptScannerModal } from "@/components/transactions/receipt-scanner-modal"
 
 const clientSchema = z
   .object({
@@ -78,8 +79,35 @@ export function TransactionForm({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [scannerOpen, setScannerOpen] = useState(false)
 
   const isEditing = !!initialTransaction
+
+  const handleScanComplete = (scanned: any) => {
+    setValue("description", scanned.merchant || scanned.description, { shouldDirty: true })
+    setValue("amount", scanned.amount / 100, { shouldDirty: true })
+    setValue("date", scanned.date, { shouldDirty: true })
+    setValue("type", "expense", { shouldDirty: true })
+    
+    // Find matching category
+    const matchedCategory = categories.find(
+      (c) => c.name.toLowerCase() === scanned.categoryName.toLowerCase()
+    )
+    if (matchedCategory) {
+      setValue("categoryId", matchedCategory._id.toString(), { shouldDirty: true })
+    }
+    
+    // Select first wallet with matching currency if available
+    const matchedWallet = wallets.find(
+      (w) => w.currency.toUpperCase() === scanned.currency.toUpperCase() && !w.isArchived
+    )
+    if (matchedWallet) {
+      setValue("walletId", matchedWallet._id.toString(), { shouldDirty: true })
+      setValue("currency", matchedWallet.currency)
+    }
+
+    toast.success("Autofilled form from receipt!")
+  }
 
   // Attempt to pre-resolve source and target wallets if counterpart transaction is in local list
   let initialWalletId = initialTransaction?.walletId || (wallets[0]?._id?.toString() || "")
@@ -240,12 +268,36 @@ export function TransactionForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {error && (
-        <div className="p-3 text-sm font-medium text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
-          {error}
+    <>
+      {!isEditing && (
+        <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-primary/10 gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Sparkles className="size-4 animate-pulse" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-bold text-foreground">Have a receipt?</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Scan it to auto-fill the transaction details.</p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setScannerOpen(true)}
+            className="rounded-lg font-bold border-primary/20 text-primary hover:bg-primary/5 cursor-pointer"
+          >
+            Scan Receipt
+          </Button>
         </div>
       )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <div className="p-3 text-sm font-medium text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+            {error}
+          </div>
+        )}
 
       <FieldGroup>
         {/* Transaction Type */}
@@ -499,6 +551,15 @@ export function TransactionForm({
           {isEditing ? "Save Changes" : "Create Transaction"}
         </Button>
       </div>
-    </form>
+      </form>
+
+      {!isEditing && (
+        <ReceiptScannerModal
+          open={scannerOpen}
+          onOpenChange={setScannerOpen}
+          onScanComplete={handleScanComplete}
+        />
+      )}
+    </>
   )
 }
