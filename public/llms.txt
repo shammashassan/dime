@@ -1,0 +1,69 @@
+# Dime
+
+Dime is a secure, production-ready, full-stack personal finance tracker. It provides users with isolated accounts to manage their budgets, track wallets, log transactions (income, expense, transfer), configure recurring transaction rules, set financial goals, analyze spending trends with visual charts, and organize custom categories. The app features an invite-only registration model where new signups enter a pending queue for admin approval.
+
+## Stack
+- **Framework**: Next.js 16+ (App Router, React 19)
+- **Database**: MongoDB (Native driver, collection indexing, automatic seeding)
+- **Authentication**: Better Auth (Email/password, Username/password, Google OAuth, Magic Links, Passkeys, 2FA, Admin, Database hooks)
+- **UI/UX**: shadcn/ui components, GSAP (Animations & micro-interactions), and Tailwind CSS v4 (with custom semantic tokens)
+- **Forms**: React Hook Form + Zod validation
+- **Emails**: Resend integration (with console.log fallback)
+
+## Public URL
+https://dime-finance.vercel.app/
+
+## Features
+- **Public Landing Page**: Premium designed hero, feature bento, interactive conversion showcases, and security highlights.
+- **Multi-Method Authentication**: Support for secure login, username registration, Magic Link passwordless sign-ins, and biometric/PIN Passkeys.
+- **Two-Factor Authentication**: Optional TOTP (Authenticator apps), Email OTP, and encrypted backup codes.
+- **Admin approval queue**: All signups default to `approved: false` and must be approved via the admin dashboard before accessing protected app routes.
+- **Dashboard Overview**: Net worth aggregation, monthly cashflow summary, interactive spending trend charts (area/pie), active budget progress trackers, and recent transaction list.
+- **Transactions Management**: Complete CRUD, advanced search parameters (type, wallet, category, date, amount, tags), bulk actions, CSV export, and parallel route modals for transaction details. Includes automatic source-to-destination transfer linking.
+- **Wallets & Multi-Currency**: Support for multiple currencies (ISO 4217), balance adjustments with logs, wallet transaction histories, and wallet archiving.
+- **Budgets**: Threshold alerts (0-100%), periods (daily, weekly, monthly, yearly), and visual progress bars.
+- **Recurring Transactions**: Automated rule processing via cron trigger (`/api/cron/process-recurring`).
+- **Visual Reports**: Area trend, category breakdowns, day-of-week spend bars, net savings, and budget performance charts.
+- **Category Control**: System defaults (Food, Transport, Salary, etc.), user-defined categories, and category merging (migrates transactions to target category before deletion).
+- **Settings**: Profile configuration, active session management, security dashboard, preferences, JSON/CSV data export, and full account deletion.
+- **Admin Portal**: User status overview, pending approval logs (single/bulk actions), user banning, demotions/promotions, and secure user impersonation.
+
+## API
+All `/api/*` endpoints (except public auth handlers) require verified user sessions:
+- `/api/auth/*` (Better Auth handlers)
+- `/api/cron/process-recurring` (Protected by `CRON_SECRET` header)
+
+## Access Policy
+- Dashboard and admin routes require active, approved sessions.
+- Do not crawl authenticated/dashboard pages or administrative tables.
+- Do not perform automated request loops against `/api/*`.
+
+## Robots & Sitemap
+- `/robots.txt`
+- `/sitemap.xml`
+
+## Crawl Preference
+
+Preferred:
+- Public landing page (`/`)
+- Public sitemap and metadata
+
+Avoid:
+- `/sign-in`
+- `/sign-up`
+- `/forgot-password`
+- `/reset-password`
+- `/verify-email`
+- `/2fa`
+- `/pending-approval`
+- `/dashboard`
+- `/transactions`
+- `/wallets`
+- `/budgets`
+- `/goals`
+- `/recurring`
+- `/reports`
+- `/categories`
+- `/settings`
+- `/admin`
+- `/api/*`

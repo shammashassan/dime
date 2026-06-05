@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+
+# Auth & approval flow (crawler exclusion)
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /2fa
+Disallow: /pending-approval
+
+# Protected application routes (authenticated dashboard)
+Disallow: /dashboard
+Disallow: /transactions
+Disallow: /wallets
+Disallow: /budgets
+Disallow: /goals
+Disallow: /recurring
+Disallow: /reports
+Disallow: /categories
+Disallow: /settings
+Disallow: /admin
+
+# API routes
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://dime-tracker.vercel.app/sitemap.xml

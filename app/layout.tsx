@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   title: "Dime",
   description: "The AI-Powered Expense Manager for Everyone",
   manifest: '/site.webmanifest',
+  verification: {
+    google: "-Yn2JXXqhEK1dVAiHMaEM_OapfXKA3OHM32EwznOG5o"
+  }
 };
 
 export default function RootLayout({
