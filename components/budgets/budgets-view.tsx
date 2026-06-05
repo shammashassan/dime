@@ -6,6 +6,7 @@ import { BudgetWithSpending } from "@/lib/queries/budgets"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -49,8 +50,7 @@ function BudgetCard({
   onEdit: () => void
   onDelete: () => void
 }) {
-  const [animated, setAnimated] = useState(false)
-  useEffect(() => { const t = setTimeout(() => setAnimated(true), 80); return () => clearTimeout(t) }, [])
+
 
   const percent = b.amount > 0 ? (b.spent / b.amount) * 100 : 0
   const remaining = Math.max(b.amount - b.spent, 0)
@@ -139,12 +139,11 @@ function BudgetCard({
 
         {/* Progress bar */}
         <div>
-          <div className="w-full h-2 bg-muted/60 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-[width] duration-1000 ease-out"
-              style={{ width: animated ? `${Math.min(percent, 100)}%` : "0%", backgroundColor: barColor }}
-            />
-          </div>
+          <Progress 
+            value={Math.min(percent, 100)} 
+            indicatorStyle={{ backgroundColor: barColor }}
+            className="h-2 bg-muted/60"
+          />
           <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
             <span className="text-foreground/60">{formatCurrency(remaining, b.currency)} remaining</span>
             <span>Limit: {formatCurrency(b.amount, b.currency)}</span>

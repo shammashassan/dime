@@ -38,6 +38,7 @@ export default async function AdminUsersPage() {
   const currentUserRole = session.user.role || "user"
 
   const users = serializeData(rawUsers)
+  const approvedUsers = users.filter((u: any) => u.approved)
   const adminUsers = users.filter((u: any) => u.role === "admin")
 
   return (
@@ -65,7 +66,7 @@ export default async function AdminUsersPage() {
         allTab={
           <Suspense fallback={<TableSkeleton />}>
             <UsersTable
-              users={users}
+              users={approvedUsers}
               currentUserRole={currentUserRole}
               currentUserId={currentUserId}
             />

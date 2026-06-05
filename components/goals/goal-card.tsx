@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Goal, Wallet } from "@/types"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import { 
   Target, 
   PiggyBank, 
@@ -141,12 +142,11 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
 
           {/* Progress bar */}
           <div>
-            <div className="w-full h-2 bg-muted/60 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${percentage}%`, backgroundColor: barColor }}
-              />
-            </div>
+            <Progress 
+              value={percentage} 
+              indicatorStyle={{ backgroundColor: barColor }}
+              className="h-2 bg-muted/60"
+            />
             <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
               <span>
                 {remaining > 0 ? (
