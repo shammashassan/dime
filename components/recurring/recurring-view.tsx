@@ -19,6 +19,7 @@ import {
 import { RecurringForm } from "./recurring-form"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { cn } from "@/lib/utils"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Edit,
   Trash2,
@@ -30,6 +31,8 @@ import {
   FolderOpen,
   TrendingUp,
   TrendingDown,
+  Play,
+  Pause,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
@@ -159,20 +162,59 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
 
                   {/* Action buttons — no chip */}
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
-                    <Button
-                      variant="ghost" size="icon"
-                      className="size-8 rounded-lg hover:bg-muted/70"
-                      onClick={() => setEditingRule(rule)}
-                    >
-                      <Edit className="size-3.5 text-muted-foreground" />
-                    </Button>
-                    <Button
-                      variant="ghost" size="icon"
-                      className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
-                      onClick={() => setDeletingRuleId(rule._id.toString())}
-                    >
-                      <Trash2 className="size-3.5" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost" size="icon"
+                          className={cn(
+                            "size-8 rounded-lg",
+                            rule.isActive 
+                              ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" 
+                              : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10"
+                          )}
+                          onClick={() => handleToggleActive(rule._id.toString())}
+                        >
+                          {rule.isActive ? (
+                            <Pause className="size-3.5 fill-amber-500/10" />
+                          ) : (
+                            <Play className="size-3.5 fill-emerald-500/10" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="rounded-xl font-medium">
+                        {rule.isActive ? "Pause rule" : "Resume rule"}
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost" size="icon"
+                          className="size-8 rounded-lg hover:bg-muted/70"
+                          onClick={() => setEditingRule(rule)}
+                        >
+                          <Edit className="size-3.5 text-muted-foreground" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="rounded-xl font-medium">
+                        Edit rule
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost" size="icon"
+                          className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
+                          onClick={() => setDeletingRuleId(rule._id.toString())}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="rounded-xl font-medium">
+                        Delete rule
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 

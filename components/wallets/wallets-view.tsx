@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Dialog,
   DialogContent,
@@ -179,27 +180,73 @@ export function WalletsView({ wallets }: WalletsViewProps) {
         {/* Footer */}
         <div className="border-t border-border/30 px-2.5 py-1.5 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-0.5">
-            <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-              onClick={() => router.push(`/wallets/${w._id.toString()}`)}><Eye className="size-3.5" /></Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                  onClick={() => router.push(`/wallets/${w._id.toString()}`)}>
+                  <Eye className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="rounded-xl font-medium">
+                View transactions
+              </TooltipContent>
+            </Tooltip>
+
             {isOwner && (
-              <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                onClick={() => setEditingWallet(w)}><Edit className="size-3.5" /></Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                    onClick={() => setEditingWallet(w)}>
+                    <Edit className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="rounded-xl font-medium">
+                  Edit wallet
+                </TooltipContent>
+              </Tooltip>
             )}
+
             {isOwner && (
-              <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
-                onClick={() => setSharingWallet(w)} title="Share Wallet"><Users className="size-3.5 text-blue-500" /></Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
+                    onClick={() => setSharingWallet(w)}>
+                    <Users className="size-3.5 text-blue-500" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="rounded-xl font-medium">
+                  Share wallet
+                </TooltipContent>
+              </Tooltip>
             )}
+
             {isOwner && (
-              <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}><Archive className="size-3.5" /></Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                    onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}>
+                    <Archive className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="rounded-xl font-medium">
+                  Archive wallet
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
           {isOwner && (
-            <Button variant="ghost" size="icon"
-              className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0"
-              onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
-              <Trash2 className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon"
+                  className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0"
+                  onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="rounded-xl font-medium">
+                Delete wallet
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
       </div>
@@ -279,8 +326,17 @@ export function WalletsView({ wallets }: WalletsViewProps) {
                       onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}>
                       <ArchiveRestore className="size-3" />Restore
                     </Button>
-                    <Button variant="ghost" size="icon" className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10"
-                      onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}><Trash2 className="size-3.5" /></Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10"
+                          onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="rounded-xl font-medium">
+                        Delete wallet
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               )

@@ -26,6 +26,7 @@ import { toast } from "sonner"
 import { GoalFormDialog } from "./goal-form"
 import { GoalContributionDialog } from "./goal-contribution-dialog"
 import { cn } from "@/lib/utils"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const GOAL_ICONS: Record<string, React.ComponentType<any>> = {
   Target,
@@ -105,20 +106,35 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
 
           {/* Action buttons (hover visible) */}
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
-            <Button
-              variant="ghost" size="icon"
-              className="size-8 rounded-lg hover:bg-muted/70 cursor-pointer"
-              onClick={() => setEditOpen(true)}
-            >
-              <Edit className="size-3.5 text-muted-foreground" />
-            </Button>
-            <Button
-              variant="ghost" size="icon"
-              className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10 cursor-pointer"
-              onClick={onDeleteClick}
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost" size="icon"
+                  className="size-8 rounded-lg hover:bg-muted/70 cursor-pointer"
+                  onClick={() => setEditOpen(true)}
+                >
+                  <Edit className="size-3.5 text-muted-foreground" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="rounded-xl font-medium">
+                Edit goal
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost" size="icon"
+                  className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10 cursor-pointer"
+                  onClick={onDeleteClick}
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="rounded-xl font-medium">
+                Delete goal
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
