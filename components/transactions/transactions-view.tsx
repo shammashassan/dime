@@ -95,34 +95,36 @@ export function TransactionsView({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCSV}
-            className="flex-1 sm:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50"
-            disabled={transactions.length === 0}
-          >
-            <Download className="size-4" />
-            Export CSV
-          </Button>
-          {wallets.length > 0 && (
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 w-full lg:w-auto">
+          <div className="flex items-center gap-2 w-full lg:w-auto">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setImportOpen(true)}
-              className="flex-1 sm:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50 cursor-pointer"
+              onClick={handleExportCSV}
+              className="flex-1 lg:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50"
+              disabled={transactions.length === 0}
             >
-              <FileSpreadsheet className="size-4 text-emerald-500" />
-              Import CSV
+              <Download className="size-4" />
+              Export CSV
             </Button>
-          )}
+            {wallets.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setImportOpen(true)}
+                className="flex-1 lg:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50 cursor-pointer"
+              >
+                <FileSpreadsheet className="size-4 text-emerald-500" />
+                Import CSV
+              </Button>
+            )}
+          </div>
           {wallets.length > 0 ? (
-            <div className="flex-1 sm:flex-initial">
+            <div className="w-full lg:w-auto">
               <AddTransactionDialog categories={categories} wallets={wallets} />
             </div>
           ) : (
-            <span className="text-sm text-muted-foreground italic">Create a wallet first to add transactions.</span>
+            <span className="text-sm text-muted-foreground italic lg:w-auto">Create a wallet first to add transactions.</span>
           )}
         </div>
       </div>

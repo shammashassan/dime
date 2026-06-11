@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/chart"
 import { formatCurrency } from "@/lib/utils"
 
+const getSafeKey = (name: string) => `cat-${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`
+
 interface CategoryBreakdownChartProps {
   data: { category: string; value: number; color: string; icon: string }[]
   currency?: string
@@ -34,7 +36,8 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
 
   const chartConfig = useMemo(() => {
     return activeData.reduce((acc, item) => {
-      acc[item.category] = { label: item.category, color: item.color }
+      const safeKey = getSafeKey(item.category)
+      acc[safeKey] = { label: item.category, color: item.color }
       return acc
     }, {} as ChartConfig)
   }, [activeData])
@@ -42,7 +45,7 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
   // Radial stacked chart expects a single-row object with category keys
   const chartData = useMemo(() => {
     return activeData.length > 0
-      ? [activeData.reduce((acc, item) => ({ ...acc, [item.category]: item.value }), {} as Record<string, number>)]
+      ? [activeData.reduce((acc, item) => ({ ...acc, [getSafeKey(item.category)]: item.value }), {} as Record<string, number>)]
       : []
   }, [activeData])
 
@@ -69,7 +72,7 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
         {activeData.length > 0 ? (
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-[5/3] w-full max-w-[250px]"
+            className="mx-auto aspect-5/3 w-full max-w-[250px]"
           >
             <RadialBarChart
               data={chartData}
@@ -83,38 +86,46 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
                 domain={[0, totalExpense]}
                 tick={false}
               />
-              {activeData.map((item) => (
-                <RadialBar
-                  key={item.category}
-                  dataKey={item.category}
-                  fill={`var(--color-${item.category})`}
-                  stackId="a"
-                  cornerRadius={5}
-                  className="stroke-transparent stroke-2"
-                  isAnimationActive={true}
-                />
-              ))}
+              {activeData.map((item) => {
+                const safeKey = getSafeKey(item.category)
+                return (
+                  <RadialBar
+                    key={item.category}
+                    dataKey={safeKey}
+                    fill={`var(--color-${safeKey})`}
+                    stackId="a"
+                    cornerRadius={5}
+                    className="stroke-transparent stroke-2"
+                    isAnimationActive={true}
+                  />
+                )
+              })}
               <ChartTooltip
                 cursor={false}
                 content={
                   <ChartTooltipContent
                     hideLabel
-                    formatter={(value, name, item) => (
-                      <>
-                        <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                          style={{
-                            backgroundColor: item.color || item.payload?.fill,
-                          }}
-                        />
-                        <div className="flex flex-1 justify-between items-center leading-none">
-                          <span className="text-muted-foreground">{name}:</span>
-                          <span className="font-mono font-bold text-foreground ml-2">
-                            {formatCurrency(Number(value) * 100, currency)}
-                          </span>
-                        </div>
-                      </>
-                    )}
+                    formatter={(value, name, item) => {
+                      const safeName = String(name)
+                      const friendlyName = chartConfig[safeName]?.label || safeName
+                      const color = chartConfig[safeName]?.color || item.color || item.payload?.fill
+                      return (
+                        <>
+                          <div
+                            className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                            style={{
+                              backgroundColor: color,
+                            }}
+                          />
+                          <div className="flex flex-1 justify-between items-center leading-none">
+                            <span className="text-muted-foreground">{friendlyName}:</span>
+                            <span className="font-mono font-bold text-foreground ml-2">
+                              {formatCurrency(Number(value) * 100, currency)}
+                            </span>
+                          </div>
+                        </>
+                      )
+                    }}
                   />
                 }
               />
@@ -167,9 +178,8 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
                   {displayData.map((entry, index) => (
                     <div
                       key={entry.category}
-                      className={`flex items-center justify-between gap-3 px-2 py-1 rounded-md transition-colors cursor-default ${
-                        activeIndex === index ? "bg-muted" : ""
-                      }`}
+                      className={`flex items-center justify-between gap-3 px-2 py-1 rounded-md transition-colors cursor-default ${activeIndex === index ? "bg-muted" : ""
+                        }`}
                       onMouseEnter={() => setActiveIndex(index)}
                       onMouseLeave={() => setActiveIndex(undefined)}
                     >
@@ -189,9 +199,8 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
                   ))}
                   {showSummary && (
                     <div
-                      className={`flex items-center justify-between gap-3 px-2 py-1 rounded-md transition-colors cursor-default ${
-                        activeIndex === 3 ? "bg-muted" : ""
-                      }`}
+                      className={`flex items-center justify-between gap-3 px-2 py-1 rounded-md transition-colors cursor-default ${activeIndex === 3 ? "bg-muted" : ""
+                        }`}
                       onMouseEnter={() => setActiveIndex(3)}
                       onMouseLeave={() => setActiveIndex(undefined)}
                     >
