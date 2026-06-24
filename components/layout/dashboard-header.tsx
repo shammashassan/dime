@@ -6,6 +6,7 @@ import { Home } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/layout/mode-toggle"
+import { SearchCommand } from "@/components/layout/search-command"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -75,6 +76,7 @@ export function DashboardHeader() {
 
         {/* Right: actions */}
         <div className="flex items-center gap-2 sm:gap-4">
+          <SearchCommand />
           <ModeToggle />
         </div>
       </div>
