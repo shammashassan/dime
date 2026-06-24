@@ -82,6 +82,9 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 
 # Cron Secret (For recurring transaction runner protection)
 CRON_SECRET=your_cron_secret
+
+# Gemini API Key (Optional - for AI receipt scanning OCR features)
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### 3. Installation
