@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client"
 import { ModeToggle } from "@/components/layout/mode-toggle"
 import { Button } from "@/components/ui/button"
 
-export function LandingHeader() {
+export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
   const { data: session } = authClient.useSession()
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -28,6 +28,8 @@ export function LandingHeader() {
   }, [])
 
   useGSAP(() => {
+    if (!startAnimation) return
+
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
 
     tl.fromTo(
@@ -35,35 +37,36 @@ export function LandingHeader() {
       { y: -50, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.8 }
     )
-    .fromTo(
-      logoRef.current,
-      { scale: 0.8, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.5)" },
-      "-=0.4"
-    )
-    .fromTo(
-      navRef.current ? Array.from(navRef.current.children) : [],
-      { y: -10, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.08, duration: 0.4 },
-      "-=0.3"
-    )
-    .fromTo(
-      actionsRef.current,
-      { x: 15, opacity: 0 },
-      { x: 0, opacity: 1, duration: 0.4 },
-      "-=0.2"
-    )
-  }, { scope: headerRef })
+      .fromTo(
+        logoRef.current,
+        { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.5)" },
+        "-=0.4"
+      )
+      .fromTo(
+        navRef.current ? Array.from(navRef.current.children) : [],
+        { y: -10, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.08, duration: 0.4 },
+        "-=0.3"
+      )
+      .fromTo(
+        actionsRef.current,
+        { x: 15, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.4 },
+        "-=0.2"
+      )
+  }, { scope: headerRef, dependencies: [startAnimation] })
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
       <div
         ref={headerRef}
+        style={{ opacity: 0 }}
         className={`mx-auto max-w-6xl mt-4 px-6 py-3 transition-[max-width,padding,background-color,border-color] duration-300 border ${mobileMenuOpen
-            ? "rounded-3xl bg-background/95 border-border/40 shadow-2xl backdrop-blur-xl"
-            : isScrolled
-              ? "rounded-full bg-background/80 border-border/40 shadow-lg backdrop-blur-md max-w-4xl"
-              : "rounded-full bg-background/20 border-transparent backdrop-blur-xs"
+          ? "rounded-3xl bg-background/95 border-border/40 shadow-2xl backdrop-blur-xl"
+          : isScrolled
+            ? "rounded-full bg-background/80 border-border/40 shadow-lg backdrop-blur-md max-w-4xl"
+            : "rounded-full bg-background/20 border-transparent backdrop-blur-xs"
           }`}
       >
         <div className="flex items-center justify-between">
@@ -82,30 +85,22 @@ export function LandingHeader() {
             <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
               Features
             </a>
-            <a href="#analytics" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Analytics
+            <a href="#workflow" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              Workflow
             </a>
-            <a href="#security" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Security
+            <a href="#faq" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              FAQ
             </a>
           </nav>
 
           {/* Right Action Button & Theme */}
           <div ref={actionsRef} className="hidden md:flex items-center gap-4">
             <ModeToggle />
-            {session ? (
-              <Button asChild className="rounded-full shadow-md shadow-primary/20 cursor-pointer font-semibold">
-                <Link href="/dashboard">
-                  Go to Dashboard
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild className="rounded-full shadow-md shadow-primary/20 cursor-pointer font-semibold">
-                <Link href="/sign-in">
-                  Get Started
-                </Link>
-              </Button>
-            )}
+            <Button asChild className="rounded-full shadow-md shadow-primary/20 cursor-pointer font-semibold">
+              <Link href={session ? "/dashboard" : "/sign-in"}>
+                Open Workspace
+              </Link>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -132,39 +127,26 @@ export function LandingHeader() {
               Features
             </a>
             <a
-              href="#analytics"
+              href="#workflow"
               onClick={() => setMobileMenuOpen(false)}
               className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Analytics
+              Workflow
             </a>
             <a
-              href="#security"
+              href="#faq"
               onClick={() => setMobileMenuOpen(false)}
               className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Security
+              FAQ
             </a>
-            {session ? (
-              <Button asChild size="lg" className="rounded-full cursor-pointer font-semibold w-full">
-                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                  Go to Dashboard
+            <div className="mt-4 pt-2">
+              <Button asChild size="lg" className="rounded-full cursor-pointer font-semibold w-full shadow-md shadow-primary/20">
+                <Link href={session ? "/dashboard" : "/sign-in"} onClick={() => setMobileMenuOpen(false)}>
+                  Open Workspace
                 </Link>
               </Button>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <Button asChild variant="outline" size="lg" className="rounded-full cursor-pointer font-semibold w-full bg-input/30 hover:bg-input/50">
-                  <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
-                    Sign In
-                  </Link>
-                </Button>
-                <Button asChild size="lg" className="rounded-full cursor-pointer font-semibold shadow-md shadow-primary/20 w-full">
-                  <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                    Sign Up
-                  </Link>
-                </Button>
-              </div>
-            )}
+            </div>
           </div>
         )}
       </div>

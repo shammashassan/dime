@@ -30,7 +30,9 @@ export async function proxy(request: NextRequest) {
     pathname === "/reset-password" ||
     pathname === "/verify-email" ||
     pathname === "/magic-link" ||
-    pathname === "/pending-approval"
+    pathname === "/pending-approval" ||
+    pathname === "/privacy" ||
+    pathname === "/terms"
 
   if (!session) {
     // Fallback check: if the cookie cache is empty/expired, check if the session cookie itself exists
@@ -49,7 +51,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Session exists, handle redirects
-  const user = session.user as any
+  const user = session.user as { approved?: boolean; role?: string }
   const approved = user.approved
   const role = user.role
 

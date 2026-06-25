@@ -15,6 +15,7 @@ https://dime-finance.vercel.app/
 
 ## Features
 - **Public Landing Page**: Premium designed hero, feature bento, interactive conversion showcases, and security highlights.
+- **Lightweight Policy Pages**: Clean, responsive privacy and terms documentation outlining private database ownership.
 - **Multi-Method Authentication**: Support for secure login, username registration, Magic Link passwordless sign-ins, and biometric/PIN Passkeys.
 - **Two-Factor Authentication**: Optional TOTP (Authenticator apps), Email OTP, and encrypted backup codes.
 - **Admin approval queue**: All signups default to `approved: false` and must be approved via the admin dashboard before accessing protected app routes.
@@ -47,6 +48,8 @@ All `/api/*` endpoints (except public auth handlers) require verified user sessi
 Preferred:
 - Public landing page (`/`)
 - Public sitemap and metadata
+- Privacy Policy (`/privacy`)
+- Terms of Service (`/terms`)
 
 Avoid:
 - `/sign-in`
