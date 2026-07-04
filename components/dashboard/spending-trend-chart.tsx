@@ -52,6 +52,13 @@ interface SpendingTrendChartProps {
 }
 
 const formatMonthDay = (dateStr: string | Date) => {
+  // If it's a plain date string like "2026-07-05", parse it in UTC to prevent
+  // the browser from shifting it to the previous day for positive-offset timezones.
+  if (typeof dateStr === "string" && dateStr.length === 10) {
+    const [year, month, day] = dateStr.split("-").map(Number)
+    const date = new Date(Date.UTC(year, month - 1, day))
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })
+  }
   const date = new Date(dateStr)
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }

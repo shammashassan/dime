@@ -55,7 +55,7 @@ export async function createTransaction(input: TransactionInput) {
 
     revalidatePath("/transactions")
     revalidatePath(`/wallets/${validated.walletId}`)
-    revalidatePath("/")
+    revalidatePath("/", "layout")
     return { success: true, id: result.insertedId.toString() }
   } else {
     // Transfer Transaction
@@ -122,7 +122,7 @@ export async function createTransaction(input: TransactionInput) {
     revalidatePath("/transactions")
     revalidatePath(`/wallets/${validated.walletId}`)
     revalidatePath(`/wallets/${validated.targetWalletId}`)
-    revalidatePath("/")
+    revalidatePath("/", "layout")
     return { success: true, id: debitOid.toString() }
   }
 }
@@ -177,7 +177,7 @@ export async function deleteTransaction(id: string) {
     // Revalidate target wallet path too if we have it
     // (the actual wallet ID of the linked tx is in the database, we fetched or will fetch it)
   }
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true }
 }
 
@@ -423,7 +423,7 @@ export async function importTransactionsAction(walletId: string, transactionsLis
 
   revalidatePath("/transactions")
   revalidatePath(`/wallets/${walletId}`)
-  revalidatePath("/dashboard")
+  revalidatePath("/", "layout")
 
   return { success: true, count: documentsToInsert.length }
 }

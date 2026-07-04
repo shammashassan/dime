@@ -32,7 +32,7 @@ export async function createBudget(input: BudgetInput) {
   const result = await budgetsColl.insertOne(budget as Budget)
 
   revalidatePath("/budgets")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true, id: result.insertedId.toString() }
 }
 
@@ -66,7 +66,7 @@ export async function updateBudget(id: string, input: BudgetInput) {
   )
 
   revalidatePath("/budgets")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true }
 }
 
@@ -81,6 +81,6 @@ export async function deleteBudget(id: string) {
   await budgetsColl.deleteOne({ _id: budgetOid, userId: session.user.id })
 
   revalidatePath("/budgets")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true }
 }

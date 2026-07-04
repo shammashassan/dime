@@ -63,8 +63,8 @@ async function TransactionsContent({
     categoryIds: params.categories ? params.categories.split(",").filter(Boolean) : undefined,
     minAmount: params.minAmount ? Math.round(parseFloat(params.minAmount) * 100) : undefined,
     maxAmount: params.maxAmount ? Math.round(parseFloat(params.maxAmount) * 100) : undefined,
-    startDate: params.from ? new Date(params.from) : undefined,
-    endDate: params.to ? new Date(params.to) : undefined,
+    startDate: params.from ? new Date(new Date(params.from).toISOString().slice(0, 10) + "T00:00:00.000Z") : undefined,
+    endDate: params.to ? new Date(new Date(params.to).toISOString().slice(0, 10) + "T23:59:59.999Z") : undefined,
   }
 
   // Parse sort

@@ -36,7 +36,7 @@ export async function createRecurringRule(input: RecurringRuleInput) {
   const result = await recurringColl.insertOne(rule as RecurringRule)
 
   revalidatePath("/recurring")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true, id: result.insertedId.toString() }
 }
 
@@ -81,7 +81,7 @@ export async function updateRecurringRule(id: string, input: RecurringRuleInput)
   )
 
   revalidatePath("/recurring")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true }
 }
 
@@ -96,7 +96,7 @@ export async function deleteRecurringRule(id: string) {
   await recurringColl.deleteOne({ _id: ruleOid, userId: session.user.id })
 
   revalidatePath("/recurring")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true }
 }
 
@@ -160,7 +160,7 @@ export async function processRecurringRuleNow(id: string) {
 
   revalidatePath("/recurring")
   revalidatePath("/transactions")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true, processedCount }
 }
 
@@ -185,6 +185,6 @@ export async function toggleRecurringRuleActive(id: string) {
   )
 
   revalidatePath("/recurring")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true, isActive: nextState }
 }

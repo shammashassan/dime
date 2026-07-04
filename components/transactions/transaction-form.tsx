@@ -129,6 +129,12 @@ export function TransactionForm({
   }
 
   // If editing, convert amount in cents to decimal format, and tags array to comma-separated string
+  let initialDate = new Date()
+  if (initialTransaction?.date) {
+    const d = new Date(initialTransaction.date)
+    initialDate = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  }
+
   const defaultValues: Partial<ClientFormInput> = {
     type: initialTransaction?.type || "expense",
     walletId: initialWalletId,
@@ -138,7 +144,7 @@ export function TransactionForm({
     currency: initialTransaction?.currency || (wallets[0]?.currency || "USD"),
     description: initialTransaction?.description || "",
     notes: initialTransaction?.notes || "",
-    date: initialTransaction?.date ? new Date(initialTransaction.date) : new Date(),
+    date: initialDate,
     tags: initialTransaction?.tags ? initialTransaction.tags.join(", ") : "",
     isRecurring: initialTransaction?.isRecurring || false,
   }
@@ -228,7 +234,7 @@ export function TransactionForm({
           currency: walletCurrency,
           description: data.description,
           notes: data.notes || undefined,
-          date: data.date,
+          date: format(data.date, "yyyy-MM-dd"),
           tags: tagsArray,
           targetWalletId: data.type === "transfer" ? data.targetWalletId : undefined,
           isRecurring: data.isRecurring,

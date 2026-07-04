@@ -12,10 +12,11 @@ export function formatCurrency(amountInCents: number, currency: string = "USD") 
   }).format(amountInCents / 100)
 }
 
-export function formatDate(date: Date | string, formatStr: string = "PPP") {
+export function formatDate(date: Date | string) {
   const d = typeof date === "string" ? new Date(date) : date
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
+    timeZone: "UTC",
   }).format(d)
 }
 

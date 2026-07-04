@@ -5,14 +5,17 @@ import { getCategories } from "./categories"
 import { getActiveBudgets } from "./budgets"
 import { getPreferences } from "./preferences"
 import { getCurrencyConverter } from "@/lib/currency"
-import { Transaction, Budget, Category, Wallet } from "@/types"
-import { startOfDay, endOfDay, subDays, startOfMonth, endOfMonth, subMonths, format } from "date-fns"
+import { Transaction, Category } from "@/types"
+import { subDays, subMonths } from "date-fns"
 
 
 // 1. Income vs Expense Trend: Area (dual-line) - 3 / 6 / 12 months
 export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: number = 6) => {
   const transactionsColl = await getCollection<Transaction>("transactions")
-  const startDate = startOfMonth(subMonths(new Date(), monthsCount - 1))
+  const now = new Date()
+  
+  // Start date in UTC (e.g. 1st day of the starting month)
+  const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (monthsCount - 1), 1, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
     userId,
@@ -25,17 +28,27 @@ export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: n
   const currencies = transactions.map(tx => tx.currency)
   const convert = await getCurrencyConverter(targetCurrency, currencies)
 
-  // Initialize month maps
+  // Find maximum date to align charts (handles user's local timezone being ahead of server)
+  let maxDate = now
+  transactions.forEach((tx) => {
+    if (tx.date > maxDate) {
+      maxDate = tx.date
+    }
+  })
+
+  // Initialize month maps in UTC
   const monthlyData: Record<string, { month: string; income: number; expense: number }> = {}
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   for (let i = 0; i < monthsCount; i++) {
-    const d = subMonths(new Date(), i)
-    const key = format(d, "yyyy-MM")
-    const label = format(d, "MMM yy")
+    // Use the 15th of the month to safely avoid month-end overflows when subtracting
+    const d = subMonths(new Date(Date.UTC(maxDate.getUTCFullYear(), maxDate.getUTCMonth(), 15)), i)
+    const key = d.toISOString().slice(0, 7) // "yyyy-MM"
+    const label = `${monthNames[d.getUTCMonth()]} ${d.getUTCFullYear().toString().slice(-2)}`
     monthlyData[key] = { month: label, income: 0, expense: 0 }
   }
 
   transactions.forEach((tx) => {
-    const key = format(tx.date, "yyyy-MM")
+    const key = tx.date.toISOString().slice(0, 7)
     if (monthlyData[key]) {
       const convertedAmount = convert(tx.amount, tx.currency)
       if (tx.type === "income" || (tx.type === "transfer" && tx.transferType === "credit")) {
@@ -59,11 +72,14 @@ export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: n
 // 1b. Daily Income vs Expense Trend for Dashboard (last 90 days)
 export const getDailyIncomeExpenseTrend = cache(async (userId: string) => {
   const transactionsColl = await getCollection<Transaction>("transactions")
-  const startDate = startOfDay(subDays(new Date(), 90))
+  const now = new Date()
+  
+  // Fetch a bit extra (95 days) to ensure we cover all timezone boundaries
+  const queryStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 95, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
     userId,
-    date: { $gte: startDate },
+    date: { $gte: queryStartDate },
     type: { $in: ["income", "expense", "transfer"] },
   }).sort({ date: 1 }).toArray()
 
@@ -72,16 +88,26 @@ export const getDailyIncomeExpenseTrend = cache(async (userId: string) => {
   const currencies = transactions.map(tx => tx.currency)
   const convert = await getCurrencyConverter(targetCurrency, currencies)
 
-  // Initialize day maps for the last 90 days
+  // Find maximum date to align charts (handles user's local timezone being ahead of server)
+  let maxDate = now
+  transactions.forEach((tx) => {
+    if (tx.date > maxDate) {
+      maxDate = tx.date
+    }
+  })
+
+  const baseDate = new Date(Date.UTC(maxDate.getUTCFullYear(), maxDate.getUTCMonth(), maxDate.getUTCDate()))
+
+  // Initialize day maps for the last 90 days in UTC
   const dailyData: Record<string, { date: string; income: number; expense: number }> = {}
   for (let i = 0; i <= 90; i++) {
-    const d = subDays(new Date(), i)
-    const key = format(d, "yyyy-MM-dd")
+    const d = subDays(baseDate, i)
+    const key = d.toISOString().slice(0, 10)
     dailyData[key] = { date: key, income: 0, expense: 0 }
   }
 
   transactions.forEach((tx) => {
-    const key = format(tx.date, "yyyy-MM-dd")
+    const key = tx.date.toISOString().slice(0, 10)
     if (dailyData[key]) {
       const convertedAmount = convert(tx.amount, tx.currency)
       if (tx.type === "income" || (tx.type === "transfer" && tx.transferType === "credit")) {
@@ -107,8 +133,14 @@ export const getCategoryBreakdown = cache(async (userId: string, start?: Date, e
   const transactionsColl = await getCollection<Transaction>("transactions")
   const categories = await getCategories(userId)
 
-  const startDate = start || startOfMonth(new Date())
-  const endDate = end || endOfMonth(new Date())
+  const now = new Date()
+  const startDate = start 
+    ? new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate(), 0, 0, 0, 0)) 
+    : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0))
+
+  const endDate = end 
+    ? new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate(), 23, 59, 59, 999)) 
+    : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999))
 
   const transactions = await transactionsColl.find({
     userId,
@@ -151,7 +183,8 @@ export const getCategoryBreakdown = cache(async (userId: string, start?: Date, e
 // 3. Spending by Day of Week: Bar - Last 30 days
 export const getSpendingByDayOfWeek = cache(async (userId: string) => {
   const transactionsColl = await getCollection<Transaction>("transactions")
-  const startDate = subDays(new Date(), 30)
+  const now = new Date()
+  const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 30, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
     userId,
@@ -170,7 +203,7 @@ export const getSpendingByDayOfWeek = cache(async (userId: string) => {
   transactions.forEach((tx) => {
     if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
       const convertedAmount = convert(tx.amount, tx.currency)
-      const dayIndex = tx.date.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const dayIndex = tx.date.getUTCDay() // Use UTC day to align with selected date
       dayData[dayIndex].amount += convertedAmount
     }
   })
@@ -192,15 +225,20 @@ export const getWalletBalanceHistory = cache(async (userId: string, monthsCount:
   const convert = await getCurrencyConverter(targetCurrency, walletCurrencies)
 
   // We want to reconstruct end-of-month balances for the last N months
-  // We'll generate the month end dates
+  // We'll generate the month end UTC dates
+  const now = new Date()
   const months: Date[] = []
   for (let i = 0; i < monthsCount; i++) {
-    months.push(endOfMonth(subMonths(new Date(), i)))
+    // Use UTC end-of-month (last ms of the last day) so date comparison is timezone-safe
+    const d = subMonths(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 15)), i)
+    const utcMonthEnd = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0, 23, 59, 59, 999))
+    months.push(utcMonthEnd)
   }
   months.sort((a, b) => a.getTime() - b.getTime()) // Chronological order
 
   // Fetch all transactions after the oldest month's start, to backtrack
-  const oldestStartDate = startOfMonth(subMonths(new Date(), monthsCount - 1))
+  const oldestStart = months[0]
+  const oldestStartDate = new Date(Date.UTC(oldestStart.getUTCFullYear(), oldestStart.getUTCMonth(), 1, 0, 0, 0, 0))
   const transactions = await transactionsColl.find({
     userId,
     date: { $gte: oldestStartDate },
@@ -257,9 +295,10 @@ export const getWalletBalanceHistory = cache(async (userId: string, monthsCount:
   })
 
   // Format into final history array (chronological order)
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   return months.map((monthEnd) => {
     const data: Record<string, string | number> = {
-      month: format(monthEnd, "MMM yy"),
+      month: `${monthNames[monthEnd.getUTCMonth()]} ${monthEnd.getUTCFullYear().toString().slice(-2)}`,
     }
     const monthBalances = recordedBalances[monthEnd.getTime().toString()] || {}
     wallets.forEach((w) => {
@@ -274,7 +313,8 @@ export const getWalletBalanceHistory = cache(async (userId: string, monthsCount:
 // 5. Monthly Net Savings: Pos/neg bar - Last 12 months
 export const getMonthlyNetSavings = cache(async (userId: string) => {
   const transactionsColl = await getCollection<Transaction>("transactions")
-  const startDate = startOfMonth(subMonths(new Date(), 11))
+  const now = new Date()
+  const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
     userId,
@@ -287,16 +327,23 @@ export const getMonthlyNetSavings = cache(async (userId: string) => {
   const currencies = transactions.map(tx => tx.currency)
   const convert = await getCurrencyConverter(targetCurrency, currencies)
 
+  // Find maximum date to align charts
+  let maxDate = now
+  transactions.forEach((tx) => {
+    if (tx.date > maxDate) maxDate = tx.date
+  })
+
   const monthlyData: Record<string, { month: string; income: number; expense: number }> = {}
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   for (let i = 0; i < 12; i++) {
-    const d = subMonths(new Date(), i)
-    const key = format(d, "yyyy-MM")
-    const label = format(d, "MMM yy")
+    const d = subMonths(new Date(Date.UTC(maxDate.getUTCFullYear(), maxDate.getUTCMonth(), 15)), i)
+    const key = d.toISOString().slice(0, 7)
+    const label = `${monthNames[d.getUTCMonth()]} ${d.getUTCFullYear().toString().slice(-2)}`
     monthlyData[key] = { month: label, income: 0, expense: 0 }
   }
 
   transactions.forEach((tx) => {
-    const key = format(tx.date, "yyyy-MM")
+    const key = tx.date.toISOString().slice(0, 7)
     if (monthlyData[key]) {
       const convertedAmount = convert(tx.amount, tx.currency)
       if (tx.type === "income" || (tx.type === "transfer" && tx.transferType === "credit")) {

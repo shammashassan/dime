@@ -60,7 +60,7 @@ export async function createWallet(input: WalletInput) {
   }
 
   revalidatePath("/wallets")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true, id: result.insertedId.toString() }
 }
 
@@ -124,7 +124,7 @@ export async function updateWallet(id: string, input: WalletInput) {
 
   revalidatePath("/wallets")
   revalidatePath(`/wallets/${id}`)
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true }
 }
 
@@ -150,7 +150,7 @@ export async function toggleArchiveWallet(id: string) {
 
   revalidatePath("/wallets")
   revalidatePath(`/wallets/${id}`)
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true, isArchived: nextState }
 }
 
@@ -180,7 +180,7 @@ export async function deleteWallet(id: string) {
   await transactionsColl.deleteMany({ walletId: id, userId: session.user.id })
 
   revalidatePath("/wallets")
-  revalidatePath("/")
+  revalidatePath("/", "layout")
   return { success: true }
 }
 
@@ -214,7 +214,7 @@ export async function shareWalletAction(walletId: string, email: string) {
 
   revalidatePath("/wallets")
   revalidatePath(`/wallets/${walletId}`)
-  revalidatePath("/dashboard")
+  revalidatePath("/", "layout")
 
   return { success: true }
 }
@@ -241,7 +241,7 @@ export async function unshareWalletAction(walletId: string, email: string) {
 
   revalidatePath("/wallets")
   revalidatePath(`/wallets/${walletId}`)
-  revalidatePath("/dashboard")
+  revalidatePath("/", "layout")
 
   return { success: true }
 }
