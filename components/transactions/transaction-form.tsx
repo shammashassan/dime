@@ -234,7 +234,7 @@ export function TransactionForm({
           currency: walletCurrency,
           description: data.description,
           notes: data.notes || undefined,
-          date: format(data.date, "yyyy-MM-dd"),
+          date: new Date(format(data.date, "yyyy-MM-dd") + "T00:00:00.000Z"),
           tags: tagsArray,
           targetWalletId: data.type === "transfer" ? data.targetWalletId : undefined,
           isRecurring: data.isRecurring,
