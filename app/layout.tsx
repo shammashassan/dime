@@ -20,9 +20,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "Dime",
   description: "The AI-Powered Expense Manager for Everyone",
   manifest: '/site.webmanifest',
+  openGraph: {
+    title: "Dime",
+    description: "The AI-Powered Expense Manager for Everyone",
+    siteName: "Dime",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dime",
+    description: "The AI-Powered Expense Manager for Everyone",
+  },
   verification: {
     google: "-Yn2JXXqhEK1dVAiHMaEM_OapfXKA3OHM32EwznOG5o"
   }
