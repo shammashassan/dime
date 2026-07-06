@@ -19,7 +19,7 @@ void initDatabase()
 export const auth = betterAuth({
   appName: "Dime",
   database: mongodbAdapter(db),
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: process.env.NEXT_PUBLIC_APP_URL || process.env.BETTER_AUTH_URL,
 
   emailAndPassword: {
     enabled: true,
