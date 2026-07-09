@@ -1,7 +1,7 @@
 export function LogoMark(props: React.SVGProps<SVGSVGElement>) {
     return (
         <svg
-            viewBox="0 0 228 219"
+            viewBox="0 0 211 194"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             {...props}

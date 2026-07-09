@@ -73,9 +73,7 @@ export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link ref={logoRef} href="/" className="flex items-center gap-2">
-            <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shadow-primary/30">
-              <LogoMark className="size-5 animate-pulse" />
-            </div>
+            <LogoMark className="size-8 text-primary dark:text-purple-500" />
             <span className="text-xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
               Dime
             </span>
