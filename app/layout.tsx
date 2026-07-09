@@ -23,7 +23,6 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   title: "Dime",
   description: "The AI-Powered Expense Manager for Everyone",
-  manifest: '/site.webmanifest',
   openGraph: {
     title: "Dime",
     description: "The AI-Powered Expense Manager for Everyone",

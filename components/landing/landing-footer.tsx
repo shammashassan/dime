@@ -2,7 +2,7 @@
 
 import React from "react"
 import Link from "next/link"
-import { Sparkles } from "lucide-react"
+import { LogoMark } from "@/components/brand/logo-mark"
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -37,7 +37,7 @@ export function LandingFooter() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2.5">
               <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
-                <Sparkles className="size-4" />
+                <LogoMark className="size-5" />
               </div>
               <span className="text-xl font-bold tracking-tight">Dime</span>
             </div>

@@ -4,7 +4,8 @@ import React, { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
-import { Sparkles, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
+import { LogoMark } from "@/components/brand/logo-mark"
 import { authClient } from "@/lib/auth-client"
 import { ModeToggle } from "@/components/layout/mode-toggle"
 import { Button } from "@/components/ui/button"
@@ -73,7 +74,7 @@ export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
           {/* Logo */}
           <Link ref={logoRef} href="/" className="flex items-center gap-2">
             <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm shadow-primary/30">
-              <Sparkles className="size-4 animate-pulse" />
+              <LogoMark className="size-5 animate-pulse" />
             </div>
             <span className="text-xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
               Dime

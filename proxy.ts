@@ -10,8 +10,10 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/api") ||
     pathname.startsWith("/icon") ||
     pathname.startsWith("/apple-icon") ||
+    pathname.startsWith("/opengraph-image") ||
+    pathname.startsWith("/twitter-image") ||
     pathname === "/favicon.ico" ||
-    pathname === "/site.webmanifest" ||
+    pathname === "/manifest.webmanifest" ||
     pathname.includes(".") // Catches all files with extensions (.ico, .xml, .png, etc.)
 
   if (isStaticAsset) {
@@ -81,6 +83,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Ultra-clean lookahead regex pattern optimization to match the volt app
   matcher: [
-    "/((?!api(?:/|$)|_next/static|_next/image|icon(?:/|$)|apple-icon(?:/|$)|favicon\\.ico$|site\\.webmanifest$|.*\\..*).*)",
+    "/((?!api(?:/|$)|_next/static|_next/image|icon(?:/|$)|apple-icon(?:/|$)|opengraph-image(?:/|$)|twitter-image(?:/|$)|favicon\\.ico$|manifest\\.webmanifest$|.*\\..*).*)",
   ],
 }

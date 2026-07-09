@@ -15,10 +15,10 @@ import {
   Tags,
   Cog,
   Shield,
-  Sparkles,
   LogOut,
   ChevronsUpDown,
 } from "lucide-react"
+import { LogoMark } from "@/components/brand/logo-mark"
 import {
   Sidebar,
   SidebarContent,
@@ -125,7 +125,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
             <SidebarMenuButton size="lg" asChild className="h-12">
               <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/30">
-                  <Sparkles className="size-4" />
+                  <LogoMark className="size-5" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Dime</span>

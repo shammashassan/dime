@@ -1,0 +1,139 @@
+import { ImageResponse } from 'next/og'
+
+export const alt = 'Dime'
+export const size = {
+  width: 1200,
+  height: 630,
+}
+export const contentType = 'image/png'
+
+export default function Image() {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          background: '#070708',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+          padding: '60px 40px',
+        }}
+      >
+        {/* Subtle background ambient light (greenish tint for money/dime) */}
+        <div
+          style={{
+            position: 'absolute',
+            width: '600px',
+            height: '600px',
+            borderRadius: '300px',
+            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(0, 0, 0, 0) 70%)',
+            top: '15px',
+            left: '300px',
+            opacity: 0.8,
+          }}
+        />
+
+        {/* Branding Container */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+          }}
+        >
+          {/* Logo Mark (Dime symbol) */}
+          <div
+            style={{
+              display: 'flex',
+              width: '160px',
+              height: '160px',
+              marginBottom: '32px',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <svg
+              viewBox="0 0 228 219"
+              width="100%"
+              height="100%"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+            >
+              <path
+                d="M0 108.536C16.3004 145.657 57.388 172 105.5 172C127.756 172 148.508 166.361 166 156.628V180.72C148.871 189.088 128.009 194 105.5 194C47.234 194 0 161.093 0 120.5C0 119.327 0.0410885 118.16 0.119141 117H0V108.536ZM211 117H210.881C210.959 118.16 211 119.327 211 120.5C211 141.873 197.905 161.114 177 174.544V149.663C192.066 138.865 203.891 124.726 211 108.536V117ZM105.5 0C163.766 0 211 34.6979 211 77.5C211 120.302 163.766 155 105.5 155C47.234 155 0 120.302 0 77.5C0 34.6979 47.234 0 105.5 0ZM105.5 16C55.5182 16 15 43.5345 15 77.5C15 111.466 55.5182 139 105.5 139C155.482 139 196 111.466 196 77.5C196 43.5345 155.482 16 105.5 16ZM74 80C77.866 80 81 83.134 81 87V104C81 107.866 77.866 111 74 111C70.134 111 67 107.866 67 104V87C67 83.134 70.134 80 74 80ZM104 61C107.866 61 111 64.134 111 68V104C111 107.866 107.866 111 104 111C100.134 111 97 107.866 97 104V68C97 64.134 100.134 61 104 61ZM134 44C137.866 44 141 47.134 141 51V104C141 107.866 137.866 111 134 111C130.134 111 127 107.866 127 104V51C127 47.134 130.134 44 134 44Z"
+                fill="#ffffff"
+              />
+            </svg>
+          </div>
+
+          {/* Title */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '20px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '76px',
+                fontWeight: 800,
+                color: '#ffffff',
+                letterSpacing: '-0.03em',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+              }}
+            >
+              Dime
+            </span>
+          </div>
+
+          {/* Subtitle / Description */}
+          <div
+            style={{
+              fontSize: '26px',
+              fontWeight: 400,
+              color: '#a1a1aa',
+              textAlign: 'center',
+              maxWidth: '750px',
+              lineHeight: 1.5,
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+            }}
+          >
+            The AI-Powered Expense Manager for Everyone.
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '40px',
+            left: '0',
+            right: '0',
+            display: 'flex',
+            justifyContent: 'center',
+            color: '#52525b',
+            fontSize: '16px',
+            fontWeight: 500,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            zIndex: 10,
+          }}
+        >
+          DIME-TRACKER.VERCEL.APP
+        </div>
+      </div>
+    ),
+    {
+      ...size,
+    }
+  )
+}
