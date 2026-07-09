@@ -44,7 +44,6 @@ export default function Image() {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 10,
           }}
         >
           {/* Logo Mark (Dime symbol) */}
@@ -125,10 +124,9 @@ export default function Image() {
             letterSpacing: '0.05em',
             textTransform: 'uppercase',
             fontFamily: 'system-ui, -apple-system, sans-serif',
-            zIndex: 10,
           }}
         >
-          DIME-TRACKER.VERCEL.APP
+          dime-tracker.vercel.app
         </div>
       </div>
     ),
