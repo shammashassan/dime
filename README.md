@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://shieldcn.dev/header/glow.svg?title=Dime&subtitle=Personal%20Finance%20Tracker&theme=zinc&logo=wallet" alt="Dime Header Banner" width="100%" />
+  <img src="public/readme-banner.svg" alt="Dime Header Banner" width="100%" />
 </p>
 
 <p align="center">
