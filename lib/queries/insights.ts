@@ -2,6 +2,7 @@ import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { Transaction, Budget, Category } from "@/types"
 import { subDays, startOfDay, endOfDay } from "date-fns"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 export interface FinancialInsight {
   id: string
@@ -13,6 +14,8 @@ export interface FinancialInsight {
 }
 
 export const getFinancialInsights = cache(async (userId: string): Promise<FinancialInsight[]> => {
+  const scope = await getFinancialScope()
+  const scopeFilter = getScopeFilter(scope)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const categoriesColl = await getCollection<Category>("categories")
   
@@ -23,13 +26,16 @@ export const getFinancialInsights = cache(async (userId: string): Promise<Financ
 
   // Fetch categories to resolve names
   const categories = await categoriesColl.find({
-    $or: [{ userId }, { userId: null }]
+    $or: [
+      scopeFilter,
+      { userId: null }
+    ]
   }).toArray()
   const catMap = new Map(categories.map(c => [c._id.toString(), c.name]))
 
   // Fetch transactions for the last 30 days
   const txs = await transactionsColl.find({
-    userId,
+    ...scopeFilter,
     date: { $gte: thirtyDaysAgo }
   }).toArray()
 

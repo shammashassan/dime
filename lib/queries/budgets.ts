@@ -5,6 +5,7 @@ import { Budget, Category, Wallet, Transaction } from "@/types"
 import { getCategories } from "./categories"
 import { getWallets } from "./wallets"
 import { getCurrencyConverter } from "@/lib/currency"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 export interface BudgetWithSpending extends Budget {
   spent: number
@@ -14,25 +15,33 @@ export interface BudgetWithSpending extends Budget {
 }
 
 export const getBudgets = cache(async (userId: string): Promise<Budget[]> => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const budgetsColl = await getCollection<Budget>("budgets")
-  return budgetsColl.find({ userId }).toArray()
+  return budgetsColl.find(filter).toArray()
 })
 
 export const getActiveBudgets = cache(async (userId: string): Promise<Budget[]> => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const budgetsColl = await getCollection<Budget>("budgets")
-  return budgetsColl.find({ userId, isActive: true }).toArray()
+  return budgetsColl.find({ ...filter, isActive: true }).toArray()
 })
 
 export const getBudgetById = cache(async (userId: string, budgetId: string): Promise<Budget | null> => {
   try {
+    const scope = await getFinancialScope()
+    const filter = getScopeFilter(scope)
     const budgetsColl = await getCollection<Budget>("budgets")
-    return budgetsColl.findOne({ _id: new ObjectId(budgetId), userId })
+    return budgetsColl.findOne({ _id: new ObjectId(budgetId), ...filter })
   } catch (err) {
     return null
   }
 })
 
 export const getBudgetsWithSpending = cache(async (userId: string): Promise<BudgetWithSpending[]> => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const budgets = await getBudgets(userId)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const [categories, wallets] = await Promise.all([
@@ -50,7 +59,7 @@ export const getBudgetsWithSpending = cache(async (userId: string): Promise<Budg
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query: any = {
-        userId,
+        ...filter,
         categoryId: budget.categoryId,
         type: { $in: ["expense", "transfer"] },
         date: { $gte: budget.startDate },

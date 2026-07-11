@@ -2,6 +2,7 @@ import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { Transaction } from "@/types"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 export interface TransactionFilters {
   startDate?: Date
@@ -17,9 +18,12 @@ export interface TransactionFilters {
 
 import { getWallets } from "./wallets"
 
-function buildQuery(userId: string, filters: TransactionFilters, allowedWalletIds: string[]) {
+function buildQuery(filters: TransactionFilters, allowedWalletIds: string[], scopeFilter: any) {
   // Query transactions in wallets the user has access to
-  const query: any = { walletId: { $in: allowedWalletIds } }
+  const query: any = {
+    ...scopeFilter,
+    walletId: { $in: allowedWalletIds }
+  }
 
   if (filters.startDate || filters.endDate) {
     query.date = {}
@@ -73,13 +77,15 @@ export const getFilteredTransactions = cache(
     pagination?: { limit?: number; skip?: number },
     sort?: { sortBy?: "date" | "amount" | "description"; sortOrder?: "asc" | "desc" }
   ): Promise<Transaction[]> => {
+    const scope = await getFinancialScope()
+    const scopeFilter = getScopeFilter(scope)
     const transactionsColl = await getCollection<Transaction>("transactions")
     
     // Resolve allowed wallet IDs (owned and shared)
     const wallets = await getWallets(userId)
     const allowedWalletIds = wallets.map(w => w._id.toString())
     
-    const query = buildQuery(userId, filters, allowedWalletIds)
+    const query = buildQuery(filters, allowedWalletIds, scopeFilter)
 
     // Build sort object: default to date desc
     const sortBy = sort?.sortBy || "date"
@@ -107,13 +113,15 @@ export const getFilteredTransactions = cache(
 
 export const getFilteredTransactionsCount = cache(
   async (userId: string, filters: TransactionFilters): Promise<number> => {
+    const scope = await getFinancialScope()
+    const scopeFilter = getScopeFilter(scope)
     const transactionsColl = await getCollection<Transaction>("transactions")
     
     // Resolve allowed wallet IDs (owned and shared)
     const wallets = await getWallets(userId)
     const allowedWalletIds = wallets.map(w => w._id.toString())
     
-    const query = buildQuery(userId, filters, allowedWalletIds)
+    const query = buildQuery(filters, allowedWalletIds, scopeFilter)
     return transactionsColl.countDocuments(query)
   }
 )
@@ -121,13 +129,16 @@ export const getFilteredTransactionsCount = cache(
 export const getTransactionById = cache(
   async (userId: string, transactionId: string): Promise<Transaction | null> => {
     try {
+      const scope = await getFinancialScope()
+      const scopeFilter = getScopeFilter(scope)
       const transactionsColl = await getCollection<Transaction>("transactions")
       const wallets = await getWallets(userId)
       const allowedWalletIds = wallets.map(w => w._id.toString())
       
       return transactionsColl.findOne({ 
         _id: new ObjectId(transactionId),
-        walletId: { $in: allowedWalletIds }
+        walletId: { $in: allowedWalletIds },
+        ...scopeFilter
       })
     } catch (err) {
       return null
@@ -137,12 +148,15 @@ export const getTransactionById = cache(
 
 export const getRecentTransactions = cache(
   async (userId: string, limit: number = 5): Promise<Transaction[]> => {
+    const scope = await getFinancialScope()
+    const scopeFilter = getScopeFilter(scope)
     const transactionsColl = await getCollection<Transaction>("transactions")
     const wallets = await getWallets(userId)
     const allowedWalletIds = wallets.map(w => w._id.toString())
 
     return transactionsColl.find({ 
-      walletId: { $in: allowedWalletIds } 
+      walletId: { $in: allowedWalletIds },
+      ...scopeFilter
     }).sort({ date: -1, createdAt: -1 }).limit(limit).toArray()
   }
 )

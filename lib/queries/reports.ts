@@ -7,10 +7,13 @@ import { getPreferences } from "./preferences"
 import { getCurrencyConverter } from "@/lib/currency"
 import { Transaction, Category } from "@/types"
 import { subDays, subMonths } from "date-fns"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 
 // 1. Income vs Expense Trend: Area (dual-line) - 3 / 6 / 12 months
 export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: number = 6) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const now = new Date()
   
@@ -18,7 +21,7 @@ export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: n
   const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (monthsCount - 1), 1, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     date: { $gte: startDate },
     type: { $in: ["income", "expense", "transfer"] },
   }).sort({ date: 1 }).toArray()
@@ -71,6 +74,8 @@ export const getIncomeExpenseTrend = cache(async (userId: string, monthsCount: n
 
 // 1b. Daily Income vs Expense Trend for Dashboard (last 90 days)
 export const getDailyIncomeExpenseTrend = cache(async (userId: string) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const now = new Date()
   
@@ -78,7 +83,7 @@ export const getDailyIncomeExpenseTrend = cache(async (userId: string) => {
   const queryStartDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 95, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     date: { $gte: queryStartDate },
     type: { $in: ["income", "expense", "transfer"] },
   }).sort({ date: 1 }).toArray()
@@ -130,6 +135,8 @@ export const getDailyIncomeExpenseTrend = cache(async (userId: string) => {
 
 // 2. Category Breakdown: Pie - Current month / custom range
 export const getCategoryBreakdown = cache(async (userId: string, start?: Date, end?: Date) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const categories = await getCategories(userId)
 
@@ -143,7 +150,7 @@ export const getCategoryBreakdown = cache(async (userId: string, start?: Date, e
     : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999))
 
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     date: { $gte: startDate, $lte: endDate },
     type: { $in: ["expense", "transfer"] },
   }).toArray()
@@ -182,12 +189,14 @@ export const getCategoryBreakdown = cache(async (userId: string, start?: Date, e
 
 // 3. Spending by Day of Week: Bar - Last 30 days
 export const getSpendingByDayOfWeek = cache(async (userId: string) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const now = new Date()
   const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 30, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     date: { $gte: startDate },
     type: { $in: ["expense", "transfer"] },
   }).toArray()
@@ -216,6 +225,8 @@ export const getSpendingByDayOfWeek = cache(async (userId: string) => {
 
 // 4. Wallet Balance History: Multi-line - 3 / 6 / 12 months
 export const getWalletBalanceHistory = cache(async (userId: string, monthsCount: number = 6) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const wallets = await getWallets(userId)
   const transactionsColl = await getCollection<Transaction>("transactions")
 
@@ -240,7 +251,7 @@ export const getWalletBalanceHistory = cache(async (userId: string, monthsCount:
   const oldestStart = months[0]
   const oldestStartDate = new Date(Date.UTC(oldestStart.getUTCFullYear(), oldestStart.getUTCMonth(), 1, 0, 0, 0, 0))
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     date: { $gte: oldestStartDate },
   }).sort({ date: -1 }).toArray() // Descending order for backtracking
 
@@ -312,12 +323,14 @@ export const getWalletBalanceHistory = cache(async (userId: string, monthsCount:
 
 // 5. Monthly Net Savings: Pos/neg bar - Last 12 months
 export const getMonthlyNetSavings = cache(async (userId: string) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const now = new Date()
   const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1, 0, 0, 0, 0))
 
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     date: { $gte: startDate },
     type: { $in: ["income", "expense", "transfer"] },
   }).toArray()
@@ -367,6 +380,8 @@ export const getMonthlyNetSavings = cache(async (userId: string) => {
 
 // 6. Budget Performance: Grouped bar - Current period
 export const getBudgetPerformance = cache(async (userId: string) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const activeBudgets = await getActiveBudgets(userId)
   const transactionsColl = await getCollection<Transaction>("transactions")
   const categories = await getCategories(userId)
@@ -389,7 +404,7 @@ export const getBudgetPerformance = cache(async (userId: string) => {
       // Find transactions in the category under the budget's duration
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query: any = {
-        userId,
+        ...filter,
         categoryId: budget.categoryId,
         type: { $in: ["expense", "transfer"] },
         date: { $gte: start },

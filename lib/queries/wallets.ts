@@ -2,48 +2,36 @@ import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { Wallet, Transaction } from "@/types"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 export const getWallets = cache(async (userId: string): Promise<Wallet[]> => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const walletsColl = await getCollection<Wallet>("wallets")
-  const usersColl = await getCollection<any>("user")
-  const user = await usersColl.findOne({ id: userId })
-  const userEmail = user?.email || ""
 
   return walletsColl.find({
-    $or: [
-      { userId, isArchived: false },
-      { sharedWith: userEmail, isArchived: false }
-    ]
+    ...filter,
+    isArchived: false
   }).sort({ name: 1 }).toArray()
 })
 
 export const getAllWalletsIncludingArchived = cache(async (userId: string): Promise<Wallet[]> => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const walletsColl = await getCollection<Wallet>("wallets")
-  const usersColl = await getCollection<any>("user")
-  const user = await usersColl.findOne({ id: userId })
-  const userEmail = user?.email || ""
 
-  return walletsColl.find({
-    $or: [
-      { userId },
-      { sharedWith: userEmail }
-    ]
-  }).sort({ isArchived: 1, name: 1 }).toArray()
+  return walletsColl.find(filter).sort({ isArchived: 1, name: 1 }).toArray()
 })
 
 export const getWalletById = cache(async (userId: string, walletId: string): Promise<Wallet | null> => {
   try {
+    const scope = await getFinancialScope()
+    const filter = getScopeFilter(scope)
     const walletsColl = await getCollection<Wallet>("wallets")
-    const usersColl = await getCollection<any>("user")
-    const user = await usersColl.findOne({ id: userId })
-    const userEmail = user?.email || ""
 
     return walletsColl.findOne({
       _id: new ObjectId(walletId),
-      $or: [
-        { userId },
-        { sharedWith: userEmail }
-      ]
+      ...filter
     })
   } catch (err) {
     return null
@@ -51,8 +39,10 @@ export const getWalletById = cache(async (userId: string, walletId: string): Pro
 })
 
 export const getSingleWalletBalanceHistory = cache(async (userId: string, walletId: string, monthsCount: number = 6) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const walletsColl = await getCollection<Wallet>("wallets")
-  const wallet = await walletsColl.findOne({ _id: new ObjectId(walletId), userId })
+  const wallet = await walletsColl.findOne({ _id: new ObjectId(walletId), ...filter })
   if (!wallet) return []
 
   const transactionsColl = await getCollection<Transaction>("transactions")
@@ -67,7 +57,7 @@ export const getSingleWalletBalanceHistory = cache(async (userId: string, wallet
 
   const oldestStartDate = startOfMonth(subMonths(new Date(), monthsCount - 1))
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     walletId,
     date: { $gte: oldestStartDate },
   }).sort({ date: -1 }).toArray()
@@ -104,8 +94,10 @@ export const getSingleWalletBalanceHistory = cache(async (userId: string, wallet
 })
 
 export const getSingleWalletBalanceDailyHistory = cache(async (userId: string, walletId: string, daysCount: number = 90) => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
   const walletsColl = await getCollection<Wallet>("wallets")
-  const wallet = await walletsColl.findOne({ _id: new ObjectId(walletId), userId })
+  const wallet = await walletsColl.findOne({ _id: new ObjectId(walletId), ...filter })
   if (!wallet) return []
 
   const transactionsColl = await getCollection<Transaction>("transactions")
@@ -120,7 +112,7 @@ export const getSingleWalletBalanceDailyHistory = cache(async (userId: string, w
 
   const oldestStartDate = startOfDay(subDays(new Date(), daysCount - 1))
   const transactions = await transactionsColl.find({
-    userId,
+    ...filter,
     walletId,
     date: { $gte: oldestStartDate },
   }).sort({ date: -1 }).toArray()
