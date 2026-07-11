@@ -4,8 +4,11 @@ import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
 import { Category, Transaction } from "@/types"
 import { ObjectId } from "mongodb"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, updateTag } from "next/cache"
 import { z } from "zod"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { db } from "@/lib/db/client"
+import { canManageBudgets, Role } from "@/lib/permissions"
 
 const categoryInputSchema = z.object({
   name: z.string().min(1, "Name is required").max(30, "Name must be 30 characters or less"),
@@ -21,10 +24,26 @@ export async function createCategory(input: CategoryInput) {
   const session = await requireApprovedUser()
   const validated = categoryInputSchema.parse(input)
 
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const categoriesColl = await getCollection<Category>("categories")
 
   const category: Omit<Category, "_id"> = {
-    userId: session.user.id,
+    userId: scope.userId,
+    organizationId: scope.organizationId,
+    ownerUserId: scope.userId,
+    createdBy: scope.userId,
+    updatedBy: scope.userId,
     name: validated.name,
     type: validated.type,
     icon: validated.icon,
@@ -32,10 +51,13 @@ export async function createCategory(input: CategoryInput) {
     parentId: validated.parentId || undefined,
     isDefault: false,
     createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1,
   }
 
   const result = await categoriesColl.insertOne(category as Category)
 
+  updateTag("categories")
   revalidatePath("/categories")
   revalidatePath("/")
   return { success: true, id: result.insertedId.toString() }
@@ -45,14 +67,26 @@ export async function updateCategory(id: string, input: CategoryInput) {
   const session = await requireApprovedUser()
   const validated = categoryInputSchema.parse(input)
 
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const categoriesColl = await getCollection<Category>("categories")
   const categoryOid = new ObjectId(id)
 
-  const existing = await categoriesColl.findOne({ _id: categoryOid, userId: session.user.id })
+  const existing = await categoriesColl.findOne({ _id: categoryOid, ...getScopeFilter(scope) })
   if (!existing) throw new Error("Category not found or is read-only")
 
   await categoriesColl.updateOne(
-    { _id: categoryOid, userId: session.user.id },
+    { _id: categoryOid, ...getScopeFilter(scope) },
     {
       $set: {
         name: validated.name,
@@ -60,10 +94,14 @@ export async function updateCategory(id: string, input: CategoryInput) {
         icon: validated.icon,
         color: validated.color,
         parentId: validated.parentId || undefined,
+        updatedAt: new Date(),
+        updatedBy: scope.userId,
       },
+      $inc: { version: 1 }
     }
   )
 
+  updateTag("categories")
   revalidatePath("/categories")
   revalidatePath("/")
   return { success: true }
@@ -71,14 +109,28 @@ export async function updateCategory(id: string, input: CategoryInput) {
 
 export async function deleteCategory(id: string) {
   const session = await requireApprovedUser()
+
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const categoriesColl = await getCollection<Category>("categories")
   const categoryOid = new ObjectId(id)
 
-  const existing = await categoriesColl.findOne({ _id: categoryOid, userId: session.user.id })
+  const existing = await categoriesColl.findOne({ _id: categoryOid, ...getScopeFilter(scope) })
   if (!existing) throw new Error("Category not found or is read-only")
 
-  await categoriesColl.deleteOne({ _id: categoryOid, userId: session.user.id })
+  await categoriesColl.deleteOne({ _id: categoryOid, ...getScopeFilter(scope) })
 
+  updateTag("categories")
   revalidatePath("/categories")
   revalidatePath("/")
   return { success: true }
@@ -86,32 +138,54 @@ export async function deleteCategory(id: string) {
 
 export async function mergeCategory(sourceId: string, targetId: string) {
   const session = await requireApprovedUser()
+
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const categoriesColl = await getCollection<Category>("categories")
   const transactionsColl = await getCollection<Transaction>("transactions")
 
   const sourceOid = new ObjectId(sourceId)
   const targetOid = new ObjectId(targetId)
 
-  // Verify source exists and belongs to user (defaults cannot be deleted/merged)
-  const sourceCategory = await categoriesColl.findOne({ _id: sourceOid, userId: session.user.id })
+  // Verify source exists and belongs to workspace (defaults cannot be deleted/merged)
+  const sourceCategory = await categoriesColl.findOne({ _id: sourceOid, ...getScopeFilter(scope) })
   if (!sourceCategory) throw new Error("Source category not found or is read-only")
 
-  // Verify target exists (can be user custom or system default)
+  // Verify target exists (can be workspace custom or system default)
   const targetCategory = await categoriesColl.findOne({
     _id: targetOid,
-    $or: [{ userId: session.user.id }, { userId: null }],
+    $or: [getScopeFilter(scope), { userId: null }],
   })
   if (!targetCategory) throw new Error("Target category not found")
 
   // Update all transactions from source category to target category
   const result = await transactionsColl.updateMany(
-    { userId: session.user.id, categoryId: sourceId },
-    { $set: { categoryId: targetId, updatedAt: new Date() } }
+    { ...getScopeFilter(scope), categoryId: sourceId },
+    { 
+      $set: { 
+        categoryId: targetId, 
+        updatedAt: new Date(),
+        updatedBy: scope.userId
+      },
+      $inc: { version: 1 }
+    }
   )
 
   // Delete source category
-  await categoriesColl.deleteOne({ _id: sourceOid, userId: session.user.id })
+  await categoriesColl.deleteOne({ _id: sourceOid, ...getScopeFilter(scope) })
 
+  updateTag("categories")
+  updateTag("transactions")
   revalidatePath("/categories")
   revalidatePath("/transactions")
   revalidatePath("/")
@@ -120,11 +194,12 @@ export async function mergeCategory(sourceId: string, targetId: string) {
 }
 
 export async function getAffectedTransactionCount(sourceId: string) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
+  const scope = await getFinancialScope()
   const transactionsColl = await getCollection<Transaction>("transactions")
   
   const count = await transactionsColl.countDocuments({
-    userId: session.user.id,
+    ...getScopeFilter(scope),
     categoryId: sourceId
   })
 
