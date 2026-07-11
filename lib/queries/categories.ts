@@ -34,7 +34,7 @@ export const getCategoryById = cache(async (userId: string, categoryId: string):
     }
 
     return categoriesColl.findOne(filter)
-  } catch (err) {
+  } catch {
     return null
   }
 })

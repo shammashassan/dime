@@ -3,6 +3,7 @@ import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { Wallet, Transaction } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { endOfMonth, subMonths, startOfMonth, format, endOfDay, subDays, startOfDay } from "date-fns"
 
 export const getWallets = cache(async (userId: string): Promise<Wallet[]> => {
   const scope = await getFinancialScope()
@@ -33,7 +34,7 @@ export const getWalletById = cache(async (userId: string, walletId: string): Pro
       _id: new ObjectId(walletId),
       ...filter
     })
-  } catch (err) {
+  } catch {
     return null
   }
 })
@@ -46,8 +47,6 @@ export const getSingleWalletBalanceHistory = cache(async (userId: string, wallet
   if (!wallet) return []
 
   const transactionsColl = await getCollection<Transaction>("transactions")
-  const { endOfMonth, subMonths, startOfMonth, format } = require("date-fns")
-
   // Generate month end dates
   const months: Date[] = []
   for (let i = 0; i < monthsCount; i++) {
@@ -101,8 +100,6 @@ export const getSingleWalletBalanceDailyHistory = cache(async (userId: string, w
   if (!wallet) return []
 
   const transactionsColl = await getCollection<Transaction>("transactions")
-  const { endOfDay, subDays, startOfDay, format } = require("date-fns")
-
   // Generate day end dates
   const days: Date[] = []
   for (let i = 0; i < daysCount; i++) {

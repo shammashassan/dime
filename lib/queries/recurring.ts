@@ -24,7 +24,7 @@ export const getRecurringRuleById = cache(async (userId: string, ruleId: string)
     const filter = getScopeFilter(scope)
     const recurringColl = await getCollection<RecurringRule>("recurring_rules")
     return recurringColl.findOne({ _id: new ObjectId(ruleId), ...filter })
-  } catch (err) {
+  } catch {
     return null
   }
 })

@@ -1,8 +1,9 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
-import { ObjectId } from "mongodb"
+import { ObjectId, Filter } from "mongodb"
 import { Transaction } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { getWallets } from "./wallets"
 
 export interface TransactionFilters {
   startDate?: Date
@@ -16,23 +17,26 @@ export interface TransactionFilters {
   search?: string
 }
 
-import { getWallets } from "./wallets"
-
-function buildQuery(filters: TransactionFilters, allowedWalletIds: string[], scopeFilter: any) {
+function buildQuery(
+  filters: TransactionFilters,
+  allowedWalletIds: string[],
+  scopeFilter: Filter<Transaction>
+): Filter<Transaction> {
   // Query transactions in wallets the user has access to
-  const query: any = {
+  const query: Filter<Transaction> = {
     ...scopeFilter,
     walletId: { $in: allowedWalletIds }
   }
 
   if (filters.startDate || filters.endDate) {
-    query.date = {}
+    const dateQuery: { $gte?: Date; $lte?: Date } = {}
     if (filters.startDate) {
-      query.date.$gte = filters.startDate
+      dateQuery.$gte = filters.startDate
     }
     if (filters.endDate) {
-      query.date.$lte = filters.endDate
+      dateQuery.$lte = filters.endDate
     }
+    query.date = dateQuery
   }
 
   if (filters.type) {
@@ -50,13 +54,14 @@ function buildQuery(filters: TransactionFilters, allowedWalletIds: string[], sco
   }
 
   if (filters.minAmount !== undefined || filters.maxAmount !== undefined) {
-    query.amount = {}
+    const amountQuery: { $gte?: number; $lte?: number } = {}
     if (filters.minAmount !== undefined) {
-      query.amount.$gte = filters.minAmount
+      amountQuery.$gte = filters.minAmount
     }
     if (filters.maxAmount !== undefined) {
-      query.amount.$lte = filters.maxAmount
+      amountQuery.$lte = filters.maxAmount
     }
+    query.amount = amountQuery
   }
 
   if (filters.tags && filters.tags.length > 0) {
@@ -140,7 +145,7 @@ export const getTransactionById = cache(
         walletId: { $in: allowedWalletIds },
         ...scopeFilter
       })
-    } catch (err) {
+    } catch {
       return null
     }
   }

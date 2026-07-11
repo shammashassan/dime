@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
-import { Budget, Category, Wallet, Transaction } from "@/types"
+import { Budget, Transaction } from "@/types"
 import { getCategories } from "./categories"
 import { getWallets } from "./wallets"
 import { getCurrencyConverter } from "@/lib/currency"
@@ -34,7 +34,7 @@ export const getBudgetById = cache(async (userId: string, budgetId: string): Pro
     const filter = getScopeFilter(scope)
     const budgetsColl = await getCollection<Budget>("budgets")
     return budgetsColl.findOne({ _id: new ObjectId(budgetId), ...filter })
-  } catch (err) {
+  } catch {
     return null
   }
 })

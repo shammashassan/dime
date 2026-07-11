@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
-import { Transaction, Budget, Category } from "@/types"
-import { subDays, startOfDay, endOfDay } from "date-fns"
+import { Transaction, Category } from "@/types"
+import { subDays } from "date-fns"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 export interface FinancialInsight {

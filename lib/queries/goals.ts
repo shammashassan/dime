@@ -17,7 +17,7 @@ export const getGoalById = cache(async (userId: string, id: string): Promise<Goa
     const filter = getScopeFilter(scope)
     const goalsColl = await getCollection<Goal>("goals")
     return goalsColl.findOne({ _id: new ObjectId(id), ...filter })
-  } catch (err) {
+  } catch {
     return null
   }
 })
