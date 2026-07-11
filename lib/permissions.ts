@@ -34,14 +34,18 @@ const CAPABILITIES: Record<Role, ReadonlySet<Capability>> = {
 };
 
 export function can(role: Role, capability: Capability): boolean {
-  return CAPABILITIES[role]?.has(capability) ?? false;
+  return CAPABILITIES[role].has(capability);
 }
 
-export const canViewTransactions = (role: Role) => can(role, "view_transactions");
-export const canCreateTransactions = (role: Role) => can(role, "create_transactions");
-export const canManageWallets = (role: Role) => can(role, "manage_wallets");
-export const canManageBudgets = (role: Role) => can(role, "manage_budgets");
-export const canInviteMembers = (role: Role) => can(role, "invite_members");
-export const canManageSpaceSettings = (role: Role) => can(role, "manage_space_settings");
-export const canDeleteSpace = (role: Role) => can(role, "delete_space");
-export const canTransferOwnership = (role: Role) => can(role, "transfer_ownership");
+// Shorthand helpers
+export const canViewTransactions = (role: Role): boolean => can(role, "view_transactions");
+export const canCreateTransactions = (role: Role): boolean => can(role, "create_transactions");
+export const canEditTransactions = (role: Role): boolean => can(role, "edit_transactions");
+export const canDeleteTransactions = (role: Role): boolean => can(role, "delete_transactions");
+export const canManageWallets = (role: Role): boolean => can(role, "manage_wallets");
+export const canManageBudgets = (role: Role): boolean => can(role, "manage_budgets");
+export const canInviteMembers = (role: Role): boolean => can(role, "invite_members");
+export const canManageSpaceSettings = (role: Role): boolean => can(role, "manage_space_settings");
+export const canDeleteSpace = (role: Role): boolean => can(role, "delete_space");
+export const canTransferOwnership = (role: Role): boolean => can(role, "transfer_ownership");
+export const canLeaveSpace = (role: Role): boolean => can(role, "leave_space");
