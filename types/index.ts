@@ -134,3 +134,18 @@ export interface Goal {
   createdAt: Date
   updatedAt: Date
 }
+
+export type SpaceType = "family" | "couple" | "business" | "travel" | "roommates" | "other";
+
+export interface OrganizationSettings {
+  _id: ObjectId;
+  organizationId: string;
+  baseCurrency: string;
+  locale: string;
+  fiscalYearStartMonth: number;
+  spaceType: SpaceType;
+  updatedBy: string;
+  updatedAt: Date;
+  version: number;
+}
+
