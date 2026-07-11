@@ -6,6 +6,7 @@ import { magicLink } from "better-auth/plugins/magic-link"
 import { twoFactor } from "better-auth/plugins/two-factor"
 import { admin } from "better-auth/plugins/admin"
 import { passkey } from "@better-auth/passkey"
+import { organization } from "better-auth/plugins"
 import { ac, roles } from "@/lib/access"
 import { db } from "@/lib/db/client"
 import { sendEmail } from "@/lib/email"
@@ -84,6 +85,34 @@ export const auth = betterAuth({
       origin: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
     }),
     admin({ defaultRole: "user", adminRoles: ["admin"], impersonationSessionDuration: 60 * 60, ac, roles }),
+    organization({
+      creatorRole: "owner",
+      invitationExpiresIn: 60 * 60 * 24 * 7,
+      organizationHooks: {
+        beforeCreateOrganization: async ({ organization }) => {
+          const baseSlug = (organization.name || "organization")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+
+          let slug = baseSlug;
+          let counter = 1;
+          
+          while (true) {
+            const existing = await db.collection("organization").findOne({ slug });
+            if (!existing) break;
+            slug = `${baseSlug}-${counter++}`;
+          }
+
+          return {
+            data: {
+              ...organization,
+              slug,
+            },
+          };
+        },
+      },
+    }),
     nextCookies(),
   ],
 
