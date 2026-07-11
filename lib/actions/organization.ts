@@ -2,15 +2,13 @@
 
 import { organizationSettingsCollection } from "@/lib/db/collections";
 import { getFinancialScope } from "@/lib/scope";
-import { revalidateTag } from "next/cache";
+import { organizationSettingsSchema } from "@/lib/validations/organization.schema";
+import { updateTag } from "next/cache";
 
-export async function updateOrganizationSettings(data: {
-  baseCurrency: string;
-  locale: string;
-  fiscalYearStartMonth: number;
-  spaceType: "family" | "couple" | "business" | "travel" | "roommates" | "other";
-}) {
+export async function updateOrganizationSettings(input: unknown) {
+  const data = organizationSettingsSchema.parse(input);
   const scope = await getFinancialScope();
+  
   if (!scope.isOrganization || !scope.organizationId) {
     throw new Error("Not inside an organization space");
   }
@@ -38,7 +36,9 @@ export async function updateOrganizationSettings(data: {
   );
 
   // Invalidate cache tags
-  revalidateTag(`org-settings-${scope.organizationId}`, "max");
+  updateTag(`org-settings-${scope.organizationId}`);
   
   return { success: true };
 }
+
+
