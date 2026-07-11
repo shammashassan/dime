@@ -4,7 +4,7 @@ import { FinancialScope } from "@/types/scope";
 
 export const getFinancialScope = cache(async (): Promise<FinancialScope> => {
   const session = await requireApprovedUser();
-  const activeOrgId = (session.session as any).activeOrganizationId || null;
+  const activeOrgId = (session.session as { activeOrganizationId?: string | null }).activeOrganizationId || null;
 
   return {
     type: activeOrgId ? "organization" : "personal",
