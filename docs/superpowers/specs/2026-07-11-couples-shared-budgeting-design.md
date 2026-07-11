@@ -6,7 +6,7 @@ This document specifies the architecture and implementation design for introduci
 
 ## 1. Architectural Overview & Financial Scope
 
-To support collaboration without sacrificing individual privacy, Dime will transition from direct user-scoping to a unified **Financial Scope** abstraction. All queries, analytics, dashboards, reports, and future modules will query the current active scope rather than branching manually.
+To support collaboration without sacrificing individual privacy, Dime will transition from direct user-scoping to a unified **Financial Scope** abstraction. All queries, analytics, dashboards, reports, exports, forecasting, and search features are **mandated** to use this abstraction.
 
 ### The Scope Model (`types/scope.ts`)
 
@@ -64,7 +64,9 @@ export function getScopeFilter(scope: FinancialScope) {
 
 ## 2. Shared Collaborative Database Models
 
-All collaborative collections (e.g., `wallets`, `transactions`, `budgets`, `recurring_rules`, `goals`, and future modules) will be structured with these mandatory fields:
+All collaborative collections (e.g., `wallets`, `transactions`, `budgets`, `recurring_rules`, `goals`, and future modules) will be structured with these mandatory fields. 
+
+**Every mutation** (insert, update, delete/soft-delete) is required to populate these audit fields and **increment the version field by 1**.
 
 ```typescript
 interface CollaborativeMetadata {
@@ -77,7 +79,7 @@ interface CollaborativeMetadata {
   updatedAt: Date;
   deletedAt?: Date | null;         // For future soft delete support
   activityId?: string | null;      // Future integration with activity feed
-  version: number;                 // Optimistic concurrency control / audit version
+  version: number;                 // Optimistic concurrency control / audit version (incremented by 1 on every update)
 }
 ```
 
@@ -87,11 +89,14 @@ interface CollaborativeMetadata {
 
 Better Auth will remain the single source of truth for organizations, memberships, invitations, and active organization state.
 
-### Server Config (`lib/auth.ts`)
+### Server Config & Server-Side Slug Validation (`lib/auth.ts`)
+
+To ensure security and consistency, organization slugs are **generated and validated on the server** rather than the client.
 
 ```typescript
 import { betterAuth } from "better-auth";
 import { organization } from "better-auth/plugins";
+import { db } from "@/lib/db/client";
 
 export const auth = betterAuth({
   // ... existing configs ...
@@ -100,6 +105,32 @@ export const auth = betterAuth({
     organization({
       creatorRole: "owner",
       invitationExpiresIn: 60 * 60 * 24 * 7, // 7 days
+      organizationHooks: {
+        beforeCreateOrganization: async ({ organization, user }) => {
+          // Generate unique slug server-side
+          const baseSlug = organization.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+
+          let slug = baseSlug;
+          let counter = 1;
+          
+          // Loop until a unique slug is resolved
+          while (true) {
+            const existing = await db.collection("organization").findOne({ slug });
+            if (!existing) break;
+            slug = `${baseSlug}-${counter++}`;
+          }
+
+          return {
+            data: {
+              ...organization,
+              slug,
+            },
+          };
+        },
+      },
     }),
   ],
 });
@@ -186,14 +217,18 @@ export const canTransferOwnership = (role: Role) => can(role, "transfer_ownershi
 
 To keep Better Auth's core tables minimal and high-performing, application-specific workspace preferences will be stored in a separate MongoDB collection named `organization_settings`.
 
+Note that visual parameters (e.g. `theme`) are excluded here as they are strictly client-side user preferences.
+
 ```typescript
+export type SpaceType = "family" | "couple" | "business" | "travel" | "roommates" | "other";
+
 interface OrganizationSettings {
   _id: ObjectId;
   organizationId: string;        // Foreign key to Better Auth organization
-  currency: string;             // ISO 4217 code (e.g. "USD", "INR")
-  timezone: string;             // e.g. "UTC", "Asia/Kolkata"
-  theme: "light" | "dark" | "system";
-  spaceType: "Family" | "Couple" | "Business" | "Travel" | "Roommates" | "Other";
+  baseCurrency: string;          // Primary default currency (ISO 4217, e.g. "USD", "INR")
+  locale: string;                // Regional formatting locale (e.g. "en-US", "en-IN")
+  fiscalYearStartMonth: number;  // 1-12 (e.g. 4 for April)
+  spaceType: SpaceType;          // Lowercase enum value representing space purpose
   updatedBy: string;
   updatedAt: Date;
 }
@@ -206,19 +241,18 @@ interface OrganizationSettings {
 ### Space Switcher Component
 Located at the top of the app sidebar:
 * **Displays**: The active space name (e.g., "Personal" or "Hassan Household") with a matching icon/avatar.
-* **Slug Generation**: When creating an organization, the slug is automatically generated client-side from the input name using standard URL-friendly formatting (e.g. `"Acme Corp"` -> `"acme-corp"`), with slug availability check via `authClient.organization.checkSlug`.
-* **Space Creation Form**: Includes a dropdown selector for the **Space Type** (Couple, Family, Business, Travel, Roommates, Other) which is stored in the `organization_settings` record.
-* **Manage Spaces**: A dedicated menu entry to view and configure memberships.
+* **Slug Generation**: Handled completely server-side inside hooks during organization creation. Slugs are not typed by users.
+* **Space Creation Form**: Includes a dropdown selector for the **Space Type** (Couple, Family, Business, Travel, Roommates, Other) which is normalized and saved as a lowercase string in `organization_settings`.
+* **Manage Spaces**: A dedicated menu entry to view, join, edit, or leave active memberships.
 
 ### Cache Invalidation & Switching State
-Switching spaces must immediately clear stale data and synchronize:
+Space switching must immediately refresh relevant states:
 1. Update active organization: `await authClient.organization.setActive({ organizationId })`
-2. Clear Next.js router cache: `router.refresh()`
-3. Invalidate query tags/paths on the server via a dedicated action to avoid layout waterfalls.
-4. Render a fullscreen spinner or skeleton loader overlay during switching to ensure user does not see visual flashes of incorrect data.
+2. **`revalidateTag()` is the primary cache invalidation mechanism** used on the server to instantly refresh scope data and invalidate active queries.
+3. **UX Transition**: We prefer showing inline **loading overlays or skeleton states** directly over components during the switch transition rather than blocking the user with a disruptive fullscreen spinner.
 
 ### Members list & Invitation screen
-* **Members list** displays: Avatar, Display Name, Email, Role, Joined Date, and last active status. Prompt for user confirmation prior to member removal.
+* **Members list** displays: Avatar, Display Name, Email, Role, Joined Date, and last active status. Prior to member removal, require confirmation.
 * **Rich Invitation Page (`/accept-invitation?id=...`)**:
   * Resolves and displays Organization Name, Inviter Name, Invited Role, and Organization Logo.
   * Prompts unauthenticated invitees to sign in first, preserving the invite ID in parameters to redirect them back post-authentication.
@@ -235,5 +269,7 @@ Destructive features are grouped inside a red-bordered "Danger Zone" block on th
 
 Because the scoping uses `getFinancialScope()`, the architecture naturally isolates collaborative state. When introducing features like **Shared Wallets, Shared Goals, Shared Budgets, and Loans**:
 * No DB schema rewrites will be required. These collections automatically inherit the standard collaborative fields.
+* **Loans & Repayments** will be treated as dedicated `loans` and `loan_repayments` collections (not simple transaction tags) to avoid modeling issues.
 * Reporting and forecasting aggregates will compute totals by passing `getScopeFilter(scope)` to MongoDB pipelines.
 * A centralized **Activity Feed** can be added by listening to mutations in server actions and recording events under `activityId` keyed by `organizationId`.
+
