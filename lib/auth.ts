@@ -90,10 +90,14 @@ export const auth = betterAuth({
       invitationExpiresIn: 60 * 60 * 24 * 7,
       organizationHooks: {
         beforeCreateOrganization: async ({ organization }) => {
-          const baseSlug = (organization.name || "organization")
+          let baseSlug = (organization.name || "organization")
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
+            .replace(/^[-]+|[-]+$/g, "");
+
+          if (!baseSlug) {
+            baseSlug = "organization";
+          }
 
           let slug = baseSlug;
           let counter = 1;
