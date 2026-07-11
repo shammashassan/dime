@@ -17,17 +17,33 @@ export async function initDatabase() {
     await transactions.createIndex({ userId: 1, categoryId: 1, date: -1 })
     await transactions.createIndex({ userId: 1, type: 1, date: -1 })
     await transactions.createIndex({ tags: 1 })
+    await transactions.createIndex({ organizationId: 1, date: -1 })
 
     // 2. Create indexes for budgets
     const budgets = db.collection("budgets")
     await budgets.createIndex({ userId: 1, isActive: 1 })
     await budgets.createIndex({ userId: 1, categoryId: 1 })
+    await budgets.createIndex({ organizationId: 1, isActive: 1 })
 
     // 3. Create indexes for recurring rules
     const recurringRules = db.collection("recurring_rules")
     await recurringRules.createIndex({ userId: 1, nextDueDate: 1, isActive: 1 })
+    await recurringRules.createIndex({ organizationId: 1, nextDueDate: 1, isActive: 1 })
 
-    // 4. Create indexes for user lookup
+    // 4. Create indexes for wallets, goals, and categories
+    const wallets = db.collection("wallets")
+    await wallets.createIndex({ userId: 1 })
+    await wallets.createIndex({ organizationId: 1 })
+
+    const goals = db.collection("goals")
+    await goals.createIndex({ userId: 1 })
+    await goals.createIndex({ organizationId: 1 })
+
+    const categories = db.collection("categories")
+    await categories.createIndex({ userId: 1 })
+    await categories.createIndex({ organizationId: 1 })
+
+    // 5. Create indexes for user lookup
     const users = db.collection("user")
     await users.createIndex({ approved: 1, role: 1 })
 

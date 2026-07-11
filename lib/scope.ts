@@ -20,7 +20,8 @@ export function getScopeFilter(scope: FinancialScope) {
     return { organizationId: scope.organizationId };
   }
   return {
-    ownerUserId: scope.userId,
+    userId: scope.userId,
     $or: [{ organizationId: null }, { organizationId: { $exists: false } }],
   };
 }
+
