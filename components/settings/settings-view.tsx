@@ -49,17 +49,22 @@ import {
   Download,
   AlertTriangle,
   LogOut,
-  Laptop
+  Laptop,
+  Building
 } from "lucide-react"
+import { OrganizationSettings } from "@/types"
+import { SpaceSettings } from "@/components/settings/space-settings"
 
 interface SettingsViewProps {
   preferences: UserPreferences
   wallets: Wallet[]
+  orgSettings: OrganizationSettings | null
 }
 
-export function SettingsView({ preferences: initialPreferences, wallets }: SettingsViewProps) {
+export function SettingsView({ preferences: initialPreferences, wallets, orgSettings }: SettingsViewProps) {
   const { data: sessionData, refetch: refreshSession } = useSession()
   const user = sessionData?.user
+  const activeOrgId = sessionData?.session?.activeOrganizationId || null
   const [activeTab, setActiveTab] = useState("profile")
   const [isPending, startTransition] = useTransition()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -664,6 +669,12 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
             <SettingsIcon className="size-4" />
             Preferences
           </TabsTrigger>
+          {activeOrgId && (
+            <TabsTrigger value="space" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+              <Building className="size-4" />
+              Space Settings
+            </TabsTrigger>
+          )}
           <TabsTrigger value="data" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400">
             <Database className="size-4" />
             Data Management
@@ -1091,6 +1102,12 @@ export function SettingsView({ preferences: initialPreferences, wallets }: Setti
               </form>
             </Card>
           </TabsContent>
+
+          {activeOrgId && (
+            <TabsContent value="space" className="outline-none" data-slot="tabs-content">
+              <SpaceSettings initialSettings={orgSettings} />
+            </TabsContent>
+          )}
 
           {/* DATA MANAGEMENT */}
           <TabsContent value="data" className="outline-none space-y-6">

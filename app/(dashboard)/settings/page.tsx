@@ -3,6 +3,7 @@ import { requireApprovedUser } from "@/lib/auth-guard"
 import { unstable_rethrow } from "next/navigation"
 import { getPreferences } from "@/lib/queries/preferences"
 import { getWallets } from "@/lib/queries/wallets"
+import { getOrganizationSettings } from "@/lib/queries/organization"
 import { SettingsView } from "@/components/settings/settings-view"
 import { serializeData } from "@/lib/utils"
 import SettingsLoading from "./loading"
@@ -10,24 +11,34 @@ import SettingsLoading from "./loading"
 async function SettingsContent() {
   const session = await requireApprovedUser()
   const userId = session.user.id
+  const activeOrgId = session.session.activeOrganizationId || null
 
   let preferences
   let wallets = []
+  let orgSettings = null
 
   try {
-    const [prefData, walletsData] = await Promise.all([
+    const [prefData, walletsData, orgSettingsData] = await Promise.all([
       getPreferences(userId),
       getWallets(userId),
+      activeOrgId ? getOrganizationSettings(activeOrgId) : null,
     ])
     preferences = prefData
     wallets = walletsData
+    orgSettings = orgSettingsData
   } catch (error) {
     unstable_rethrow(error)
     console.error("Failed to load settings data:", error)
     throw error
   }
 
-  return <SettingsView preferences={serializeData(preferences)} wallets={serializeData(wallets)} />
+  return (
+    <SettingsView
+      preferences={serializeData(preferences)}
+      wallets={serializeData(wallets)}
+      orgSettings={serializeData(orgSettings)}
+    />
+  )
 }
 
 export default async function SettingsPage() {
