@@ -4,6 +4,7 @@ import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
 import { ImpersonationBanner } from "@/components/layout/impersonation-banner"
 import { SiteFooter } from "@/components/layout/site-footer"
+import { WorkspaceLoader } from "@/components/layout/workspace-loader"
 
 export default async function DashboardLayout({
   children,
@@ -18,7 +19,8 @@ export default async function DashboardLayout({
         <DashboardHeader />
         <div className="flex flex-1">
           <DashboardSidebar />
-          <SidebarInset className="bg-background overflow-hidden">
+          <SidebarInset className="bg-background overflow-hidden relative">
+            <WorkspaceLoader />
             <ImpersonationBanner />
             <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 overflow-y-auto h-full scrollbar-hide">
               {children}

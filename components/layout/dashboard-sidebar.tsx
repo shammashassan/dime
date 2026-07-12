@@ -19,6 +19,7 @@ import {
   ChevronsUpDown,
 } from "lucide-react"
 import { LogoMark } from "@/components/brand/logo-mark"
+import { SpaceSwitcher } from "@/components/layout/space-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -118,23 +119,9 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       {...props}
     >
-      {/* ── Logo ── */}
+      {/* ── Logo & Workspace Switcher ── */}
       <SidebarHeader className="py-1.5 pb-0.5">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="h-12">
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shadow-primary/30">
-                  <LogoMark className="size-5" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Dime</span>
-                  <span className="truncate text-xs text-muted-foreground">Finance Tracker</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SpaceSwitcher />
       </SidebarHeader>
 
       {/* ── Navigation ── */}
