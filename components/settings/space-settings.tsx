@@ -751,14 +751,34 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                         {currentUserRole === "owner" && (
                           <TableCell className="text-right">
                             {member.userId !== currentUserId && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg"
-                                onClick={() => handleRemoveMember(member.id)}
-                              >
-                                <Trash2 className="size-4" />
-                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg"
+                                  >
+                                    <Trash2 className="size-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Remove Space Member?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to remove {member.user ? member.user.name : "this member"} from this shared space? They will lose access to all wallets, transactions, budgets, and settings immediately.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleRemoveMember(member.id)}
+                                      className="bg-rose-500 hover:bg-rose-600 text-white"
+                                    >
+                                      Remove Member
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
                           </TableCell>
                         )}

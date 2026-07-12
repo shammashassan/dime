@@ -36,7 +36,7 @@ export async function createTransaction(input: TransactionInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canCreateTransactions(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -176,7 +176,7 @@ export async function deleteTransaction(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canDeleteTransactions(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -242,7 +242,7 @@ export async function updateTransaction(id: string, input: TransactionInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canEditTransactions(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -574,7 +574,7 @@ export async function importTransactionsAction(walletId: string, transactionsLis
     })
     const role = (member?.role as Role) || "member"
     if (!canCreateTransactions(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 

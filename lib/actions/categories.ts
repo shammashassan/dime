@@ -32,7 +32,7 @@ export async function createCategory(input: CategoryInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -75,7 +75,7 @@ export async function updateCategory(id: string, input: CategoryInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -118,7 +118,7 @@ export async function deleteCategory(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -147,7 +147,7 @@ export async function mergeCategory(sourceId: string, targetId: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 

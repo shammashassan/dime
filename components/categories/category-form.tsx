@@ -94,11 +94,18 @@ export function CategoryForm({ initialCategory, onSuccess }: CategoryFormProps) 
 
     const savePromise = new Promise(async (resolve, reject) => {
       try {
+        let result
         if (isEditing && initialCategory) {
-          await updateCategory(initialCategory._id.toString(), data)
+          result = await updateCategory(initialCategory._id.toString(), data)
         } else {
-          await createCategory(data)
+          result = await createCategory(data)
         }
+
+        if (result && !result.success) {
+          reject(new Error(result.error || "Unauthorized"))
+          return
+        }
+
         router.refresh()
         if (onSuccess) onSuccess()
         resolve(true)

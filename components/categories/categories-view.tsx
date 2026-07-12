@@ -51,17 +51,21 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
     const deletePromise = new Promise((resolve, reject) => {
       startTransition(async () => {
         try {
-          await deleteCategory(deletingCategoryId)
-          setDeletingCategoryId(null)
-          router.refresh()
-          resolve(true)
+          const res = await deleteCategory(deletingCategoryId)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
+          } else {
+            setDeletingCategoryId(null)
+            router.refresh()
+            resolve(true)
+          }
         } catch (err) { reject(err) }
       })
     })
     toast.promise(deletePromise, {
       loading: "Deleting...",
       success: "Category deleted",
-      error: "Failed to delete category",
+      error: (err: any) => err.message || "Failed to delete category",
     })
   }
 

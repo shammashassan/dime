@@ -56,35 +56,64 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
     if (!deletingRuleId) return
     const p = new Promise((resolve, reject) => {
       startTransition(async () => {
-        try { await deleteRecurringRule(deletingRuleId); setDeletingRuleId(null); router.refresh(); resolve(true) }
+        try {
+          const res = await deleteRecurringRule(deletingRuleId)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
+          } else {
+            setDeletingRuleId(null)
+            router.refresh()
+            resolve(true)
+          }
+        }
         catch (err) { reject(err) }
       })
     })
-    toast.promise(p, { loading: "Deleting...", success: "Rule deleted", error: "Failed to delete" })
+    toast.promise(p, {
+      loading: "Deleting...",
+      success: "Rule deleted",
+      error: (err: any) => err.message || "Failed to delete",
+    })
   }
 
   const handleToggleActive = async (id: string) => {
     const p = new Promise(async (resolve, reject) => {
-      try { const res = await toggleRecurringRuleActive(id); router.refresh(); resolve(res) }
+      try {
+        const res = await toggleRecurringRuleActive(id)
+        if (res && !res.success) {
+          reject(new Error(res.error || "Unauthorized"))
+        } else {
+          router.refresh()
+          resolve(res)
+        }
+      }
       catch (err) { reject(err) }
     })
     toast.promise(p, {
       loading: "Updating...",
       success: (res: any) => `Rule is now ${res.isActive ? "active" : "inactive"}`,
-      error: "Failed to update",
+      error: (err: any) => err.message || "Failed to update",
     })
   }
 
   const handleProcessNow = async (id: string) => {
     setProcessingId(id)
     const p = new Promise(async (resolve, reject) => {
-      try { const res = await processRecurringRuleNow(id); router.refresh(); resolve(res) }
+      try {
+        const res = await processRecurringRuleNow(id)
+        if (res && !res.success) {
+          reject(new Error(res.error || "Unauthorized"))
+        } else {
+          router.refresh()
+          resolve(res)
+        }
+      }
       catch (err) { reject(err) }
     })
     toast.promise(p, {
       loading: "Processing...",
       success: (res: any) => `Created ${res.processedCount} transaction(s)`,
-      error: "Failed to process",
+      error: (err: any) => err.message || "Failed to process",
     })
     try { await p } catch (_) { } finally { setProcessingId(null) }
   }

@@ -24,7 +24,7 @@ export async function createRecurringRule(input: RecurringRuleInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -73,7 +73,7 @@ export async function updateRecurringRule(id: string, input: RecurringRuleInput)
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -132,7 +132,7 @@ export async function deleteRecurringRule(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -161,7 +161,7 @@ export async function processRecurringRuleNow(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -243,7 +243,7 @@ export async function toggleRecurringRuleActive(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 

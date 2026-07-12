@@ -22,7 +22,7 @@ export async function createBudget(input: BudgetInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -69,7 +69,7 @@ export async function updateBudget(id: string, input: BudgetInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -117,7 +117,7 @@ export async function deleteBudget(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 

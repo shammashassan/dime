@@ -33,7 +33,7 @@ export async function createGoal(input: GoalInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -77,7 +77,7 @@ export async function updateGoal(id: string, input: GoalInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -123,7 +123,7 @@ export async function deleteGoal(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -152,7 +152,7 @@ export async function contributeToGoal(id: string, amount: number, walletId: str
     })
     const role = (member?.role as Role) || "member"
     if (!canManageBudgets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 

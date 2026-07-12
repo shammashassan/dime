@@ -205,11 +205,24 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
     if (!deletingBudgetId) return
     const p = new Promise((resolve, reject) => {
       startTransition(async () => {
-        try { await deleteBudget(deletingBudgetId); setDeletingBudgetId(null); router.refresh(); resolve(true) }
+        try {
+          const res = await deleteBudget(deletingBudgetId)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
+          } else {
+            setDeletingBudgetId(null)
+            router.refresh()
+            resolve(true)
+          }
+        }
         catch (err) { reject(err) }
       })
     })
-    toast.promise(p, { loading: "Deleting...", success: "Budget deleted", error: "Failed to delete" })
+    toast.promise(p, {
+      loading: "Deleting...",
+      success: "Budget deleted",
+      error: (err: any) => err.message || "Failed to delete",
+    })
   }
 
   return (

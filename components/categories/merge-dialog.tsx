@@ -50,10 +50,14 @@ export function MergeDialog({ sourceCategory, categories, onSuccess }: MergeDial
     const mergePromise = new Promise((resolve, reject) => {
       startTransition(async () => {
         try {
-          await mergeCategory(sourceCategory._id.toString(), targetId)
-          router.refresh()
-          onSuccess()
-          resolve(true)
+          const res = await mergeCategory(sourceCategory._id.toString(), targetId)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
+          } else {
+            router.refresh()
+            onSuccess()
+            resolve(true)
+          }
         } catch (err) {
           reject(err)
         }

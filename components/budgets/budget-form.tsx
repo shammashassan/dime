@@ -101,10 +101,16 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
           endDate: data.endDate || undefined,
         }
 
+        let result
         if (isEditing && initialBudget) {
-          await updateBudget(initialBudget._id.toString(), payload)
+          result = await updateBudget(initialBudget._id.toString(), payload)
         } else {
-          await createBudget(payload)
+          result = await createBudget(payload)
+        }
+
+        if (result && !result.success) {
+          reject(new Error(result.error || "Unauthorized"))
+          return
         }
 
         router.refresh()

@@ -240,10 +240,16 @@ export function TransactionForm({
           isRecurring: data.isRecurring,
         }
 
+        let result
         if (isEditing && initialTransaction) {
-          await updateTransaction(initialTransaction._id.toString(), payload)
+          result = await updateTransaction(initialTransaction._id.toString(), payload)
         } else {
-          await createTransaction(payload)
+          result = await createTransaction(payload)
+        }
+
+        if (result && !result.success) {
+          reject(new Error(result.error || "Unauthorized"))
+          return
         }
 
         router.refresh()

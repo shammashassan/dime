@@ -125,11 +125,15 @@ export function TransactionTable({
       startTransition(async () => {
         try {
           removeOptimisticTx(id)
-          await deleteTransaction(id)
-          setSelectedIds((prev) => prev.filter((item) => item !== id))
-          setDeletingTxId(null)
-          router.refresh()
-          resolve(true)
+          const res = await deleteTransaction(id)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
+          } else {
+            setSelectedIds((prev) => prev.filter((item) => item !== id))
+            setDeletingTxId(null)
+            router.refresh()
+            resolve(true)
+          }
         } catch (err) {
           reject(err)
         }
@@ -139,7 +143,7 @@ export function TransactionTable({
     toast.promise(deletePromise, {
       loading: "Deleting transaction...",
       success: "Transaction deleted successfully",
-      error: "Failed to delete transaction",
+      error: (err: any) => err.message || "Failed to delete transaction",
     })
   }
 
@@ -150,11 +154,16 @@ export function TransactionTable({
     const deletePromise = new Promise((resolve, reject) => {
       startTransition(async () => {
         try {
-          await Promise.all(selectedIds.map((id) => deleteTransaction(id)))
-          setSelectedIds([])
-          setShowBulkDeleteDialog(false)
-          router.refresh()
-          resolve(true)
+          const results = await Promise.all(selectedIds.map((id) => deleteTransaction(id)))
+          const failed = results.find((r) => r && !r.success)
+          if (failed) {
+            reject(new Error(failed.error || "Unauthorized"))
+          } else {
+            setSelectedIds([])
+            setShowBulkDeleteDialog(false)
+            router.refresh()
+            resolve(true)
+          }
         } catch (err) {
           reject(err)
         }
@@ -164,7 +173,7 @@ export function TransactionTable({
     toast.promise(deletePromise, {
       loading: `Deleting ${count} transactions...`,
       success: `${count} transactions deleted successfully`,
-      error: "Failed to delete selected transactions",
+      error: (err: any) => err.message || "Failed to delete selected transactions",
     })
   }
 

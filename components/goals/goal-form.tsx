@@ -126,19 +126,19 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
       let res
       if (isEditing && goal) {
         res = await updateGoal(goal._id.toString(), payload)
-        if (res.success) {
+        if (res && res.success) {
           toast.success(`Goal "${data.name}" updated successfully`)
           onOpenChange(false)
         } else {
-          toast.error("Failed to update goal")
+          toast.error(res?.error || "Failed to update goal")
         }
       } else {
         res = await createGoal(payload)
-        if (res.success) {
+        if (res && res.success) {
           toast.success(`Goal "${data.name}" created successfully`)
           onOpenChange(false)
         } else {
-          toast.error("Failed to create goal")
+          toast.error(res?.error || "Failed to create goal")
         }
       }
     } catch (err) {

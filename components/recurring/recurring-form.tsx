@@ -124,10 +124,16 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
           endDate: data.endDate || undefined,
         }
 
+        let result
         if (isEditing && initialRule) {
-          await updateRecurringRule(initialRule._id.toString(), payload)
+          result = await updateRecurringRule(initialRule._id.toString(), payload)
         } else {
-          await createRecurringRule(payload)
+          result = await createRecurringRule(payload)
+        }
+
+        if (result && !result.success) {
+          reject(new Error(result.error || "Unauthorized"))
+          return
         }
 
         router.refresh()

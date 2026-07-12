@@ -42,12 +42,12 @@ export function GoalList({ initialGoals, wallets }: GoalListProps) {
       startTransition(async () => {
         try {
           const res = await deleteGoal(deletingGoalId)
-          if (res.success) {
+          if (res && res.success) {
             setDeletingGoalId(null)
             router.refresh()
             resolve(true)
           } else {
-            reject(new Error("Failed to delete goal"))
+            reject(new Error(res?.error || "Failed to delete goal"))
           }
         } catch (err) {
           reject(err)
@@ -58,7 +58,7 @@ export function GoalList({ initialGoals, wallets }: GoalListProps) {
     toast.promise(deletePromise, {
       loading: "Deleting goal...",
       success: `Goal "${goalName}" deleted successfully`,
-      error: "Failed to delete goal",
+      error: (err: any) => err.message || "Failed to delete goal",
     })
   }
 
