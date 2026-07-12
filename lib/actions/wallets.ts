@@ -3,7 +3,7 @@
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
 import { walletSchema, WalletInput } from "@/lib/validations/wallet.schema"
-import { Wallet, Transaction, Category } from "@/types"
+import { Wallet, Transaction, Category, User } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
@@ -11,7 +11,7 @@ import { db } from "@/lib/db/client"
 import { canManageWallets, Role } from "@/lib/permissions"
 
 export async function createWallet(input: WalletInput) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
   const validated = walletSchema.parse(input)
 
   const scope = await getFinancialScope()
@@ -22,7 +22,7 @@ export async function createWallet(input: WalletInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageWallets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -92,7 +92,7 @@ export async function createWallet(input: WalletInput) {
 }
 
 export async function updateWallet(id: string, input: WalletInput) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
   const validated = walletSchema.parse(input)
 
   const scope = await getFinancialScope()
@@ -103,7 +103,7 @@ export async function updateWallet(id: string, input: WalletInput) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageWallets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -177,7 +177,7 @@ export async function updateWallet(id: string, input: WalletInput) {
 }
 
 export async function toggleArchiveWallet(id: string) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
 
   const scope = await getFinancialScope()
   if (scope.isOrganization) {
@@ -187,7 +187,7 @@ export async function toggleArchiveWallet(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageWallets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -219,7 +219,7 @@ export async function toggleArchiveWallet(id: string) {
 }
 
 export async function deleteWallet(id: string) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
 
   const scope = await getFinancialScope()
   if (scope.isOrganization) {
@@ -229,7 +229,7 @@ export async function deleteWallet(id: string) {
     })
     const role = (member?.role as Role) || "member"
     if (!canManageWallets(role)) {
-      throw new Error("Unauthorized")
+      return { success: false, error: "Unauthorized" }
     }
   }
 
@@ -264,7 +264,7 @@ export async function deleteWallet(id: string) {
 }
 
 export async function shareWalletAction(walletId: string, email: string) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
 
   const scope = await getFinancialScope()
   if (scope.isOrganization) {
@@ -289,7 +289,7 @@ export async function shareWalletAction(walletId: string, email: string) {
   if (!cleanEmail) throw new Error("Email is required")
 
   // Ensure user cannot share with themselves
-  const usersColl = await getCollection<any>("user")
+  const usersColl = await getCollection<User>("user")
   const currentOwnerUser = await usersColl.findOne({ id: scope.userId })
   if (currentOwnerUser && currentOwnerUser.email.toLowerCase() === cleanEmail) {
     throw new Error("You cannot share a wallet with yourself")
@@ -314,7 +314,7 @@ export async function shareWalletAction(walletId: string, email: string) {
 }
 
 export async function unshareWalletAction(walletId: string, email: string) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
 
   const scope = await getFinancialScope()
   if (scope.isOrganization) {

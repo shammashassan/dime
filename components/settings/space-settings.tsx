@@ -578,18 +578,18 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
           {canInvite && (
             <Collapsible className="rounded-xl border border-border/30 bg-muted/5 p-4 space-y-2">
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full flex items-center justify-between p-0 hover:bg-transparent group/collapsible">
+                <Button variant="ghost" className="w-full flex items-center justify-between group/collapsible">
                   <span className="flex items-center gap-2">
                     <Plus data-icon="inline-start" /> Invite Collaborator
                   </span>
-                  <ChevronDown className="mr-1 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                  <ChevronDown className="inline-end transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-4">
                 <form onSubmit={handleInviteMember}>
                   <FieldGroup>
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3.5 w-full">
-                      <Field className="flex-1 min-w-0">
+                      <Field className="flex-[2] min-w-0">
                         <FieldLabel htmlFor="invite-username">Username</FieldLabel>
                         <FieldContent>
                           <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
@@ -671,7 +671,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                           </Popover>
                         </FieldContent>
                       </Field>
-                      <Field className="w-full sm:w-48 shrink-0">
+                      <Field className="flex-1 min-w-0">
                         <FieldLabel>Role</FieldLabel>
                         <FieldContent>
                           <Select value={inviteRole} onValueChange={(val) => setInviteRole(val as Role)} disabled={isInviting}>

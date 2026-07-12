@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react"
 import { Wallet } from "@/types"
 import { formatCurrency } from "@/lib/utils"
-import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -88,16 +87,20 @@ export function WalletsView({ wallets }: WalletsViewProps) {
     const archivePromise = new Promise((resolve, reject) => {
       startTransition(async () => {
         try {
-          await toggleArchiveWallet(id)
-          router.refresh()
-          resolve(true)
+          const res = await toggleArchiveWallet(id)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
+          } else {
+            router.refresh()
+            resolve(true)
+          }
         } catch (err) { reject(err) }
       })
     })
     toast.promise(archivePromise, {
       loading: isArchiving ? "Archiving..." : "Restoring...",
       success: isArchiving ? "Wallet archived" : "Wallet restored",
-      error: isArchiving ? "Failed to archive" : "Failed to restore",
+      error: (err: Error) => err.message || (isArchiving ? "Failed to archive" : "Failed to restore"),
     })
   }
 
@@ -106,17 +109,21 @@ export function WalletsView({ wallets }: WalletsViewProps) {
     const deletePromise = new Promise((resolve, reject) => {
       startTransition(async () => {
         try {
-          await deleteWallet(deletingWalletId)
-          setDeletingWalletId(null)
-          router.refresh()
-          resolve(true)
+          const res = await deleteWallet(deletingWalletId)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
+          } else {
+            setDeletingWalletId(null)
+            router.refresh()
+            resolve(true)
+          }
         } catch (err) { reject(err) }
       })
     })
     toast.promise(deletePromise, {
       loading: "Deleting...",
       success: "Wallet deleted",
-      error: "Failed to delete",
+      error: (err: Error) => err.message || "Failed to delete",
     })
   }
 

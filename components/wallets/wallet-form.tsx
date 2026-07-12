@@ -138,10 +138,16 @@ export function WalletForm({ initialWallet, onSuccess }: WalletFormProps) {
           isArchived: data.isArchived,
         }
 
+        let result
         if (isEditing && initialWallet) {
-          await updateWallet(initialWallet._id.toString(), payload)
+          result = await updateWallet(initialWallet._id.toString(), payload)
         } else {
-          await createWallet(payload)
+          result = await createWallet(payload)
+        }
+
+        if (result && !result.success) {
+          reject(new Error(result.error || "Unauthorized"))
+          return
         }
 
         router.refresh()
