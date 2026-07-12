@@ -28,7 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
-import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, User, Search } from "lucide-react"
+import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, Search, Info } from "lucide-react"
 
 interface SpaceSettingsProps {
   initialSettings: OrganizationSettings | null
@@ -109,7 +109,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   const [inviteUsername, setInviteUsername] = React.useState("")
   const [searchingUser, setSearchingUser] = React.useState(false)
   const [resolvedUser, setResolvedUser] = React.useState<{ id: string; name: string; email: string; username: string; image: string | null } | null>(null)
-  const [isHoverCardOpen, setIsHoverCardOpen] = React.useState(false)
   const [inviteRole, setInviteRole] = React.useState<Role>("member")
   const [isInviting, setIsInviting] = React.useState(false)
 
@@ -169,7 +168,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
       const timer = setTimeout(() => {
         if (active) {
           setResolvedUser(null)
-          setIsHoverCardOpen(false)
         }
       }, 0)
       return () => {
@@ -187,17 +185,11 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         const user = await lookupUserByUsername(inviteUsername.trim())
         if (active) {
           setResolvedUser(user)
-          if (user) {
-            setIsHoverCardOpen(true)
-          } else {
-            setIsHoverCardOpen(false)
-          }
         }
       } catch (err) {
         console.error("Failed to search user by username", err)
         if (active) {
           setResolvedUser(null)
-          setIsHoverCardOpen(false)
         }
       } finally {
         if (active) setSearchingUser(false)
@@ -243,7 +235,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         )
       }
 
-      // Update settings (without locale code)
+      // Update settings
       promises.push(
         updateOrganizationSettings({
           spaceType,
@@ -284,7 +276,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         toast.success(`Invitation sent successfully to @${resolvedUser.username}`)
         setInviteUsername("")
         setResolvedUser(null)
-        setIsHoverCardOpen(false)
         await fetchMembersAndInvitations()
       }
     } catch (err: unknown) {
@@ -594,25 +585,27 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                       )}
                     </div>
                   </div>
-                  {/* User Details Preview HoverCard - Opens automatically on resolve */}
+                  {/* Match indicators with Volt-style Info HoverCard */}
                   {resolvedUser && (
-                    <div className="mt-1">
-                      <HoverCard open={isHoverCardOpen} onOpenChange={setIsHoverCardOpen}>
+                    <div className="flex items-center gap-1.5 mt-1 text-xs text-emerald-500 font-semibold">
+                      <span>Found user: @{resolvedUser.username}</span>
+                      <HoverCard openDelay={200} closeDelay={100}>
                         <HoverCardTrigger asChild>
                           <button
                             type="button"
-                            className="text-primary hover:underline cursor-pointer font-semibold flex items-center gap-1.5 text-xs text-left"
+                            className="flex size-5 items-center justify-center rounded-full text-muted-foreground/30 transition-colors hover:text-muted-foreground/70"
                           >
-                            <User className="size-3" /> Found user: @{resolvedUser.username}
+                            <Info className="size-3.5" />
+                            <span className="sr-only">User Info</span>
                           </button>
                         </HoverCardTrigger>
-                        <HoverCardContent className="w-80 rounded-2xl p-4 shadow-lg border border-border/40 bg-popover z-50">
-                          <div className="flex gap-4">
+                        <HoverCardContent align="start" sideOffset={6} className="w-80 rounded-2xl p-4 shadow-lg border border-border/40 bg-popover z-50">
+                          <div className="flex gap-4 text-foreground">
                             <Avatar className="h-10 w-10">
                               <AvatarImage src={resolvedUser.image || ""} />
                               <AvatarFallback>{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                             </Avatar>
-                            <div className="space-y-1">
+                            <div className="space-y-1 text-left">
                               <h4 className="text-sm font-semibold">{resolvedUser.name}</h4>
                               <p className="text-xs text-muted-foreground">@{resolvedUser.username}</p>
                               <p className="text-xs text-muted-foreground mt-2">{resolvedUser.email}</p>

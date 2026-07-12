@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useTransition, useRef } from "react"
+import { useState, useEffect, useTransition, useRef, useCallback } from "react"
 import { useSession, authClient } from "@/lib/auth-client"
 import { updatePreferences } from "@/lib/actions/preferences"
 import { toast } from "sonner"
@@ -50,7 +50,8 @@ import {
   AlertTriangle,
   LogOut,
   Laptop,
-  Building
+  Building,
+  Mail
 } from "lucide-react"
 import { OrganizationSettings } from "@/types"
 import { SpaceSettings } from "@/components/settings/space-settings"
@@ -68,6 +69,95 @@ export function SettingsView({ preferences: initialPreferences, wallets, orgSett
   const [activeTab, setActiveTab] = useState("profile")
   const [isPending, startTransition] = useTransition()
   const contentRef = useRef<HTMLDivElement>(null)
+
+  // Invitations state
+  interface UserInvitation {
+    id: string
+    organizationId: string
+    organizationName: string
+    inviterEmail: string
+    role: string
+    status: string
+    expiresAt: Date
+    createdAt: Date
+  }
+
+  const [userInvitations, setUserInvitations] = useState<UserInvitation[]>([])
+  const [loadingInvitations, setLoadingInvitations] = useState(false)
+  const [acceptingInviteId, setAcceptingInviteId] = useState<string | null>(null)
+  const [decliningInviteId, setDecliningInviteId] = useState<string | null>(null)
+
+  const fetchUserInvitations = useCallback(async () => {
+    setLoadingInvitations(true)
+    try {
+      const res = await authClient.organization.listUserInvitations()
+      if (res.data) {
+        setUserInvitations(res.data as unknown as UserInvitation[])
+      }
+    } catch (err) {
+      console.error("Failed to fetch user invitations", err)
+    } finally {
+      setLoadingInvitations(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    const timer = setTimeout(() => {
+      if (active) {
+        fetchUserInvitations()
+      }
+    }, 0)
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [fetchUserInvitations])
+
+  const handleAcceptInvite = async (id: string, orgId: string, orgName: string) => {
+    setAcceptingInviteId(id)
+    try {
+      const { error } = await authClient.organization.acceptInvitation({
+        invitationId: id,
+      })
+      if (error) {
+        toast.error(error.message || "Failed to accept invitation")
+      } else {
+        toast.success(`Joined ${orgName} successfully!`)
+        await fetchUserInvitations()
+        window.dispatchEvent(new Event("workspace-switch-start"))
+        await authClient.organization.setActive({
+          organizationId: orgId,
+        })
+        window.location.reload()
+      }
+    } catch (err) {
+      console.error("Failed to accept invite", err)
+      toast.error("An error occurred while accepting the invitation")
+    } finally {
+      setAcceptingInviteId(null)
+    }
+  }
+
+  const handleDeclineInvite = async (id: string) => {
+    setDecliningInviteId(id)
+    try {
+      const { error } = await authClient.organization.rejectInvitation({
+        invitationId: id,
+      })
+      if (error) {
+        toast.error(error.message || "Failed to decline invitation")
+      } else {
+        toast.info("Invitation declined")
+        await fetchUserInvitations()
+      }
+    } catch (err) {
+      console.error("Failed to decline invite", err)
+      toast.error("An error occurred while declining the invitation")
+    } finally {
+      setDecliningInviteId(null)
+    }
+  }
 
   // GSAP animation on tab change
   useGSAP(
@@ -675,6 +765,15 @@ export function SettingsView({ preferences: initialPreferences, wallets, orgSett
               Space Settings
             </TabsTrigger>
           )}
+          <TabsTrigger value="invitations" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+            <Mail className="size-4" />
+            Invitations
+            {userInvitations.length > 0 && (
+              <Badge variant="destructive" className="ml-auto h-5 px-1.5 flex items-center justify-center text-[10px] rounded-full">
+                {userInvitations.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="data" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400">
             <Database className="size-4" />
             Data Management
@@ -1108,6 +1207,72 @@ export function SettingsView({ preferences: initialPreferences, wallets, orgSett
               <SpaceSettings initialSettings={orgSettings} />
             </TabsContent>
           )}
+
+          <TabsContent value="invitations" className="outline-none" data-slot="tabs-content">
+            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+              <CardHeader>
+                <CardTitle className="text-lg font-bold">Invitations</CardTitle>
+                <CardDescription>
+                  Review and accept pending invitations to join shared workspace spaces.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {loadingInvitations ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : userInvitations.length === 0 ? (
+                  <div className="text-center py-10 text-muted-foreground">
+                    <Mail className="size-10 mx-auto opacity-30 mb-3" />
+                    <p className="text-sm font-medium">No pending invitations</p>
+                    <p className="text-xs text-muted-foreground/75 mt-1">
+                      Invitations to collaborate in shared workspaces will appear here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {userInvitations.map((invite) => (
+                      <div
+                        key={invite.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-border/40 bg-muted/5 gap-4"
+                      >
+                        <div className="space-y-1">
+                          <h4 className="text-sm font-bold">{invite.organizationName}</h4>
+                          <p className="text-xs text-muted-foreground">
+                            Invited by <span className="font-medium text-foreground">{invite.inviterEmail}</span> as a <span className="capitalize font-semibold text-primary">{invite.role}</span>
+                          </p>
+                          <p className="text-[10px] text-muted-foreground/60">
+                            Expires on {new Date(invite.expiresAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 sm:self-center">
+                          <Button
+                            size="sm"
+                            disabled={acceptingInviteId !== null}
+                            onClick={() => handleAcceptInvite(invite.id, invite.organizationId, invite.organizationName)}
+                            className="rounded-lg text-xs font-bold"
+                          >
+                            {acceptingInviteId === invite.id && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={decliningInviteId !== null}
+                            onClick={() => handleDeclineInvite(invite.id)}
+                            className="rounded-lg text-xs font-bold text-rose-500 border-rose-500/20 hover:bg-rose-500/5 hover:text-rose-600"
+                          >
+                            {decliningInviteId === invite.id && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
+                            Decline
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* DATA MANAGEMENT */}
           <TabsContent value="data" className="outline-none space-y-6">
