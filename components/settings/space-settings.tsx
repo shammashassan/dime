@@ -13,6 +13,9 @@ import { Field, FieldLabel, FieldGroup, FieldDescription } from "@/components/ui
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { lookupUserByUsername } from "@/lib/actions/user"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
-import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert } from "lucide-react"
+import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, User, Search } from "lucide-react"
 
 interface SpaceSettingsProps {
   initialSettings: OrganizationSettings | null
@@ -77,12 +80,30 @@ const MONTHS = [
   { value: 12, label: "December" },
 ]
 
+const CURRENCIES = [
+  { value: "USD", label: "USD ($)" },
+  { value: "EUR", label: "EUR (€)" },
+  { value: "GBP", label: "GBP (£)" },
+  { value: "INR", label: "INR (₹)" },
+  { value: "JPY", label: "JPY (¥)" },
+  { value: "AUD", label: "AUD ($)" },
+  { value: "CAD", label: "CAD ($)" },
+]
+
+const LOCALES = [
+  { value: "en-US", label: "English (United States)" },
+  { value: "en-GB", label: "English (United Kingdom)" },
+  { value: "de-DE", label: "German (Germany)" },
+  { value: "fr-FR", label: "French (France)" },
+  { value: "ja-JP", label: "Japanese (Japan)" },
+  { value: "hi-IN", label: "Hindi (India)" },
+]
+
 export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   const { data: sessionData } = useSession()
   const { data: activeOrg, refetch: refetchActiveOrg } = authClient.useActiveOrganization()
   
   const [orgName, setOrgName] = React.useState<string | undefined>(undefined)
-  const [isUpdatingOrgName, setIsUpdatingOrgName] = React.useState(false)
 
   // Settings states
   const [spaceType, setSpaceType] = React.useState<SpaceType>(initialSettings?.spaceType || "couple")
@@ -95,7 +116,9 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   const [members, setMembers] = React.useState<WorkspaceMember[]>([])
   const [invitations, setInvitations] = React.useState<WorkspaceInvitation[]>([])
   const [loadingMembers, setLoadingMembers] = React.useState(true)
-  const [inviteEmail, setInviteEmail] = React.useState("")
+  const [inviteUsername, setInviteUsername] = React.useState("")
+  const [searchingUser, setSearchingUser] = React.useState(false)
+  const [resolvedUser, setResolvedUser] = React.useState<{ id: string; name: string; email: string; username: string; image: string | null } | null>(null)
   const [inviteRole, setInviteRole] = React.useState<Role>("member")
   const [isInviting, setIsInviting] = React.useState(false)
 
@@ -137,14 +160,52 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
     }
   }, [activeOrgId])
 
+  // Resolve stuttering: dependent on activeOrgId string primitive instead of activeOrg object reference
   React.useEffect(() => {
-    if (activeOrg) {
+    if (activeOrgId) {
       const timer = setTimeout(() => {
         fetchMembersAndInvitations()
       }, 0)
       return () => clearTimeout(timer)
     }
-  }, [activeOrg, fetchMembersAndInvitations])
+  }, [activeOrgId, fetchMembersAndInvitations])
+
+  // Debounced search user by username
+  React.useEffect(() => {
+    let active = true
+
+    if (!inviteUsername.trim() || inviteUsername.trim().length < 2) {
+      const timer = setTimeout(() => {
+        if (active) setResolvedUser(null)
+      }, 0)
+      return () => {
+        active = false
+        clearTimeout(timer)
+      }
+    }
+
+    const timerSearch = setTimeout(() => {
+      if (active) setSearchingUser(true)
+    }, 0)
+
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const user = await lookupUserByUsername(inviteUsername.trim())
+        if (active) setResolvedUser(user)
+      } catch (err) {
+        console.error("Failed to search user by username", err)
+        if (active) setResolvedUser(null)
+      } finally {
+        if (active) setSearchingUser(false)
+      }
+    }, 400)
+
+    return () => {
+      active = false
+      clearTimeout(timerSearch)
+      clearTimeout(delayDebounce)
+    }
+  }, [inviteUsername])
 
   // Compute permissions
   const currentUserMember = members.find((m) => m.userId === currentUserId)
@@ -158,44 +219,41 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
   const currentOrgName = orgName !== undefined ? orgName : (activeOrg?.name || "")
 
-  const handleUpdateOrgName = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!currentOrgName.trim() || !activeOrgId) return
-
-    setIsUpdatingOrgName(true)
-    try {
-      const { error } = await authClient.organization.update({
-        data: { name: currentOrgName.trim() },
-      })
-      if (error) {
-        toast.error(error.message || "Failed to update space name")
-      } else {
-        toast.success("Space name updated successfully")
-        await refetchActiveOrg()
-      }
-    } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
-    } finally {
-      setIsUpdatingOrgName(false)
-    }
-  }
-
-  const handleUpdateSettings = async (e: React.FormEvent) => {
+  const handleSavePreferences = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!activeOrgId) return
 
     setIsUpdatingSettings(true)
     try {
-      const res = await updateOrganizationSettings({
-        spaceType,
-        baseCurrency,
-        locale,
-        fiscalYearStartMonth: Number(fiscalYearStart),
-      })
-      if (res.success) {
-        toast.success("Space settings saved successfully")
+      const promises: Promise<unknown>[] = []
+
+      // If org name is changed, update it
+      const finalOrgName = currentOrgName.trim()
+      if (finalOrgName && finalOrgName !== activeOrg?.name) {
+        promises.push(
+          authClient.organization.update({
+            data: { name: finalOrgName },
+          }).then(({ error }) => {
+            if (error) throw new Error(error.message || "Failed to update space name")
+          })
+        )
       }
+
+      // Update settings
+      promises.push(
+        updateOrganizationSettings({
+          spaceType,
+          baseCurrency,
+          locale,
+          fiscalYearStartMonth: Number(fiscalYearStart),
+        }).then((res) => {
+          if (!res.success) throw new Error("Failed to update financial settings")
+        })
+      )
+
+      await Promise.all(promises)
+      toast.success("Workspace preferences saved successfully")
+      await refetchActiveOrg()
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
       toast.error(errMsg)
@@ -206,19 +264,23 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!inviteEmail.trim() || !activeOrgId) return
+    if (!resolvedUser || !activeOrgId) {
+      toast.error("Please search and select a valid user first")
+      return
+    }
 
     setIsInviting(true)
     try {
       const { error } = await authClient.organization.inviteMember({
-        email: inviteEmail.trim(),
+        email: resolvedUser.email,
         role: inviteRole as "admin" | "member" | "owner",
       })
       if (error) {
         toast.error(error.message || "Failed to send invitation")
       } else {
-        toast.success("Invitation sent successfully")
-        setInviteEmail("")
+        toast.success(`Invitation sent successfully to @${resolvedUser.username}`)
+        setInviteUsername("")
+        setResolvedUser(null)
         await fetchMembersAndInvitations()
       }
     } catch (err: unknown) {
@@ -388,18 +450,17 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
   return (
     <div className="space-y-6">
-      {/* 1. General Profile & Settings */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Space Profile Card */}
-        <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold">Space Profile</CardTitle>
-            <CardDescription>
-              Configure the display name and details of this shared workspace.
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleUpdateOrgName}>
-            <CardContent className="space-y-4">
+      {/* 1. Unified Space Preferences Card */}
+      <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+        <CardHeader>
+          <CardTitle className="text-lg font-bold">Space Preferences</CardTitle>
+          <CardDescription>
+            Configure the display name, category, currency, and fiscal configurations for this shared workspace.
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSavePreferences}>
+          <CardContent className="space-y-6">
+            <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="org-name">Workspace Name</FieldLabel>
                 <Input
@@ -409,34 +470,13 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder="e.g. Couples Shared Ledger"
                   required
-                  disabled={!canManageSettings || isUpdatingOrgName}
+                  disabled={!canManageSettings || isUpdatingSettings}
                   className="rounded-xl border-border/40"
                 />
                 <FieldDescription>This name will be displayed in the sidebar switcher for all members.</FieldDescription>
               </Field>
-            </CardContent>
-            {canManageSettings && (
-              <CardFooter className="border-t border-border/10 bg-muted/10 px-6 py-4 flex justify-end">
-                <Button type="submit" disabled={isUpdatingOrgName || currentOrgName === activeOrg?.name} className="rounded-xl font-bold">
-                  {isUpdatingOrgName && <Loader2 className="mr-2 size-4 animate-spin" />}
-                  Save Space Name
-                </Button>
-              </CardFooter>
-            )}
-          </form>
-        </Card>
 
-        {/* Space Financial Configuration Card */}
-        <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold">Financial Preferences</CardTitle>
-            <CardDescription>
-              Set currency, localization, and fiscal configurations for this space.
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleUpdateSettings}>
-            <CardContent className="space-y-4">
-              <FieldGroup>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Field>
                   <FieldLabel htmlFor="space-type">Space Category</FieldLabel>
                   <Select
@@ -459,67 +499,80 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
                 <Field>
                   <FieldLabel htmlFor="currency">Base Currency</FieldLabel>
-                  <Input
-                    id="currency"
-                    type="text"
+                  <Select
                     value={baseCurrency}
-                    onChange={(e) => setBaseCurrency(e.target.value.toUpperCase())}
-                    placeholder="USD"
-                    required
+                    onValueChange={(val) => setBaseCurrency(val)}
                     disabled={!canManageSettings || isUpdatingSettings}
-                    className="rounded-xl border-border/40 uppercase"
-                  />
+                  >
+                    <SelectTrigger className="rounded-xl border border-border/40">
+                      <SelectValue placeholder="Select Base Currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FieldDescription>Default currency for budgets, reporting, and dashboard counters.</FieldDescription>
                 </Field>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <Field>
-                    <FieldLabel htmlFor="locale">Locale Code</FieldLabel>
-                    <Input
-                      id="locale"
-                      type="text"
-                      value={locale}
-                      onChange={(e) => setLocale(e.target.value)}
-                      placeholder="en-US"
-                      required
-                      disabled={!canManageSettings || isUpdatingSettings}
-                      className="rounded-xl border-border/40"
-                    />
-                  </Field>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Field>
+                  <FieldLabel htmlFor="locale">Locale Code</FieldLabel>
+                  <Select
+                    value={locale}
+                    onValueChange={(val) => setLocale(val)}
+                    disabled={!canManageSettings || isUpdatingSettings}
+                  >
+                    <SelectTrigger className="rounded-xl border border-border/40">
+                      <SelectValue placeholder="Select Locale Code" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LOCALES.map((l) => (
+                        <SelectItem key={l.value} value={l.value}>
+                          {l.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>Formats numbers and dates for ledger entries.</FieldDescription>
+                </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="fiscal-year">Fiscal Year Start</FieldLabel>
-                    <Select
-                      value={String(fiscalYearStart)}
-                      onValueChange={(val) => setFiscalYearStart(Number(val))}
-                      disabled={!canManageSettings || isUpdatingSettings}
-                    >
-                      <SelectTrigger className="rounded-xl border border-border/40">
-                        <SelectValue placeholder="Select starting month" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {MONTHS.map((m) => (
-                          <SelectItem key={m.value} value={String(m.value)}>
-                            {m.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                </div>
-              </FieldGroup>
-            </CardContent>
-            {canManageSettings && (
-              <CardFooter className="border-t border-border/10 bg-muted/10 px-6 py-4 flex justify-end">
-                <Button type="submit" disabled={isUpdatingSettings} className="rounded-xl font-bold">
-                  {isUpdatingSettings && <Loader2 className="mr-2 size-4 animate-spin" />}
-                  Save Settings
-                </Button>
-              </CardFooter>
-            )}
-          </form>
-        </Card>
-      </div>
+                <Field>
+                  <FieldLabel htmlFor="fiscal-year">Fiscal Year Start</FieldLabel>
+                  <Select
+                    value={String(fiscalYearStart)}
+                    onValueChange={(val) => setFiscalYearStart(Number(val))}
+                    disabled={!canManageSettings || isUpdatingSettings}
+                  >
+                    <SelectTrigger className="rounded-xl border border-border/40">
+                      <SelectValue placeholder="Select starting month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {MONTHS.map((m) => (
+                        <SelectItem key={m.value} value={String(m.value)}>
+                          {m.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </FieldGroup>
+          </CardContent>
+          {canManageSettings && (
+            <CardFooter className="flex justify-end p-6 pt-0">
+              <Button type="submit" disabled={isUpdatingSettings} className="rounded-xl font-bold">
+                {isUpdatingSettings && <Loader2 className="mr-2 size-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </CardFooter>
+          )}
+        </form>
+      </Card>
 
       {/* 2. Members Management Card */}
       <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
@@ -538,17 +591,57 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
               </h4>
               <form onSubmit={handleInviteMember} className="flex flex-col sm:flex-row gap-4 items-end">
                 <div className="flex-1 w-full space-y-1.5">
-                  <Label htmlFor="invite-email" className="text-xs">Email Address</Label>
-                  <Input
-                    id="invite-email"
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    placeholder="partner@example.com"
-                    required
-                    disabled={isInviting}
-                    className="rounded-xl border-border/40"
-                  />
+                  <Label htmlFor="invite-username" className="text-xs">Username</Label>
+                  <div className="relative">
+                    <Input
+                      id="invite-username"
+                      type="text"
+                      value={inviteUsername}
+                      onChange={(e) => setInviteUsername(e.target.value)}
+                      placeholder="partner"
+                      required
+                      disabled={isInviting}
+                      className="rounded-xl border-border/40 pl-9"
+                    />
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60">
+                      {searchingUser ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Search className="size-4" />
+                      )}
+                    </div>
+                  </div>
+                  {/* User Details Preview HoverCard */}
+                  {resolvedUser && (
+                    <div className="mt-1">
+                      <HoverCard>
+                        <HoverCardTrigger asChild>
+                          <button
+                            type="button"
+                            className="text-primary hover:underline cursor-pointer font-semibold flex items-center gap-1.5 text-xs text-left"
+                          >
+                            <User className="size-3" /> Found user: @{resolvedUser.username} (Hover to view)
+                          </button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80 rounded-2xl p-4 shadow-lg border border-border/40 bg-popover z-50">
+                          <div className="flex gap-4">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={resolvedUser.image || ""} />
+                              <AvatarFallback>{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="space-y-1">
+                              <h4 className="text-sm font-semibold">{resolvedUser.name}</h4>
+                              <p className="text-xs text-muted-foreground">@{resolvedUser.username}</p>
+                              <p className="text-xs text-muted-foreground mt-2">{resolvedUser.email}</p>
+                            </div>
+                          </div>
+                        </HoverCardContent>
+                      </HoverCard>
+                    </div>
+                  )}
+                  {!resolvedUser && inviteUsername.trim().length >= 2 && !searchingUser && (
+                    <p className="text-xs text-rose-500 font-semibold mt-1">No user found with username &quot;{inviteUsername}&quot;</p>
+                  )}
                 </div>
                 <div className="w-full sm:w-48 space-y-1.5">
                   <Label htmlFor="invite-role" className="text-xs">Role Capability</Label>
@@ -563,7 +656,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" disabled={isInviting || !inviteEmail.trim()} className="rounded-xl w-full sm:w-auto font-bold">
+                <Button type="submit" disabled={isInviting || !resolvedUser} className="rounded-xl w-full sm:w-auto font-bold">
                   {isInviting && <Loader2 className="mr-2 size-4 animate-spin" />}
                   Send Invite
                 </Button>
@@ -593,9 +686,10 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     {members.map((member) => (
                       <TableRow key={member.id}>
                         <TableCell className="font-medium flex items-center gap-2">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">
-                            {member.user ? member.user.name.substring(0, 2).toUpperCase() : "?"}
-                          </div>
+                          <Avatar className="h-7 w-7">
+                            <AvatarImage src={member.user?.image || ""} />
+                            <AvatarFallback>{member.user ? member.user.name.substring(0, 2).toUpperCase() : "?"}</AvatarFallback>
+                          </Avatar>
                           <span>{member.user ? member.user.name : "Pending User"}</span>
                         </TableCell>
                         <TableCell>{member.user ? member.user.email : "-"}</TableCell>

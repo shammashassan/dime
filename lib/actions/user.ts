@@ -60,3 +60,24 @@ export async function getUserExportData() {
     })),
   }
 }
+
+export async function lookupUserByUsername(username: string) {
+  const session = await requireApprovedUser()
+  if (!session) throw new Error("Unauthorized")
+
+  if (!username || username.trim().length < 2) return null
+
+  const user = await db.collection("user").findOne({
+    username: { $regex: new RegExp(`^${username.trim()}$`, "i") }
+  })
+
+  if (!user) return null
+
+  return {
+    id: user.id,
+    name: user.name as string,
+    email: user.email as string,
+    username: user.username as string,
+    image: (user.image || null) as string | null,
+  }
+}

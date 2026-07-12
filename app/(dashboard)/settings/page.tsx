@@ -37,6 +37,7 @@ async function SettingsContent() {
       preferences={serializeData(preferences)}
       wallets={serializeData(wallets)}
       orgSettings={serializeData(orgSettings)}
+      activeOrgId={activeOrgId}
     />
   )
 }

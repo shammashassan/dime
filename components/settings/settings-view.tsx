@@ -59,12 +59,12 @@ interface SettingsViewProps {
   preferences: UserPreferences
   wallets: Wallet[]
   orgSettings: OrganizationSettings | null
+  activeOrgId: string | null
 }
 
-export function SettingsView({ preferences: initialPreferences, wallets, orgSettings }: SettingsViewProps) {
+export function SettingsView({ preferences: initialPreferences, wallets, orgSettings, activeOrgId }: SettingsViewProps) {
   const { data: sessionData, refetch: refreshSession } = useSession()
   const user = sessionData?.user
-  const activeOrgId = sessionData?.session?.activeOrganizationId || null
   const [activeTab, setActiveTab] = useState("profile")
   const [isPending, startTransition] = useTransition()
   const contentRef = useRef<HTMLDivElement>(null)
