@@ -90,15 +90,6 @@ const CURRENCIES = [
   { value: "CAD", label: "CAD ($)" },
 ]
 
-const LOCALES = [
-  { value: "en-US", label: "English (United States)" },
-  { value: "en-GB", label: "English (United Kingdom)" },
-  { value: "de-DE", label: "German (Germany)" },
-  { value: "fr-FR", label: "French (France)" },
-  { value: "ja-JP", label: "Japanese (Japan)" },
-  { value: "hi-IN", label: "Hindi (India)" },
-]
-
 export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   const { data: sessionData } = useSession()
   const { data: activeOrg, refetch: refetchActiveOrg } = authClient.useActiveOrganization()
@@ -108,7 +99,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   // Settings states
   const [spaceType, setSpaceType] = React.useState<SpaceType>(initialSettings?.spaceType || "couple")
   const [baseCurrency, setBaseCurrency] = React.useState(initialSettings?.baseCurrency || "USD")
-  const [locale, setLocale] = React.useState(initialSettings?.locale || "en-US")
   const [fiscalYearStart, setFiscalYearStart] = React.useState(initialSettings?.fiscalYearStartMonth || 1)
   const [isUpdatingSettings, setIsUpdatingSettings] = React.useState(false)
 
@@ -119,6 +109,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   const [inviteUsername, setInviteUsername] = React.useState("")
   const [searchingUser, setSearchingUser] = React.useState(false)
   const [resolvedUser, setResolvedUser] = React.useState<{ id: string; name: string; email: string; username: string; image: string | null } | null>(null)
+  const [isHoverCardOpen, setIsHoverCardOpen] = React.useState(false)
   const [inviteRole, setInviteRole] = React.useState<Role>("member")
   const [isInviting, setIsInviting] = React.useState(false)
 
@@ -176,7 +167,10 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
     if (!inviteUsername.trim() || inviteUsername.trim().length < 2) {
       const timer = setTimeout(() => {
-        if (active) setResolvedUser(null)
+        if (active) {
+          setResolvedUser(null)
+          setIsHoverCardOpen(false)
+        }
       }, 0)
       return () => {
         active = false
@@ -191,10 +185,20 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
     const delayDebounce = setTimeout(async () => {
       try {
         const user = await lookupUserByUsername(inviteUsername.trim())
-        if (active) setResolvedUser(user)
+        if (active) {
+          setResolvedUser(user)
+          if (user) {
+            setIsHoverCardOpen(true)
+          } else {
+            setIsHoverCardOpen(false)
+          }
+        }
       } catch (err) {
         console.error("Failed to search user by username", err)
-        if (active) setResolvedUser(null)
+        if (active) {
+          setResolvedUser(null)
+          setIsHoverCardOpen(false)
+        }
       } finally {
         if (active) setSearchingUser(false)
       }
@@ -239,12 +243,11 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         )
       }
 
-      // Update settings
+      // Update settings (without locale code)
       promises.push(
         updateOrganizationSettings({
           spaceType,
           baseCurrency,
-          locale,
           fiscalYearStartMonth: Number(fiscalYearStart),
         }).then((res) => {
           if (!res.success) throw new Error("Failed to update financial settings")
@@ -281,6 +284,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         toast.success(`Invitation sent successfully to @${resolvedUser.username}`)
         setInviteUsername("")
         setResolvedUser(null)
+        setIsHoverCardOpen(false)
         await fetchMembersAndInvitations()
       }
     } catch (err: unknown) {
@@ -521,27 +525,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Field>
-                  <FieldLabel htmlFor="locale">Locale Code</FieldLabel>
-                  <Select
-                    value={locale}
-                    onValueChange={(val) => setLocale(val)}
-                    disabled={!canManageSettings || isUpdatingSettings}
-                  >
-                    <SelectTrigger className="rounded-xl border border-border/40">
-                      <SelectValue placeholder="Select Locale Code" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LOCALES.map((l) => (
-                        <SelectItem key={l.value} value={l.value}>
-                          {l.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription>Formats numbers and dates for ledger entries.</FieldDescription>
-                </Field>
-
-                <Field>
                   <FieldLabel htmlFor="fiscal-year">Fiscal Year Start</FieldLabel>
                   <Select
                     value={String(fiscalYearStart)}
@@ -611,16 +594,16 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                       )}
                     </div>
                   </div>
-                  {/* User Details Preview HoverCard */}
+                  {/* User Details Preview HoverCard - Opens automatically on resolve */}
                   {resolvedUser && (
                     <div className="mt-1">
-                      <HoverCard>
+                      <HoverCard open={isHoverCardOpen} onOpenChange={setIsHoverCardOpen}>
                         <HoverCardTrigger asChild>
                           <button
                             type="button"
                             className="text-primary hover:underline cursor-pointer font-semibold flex items-center gap-1.5 text-xs text-left"
                           >
-                            <User className="size-3" /> Found user: @{resolvedUser.username} (Hover to view)
+                            <User className="size-3" /> Found user: @{resolvedUser.username}
                           </button>
                         </HoverCardTrigger>
                         <HoverCardContent className="w-80 rounded-2xl p-4 shadow-lg border border-border/40 bg-popover z-50">
@@ -785,11 +768,11 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
       {/* 3. Danger Zone Card */}
       <Card className="border border-rose-500/20 bg-card shadow-md rounded-2xl overflow-hidden">
-        <CardHeader className="bg-rose-500/5 border-b border-rose-500/10">
+        <CardHeader>
           <CardTitle className="text-lg font-bold text-rose-500 flex items-center gap-2">
             <ShieldAlert className="size-5" /> Danger Zone
           </CardTitle>
-          <CardDescription className="text-rose-500/70">
+          <CardDescription>
             Irreversible actions regarding ownership and deletion of this space ledger.
           </CardDescription>
         </CardHeader>

@@ -172,7 +172,6 @@ export interface OrganizationSettings {
   _id: ObjectId;
   organizationId: string;
   baseCurrency: string;
-  locale: string;
   fiscalYearStartMonth: number;
   spaceType: SpaceType;
   updatedBy: string;

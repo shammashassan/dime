@@ -21,7 +21,6 @@ export async function updateOrganizationSettings(input: unknown) {
     {
       $set: {
         baseCurrency: data.baseCurrency,
-        locale: data.locale,
         fiscalYearStartMonth: data.fiscalYearStartMonth,
         spaceType: data.spaceType,
         updatedBy: scope.userId,
