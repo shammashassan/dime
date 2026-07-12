@@ -88,6 +88,23 @@ export const auth = betterAuth({
     organization({
       creatorRole: "owner",
       invitationExpiresIn: 60 * 60 * 24 * 7,
+      sendInvitationEmail: async (data) => {
+        const inviteLink = `${process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/accept-invitation/${data.id}`
+        await sendEmail({
+          to: data.email,
+          subject: `You've been invited to join ${data.organization.name} on Dime`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+              <h2 style="margin-top: 0; color: #0f172a;">Join Workspace Space</h2>
+              <p>You have been invited to collaborate in the workspace <strong>${data.organization.name}</strong> as a <strong>${data.role}</strong>.</p>
+              <div style="margin: 24px 0;">
+                <a href="${inviteLink}" style="background-color: #0f172a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Accept Invitation</a>
+              </div>
+              <p style="font-size: 12px; color: #64748b; margin-bottom: 0;">If you did not expect this invitation, you can safely ignore this email.</p>
+            </div>
+          `,
+        })
+      },
       organizationHooks: {
         beforeCreateOrganization: async ({ organization }) => {
           let baseSlug = (organization.name || "organization")
