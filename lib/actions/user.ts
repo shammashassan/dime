@@ -2,6 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { db } from "@/lib/db/client"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 export async function deleteUserAccount() {
   const session = await requireApprovedUser()
@@ -27,12 +28,13 @@ export async function deleteUserAccount() {
 
 export async function getUserExportData() {
   const session = await requireApprovedUser()
-  const userId = session.user.id
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
 
-  const transactions = await db.collection("transactions").find({ userId }).toArray()
-  const wallets = await db.collection("wallets").find({ userId }).toArray()
-  const budgets = await db.collection("budgets").find({ userId }).toArray()
-  const categories = await db.collection("categories").find({ $or: [{ userId }, { userId: null }] }).toArray()
+  const transactions = await db.collection("transactions").find(filter).toArray()
+  const wallets = await db.collection("wallets").find(filter).toArray()
+  const budgets = await db.collection("budgets").find(filter).toArray()
+  const categories = await db.collection("categories").find({ $or: [filter, { userId: null }] }).toArray()
 
   return {
     transactions: transactions.map(t => ({
@@ -41,7 +43,7 @@ export async function getUserExportData() {
       date: t.date instanceof Date ? t.date.toISOString() : new Date(t.date).toISOString(),
       walletId: t.walletId.toString(),
       categoryId: t.categoryId?.toString() || null,
-      transferWalletId: t.transferWalletId?.toString() || null,
+      transferWalletId: (t as any).transferWalletId?.toString() || null,
     })),
     wallets: wallets.map(w => ({
       ...w,
@@ -50,7 +52,7 @@ export async function getUserExportData() {
     budgets: budgets.map(b => ({
       ...b,
       _id: b._id.toString(),
-      categoryIds: b.categoryIds.map((cId: any) => cId.toString()),
+      categoryIds: (b as any).categoryIds ? (b as any).categoryIds.map((cId: any) => cId.toString()) : [b.categoryId],
     })),
     categories: categories.map(c => ({
       ...c,
