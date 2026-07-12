@@ -14,8 +14,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { lookupUserByUsername } from "@/lib/actions/user"
+import { createNotification } from "@/lib/actions/notifications"
+import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover"
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupButton } from "@/components/ui/input-group"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +30,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
-import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, Search, Info } from "lucide-react"
+import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, Search, User } from "lucide-react"
 
 interface SpaceSettingsProps {
   initialSettings: OrganizationSettings | null
@@ -109,6 +111,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   const [inviteUsername, setInviteUsername] = React.useState("")
   const [searchingUser, setSearchingUser] = React.useState(false)
   const [resolvedUser, setResolvedUser] = React.useState<{ id: string; name: string; email: string; username: string; image: string | null } | null>(null)
+  const [showUserPreview, setShowUserPreview] = React.useState(false)
   const [inviteRole, setInviteRole] = React.useState<Role>("member")
   const [isInviting, setIsInviting] = React.useState(false)
 
@@ -168,6 +171,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
       const timer = setTimeout(() => {
         if (active) {
           setResolvedUser(null)
+          setShowUserPreview(false)
         }
       }, 0)
       return () => {
@@ -185,11 +189,17 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         const user = await lookupUserByUsername(inviteUsername.trim())
         if (active) {
           setResolvedUser(user)
+          if (user) {
+            setShowUserPreview(true)
+          } else {
+            setShowUserPreview(false)
+          }
         }
       } catch (err) {
         console.error("Failed to search user by username", err)
         if (active) {
           setResolvedUser(null)
+          setShowUserPreview(false)
         }
       } finally {
         if (active) setSearchingUser(false)
@@ -274,6 +284,16 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         toast.error(error.message || "Failed to send invitation")
       } else {
         toast.success(`Invitation sent successfully to @${resolvedUser.username}`)
+        // Create in-app notification for the invited user
+        await createNotification({
+          userId: resolvedUser.id,
+          title: "Workspace Invitation",
+          message: `You have been invited to join the workspace "${activeOrg?.name || 'Shared Space'}" as ${inviteRole === 'admin' ? 'an Admin' : inviteRole === 'viewer' ? 'a Viewer' : 'a Member'}.`,
+          type: "system",
+          link: "/settings?tab=invitations",
+        }).catch((nErr) => {
+          console.error("Failed to trigger in-app invitation notification:", nErr)
+        })
         setInviteUsername("")
         setResolvedUser(null)
         await fetchMembersAndInvitations()
@@ -566,55 +586,56 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
               <form onSubmit={handleInviteMember} className="flex flex-col sm:flex-row gap-4 items-end">
                 <div className="flex-1 w-full space-y-1.5">
                   <Label htmlFor="invite-username" className="text-xs">Username</Label>
-                  <div className="relative">
-                    <Input
-                      id="invite-username"
-                      type="text"
-                      value={inviteUsername}
-                      onChange={(e) => setInviteUsername(e.target.value)}
-                      placeholder="partner"
-                      required
-                      disabled={isInviting}
-                      className="rounded-xl border-border/40 pl-9"
-                    />
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/60">
-                      {searchingUser ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Search className="size-4" />
-                      )}
-                    </div>
-                  </div>
-                  {/* Match indicators with Volt-style Info HoverCard */}
-                  {resolvedUser && (
-                    <div className="flex items-center gap-1.5 mt-1 text-xs text-emerald-500 font-semibold">
-                      <span>Found user: @{resolvedUser.username}</span>
-                      <HoverCard openDelay={200} closeDelay={100}>
-                        <HoverCardTrigger asChild>
-                          <button
+                  <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
+                    <PopoverAnchor asChild>
+                      <InputGroup className="h-10 rounded-xl">
+                        <InputGroupAddon align="inline-start">
+                          <Search className="size-4" />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          id="invite-username"
+                          type="text"
+                          value={inviteUsername}
+                          onChange={(e) => setInviteUsername(e.target.value)}
+                          placeholder="partner"
+                          required
+                          disabled={isInviting}
+                          className="rounded-xl border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:outline-hidden"
+                        />
+                        {resolvedUser && (
+                          <InputGroupButton
                             type="button"
-                            className="flex size-5 items-center justify-center rounded-full text-muted-foreground/30 transition-colors hover:text-muted-foreground/70"
+                            onClick={() => setShowUserPreview(!showUserPreview)}
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-muted-foreground/40 hover:text-muted-foreground/70"
                           >
-                            <Info className="size-3.5" />
-                            <span className="sr-only">User Info</span>
-                          </button>
-                        </HoverCardTrigger>
-                        <HoverCardContent align="start" sideOffset={6} className="w-80 rounded-2xl p-4 shadow-lg border border-border/40 bg-popover z-50">
-                          <div className="flex gap-4 text-foreground">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={resolvedUser.image || ""} />
-                              <AvatarFallback>{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="space-y-1 text-left">
-                              <h4 className="text-sm font-semibold">{resolvedUser.name}</h4>
-                              <p className="text-xs text-muted-foreground">@{resolvedUser.username}</p>
-                              <p className="text-xs text-muted-foreground mt-2">{resolvedUser.email}</p>
-                            </div>
+                            <User className="size-4" />
+                          </InputGroupButton>
+                        )}
+                        {searchingUser && (
+                          <InputGroupAddon align="inline-end">
+                            <Loader2 className="size-4 animate-spin text-muted-foreground/60" />
+                          </InputGroupAddon>
+                        )}
+                      </InputGroup>
+                    </PopoverAnchor>
+                    <PopoverContent align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm p-4 rounded-2xl shadow-xl border border-border/40 bg-popover z-50">
+                      {resolvedUser && (
+                        <div className="flex gap-4">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={resolvedUser.image || ""} />
+                            <AvatarFallback>{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div className="space-y-1 text-left text-foreground">
+                            <h4 className="text-sm font-semibold">{resolvedUser.name}</h4>
+                            <p className="text-xs text-muted-foreground">@{resolvedUser.username}</p>
+                            <p className="text-xs text-muted-foreground mt-2">{resolvedUser.email}</p>
                           </div>
-                        </HoverCardContent>
-                      </HoverCard>
-                    </div>
-                  )}
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
                   {!resolvedUser && inviteUsername.trim().length >= 2 && !searchingUser && (
                     <p className="text-xs text-rose-500 font-semibold mt-1">No user found with username &quot;{inviteUsername}&quot;</p>
                   )}
@@ -622,7 +643,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                 <div className="w-full sm:w-48 space-y-1.5">
                   <Label htmlFor="invite-role" className="text-xs">Role Capability</Label>
                   <Select value={inviteRole} onValueChange={(val) => setInviteRole(val as Role)} disabled={isInviting}>
-                    <SelectTrigger className="rounded-xl border border-border/40">
+                    <SelectTrigger className="rounded-xl border border-border/40 h-10">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -632,7 +653,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" disabled={isInviting || !resolvedUser} className="rounded-xl w-full sm:w-auto font-bold">
+                <Button type="submit" disabled={isInviting || !resolvedUser} className="rounded-xl w-full sm:w-auto font-bold h-10">
                   {isInviting && <Loader2 className="mr-2 size-4 animate-spin" />}
                   Send Invite
                 </Button>

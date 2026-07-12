@@ -179,3 +179,18 @@ export interface OrganizationSettings {
   version: number;
 }
 
+export interface Notification {
+  _id: ObjectId;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  link?: string;
+  image?: string;
+  readAt?: Date;
+  dismissedAt?: Date;
+  archivedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
