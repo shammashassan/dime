@@ -57,13 +57,13 @@ export async function getUserInvitationsAction() {
         });
         return {
           id: invite.id,
-          organizationId: invite.organizationId,
+          organizationId: invite.organizationId ? invite.organizationId.toString() : "",
           organizationName: org?.name || "Shared Workspace",
           inviterEmail: invite.inviterEmail || "Collaborator",
           role: invite.role,
           status: invite.status,
-          expiresAt: invite.expiresAt,
-          createdAt: invite.createdAt,
+          expiresAt: invite.expiresAt ? invite.expiresAt.toISOString() : null,
+          createdAt: invite.createdAt ? invite.createdAt.toISOString() : null,
         };
       })
     );

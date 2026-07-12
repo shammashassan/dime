@@ -5,6 +5,7 @@ import { notificationsCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { revalidatePath } from "next/cache"
 import { updateTag } from "next/cache"
+import { Notification } from "@/types"
 
 export async function getNotificationsAction() {
   try {
@@ -20,8 +21,18 @@ export async function getNotificationsAction() {
     return {
       success: true,
       data: items.map((item) => ({
-        ...item,
         _id: item._id.toString(),
+        userId: item.userId || "",
+        title: item.title,
+        message: item.message,
+        type: item.type,
+        link: item.link || null,
+        image: item.image || null,
+        readAt: item.readAt ? item.readAt.toISOString() : null,
+        dismissedAt: item.dismissedAt ? item.dismissedAt.toISOString() : null,
+        archivedAt: item.archivedAt ? item.archivedAt.toISOString() : null,
+        createdAt: item.createdAt ? item.createdAt.toISOString() : null,
+        updatedAt: item.updatedAt ? item.updatedAt.toISOString() : null,
       })),
     }
   } catch (err) {
@@ -33,9 +44,7 @@ export async function getNotificationsAction() {
 export async function markNotificationReadAction(id: string) {
   try {
     const session = await requireApprovedUser()
-    const query = ObjectId.isValid(id)
-      ? { _id: new ObjectId(id), userId: session.user.id }
-      : { id, userId: session.user.id }
+    const query = { _id: new ObjectId(id), userId: session.user.id }
 
     const res = await notificationsCollection.updateOne(query, {
       $set: { readAt: new Date(), updatedAt: new Date() },
@@ -53,9 +62,7 @@ export async function markNotificationReadAction(id: string) {
 export async function archiveNotificationAction(id: string) {
   try {
     const session = await requireApprovedUser()
-    const query = ObjectId.isValid(id)
-      ? { _id: new ObjectId(id), userId: session.user.id }
-      : { id, userId: session.user.id }
+    const query = { _id: new ObjectId(id), userId: session.user.id }
 
     const res = await notificationsCollection.updateOne(query, {
       $set: { archivedAt: new Date(), updatedAt: new Date() },
@@ -73,9 +80,7 @@ export async function archiveNotificationAction(id: string) {
 export async function deleteNotificationAction(id: string) {
   try {
     const session = await requireApprovedUser()
-    const query = ObjectId.isValid(id)
-      ? { _id: new ObjectId(id), userId: session.user.id }
-      : { id, userId: session.user.id }
+    const query = { _id: new ObjectId(id), userId: session.user.id }
 
     const res = await notificationsCollection.updateOne(query, {
       $set: { deletedAt: new Date(), updatedAt: new Date() },
@@ -116,7 +121,7 @@ export async function createNotification({
     createdAt: new Date(),
     updatedAt: new Date(),
   }
-  const res = await notificationsCollection.insertOne(doc as any)
+  const res = await notificationsCollection.insertOne(doc as unknown as Notification)
   updateTag("notifications")
   return { ...doc, _id: res.insertedId }
 }

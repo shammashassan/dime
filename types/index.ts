@@ -194,3 +194,18 @@ export interface Notification {
   updatedAt: Date;
 }
 
+export interface SerializedNotification {
+  _id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  link?: string | null;
+  image?: string | null;
+  readAt?: string | null;
+  dismissedAt?: string | null;
+  archivedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+

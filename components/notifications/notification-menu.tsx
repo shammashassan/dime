@@ -157,7 +157,7 @@ export function NotificationMenu() {
     router.refresh();
   };
 
-  const getRelativeTime = (date: Date) => {
+  const getRelativeTime = (date: Date | string) => {
     const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
     // eslint-disable-next-line react-hooks/purity
     const elapsed = new Date(date).getTime() - Date.now();

@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { lookupUserByUsername } from "@/lib/actions/user"
 import { createNotification } from "@/lib/actions/notifications"
-import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverAnchor, PopoverHeader, PopoverTitle, PopoverDescription } from "@/components/ui/popover"
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupButton } from "@/components/ui/input-group"
 import {
   AlertDialog,
@@ -619,25 +619,51 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                         )}
                       </InputGroup>
                     </PopoverAnchor>
-                    <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm p-4 rounded-2xl shadow-xl border border-border/40 bg-popover z-50">
-                      {resolvedUser && (
-                        <div className="flex gap-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={resolvedUser.image || ""} />
-                            <AvatarFallback>{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <div className="space-y-1 text-left text-foreground">
-                            <h4 className="text-sm font-semibold">{resolvedUser.name}</h4>
-                            <p className="text-xs text-muted-foreground">@{resolvedUser.username}</p>
-                            <p className="text-xs text-muted-foreground mt-2">{resolvedUser.email}</p>
-                          </div>
+                    <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-(--radix-popover-trigger-width) max-w-sm p-4 rounded-2xl shadow-xl border border-border/40 bg-popover z-50 flex flex-col gap-3">
+                      {searchingUser ? (
+                        <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
+                          <Loader2 className="size-4 animate-spin text-primary" />
+                          <span className="text-xs font-medium">Searching user...</span>
                         </div>
+                      ) : resolvedUser ? (
+                        <>
+                          <PopoverHeader>
+                            <PopoverTitle className="text-sm font-bold flex items-center gap-1.5">
+                              Found User
+                            </PopoverTitle>
+                            <PopoverDescription className="text-xs text-muted-foreground">
+                              Verify details before sending invitation
+                            </PopoverDescription>
+                          </PopoverHeader>
+                          <div className="flex gap-3 pt-1">
+                            <Avatar className="h-10 w-10 shrink-0 border border-border/40">
+                              <AvatarImage src={resolvedUser.image || ""} />
+                              <AvatarFallback className="font-bold">{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="space-y-0.5 text-left text-foreground min-w-0">
+                              <h4 className="text-sm font-bold truncate leading-snug">{resolvedUser.name}</h4>
+                              <p className="text-xs text-muted-foreground truncate">@{resolvedUser.username}</p>
+                              <p className="text-[11px] text-muted-foreground mt-1 truncate">{resolvedUser.email}</p>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <PopoverHeader>
+                            <PopoverTitle className="text-sm font-bold text-rose-500 flex items-center gap-1.5">
+                              Not Found
+                            </PopoverTitle>
+                            <PopoverDescription className="text-xs text-muted-foreground">
+                              No user matches this username
+                            </PopoverDescription>
+                          </PopoverHeader>
+                          <p className="text-xs text-muted-foreground leading-relaxed pt-1">
+                            We couldn&apos;t find any user with the username &quot;{inviteUsername}&quot;. Please double check the spelling and try again.
+                          </p>
+                        </>
                       )}
                     </PopoverContent>
                   </Popover>
-                  {!resolvedUser && inviteUsername.trim().length >= 2 && !searchingUser && (
-                    <p className="text-xs text-rose-500 font-semibold mt-1">No user found with username &quot;{inviteUsername}&quot;</p>
-                  )}
                 </div>
                 <div className="w-full sm:w-48 space-y-1.5">
                   <Label htmlFor="invite-role" className="text-xs">Role Capability</Label>

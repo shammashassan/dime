@@ -74,7 +74,7 @@ export async function lookupUserByUsername(username: string) {
   if (!user) return null
 
   return {
-    id: user.id,
+    id: user._id.toString(),
     name: user.name as string,
     email: user.email as string,
     username: user.username as string,
