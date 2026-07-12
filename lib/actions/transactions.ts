@@ -8,11 +8,12 @@ import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
 import { convertCurrency } from "@/lib/currency"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { FinancialScope } from "@/types/scope"
 import { db } from "@/lib/db/client"
 import { canCreateTransactions, canEditTransactions, canDeleteTransactions, Role } from "@/lib/permissions"
 
 // Helper to update a wallet's balance
-async function updateWalletBalance(scope: any, walletId: string, amountChange: number) {
+async function updateWalletBalance(scope: FinancialScope, walletId: string, amountChange: number) {
   const walletsColl = await getCollection<Wallet>("wallets")
   await walletsColl.updateOne(
     { _id: new ObjectId(walletId), ...getScopeFilter(scope) },
@@ -24,7 +25,7 @@ async function updateWalletBalance(scope: any, walletId: string, amountChange: n
 }
 
 export async function createTransaction(input: TransactionInput) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
   const validated = transactionSchema.parse(input)
 
   const scope = await getFinancialScope()
@@ -165,7 +166,7 @@ export async function createTransaction(input: TransactionInput) {
 }
 
 export async function deleteTransaction(id: string) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
 
   const scope = await getFinancialScope()
   if (scope.isOrganization) {
@@ -230,7 +231,7 @@ export async function deleteTransaction(id: string) {
 }
 
 export async function updateTransaction(id: string, input: TransactionInput) {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
   const validated = transactionSchema.parse(input)
 
   const scope = await getFinancialScope()
@@ -252,6 +253,10 @@ export async function updateTransaction(id: string, input: TransactionInput) {
   // 1. Verify existence and retrieve details of the old transaction
   const tx = await transactionsColl.findOne({ _id: txOid, ...getScopeFilter(scope) })
   if (!tx) throw new Error("Transaction not found")
+
+  // Verify that the new source wallet exists and belongs to the active scope
+  const sourceWallet = await walletsColl.findOne({ _id: new ObjectId(validated.walletId), ...getScopeFilter(scope) })
+  if (!sourceWallet) throw new Error("Source wallet not found")
 
   // 2. Revert the balance impact of the old transaction
   if (tx.type !== "transfer") {
@@ -297,7 +302,7 @@ export async function updateTransaction(id: string, input: TransactionInput) {
           categoryId: validated.categoryId,
           type: validated.type,
           amount: validated.amount,
-          currency: validated.currency,
+          currency: sourceWallet.currency, // Force currency to match the source wallet
           description: validated.description,
           notes: validated.notes || undefined,
           date: validated.date,
@@ -324,18 +329,21 @@ export async function updateTransaction(id: string, input: TransactionInput) {
     // Determine target amount and target currency
     const targetWallet = await walletsColl.findOne({ _id: new ObjectId(validated.targetWalletId), ...getScopeFilter(scope) })
     if (!targetWallet) throw new Error("Target wallet not found")
-    const targetAmount = await convertCurrency(validated.amount, validated.currency, targetWallet.currency)
+    const targetAmount = await convertCurrency(validated.amount, sourceWallet.currency, targetWallet.currency)
 
     // Resolve the linked transaction ID (reuse if existing, otherwise generate a new one)
     const linkedOid = tx.linkedTransactionId ? new ObjectId(tx.linkedTransactionId) : new ObjectId()
+    const linkedTx = tx.linkedTransactionId
+      ? await transactionsColl.findOne({ _id: linkedOid, ...getScopeFilter(scope) })
+      : null
 
     // Upsert the linked credit transaction
     const creditTx: Transaction = {
       _id: linkedOid,
-      userId: scope.userId,
+      userId: linkedTx?.userId || tx.userId || scope.userId,
       organizationId: scope.organizationId,
-      ownerUserId: scope.userId,
-      createdBy: scope.userId,
+      ownerUserId: linkedTx?.ownerUserId || tx.ownerUserId || scope.userId,
+      createdBy: linkedTx?.createdBy || tx.createdBy || scope.userId,
       updatedBy: scope.userId,
       walletId: validated.targetWalletId,
       categoryId: validated.categoryId,
@@ -349,9 +357,9 @@ export async function updateTransaction(id: string, input: TransactionInput) {
       tags: validated.tags || [],
       isRecurring: validated.isRecurring || false,
       linkedTransactionId: txOid.toString(),
-      createdAt: tx.createdAt || new Date(),
+      createdAt: linkedTx?.createdAt || tx.createdAt || new Date(),
       updatedAt: new Date(),
-      version: tx.version ? tx.version + 1 : 1,
+      version: linkedTx?.version ? linkedTx.version + 1 : 1,
     }
     await transactionsColl.replaceOne({ _id: linkedOid }, creditTx, { upsert: true })
 
@@ -365,7 +373,7 @@ export async function updateTransaction(id: string, input: TransactionInput) {
           type: "transfer",
           transferType: "debit",
           amount: validated.amount,
-          currency: validated.currency,
+          currency: sourceWallet.currency, // Force currency to match the source wallet
           description: validated.description,
           notes: validated.notes || undefined,
           date: validated.date,
@@ -397,7 +405,7 @@ export async function updateTransaction(id: string, input: TransactionInput) {
 }
 
 export async function getTransactionWalletId(id: string): Promise<string | null> {
-  const session = await requireApprovedUser()
+  await requireApprovedUser()
   const scope = await getFinancialScope()
   const transactionsColl = await getCollection<Transaction>("transactions")
   const tx = await transactionsColl.findOne({ _id: new ObjectId(id), ...getScopeFilter(scope) })
@@ -544,8 +552,19 @@ export async function scanReceiptAction(base64Image: string, filename: string) {
   }
 }
 
-export async function importTransactionsAction(walletId: string, transactionsList: any[]) {
-  const session = await requireApprovedUser()
+export interface ImportedTransactionInput {
+  categoryId?: string
+  categoryName?: string
+  type: "income" | "expense"
+  amount: number
+  description?: string
+  notes?: string
+  date?: string | Date
+  tags?: string[]
+}
+
+export async function importTransactionsAction(walletId: string, transactionsList: ImportedTransactionInput[]) {
+  await requireApprovedUser()
   const scope = await getFinancialScope()
 
   if (scope.isOrganization) {
@@ -583,8 +602,9 @@ export async function importTransactionsAction(walletId: string, transactionsLis
 
     // Try to resolve category by name if ID not provided
     if (!resolvedCategoryId && item.categoryName) {
+      const categoryNameLower = item.categoryName.toLowerCase()
       const match = categories.find(
-        c => c.name.toLowerCase() === item.categoryName.toLowerCase()
+        c => c.name.toLowerCase() === categoryNameLower
       )
       resolvedCategoryId = match ? match._id.toString() : defaultCategoryId
     } else if (!resolvedCategoryId) {
