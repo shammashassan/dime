@@ -13,6 +13,11 @@ export interface Wallet {
   sharedWith?: string[]   // Array of collaborator emails
   createdAt: Date
   updatedAt: Date
+  organizationId?: string | null
+  ownerUserId?: string
+  createdBy?: string
+  updatedBy?: string
+  version?: number
 }
 
 export interface Transaction {
@@ -34,6 +39,11 @@ export interface Transaction {
   goalId?: string         // Optional link to a Goal document for savings goals contributions
   createdAt: Date
   updatedAt: Date
+  organizationId?: string | null
+  ownerUserId?: string
+  createdBy?: string
+  updatedBy?: string
+  version?: number
 }
 
 export interface Category {
@@ -46,6 +56,12 @@ export interface Category {
   parentId?: string       // For subcategories
   isDefault: boolean
   createdAt: Date
+  updatedAt?: Date
+  organizationId?: string | null
+  ownerUserId?: string
+  createdBy?: string
+  updatedBy?: string
+  version?: number
 }
 
 export interface Budget {
@@ -63,6 +79,11 @@ export interface Budget {
   alertThreshold: number  // 0–100; alert when spending % hits this value
   createdAt: Date
   updatedAt: Date
+  organizationId?: string | null
+  ownerUserId?: string
+  createdBy?: string
+  updatedBy?: string
+  version?: number
 }
 
 export interface RecurringRule {
@@ -83,6 +104,11 @@ export interface RecurringRule {
   tags: string[]
   createdAt: Date
   updatedAt: Date
+  organizationId?: string | null
+  ownerUserId?: string
+  createdBy?: string
+  updatedBy?: string
+  version?: number
 }
 
 export interface ExchangeRate {
@@ -133,6 +159,11 @@ export interface Goal {
   icon: string
   createdAt: Date
   updatedAt: Date
+  organizationId?: string | null
+  ownerUserId?: string
+  createdBy?: string
+  updatedBy?: string
+  version?: number
 }
 
 export type SpaceType = "family" | "couple" | "business" | "travel" | "roommates" | "other";
