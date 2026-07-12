@@ -245,18 +245,155 @@ export async function updateTransaction(id: string, input: TransactionInput) {
     }
   }
 
-  // First, verify existence and retrieve details
+  const walletsColl = await getCollection<Wallet>("wallets")
   const transactionsColl = await getCollection<Transaction>("transactions")
-  const tx = await transactionsColl.findOne({ _id: new ObjectId(id), ...getScopeFilter(scope) })
+  const txOid = new ObjectId(id)
+
+  // 1. Verify existence and retrieve details of the old transaction
+  const tx = await transactionsColl.findOne({ _id: txOid, ...getScopeFilter(scope) })
   if (!tx) throw new Error("Transaction not found")
 
-  // Delete old transaction (handles reverting balances for normal and transfers)
-  await deleteTransaction(id)
+  // 2. Revert the balance impact of the old transaction
+  if (tx.type !== "transfer") {
+    const balanceRevert = tx.type === "income" ? -tx.amount : tx.amount
+    await updateWalletBalance(scope, tx.walletId, balanceRevert)
+  } else {
+    // Transfer: revert both wallets
+    if (tx.transferType === "debit") {
+      await updateWalletBalance(scope, tx.walletId, tx.amount)
+      if (tx.linkedTransactionId) {
+        const linkedOid = new ObjectId(tx.linkedTransactionId)
+        const linkedTx = await transactionsColl.findOne({ _id: linkedOid, ...getScopeFilter(scope) })
+        if (linkedTx) {
+          await updateWalletBalance(scope, linkedTx.walletId, -linkedTx.amount)
+        }
+      }
+    } else {
+      await updateWalletBalance(scope, tx.walletId, -tx.amount)
+      if (tx.linkedTransactionId) {
+        const linkedOid = new ObjectId(tx.linkedTransactionId)
+        const linkedTx = await transactionsColl.findOne({ _id: linkedOid, ...getScopeFilter(scope) })
+        if (linkedTx) {
+          await updateWalletBalance(scope, linkedTx.walletId, linkedTx.amount)
+        }
+      }
+    }
+  }
 
-  // Create new transaction using our robust createTransaction action
-  const result = await createTransaction(validated)
+  // 3. Apply updates in-place based on the new transaction type
+  if (validated.type !== "transfer") {
+    // If it was a transfer before, clean up the linked transaction
+    if (tx.type === "transfer" && tx.linkedTransactionId) {
+      const linkedOid = new ObjectId(tx.linkedTransactionId)
+      await transactionsColl.deleteOne({ _id: linkedOid, ...getScopeFilter(scope) })
+    }
 
-  return result
+    // Update the main transaction document
+    await transactionsColl.updateOne(
+      { _id: txOid },
+      {
+        $set: {
+          walletId: validated.walletId,
+          categoryId: validated.categoryId,
+          type: validated.type,
+          amount: validated.amount,
+          currency: validated.currency,
+          description: validated.description,
+          notes: validated.notes || undefined,
+          date: validated.date,
+          tags: validated.tags || [],
+          isRecurring: validated.isRecurring || false,
+          updatedAt: new Date(),
+          updatedBy: scope.userId,
+        },
+        $unset: {
+          linkedTransactionId: "",
+          transferType: "",
+        },
+        $inc: { version: 1 }
+      }
+    )
+
+    // Apply the new balance impact
+    const balanceChange = validated.type === "income" ? validated.amount : -validated.amount
+    await updateWalletBalance(scope, validated.walletId, balanceChange)
+  } else {
+    // It is a transfer
+    if (!validated.targetWalletId) throw new Error("Target wallet is required for transfers")
+
+    // Determine target amount and target currency
+    const targetWallet = await walletsColl.findOne({ _id: new ObjectId(validated.targetWalletId), ...getScopeFilter(scope) })
+    if (!targetWallet) throw new Error("Target wallet not found")
+    const targetAmount = await convertCurrency(validated.amount, validated.currency, targetWallet.currency)
+
+    // Resolve the linked transaction ID (reuse if existing, otherwise generate a new one)
+    const linkedOid = tx.linkedTransactionId ? new ObjectId(tx.linkedTransactionId) : new ObjectId()
+
+    // Upsert the linked credit transaction
+    const creditTx: Transaction = {
+      _id: linkedOid,
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+      ownerUserId: scope.userId,
+      createdBy: scope.userId,
+      updatedBy: scope.userId,
+      walletId: validated.targetWalletId,
+      categoryId: validated.categoryId,
+      type: "transfer",
+      transferType: "credit",
+      amount: targetAmount,
+      currency: targetWallet.currency,
+      description: validated.description,
+      notes: validated.notes || undefined,
+      date: validated.date,
+      tags: validated.tags || [],
+      isRecurring: validated.isRecurring || false,
+      linkedTransactionId: txOid.toString(),
+      createdAt: tx.createdAt || new Date(),
+      updatedAt: new Date(),
+      version: tx.version ? tx.version + 1 : 1,
+    }
+    await transactionsColl.replaceOne({ _id: linkedOid }, creditTx, { upsert: true })
+
+    // Update the main debit transaction
+    await transactionsColl.updateOne(
+      { _id: txOid },
+      {
+        $set: {
+          walletId: validated.walletId,
+          categoryId: validated.categoryId,
+          type: "transfer",
+          transferType: "debit",
+          amount: validated.amount,
+          currency: validated.currency,
+          description: validated.description,
+          notes: validated.notes || undefined,
+          date: validated.date,
+          tags: validated.tags || [],
+          isRecurring: validated.isRecurring || false,
+          linkedTransactionId: linkedOid.toString(),
+          updatedAt: new Date(),
+          updatedBy: scope.userId,
+        },
+        $inc: { version: 1 }
+      }
+    )
+
+    // Apply the new balance impact to both wallets
+    await updateWalletBalance(scope, validated.walletId, -validated.amount)
+    await updateWalletBalance(scope, validated.targetWalletId, targetAmount)
+  }
+
+  updateTag("transactions")
+  updateTag("wallets")
+  revalidatePath("/transactions")
+  revalidatePath(`/wallets/${tx.walletId}`)
+  if (validated.walletId !== tx.walletId) {
+    revalidatePath(`/wallets/${validated.walletId}`)
+  }
+  revalidatePath("/", "layout")
+
+  return { success: true }
 }
 
 export async function getTransactionWalletId(id: string): Promise<string | null> {
