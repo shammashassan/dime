@@ -88,6 +88,7 @@ export const auth = betterAuth({
     organization({
       creatorRole: "owner",
       invitationExpiresIn: 60 * 60 * 24 * 7,
+      requireEmailVerificationOnInvitation: false,
       organizationHooks: {
         beforeCreateOrganization: async ({ organization }) => {
           let baseSlug = (organization.name || "organization")
