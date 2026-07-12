@@ -5,18 +5,37 @@ import { getCollection } from "@/lib/db/collections"
 import { recurringRuleSchema, RecurringRuleInput } from "@/lib/validations/recurring.schema"
 import { RecurringRule, Transaction, Wallet } from "@/types"
 import { ObjectId } from "mongodb"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, updateTag } from "next/cache"
 import { createTransaction } from "./transactions"
 import { calculateNextDueDate } from "@/lib/utils"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { db } from "@/lib/db/client"
+import { canManageBudgets, Role } from "@/lib/permissions"
 
 export async function createRecurringRule(input: RecurringRuleInput) {
   const session = await requireApprovedUser()
   const validated = recurringRuleSchema.parse(input)
 
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const recurringColl = await getCollection<RecurringRule>("recurring_rules")
 
   const rule: Omit<RecurringRule, "_id"> = {
-    userId: session.user.id,
+    userId: scope.userId,
+    organizationId: scope.organizationId,
+    ownerUserId: scope.userId,
+    createdBy: scope.userId,
+    updatedBy: scope.userId,
     walletId: validated.walletId,
     categoryId: validated.categoryId,
     type: validated.type,
@@ -31,10 +50,12 @@ export async function createRecurringRule(input: RecurringRuleInput) {
     tags: validated.tags || [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    version: 1,
   }
 
   const result = await recurringColl.insertOne(rule as RecurringRule)
 
+  updateTag("recurring")
   revalidatePath("/recurring")
   revalidatePath("/", "layout")
   return { success: true, id: result.insertedId.toString() }
@@ -44,10 +65,22 @@ export async function updateRecurringRule(id: string, input: RecurringRuleInput)
   const session = await requireApprovedUser()
   const validated = recurringRuleSchema.parse(input)
 
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const recurringColl = await getCollection<RecurringRule>("recurring_rules")
   const ruleOid = new ObjectId(id)
 
-  const existing = await recurringColl.findOne({ _id: ruleOid, userId: session.user.id })
+  const existing = await recurringColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
   if (!existing) throw new Error("Recurring rule not found")
 
   // If start date or frequency changed, we might need to recalculate nextDueDate.
@@ -60,7 +93,7 @@ export async function updateRecurringRule(id: string, input: RecurringRuleInput)
       : existing.nextDueDate
 
   await recurringColl.updateOne(
-    { _id: ruleOid, userId: session.user.id },
+    { _id: ruleOid, ...getScopeFilter(scope) },
     {
       $set: {
         walletId: validated.walletId,
@@ -76,10 +109,13 @@ export async function updateRecurringRule(id: string, input: RecurringRuleInput)
         isActive: validated.isActive,
         tags: validated.tags,
         updatedAt: new Date(),
+        updatedBy: scope.userId,
       },
+      $inc: { version: 1 }
     }
   )
 
+  updateTag("recurring")
   revalidatePath("/recurring")
   revalidatePath("/", "layout")
   return { success: true }
@@ -87,14 +123,28 @@ export async function updateRecurringRule(id: string, input: RecurringRuleInput)
 
 export async function deleteRecurringRule(id: string) {
   const session = await requireApprovedUser()
+
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const recurringColl = await getCollection<RecurringRule>("recurring_rules")
   const ruleOid = new ObjectId(id)
 
-  const existing = await recurringColl.findOne({ _id: ruleOid, userId: session.user.id })
+  const existing = await recurringColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
   if (!existing) throw new Error("Recurring rule not found")
 
-  await recurringColl.deleteOne({ _id: ruleOid, userId: session.user.id })
+  await recurringColl.deleteOne({ _id: ruleOid, ...getScopeFilter(scope) })
 
+  updateTag("recurring")
   revalidatePath("/recurring")
   revalidatePath("/", "layout")
   return { success: true }
@@ -102,10 +152,23 @@ export async function deleteRecurringRule(id: string) {
 
 export async function processRecurringRuleNow(id: string) {
   const session = await requireApprovedUser()
+
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const recurringColl = await getCollection<RecurringRule>("recurring_rules")
   const ruleOid = new ObjectId(id)
 
-  const rule = await recurringColl.findOne({ _id: ruleOid, userId: session.user.id })
+  const rule = await recurringColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
   if (!rule) throw new Error("Recurring rule not found")
   if (!rule.isActive) throw new Error("Rule is inactive")
 
@@ -147,17 +210,22 @@ export async function processRecurringRuleNow(id: string) {
 
   if (processedCount > 0) {
     await recurringColl.updateOne(
-      { _id: ruleOid },
+      { _id: ruleOid, ...getScopeFilter(scope) },
       {
         $set: {
           nextDueDate,
           lastProcessedDate: new Date(),
           updatedAt: new Date(),
+          updatedBy: scope.userId,
         },
+        $inc: { version: 1 }
       }
     )
   }
 
+  updateTag("recurring")
+  updateTag("transactions")
+  updateTag("wallets")
   revalidatePath("/recurring")
   revalidatePath("/transactions")
   revalidatePath("/", "layout")
@@ -166,25 +234,42 @@ export async function processRecurringRuleNow(id: string) {
 
 export async function toggleRecurringRuleActive(id: string) {
   const session = await requireApprovedUser()
+
+  const scope = await getFinancialScope()
+  if (scope.isOrganization) {
+    const member = await db.collection("member").findOne({
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+    })
+    const role = (member?.role as Role) || "member"
+    if (!canManageBudgets(role)) {
+      throw new Error("Unauthorized")
+    }
+  }
+
   const recurringColl = await getCollection<RecurringRule>("recurring_rules")
   const ruleOid = new ObjectId(id)
 
-  const existing = await recurringColl.findOne({ _id: ruleOid, userId: session.user.id })
+  const existing = await recurringColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
   if (!existing) throw new Error("Recurring rule not found")
 
   const nextState = !existing.isActive
 
   await recurringColl.updateOne(
-    { _id: ruleOid, userId: session.user.id },
+    { _id: ruleOid, ...getScopeFilter(scope) },
     {
       $set: {
         isActive: nextState,
         updatedAt: new Date(),
+        updatedBy: scope.userId,
       },
+      $inc: { version: 1 }
     }
   )
 
+  updateTag("recurring")
   revalidatePath("/recurring")
   revalidatePath("/", "layout")
   return { success: true, isActive: nextState }
 }
+
