@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel, FieldGroup, FieldDescription, FieldContent } from "@/components/ui/field"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -583,13 +582,13 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                   <span className="flex items-center gap-2">
                     <Plus data-icon="inline-start" /> Invite Collaborator
                   </span>
-                  <ChevronDown className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                  <ChevronDown className="mr-1 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-4">
                 <form onSubmit={handleInviteMember}>
                   <FieldGroup>
-                    <div className="flex items-end gap-3.5 w-full">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3.5 w-full">
                       <Field className="flex-1 min-w-0">
                         <FieldLabel htmlFor="invite-username">Username</FieldLabel>
                         <FieldContent>
@@ -672,25 +671,22 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                           </Popover>
                         </FieldContent>
                       </Field>
-                      <Field className="w-auto shrink-0">
+                      <Field className="w-full sm:w-48 shrink-0">
                         <FieldLabel>Role</FieldLabel>
                         <FieldContent>
-                          <ToggleGroup
-                            type="single"
-                            value={inviteRole}
-                            onValueChange={(val) => {
-                              if (val) setInviteRole(val as Role)
-                            }}
-                            disabled={isInviting}
-                            variant="outline"
-                          >
-                            <ToggleGroupItem value="admin">Admin</ToggleGroupItem>
-                            <ToggleGroupItem value="member">Member</ToggleGroupItem>
-                            <ToggleGroupItem value="viewer">Viewer</ToggleGroupItem>
-                          </ToggleGroup>
+                          <Select value={inviteRole} onValueChange={(val) => setInviteRole(val as Role)} disabled={isInviting}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="member">Member</SelectItem>
+                              <SelectItem value="viewer">Viewer</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </FieldContent>
                       </Field>
-                      <Button type="submit" disabled={isInviting || !resolvedUser}>
+                      <Button type="submit" disabled={isInviting || !resolvedUser} className="w-full sm:w-auto">
                         {isInviting && <Loader2 className="animate-spin" data-icon="inline-start" />}
                         Send Invite
                       </Button>
