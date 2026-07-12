@@ -9,7 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Field, FieldLabel, FieldGroup, FieldDescription } from "@/components/ui/field"
+import { Field, FieldLabel, FieldGroup, FieldDescription, FieldContent } from "@/components/ui/field"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -30,7 +32,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
-import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, Search, User } from "lucide-react"
+import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, Search, User, ChevronDown } from "lucide-react"
 
 interface SpaceSettingsProps {
   initialSettings: OrganizationSettings | null
@@ -465,15 +467,14 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
 
   return (
     <div className="space-y-6">
-      {/* 1. Unified Space Preferences Card */}
-      <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
-        <CardHeader>
-          <CardTitle className="text-lg font-bold">Space Preferences</CardTitle>
-          <CardDescription>
-            Configure the display name, category, currency, and fiscal configurations for this shared workspace.
-          </CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSavePreferences}>
+      <form onSubmit={handleSavePreferences}>
+        <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold">Space Preferences</CardTitle>
+            <CardDescription>
+              Configure the display name, category, currency, and fiscal configurations for this shared workspace.
+            </CardDescription>
+          </CardHeader>
           <CardContent className="space-y-6">
             <FieldGroup>
               <Field>
@@ -486,7 +487,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                   placeholder="e.g. Couples Shared Ledger"
                   required
                   disabled={!canManageSettings || isUpdatingSettings}
-                  className="rounded-xl border-border/40"
                 />
                 <FieldDescription>This name will be displayed in the sidebar switcher for all members.</FieldDescription>
               </Field>
@@ -499,7 +499,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     onValueChange={(val) => setSpaceType(val as SpaceType)}
                     disabled={!canManageSettings || isUpdatingSettings}
                   >
-                    <SelectTrigger className="rounded-xl border border-border/40">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select space category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -519,7 +519,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     onValueChange={(val) => setBaseCurrency(val)}
                     disabled={!canManageSettings || isUpdatingSettings}
                   >
-                    <SelectTrigger className="rounded-xl border border-border/40">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select Base Currency" />
                     </SelectTrigger>
                     <SelectContent>
@@ -530,7 +530,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FieldDescription>Default currency for budgets, reporting, and dashboard counters.</FieldDescription>
                 </Field>
               </div>
 
@@ -542,7 +541,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     onValueChange={(val) => setFiscalYearStart(Number(val))}
                     disabled={!canManageSettings || isUpdatingSettings}
                   >
-                    <SelectTrigger className="rounded-xl border border-border/40">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select starting month" />
                     </SelectTrigger>
                     <SelectContent>
@@ -558,15 +557,15 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
             </FieldGroup>
           </CardContent>
           {canManageSettings && (
-            <CardFooter className="flex justify-end p-6 pt-0">
-              <Button type="submit" disabled={isUpdatingSettings} className="rounded-xl font-bold">
-                {isUpdatingSettings && <Loader2 className="mr-2 size-4 animate-spin" />}
+            <CardFooter className="justify-end border-t">
+              <Button type="submit" disabled={isUpdatingSettings}>
+                {isUpdatingSettings && <Loader2 className="animate-spin" data-icon="inline-start" />}
                 Save Changes
               </Button>
             </CardFooter>
           )}
-        </form>
-      </Card>
+        </Card>
+      </form>
 
       {/* 2. Members Management Card */}
       <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
@@ -577,113 +576,129 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Invite Member Section */}
           {canInvite && (
-            <div className="rounded-xl border border-border/30 bg-muted/5 p-4 space-y-4">
-              <h4 className="text-sm font-semibold flex items-center gap-2">
-                <Plus className="size-4" /> Invite Collaborator
-              </h4>
-              <form onSubmit={handleInviteMember} className="flex items-end gap-3.5 w-full">
-                <div className="flex-1 space-y-1.5 min-w-0">
-                  <Label htmlFor="invite-username" className="text-xs">Username</Label>
-                  <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
-                    <PopoverAnchor asChild>
-                      <InputGroup>
-                        <InputGroupAddon align="inline-start">
-                          <Search className="size-4" />
-                        </InputGroupAddon>
-                        <InputGroupInput
-                          id="invite-username"
-                          type="text"
-                          value={inviteUsername}
-                          onChange={(e) => setInviteUsername(e.target.value)}
-                          placeholder="partner"
-                          required
-                          disabled={isInviting}
-                        />
-                        {resolvedUser && (
-                          <InputGroupButton
-                            type="button"
-                            onClick={() => setShowUserPreview(!showUserPreview)}
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-muted-foreground/40 hover:text-muted-foreground/70"
-                          >
-                            <User className="size-4" />
-                          </InputGroupButton>
-                        )}
-                        {searchingUser && (
-                          <InputGroupAddon align="inline-end">
-                            <Loader2 className="size-4 animate-spin text-muted-foreground/60" />
-                          </InputGroupAddon>
-                        )}
-                      </InputGroup>
-                    </PopoverAnchor>
-                    <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm">
-                      {searchingUser ? (
-                        <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
-                          <Loader2 className="size-4 animate-spin text-primary" />
-                          <span className="text-xs font-medium">Searching user...</span>
-                        </div>
-                      ) : resolvedUser ? (
-                        <>
-                          <PopoverHeader>
-                            <PopoverTitle className="text-sm font-bold flex items-center gap-1.5">
-                              Found User
-                            </PopoverTitle>
-                            <PopoverDescription className="text-xs text-muted-foreground">
-                              Verify details before sending invitation
-                            </PopoverDescription>
-                          </PopoverHeader>
-                          <div className="flex gap-3 pt-1">
-                            <Avatar className="h-10 w-10 shrink-0 border border-border/40">
-                              <AvatarImage src={resolvedUser.image || ""} />
-                              <AvatarFallback className="font-bold">{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div className="space-y-0.5 text-left text-foreground min-w-0">
-                              <h4 className="text-sm font-bold truncate leading-snug">{resolvedUser.name}</h4>
-                              <p className="text-xs text-muted-foreground truncate">@{resolvedUser.username}</p>
-                              <p className="text-[11px] text-muted-foreground mt-1 truncate">{resolvedUser.email}</p>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <PopoverHeader>
-                            <PopoverTitle className="text-sm font-bold text-rose-500 flex items-center gap-1.5">
-                              Not Found
-                            </PopoverTitle>
-                            <PopoverDescription className="text-xs text-muted-foreground">
-                              No user matches this username
-                            </PopoverDescription>
-                          </PopoverHeader>
-                          <p className="text-xs text-muted-foreground leading-relaxed pt-1">
-                            We couldn&apos;t find any user with the username &quot;{inviteUsername}&quot;. Please double check the spelling and try again.
-                          </p>
-                        </>
-                      )}
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="w-36 sm:w-48 space-y-1.5 shrink-0">
-                  <Label htmlFor="invite-role" className="text-xs">Role Capability</Label>
-                  <Select value={inviteRole} onValueChange={(val) => setInviteRole(val as Role)} disabled={isInviting}>
-                    <SelectTrigger className="rounded-xl border border-border/40 h-10">
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="member">Member</SelectItem>
-                      <SelectItem value="viewer">Viewer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button type="submit" disabled={isInviting || !resolvedUser} className="rounded-xl font-bold h-10 shrink-0">
-                  {isInviting && <Loader2 className="mr-2 size-4 animate-spin" />}
-                  Send Invite
+            <Collapsible className="rounded-xl border border-border/30 bg-muted/5 p-4 space-y-2">
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full flex items-center justify-between p-0 hover:bg-transparent group/collapsible">
+                  <span className="flex items-center gap-2">
+                    <Plus data-icon="inline-start" /> Invite Collaborator
+                  </span>
+                  <ChevronDown className="transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
                 </Button>
-              </form>
-            </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-4">
+                <form onSubmit={handleInviteMember}>
+                  <FieldGroup>
+                    <div className="flex items-end gap-3.5 w-full">
+                      <Field className="flex-1 min-w-0">
+                        <FieldLabel htmlFor="invite-username">Username</FieldLabel>
+                        <FieldContent>
+                          <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
+                            <PopoverAnchor asChild>
+                              <InputGroup>
+                                <InputGroupAddon align="inline-start">
+                                  <Search />
+                                </InputGroupAddon>
+                                <InputGroupInput
+                                  id="invite-username"
+                                  type="text"
+                                  value={inviteUsername}
+                                  onChange={(e) => setInviteUsername(e.target.value)}
+                                  placeholder="partner"
+                                  required
+                                  disabled={isInviting}
+                                />
+                                {resolvedUser && (
+                                  <InputGroupButton
+                                    type="button"
+                                    onClick={() => setShowUserPreview(!showUserPreview)}
+                                    variant="ghost"
+                                    size="icon-sm"
+                                  >
+                                    <User />
+                                  </InputGroupButton>
+                                )}
+                                {searchingUser && (
+                                  <InputGroupAddon align="inline-end">
+                                    <Loader2 className="animate-spin" />
+                                  </InputGroupAddon>
+                                )}
+                              </InputGroup>
+                            </PopoverAnchor>
+                            <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm">
+                              {searchingUser ? (
+                                <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
+                                  <Loader2 className="animate-spin text-primary" />
+                                  <span className="text-xs font-medium">Searching user...</span>
+                                </div>
+                              ) : resolvedUser ? (
+                                <>
+                                  <PopoverHeader>
+                                    <PopoverTitle className="text-sm font-bold flex items-center gap-1.5">
+                                      Found User
+                                    </PopoverTitle>
+                                    <PopoverDescription className="text-xs text-muted-foreground">
+                                      Verify details before sending invitation
+                                    </PopoverDescription>
+                                  </PopoverHeader>
+                                  <div className="flex gap-3 pt-1">
+                                    <Avatar className="h-10 w-10 shrink-0 border border-border/40">
+                                      <AvatarImage src={resolvedUser.image || ""} />
+                                      <AvatarFallback className="font-bold">{resolvedUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="space-y-0.5 text-left text-foreground min-w-0">
+                                      <h4 className="text-sm font-bold truncate leading-snug">{resolvedUser.name}</h4>
+                                      <p className="text-xs text-muted-foreground truncate">@{resolvedUser.username}</p>
+                                      <p className="text-[11px] text-muted-foreground mt-1 truncate">{resolvedUser.email}</p>
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <PopoverHeader>
+                                    <PopoverTitle className="text-sm font-bold text-rose-500 flex items-center gap-1.5">
+                                      Not Found
+                                    </PopoverTitle>
+                                    <PopoverDescription className="text-xs text-muted-foreground">
+                                      No user matches this username
+                                    </PopoverDescription>
+                                  </PopoverHeader>
+                                  <p className="text-xs text-muted-foreground leading-relaxed pt-1">
+                                    We couldn&apos;t find any user with the username &quot;{inviteUsername}&quot;. Please double check the spelling and try again.
+                                  </p>
+                                </>
+                              )}
+                            </PopoverContent>
+                          </Popover>
+                        </FieldContent>
+                      </Field>
+                      <Field className="w-auto shrink-0">
+                        <FieldLabel>Role</FieldLabel>
+                        <FieldContent>
+                          <ToggleGroup
+                            type="single"
+                            value={inviteRole}
+                            onValueChange={(val) => {
+                              if (val) setInviteRole(val as Role)
+                            }}
+                            disabled={isInviting}
+                            variant="outline"
+                          >
+                            <ToggleGroupItem value="admin">Admin</ToggleGroupItem>
+                            <ToggleGroupItem value="member">Member</ToggleGroupItem>
+                            <ToggleGroupItem value="viewer">Viewer</ToggleGroupItem>
+                          </ToggleGroup>
+                        </FieldContent>
+                      </Field>
+                      <Button type="submit" disabled={isInviting || !resolvedUser}>
+                        {isInviting && <Loader2 className="animate-spin" data-icon="inline-start" />}
+                        Send Invite
+                      </Button>
+                    </div>
+                  </FieldGroup>
+                </form>
+              </CollapsibleContent>
+            </Collapsible>
           )}
 
           {/* Active Members Table */}
