@@ -56,7 +56,7 @@ export async function getUserInvitationsAction() {
           id: invite.organizationId
         });
         return {
-          id: invite.id,
+          id: invite._id.toString(),
           organizationId: invite.organizationId ? invite.organizationId.toString() : "",
           organizationName: org?.name || "Shared Workspace",
           inviterEmail: invite.inviterEmail || "Collaborator",

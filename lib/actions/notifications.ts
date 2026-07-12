@@ -123,5 +123,5 @@ export async function createNotification({
   }
   const res = await notificationsCollection.insertOne(doc as unknown as Notification)
   updateTag("notifications")
-  return { ...doc, _id: res.insertedId }
+  return { ...doc, _id: res.insertedId.toString() }
 }

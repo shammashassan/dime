@@ -583,8 +583,8 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
               <h4 className="text-sm font-semibold flex items-center gap-2">
                 <Plus className="size-4" /> Invite Collaborator
               </h4>
-              <form onSubmit={handleInviteMember} className="flex flex-col sm:flex-row gap-4 items-end">
-                <div className="flex-1 w-full space-y-1.5">
+              <form onSubmit={handleInviteMember} className="flex items-end gap-3.5 w-full">
+                <div className="flex-1 space-y-1.5 min-w-0">
                   <Label htmlFor="invite-username" className="text-xs">Username</Label>
                   <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
                     <PopoverAnchor asChild>
@@ -619,7 +619,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                         )}
                       </InputGroup>
                     </PopoverAnchor>
-                    <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-(--radix-popover-trigger-width) max-w-sm p-4 rounded-2xl shadow-xl border border-border/40 bg-popover z-50 flex flex-col gap-3">
+                    <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm">
                       {searchingUser ? (
                         <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
                           <Loader2 className="size-4 animate-spin text-primary" />
@@ -665,7 +665,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="w-full sm:w-48 space-y-1.5">
+                <div className="w-36 sm:w-48 space-y-1.5 shrink-0">
                   <Label htmlFor="invite-role" className="text-xs">Role Capability</Label>
                   <Select value={inviteRole} onValueChange={(val) => setInviteRole(val as Role)} disabled={isInviting}>
                     <SelectTrigger className="rounded-xl border border-border/40 h-10">
@@ -678,7 +678,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" disabled={isInviting || !resolvedUser} className="rounded-xl w-full sm:w-auto font-bold h-10">
+                <Button type="submit" disabled={isInviting || !resolvedUser} className="rounded-xl font-bold h-10 shrink-0">
                   {isInviting && <Loader2 className="mr-2 size-4 animate-spin" />}
                   Send Invite
                 </Button>
