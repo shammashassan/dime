@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition, useRef, useCallback } from "react"
 import { useSession, authClient } from "@/lib/auth-client"
 import { updatePreferences } from "@/lib/actions/preferences"
+import { getUserInvitationsAction } from "@/lib/actions/organization"
 import { toast } from "sonner"
 import { deleteUserAccount, getUserExportData } from "@/lib/actions/user"
 import { UserPreferences } from "@/lib/queries/preferences"
@@ -90,8 +91,8 @@ export function SettingsView({ preferences: initialPreferences, wallets, orgSett
   const fetchUserInvitations = useCallback(async () => {
     setLoadingInvitations(true)
     try {
-      const res = await authClient.organization.listUserInvitations()
-      if (res.data) {
+      const res = await getUserInvitationsAction()
+      if (res.success && res.data) {
         setUserInvitations(res.data as unknown as UserInvitation[])
       }
     } catch (err) {

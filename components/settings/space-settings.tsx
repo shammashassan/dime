@@ -95,7 +95,7 @@ const CURRENCIES = [
 export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
   const { data: sessionData } = useSession()
   const { data: activeOrg, refetch: refetchActiveOrg } = authClient.useActiveOrganization()
-  
+
   const [orgName, setOrgName] = React.useState<string | undefined>(undefined)
 
   // Settings states
@@ -133,13 +133,13 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
         authClient.organization.listMembers({ query: { organizationId: activeOrgId } }),
         authClient.organization.listInvitations({ query: { organizationId: activeOrgId } })
       ])
-      
+
       if (mRes.data?.members) {
         setMembers(mRes.data.members as WorkspaceMember[])
       } else if (Array.isArray(mRes.data)) {
         setMembers(mRes.data as WorkspaceMember[])
       }
-      
+
       if (Array.isArray(iRes.data)) {
         setInvitations(iRes.data as WorkspaceInvitation[])
       } else if (iRes.data && "invitations" in (iRes.data as Record<string, unknown>)) {
@@ -588,7 +588,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                   <Label htmlFor="invite-username" className="text-xs">Username</Label>
                   <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
                     <PopoverAnchor asChild>
-                      <InputGroup className="h-10 rounded-xl">
+                      <InputGroup>
                         <InputGroupAddon align="inline-start">
                           <Search className="size-4" />
                         </InputGroupAddon>
@@ -600,7 +600,6 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                           placeholder="partner"
                           required
                           disabled={isInviting}
-                          className="rounded-xl border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:outline-hidden"
                         />
                         {resolvedUser && (
                           <InputGroupButton
@@ -620,7 +619,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                         )}
                       </InputGroup>
                     </PopoverAnchor>
-                    <PopoverContent align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm p-4 rounded-2xl shadow-xl border border-border/40 bg-popover z-50">
+                    <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm p-4 rounded-2xl shadow-xl border border-border/40 bg-popover z-50">
                       {resolvedUser && (
                         <div className="flex gap-4">
                           <Avatar className="h-10 w-10">
@@ -735,48 +734,52 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
           </div>
 
           {/* Pending Invitations Table */}
-          {invitations.length > 0 && (
-            <div className="space-y-2 pt-4 border-t border-border/10">
-              <h4 className="text-sm font-semibold">Pending Invitations</h4>
-              <div className="rounded-xl border border-border/40 overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email Address</TableHead>
-                      <TableHead>Invited Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      {canInvite && <TableHead className="w-24 text-right">Actions</TableHead>}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invitations.map((invite) => (
-                      <TableRow key={invite.id}>
-                        <TableCell className="font-medium">{invite.email}</TableCell>
-                        <TableCell className="capitalize">{invite.role}</TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className="animate-pulse">
-                            Pending
-                          </Badge>
-                        </TableCell>
-                        {canInvite && (
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg text-xs"
-                              onClick={() => handleCancelInvitation(invite.id)}
-                            >
-                              Cancel
-                            </Button>
-                          </TableCell>
-                        )}
+          {(() => {
+            const pending = invitations.filter((invite) => invite.status === "pending")
+            if (pending.length === 0) return null
+            return (
+              <div className="space-y-2 pt-4 border-t border-border/10">
+                <h4 className="text-sm font-semibold">Pending Invitations</h4>
+                <div className="rounded-xl border border-border/40 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email Address</TableHead>
+                        <TableHead>Invited Role</TableHead>
+                        <TableHead>Status</TableHead>
+                        {canInvite && <TableHead className="w-24 text-right">Actions</TableHead>}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {pending.map((invite) => (
+                        <TableRow key={invite.id}>
+                          <TableCell className="font-medium">{invite.email}</TableCell>
+                          <TableCell className="capitalize">{invite.role}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="animate-pulse">
+                              Pending
+                            </Badge>
+                          </TableCell>
+                          {canInvite && (
+                            <TableCell className="text-right">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-lg text-xs"
+                                onClick={() => handleCancelInvitation(invite.id)}
+                              >
+                                Cancel
+                              </Button>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
         </CardContent>
       </Card>
 

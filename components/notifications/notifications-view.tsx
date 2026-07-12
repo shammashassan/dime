@@ -218,56 +218,41 @@ export function NotificationsContent({ initialNotifications }: NotificationsCont
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 pb-12">
-      {/* Header */}
-      <section className="px-4 pt-8 lg:px-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between max-w-7xl">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-4">
-              <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <Bell />
-              </div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-black tracking-tight md:text-4xl bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/60">
-                  Notifications
-                </h1>
-                <Badge variant="outline" className="rounded-full">
-                  {unread.length} Unread
-                </Badge>
-              </div>
-            </div>
-            <p className="text-lg text-muted-foreground max-w-2xl font-medium">
-              View and manage your alerts, reminders, and activities.
-            </p>
+    <div className="flex flex-col gap-7 w-full">
+      {/* ── Header ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0">
+            <Bell className="size-6" />
           </div>
-          <Button
-            onClick={handleMarkAllAsRead}
-            variant="outline"
-            className="w-full sm:w-auto shrink-0 rounded-xl"
-            disabled={unread.length === 0}
-          >
-            Mark all as read
-          </Button>
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight">Notifications</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">View and manage your alerts and activities.</p>
+          </div>
         </div>
-      </section>
+        <Button
+          onClick={handleMarkAllAsRead}
+          variant="outline"
+          className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform w-full md:w-auto"
+          disabled={unread.length === 0}
+        >
+          Mark all as read
+        </Button>
+      </div>
 
       <Separator />
 
       {/* Content */}
       {notifications.length === 0 ? (
-        <section className="px-4 lg:px-6">
-          <div className="max-w-7xl border border-dashed rounded-2xl">
-            <EmptyMuted onRefresh={fetchNotifications} />
-          </div>
-        </section>
+        <div className="border border-dashed rounded-2xl">
+          <EmptyMuted onRefresh={fetchNotifications} />
+        </div>
       ) : (
-        <section className="px-4 lg:px-6">
-          <div className="max-w-7xl flex flex-col gap-8">
-            {renderSection("Today", today)}
-            {renderSection("Yesterday", yesterday)}
-            {renderSection("Earlier", older)}
-          </div>
-        </section>
+        <div className="flex flex-col gap-8">
+          {renderSection("Today", today)}
+          {renderSection("Yesterday", yesterday)}
+          {renderSection("Earlier", older)}
+        </div>
       )}
     </div>
   );

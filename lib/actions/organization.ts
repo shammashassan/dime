@@ -39,5 +39,38 @@ export async function updateOrganizationSettings(input: unknown) {
   
   return { success: true };
 }
+import { requireApprovedUser } from "@/lib/auth-guard";
+import { db } from "@/lib/db/client";
 
+export async function getUserInvitationsAction() {
+  try {
+    const session = await requireApprovedUser();
+    const items = await db.collection("invitation").find({
+      email: session.user.email,
+      status: "pending",
+    }).toArray();
 
+    const resolvedItems = await Promise.all(
+      items.map(async (invite) => {
+        const org = await db.collection("organization").findOne({
+          id: invite.organizationId
+        });
+        return {
+          id: invite.id,
+          organizationId: invite.organizationId,
+          organizationName: org?.name || "Shared Workspace",
+          inviterEmail: invite.inviterEmail || "Collaborator",
+          role: invite.role,
+          status: invite.status,
+          expiresAt: invite.expiresAt,
+          createdAt: invite.createdAt,
+        };
+      })
+    );
+
+    return { success: true, data: resolvedItems };
+  } catch (err) {
+    console.error("Failed to fetch user invitations server-side:", err);
+    return { success: false, data: [] };
+  }
+}
