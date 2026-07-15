@@ -3,7 +3,7 @@
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
 import { walletSchema, WalletInput } from "@/lib/validations/wallet.schema"
-import { Wallet, Transaction, Category, User } from "@/types"
+import { Wallet, Transaction, Category } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
@@ -263,94 +263,4 @@ export async function deleteWallet(id: string) {
   return { success: true }
 }
 
-export async function shareWalletAction(walletId: string, email: string) {
-  await requireApprovedUser()
 
-  const scope = await getFinancialScope()
-  if (scope.isOrganization) {
-    const member = await db.collection("member").findOne({
-      userId: scope.userId,
-      organizationId: scope.organizationId,
-    })
-    const role = (member?.role as Role) || "member"
-    if (!canManageWallets(role)) {
-      throw new Error("Unauthorized")
-    }
-  }
-
-  const walletsColl = await getCollection<Wallet>("wallets")
-  const walletOid = new ObjectId(walletId)
-
-  // Verify wallet exists and is owned/scoped by the current space
-  const wallet = await walletsColl.findOne({ _id: walletOid, ...getScopeFilter(scope) })
-  if (!wallet) throw new Error("Wallet not found or access denied")
-
-  const cleanEmail = email.trim().toLowerCase()
-  if (!cleanEmail) throw new Error("Email is required")
-
-  // Ensure user cannot share with themselves
-  const usersColl = await getCollection<User>("user")
-  const currentOwnerUser = await usersColl.findOne({ id: scope.userId })
-  if (currentOwnerUser && currentOwnerUser.email.toLowerCase() === cleanEmail) {
-    throw new Error("You cannot share a wallet with yourself")
-  }
-
-  // Update sharedWith array
-  await walletsColl.updateOne(
-    { _id: walletOid, ...getScopeFilter(scope) },
-    { 
-      $addToSet: { sharedWith: cleanEmail },
-      $set: { updatedAt: new Date(), updatedBy: scope.userId },
-      $inc: { version: 1 }
-    }
-  )
-
-  updateTag("wallets")
-  revalidatePath("/wallets")
-  revalidatePath(`/wallets/${walletId}`)
-  revalidatePath("/", "layout")
-
-  return { success: true }
-}
-
-export async function unshareWalletAction(walletId: string, email: string) {
-  await requireApprovedUser()
-
-  const scope = await getFinancialScope()
-  if (scope.isOrganization) {
-    const member = await db.collection("member").findOne({
-      userId: scope.userId,
-      organizationId: scope.organizationId,
-    })
-    const role = (member?.role as Role) || "member"
-    if (!canManageWallets(role)) {
-      throw new Error("Unauthorized")
-    }
-  }
-
-  const walletsColl = await getCollection<Wallet>("wallets")
-  const walletOid = new ObjectId(walletId)
-
-  // Verify wallet exists and is owned/scoped by the current space
-  const wallet = await walletsColl.findOne({ _id: walletOid, ...getScopeFilter(scope) })
-  if (!wallet) throw new Error("Wallet not found or access denied")
-
-  const cleanEmail = email.trim().toLowerCase()
-
-  // Remove email from sharedWith array
-  await walletsColl.updateOne(
-    { _id: walletOid, ...getScopeFilter(scope) },
-    { 
-      $pull: { sharedWith: cleanEmail },
-      $set: { updatedAt: new Date(), updatedBy: scope.userId },
-      $inc: { version: 1 }
-    }
-  )
-
-  updateTag("wallets")
-  revalidatePath("/wallets")
-  revalidatePath(`/wallets/${walletId}`)
-  revalidatePath("/", "layout")
-
-  return { success: true }
-}

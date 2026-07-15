@@ -43,10 +43,8 @@ import {
   Loader2,
   HandCoins,
   ArchiveRestore,
-  Users,
 } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
-import { ShareWalletDialog } from "./share-wallet-dialog"
 
 interface WalletsViewProps {
   wallets: Wallet[]
@@ -78,7 +76,6 @@ export function WalletsView({ wallets }: WalletsViewProps) {
   const [addOpen, setAddOpen] = useState(false)
   const [editingWallet, setEditingWallet] = useState<Wallet | null>(null)
   const [deletingWalletId, setDeletingWalletId] = useState<string | null>(null)
-  const [sharingWallet, setSharingWallet] = useState<Wallet | null>(null)
   const { data: session } = authClient.useSession()
 
   const handleToggleArchive = (id: string) => {
@@ -155,21 +152,11 @@ export function WalletsView({ wallets }: WalletsViewProps) {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <p className="text-sm font-bold text-foreground truncate leading-tight">{w.name}</p>
-                {w.userId !== session?.user?.id && (
-                  <span title="Shared Wallet">
-                    <Users className="size-3.5 text-blue-500 shrink-0" />
-                  </span>
-                )}
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <Badge variant="secondary" className="rounded-full text-[9px] uppercase tracking-wider font-bold px-2 py-0 h-4">
                   {w.type.replace("_", " ")}
                 </Badge>
-                {w.sharedWith && w.sharedWith.length > 0 && w.userId === session?.user?.id && (
-                  <Badge variant="outline" className="rounded-full text-[9px] uppercase tracking-wider font-bold px-2 py-0 h-4 border-blue-500/20 text-blue-500 bg-blue-500/5">
-                    Shared
-                  </Badge>
-                )}
               </div>
             </div>
           </div>
@@ -209,20 +196,6 @@ export function WalletsView({ wallets }: WalletsViewProps) {
                 </TooltipTrigger>
                 <TooltipContent side="top" className="rounded-xl font-medium">
                   Edit wallet
-                </TooltipContent>
-              </Tooltip>
-            )}
-
-            {isOwner && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
-                    onClick={() => setSharingWallet(w)}>
-                    <Users className="size-3.5 text-blue-500" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="rounded-xl font-medium">
-                  Share wallet
                 </TooltipContent>
               </Tooltip>
             )}
@@ -376,13 +349,6 @@ export function WalletsView({ wallets }: WalletsViewProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Share Wallet Dialog */}
-      <ShareWalletDialog
-        open={!!sharingWallet}
-        onOpenChange={(open) => !open && setSharingWallet(null)}
-        wallet={sharingWallet}
-      />
     </div>
   )
 }

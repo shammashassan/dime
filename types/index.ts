@@ -10,7 +10,6 @@ export interface Wallet {
   color: string           // Hex color
   icon: string            // Icon name string
   isArchived: boolean
-  sharedWith?: string[]   // Array of collaborator emails
   createdAt: Date
   updatedAt: Date
   organizationId?: string | null
