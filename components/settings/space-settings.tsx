@@ -589,7 +589,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                 <form onSubmit={handleInviteMember}>
                   <FieldGroup>
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3.5 w-full">
-                      <Field className="flex-[2] min-w-0">
+                      <Field className="flex-2 min-w-0">
                         <FieldLabel htmlFor="invite-username">Username</FieldLabel>
                         <FieldContent>
                           <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
@@ -624,7 +624,7 @@ export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
                                 )}
                               </InputGroup>
                             </PopoverAnchor>
-                            <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-[var(--radix-popover-trigger-width)] max-w-sm">
+                            <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-(--radix-popover-trigger-width) max-w-sm">
                               {searchingUser ? (
                                 <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
                                   <Loader2 className="animate-spin text-primary" />
