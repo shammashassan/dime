@@ -126,7 +126,7 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
                   </p>
 
                   {/* Buttons — size-8, icon size-3.5, always visible width reserved */}
-                  <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center gap-0.5 shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
