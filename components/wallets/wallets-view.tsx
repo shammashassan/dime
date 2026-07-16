@@ -218,7 +218,7 @@ export function WalletsView({ wallets }: WalletsViewProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon"
-                  className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0"
+                  className="size-7 rounded-lg text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-100 translate-x-0 md:opacity-0 md:group-hover:opacity-100 transition-all duration-200 md:translate-x-1 md:group-hover:translate-x-0"
                   onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
                   <Trash2 className="size-3.5" />
                 </Button>
