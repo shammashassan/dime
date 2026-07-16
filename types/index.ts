@@ -23,7 +23,7 @@ export interface Transaction {
   _id: ObjectId
   userId: string
   walletId: string
-  categoryId: string
+  categoryId?: string | null
   type: "income" | "expense" | "transfer"
   amount: number          // Always positive; type determines direction
   currency: string
@@ -36,6 +36,11 @@ export interface Transaction {
   linkedTransactionId?: string // Links two transaction records in a transfer
   transferType?: "debit" | "credit" // Determines if this transaction is the source (debit) or destination (credit) of a transfer
   goalId?: string         // Optional link to a Goal document for savings goals contributions
+  budgetId?: string | null // Optional link to a Budget override
+  isFlagged?: boolean
+  needsReview?: boolean
+  splitMode?: "amount" | "percentage" | "equal"
+  splits?: { id: string; categoryId: string; amount: number; percentage?: number; notes?: string }[]
   createdAt: Date
   updatedAt: Date
   organizationId?: string | null
@@ -208,3 +213,103 @@ export interface SerializedNotification {
   updatedAt: string;
 }
 
+
+export type RuleTrigger = "manual" | "receipt" | "csv_import" | "recurring" | "api";
+
+export type ExecutionMode = "all_matches" | "first_match";
+
+export type ConditionField = "description" | "amount" | "walletId" | "walletType" | "currency" | "tags";
+
+export type ConditionOperator = 
+  | "contains" | "equals" | "starts_with" | "ends_with" | "regex"
+  | "gt" | "lt" | "eq" | "gte" | "lte"
+  | "contains_tag";
+
+export type ConditionValue = string | number | boolean | string[];
+
+export interface RuleCondition {
+  field: ConditionField
+  operator: ConditionOperator
+  value: ConditionValue
+}
+
+export type RuleAction = 
+  | { type: "assign_category"; categoryId: string }
+  | { type: "assign_tags"; tags: string[] }
+  | { type: "assign_budget"; budgetId: string }
+  | { type: "set_notes"; notes: string }
+  | { type: "mark_recurring"; isRecurring: boolean }
+  | { type: "flag_transaction"; isFlagged: boolean; needsReview: boolean }
+  | { type: "auto_split"; splits: { id?: string; categoryId: string; amount: number; notes?: string }[] }
+  | { type: "move_to_wallet"; walletId: string };
+
+export type RuleStatus = "draft" | "active" | "disabled";
+
+export interface AutomationRule {
+  _id: ObjectId
+  userId: string
+  organizationId: string | null
+  name: string
+  description?: string
+  status: RuleStatus
+  priority: number           // Higher executes first
+  stopProcessing: boolean    // If true, stop subsequent evaluations if this rule matches
+  triggers: RuleTrigger[]    // Contexts in which this rule applies
+  conditions: RuleCondition[]
+  conditionOperator: "and" | "or"
+  actions: RuleAction[]
+  
+  // Statistics
+  executionCount: number
+  lastExecutedAt: Date | null
+  lastMatchedAt: Date | null
+  
+  version: number
+  createdAt: Date
+  updatedAt: Date
+  createdBy: string
+  updatedBy: string
+}
+
+export interface RuleConflict {
+  field: string
+  winningRuleId: string
+  winningRuleName: string
+  losingRuleId: string
+  losingRuleName: string
+  valueAttempted: any
+  valueApplied: any
+}
+
+export interface RuleExecutionResult {
+  originalTransaction: Partial<Transaction>
+  modifiedTransaction: Partial<Transaction>
+  matchedRulesCount: number
+  appliedRules: {
+    ruleId: string
+    ruleName: string
+    actionsApplied: RuleAction[]
+  }[]
+  skippedRules: {
+    ruleId: string
+    ruleName: string
+    reason: "stop_processing_triggered" | "trigger_mismatch" | "disabled" | "condition_mismatch"
+  }[]
+  conflicts: RuleConflict[]
+  warnings: string[]
+  stopProcessingTriggered: boolean
+}
+
+export interface AutomationJob {
+  _id: ObjectId
+  userId: string
+  organizationId: string | null
+  ruleId: string
+  status: "pending" | "processing" | "completed" | "failed"
+  totalTransactions: number
+  processedTransactions: number
+  matchedTransactions: number
+  error?: string
+  createdAt: Date
+  updatedAt: Date
+}

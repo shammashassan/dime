@@ -7,7 +7,8 @@ import { getUserInvitationsAction } from "@/lib/actions/organization"
 import { toast } from "sonner"
 import { deleteUserAccount, getUserExportData } from "@/lib/actions/user"
 import { UserPreferences } from "@/lib/queries/preferences"
-import { Wallet } from "@/types"
+import { Wallet, Category, Budget } from "@/types"
+import { AutomationRulesSettings } from "@/components/settings/automation-rules"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -52,7 +53,8 @@ import {
   LogOut,
   Laptop,
   Building,
-  Mail
+  Mail,
+  Zap
 } from "lucide-react"
 import { OrganizationSettings } from "@/types"
 import { SpaceSettings } from "@/components/settings/space-settings"
@@ -60,11 +62,13 @@ import { SpaceSettings } from "@/components/settings/space-settings"
 interface SettingsViewProps {
   preferences: UserPreferences
   wallets: Wallet[]
+  categories: Category[]
+  budgets: Budget[]
   orgSettings: OrganizationSettings | null
   activeOrgId: string | null
 }
 
-export function SettingsView({ preferences: initialPreferences, wallets, orgSettings, activeOrgId }: SettingsViewProps) {
+export function SettingsView({ preferences: initialPreferences, wallets, categories, budgets, orgSettings, activeOrgId }: SettingsViewProps) {
   const { data: sessionData, refetch: refreshSession } = useSession()
   const user = sessionData?.user
   const [activeTab, setActiveTab] = useState("profile")
@@ -760,6 +764,10 @@ export function SettingsView({ preferences: initialPreferences, wallets, orgSett
             <SettingsIcon className="size-4" />
             Preferences
           </TabsTrigger>
+          <TabsTrigger value="rules" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+            <Zap className="size-4" />
+            Automation Rules
+          </TabsTrigger>
           {activeOrgId && (
             <TabsTrigger value="space" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
               <Building className="size-4" />
@@ -1203,6 +1211,15 @@ export function SettingsView({ preferences: initialPreferences, wallets, orgSett
             </Card>
           </TabsContent>
 
+          <TabsContent value="rules" className="outline-none" data-slot="tabs-content">
+            <AutomationRulesSettings
+              userId={user?.id || ""}
+              wallets={wallets}
+              categories={categories}
+              budgets={budgets}
+            />
+          </TabsContent>
+
           {activeOrgId && (
             <TabsContent value="space" className="outline-none" data-slot="tabs-content">
               <SpaceSettings initialSettings={orgSettings} />
@@ -1356,7 +1373,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, orgSett
             {totpUri && (
               <div className="w-full flex justify-center">
                 <div className="p-2 sm:p-3 bg-white rounded-2xl shadow-inner border border-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpUri)}`}
                     alt="2FA QR Code"

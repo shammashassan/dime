@@ -15,6 +15,8 @@ export interface TransactionFilters {
   maxAmount?: number
   tags?: string[]
   search?: string
+  isFlagged?: boolean
+  needsReview?: boolean
 }
 
 function buildQuery(
@@ -44,7 +46,10 @@ function buildQuery(
   }
 
   if (filters.categoryIds && filters.categoryIds.length > 0) {
-    query.categoryId = { $in: filters.categoryIds }
+    query.$or = [
+      { categoryId: { $in: filters.categoryIds } },
+      { "splits.categoryId": { $in: filters.categoryIds } }
+    ]
   }
 
   if (filters.walletIds && filters.walletIds.length > 0) {
@@ -70,6 +75,14 @@ function buildQuery(
 
   if (filters.search) {
     query.description = { $regex: filters.search, $options: "i" }
+  }
+
+  if (filters.isFlagged !== undefined) {
+    query.isFlagged = filters.isFlagged
+  }
+
+  if (filters.needsReview !== undefined) {
+    query.needsReview = filters.needsReview
   }
 
   return query

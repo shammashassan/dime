@@ -180,7 +180,7 @@ export function NotificationMenu() {
           variant="ghost"
           className="relative rounded-full"
         >
-          <BellIcon aria-hidden="true" className="size-5" />
+          <BellIcon aria-hidden="true" />
           {unreadCount > 0 && (
             <span
               aria-hidden="true"

@@ -11,6 +11,13 @@ import { Button } from "@/components/ui/button"
 import { Download, ArrowLeftRight, FileSpreadsheet } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 import { CSVImportModal } from "./csv-import-modal"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+import { expandTransactions } from "@/lib/split-utils"
 
 interface TransactionsViewProps {
   transactions: Transaction[]
@@ -36,8 +43,7 @@ export function TransactionsView({
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [importOpen, setImportOpen] = useState(false)
 
-  // CSV Export
-  const handleExportCSV = () => {
+  const handleExportSummaryCSV = () => {
     const categoryMap = new Map(categories.map((c) => [c._id.toString(), c]))
     const walletMap = new Map(wallets.map((w) => [w._id.toString(), w]))
 
@@ -56,7 +62,9 @@ export function TransactionsView({
       formatDate(tx.date),
       tx.description,
       tx.type,
-      categoryMap.get(tx.categoryId)?.name || "Uncategorized",
+      tx.splits && tx.splits.length > 0
+        ? `Split: ${tx.splits.map(s => `${categoryMap.get(s.categoryId)?.name || "Uncategorized"} (${s.amount / 100})`).join(" | ")}`
+        : (categoryMap.get(tx.categoryId || "")?.name || "Uncategorized"),
       walletMap.get(tx.walletId)?.name || "Unknown",
       tx.amount / 100,
       tx.currency,
@@ -64,6 +72,44 @@ export function TransactionsView({
       tx.notes || "",
     ])
 
+    downloadCSV(headers, rows, `dime_transactions_summary_${new Date().toISOString().split("T")[0]}.csv`)
+  }
+
+  const handleExportExpandedCSV = () => {
+    const categoryMap = new Map(categories.map((c) => [c._id.toString(), c]))
+    const walletMap = new Map(wallets.map((w) => [w._id.toString(), w]))
+
+    const headers = [
+      "Date",
+      "Description",
+      "Type",
+      "Category",
+      "Wallet",
+      "Amount",
+      "Currency",
+      "Tags",
+      "Notes",
+      "Is Split Part",
+    ]
+    
+    const expandedTxs = expandTransactions(transactions)
+    const rows = expandedTxs.map((tx) => [
+      formatDate(tx.date),
+      tx.description,
+      tx.type,
+      categoryMap.get(tx.categoryId || "")?.name || "Uncategorized",
+      walletMap.get(tx.walletId)?.name || "Unknown",
+      tx.amount / 100,
+      tx.currency,
+      tx.tags.join("; "),
+      tx.notes || "",
+      tx._isVirtualSplit ? "Yes" : "No",
+    ])
+
+    downloadCSV(headers, rows, `dime_transactions_expanded_${new Date().toISOString().split("T")[0]}.csv`)
+  }
+
+  const downloadCSV = (headers: string[], rows: any[][], filename: string) => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [headers.join(","), ...rows.map((r) => r.map((field) => `"${field}"`).join(","))].join("\n")
@@ -71,10 +117,7 @@ export function TransactionsView({
     const encodedUri = encodeURI(csvContent)
     const link = document.createElement("a")
     link.setAttribute("href", encodedUri)
-    link.setAttribute(
-      "download",
-      `dime_transactions_${new Date().toISOString().split("T")[0]}.csv`
-    )
+    link.setAttribute("download", filename)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -97,16 +140,27 @@ export function TransactionsView({
         </div>
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 w-full lg:w-auto">
           <div className="flex items-center gap-2 w-full lg:w-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportCSV}
-              className="flex-1 lg:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50"
-              disabled={transactions.length === 0}
-            >
-              <Download className="size-4" />
-              Export CSV
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 lg:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50 cursor-pointer"
+                  disabled={transactions.length === 0}
+                >
+                  <Download className="size-4" />
+                  Export CSV
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 bg-popover border border-border/40 shadow-md">
+                <DropdownMenuItem onClick={handleExportSummaryCSV} className="text-xs gap-2 cursor-pointer">
+                  Export Summary CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportExpandedCSV} className="text-xs gap-2 cursor-pointer">
+                  Export Expanded Splits CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {wallets.length > 0 && (
               <Button
                 variant="outline"

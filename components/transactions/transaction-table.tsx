@@ -41,6 +41,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Flag,
+  RefreshCw,
 } from "lucide-react"
 import Link from "next/link"
 import {
@@ -288,7 +290,7 @@ export function TransactionTable({
                 </TableRow>
               ) : (
                 optimisticTransactions.map((tx) => {
-                  const category = categoryMap.get(tx.categoryId)
+                  const category = categoryMap.get(tx.categoryId || "")
                   const wallet = walletMap.get(tx.walletId)
                   const isSelected = selectedIds.includes(tx._id.toString())
 
@@ -335,16 +337,53 @@ export function TransactionTable({
                             <span className="truncate group-hover:underline text-foreground text-xs font-semibold">
                               {tx.description}
                             </span>
-                            {tx.notes && (
-                              <span className="text-[10px] text-muted-foreground truncate max-w-xs">
-                                {tx.notes}
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                              {tx.isRecurring && (
+                                <RefreshCw className="size-3 text-purple-500 shrink-0" />
+                              )}
+                              {tx.isFlagged && (
+                                <Flag className="size-3 text-rose-500 fill-rose-500/20 shrink-0" />
+                              )}
+                              {tx.needsReview && (
+                                <AlertTriangle className="size-3 text-amber-500 shrink-0" />
+                              )}
+                              {(tx.isRecurring || tx.isFlagged || tx.needsReview) && tx.notes && (
+                                <span className="text-muted-foreground/30 select-none text-[9px]">|</span>
+                              )}
+                              {tx.notes && (
+                                <span className="text-[10px] text-muted-foreground truncate max-w-xs">
+                                  {tx.notes}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </Link>
                       </TableCell>
                       <TableCell>
-                        {category ? (
+                        {tx.splits && tx.splits.length > 0 ? (
+                          <div className="flex flex-col gap-1 max-w-[150px]">
+                            <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider select-none">Split ({tx.splits.length})</span>
+                            <div className="flex flex-wrap gap-1">
+                              {tx.splits.slice(0, 2).map((split, i) => {
+                                const splitCat = categoryMap.get(split.categoryId)
+                                return (
+                                  <Badge key={split.id || i} variant="outline" className="text-[9px] px-1.5 py-0.5 whitespace-nowrap bg-muted/30 max-w-[120px] truncate">
+                                    <span
+                                      className="size-1 rounded-full shrink-0 mr-1"
+                                      style={{ backgroundColor: splitCat?.color || "gray" }}
+                                    />
+                                    {splitCat?.name || "Uncategorized"}
+                                  </Badge>
+                                )
+                              })}
+                              {tx.splits.length > 2 && (
+                                <Badge variant="outline" className="text-[9px] px-1 py-0.5 text-muted-foreground bg-muted/10">
+                                  +{tx.splits.length - 2} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ) : category ? (
                           <div className="flex items-center gap-2">
                             <span
                               className="size-2 rounded-full shrink-0"

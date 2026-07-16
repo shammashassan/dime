@@ -3,7 +3,8 @@
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
 import { transactionSchema, TransactionInput } from "@/lib/validations/transaction.schema"
-import { Wallet, Transaction, Category } from "@/types"
+import { Wallet, Transaction, Category, AutomationRule } from "@/types"
+import { executeAutomationRules } from "@/lib/automation-engine"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
 import { convertCurrency } from "@/lib/currency"
@@ -11,6 +12,7 @@ import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { FinancialScope } from "@/types/scope"
 import { db } from "@/lib/db/client"
 import { canCreateTransactions, canEditTransactions, canDeleteTransactions, Role } from "@/lib/permissions"
+import { generateSplitId } from "@/lib/split-utils"
 
 // Helper to update a wallet's balance
 async function updateWalletBalance(scope: FinancialScope, walletId: string, amountChange: number) {
@@ -49,23 +51,88 @@ export async function createTransaction(input: TransactionInput) {
 
   if (validated.type !== "transfer") {
     // Normal Transaction
+    // 1. Fetch active automation rules
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const activeRules = await rulesColl.find({ ...getScopeFilter(scope), status: "active" }).toArray()
+
+    // 2. Execute rules
+    const engineResult = executeAutomationRules(
+      {
+        walletId: validated.walletId,
+        categoryId: validated.categoryId,
+        type: validated.type,
+        amount: validated.amount,
+        currency: validated.currency,
+        description: validated.description,
+        notes: validated.notes || undefined,
+        tags: validated.tags || [],
+        isRecurring: validated.isRecurring || false,
+        recurringId: validated.recurringId || undefined,
+        splits: validated.splits
+          ? validated.splits.map((s) => ({
+              id: s.id || generateSplitId(),
+              categoryId: s.categoryId,
+              amount: s.amount,
+              percentage: s.percentage,
+              notes: s.notes,
+            }))
+          : undefined,
+      },
+      activeRules,
+      { trigger: "manual", wallet }
+    )
+
+    const modTx = engineResult.modifiedTransaction
+
+    // 3. Resolve wallet changes and currency conversions if needed
+    let finalWalletId = modTx.walletId || validated.walletId
+    let finalAmount = modTx.amount || validated.amount
+    let finalCurrency = modTx.currency || validated.currency
+
+    if (finalWalletId !== validated.walletId) {
+      const targetWallet = await walletsColl.findOne({ _id: new ObjectId(finalWalletId), ...getScopeFilter(scope) })
+      if (targetWallet) {
+        finalCurrency = targetWallet.currency
+        finalAmount = await convertCurrency(validated.amount, wallet.currency, targetWallet.currency)
+      } else {
+        finalWalletId = validated.walletId
+      }
+    }
+
+    const hasSplits = (validated.splits && validated.splits.length > 0) || (modTx.splits && modTx.splits.length > 0)
+    const finalSplits = validated.splits && validated.splits.length > 0 ? validated.splits : (modTx.splits || undefined)
+    const finalSplitMode = validated.splits && validated.splits.length > 0 ? (validated.splitMode || "amount") : (hasSplits ? "amount" : undefined)
+
+    const processedSplits = finalSplits?.map(split => ({
+      id: split.id || generateSplitId(),
+      categoryId: split.categoryId,
+      amount: split.amount,
+      percentage: split.percentage,
+      notes: split.notes,
+    }))
+
     const tx: Omit<Transaction, "_id"> = {
       userId: scope.userId,
       organizationId: scope.organizationId,
       ownerUserId: scope.userId,
       createdBy: scope.userId,
       updatedBy: scope.userId,
-      walletId: validated.walletId,
-      categoryId: validated.categoryId,
-      type: validated.type,
-      amount: validated.amount,
-      currency: validated.currency,
-      description: validated.description,
-      notes: validated.notes || undefined,
+      walletId: finalWalletId,
+      categoryId: hasSplits ? null : (modTx.categoryId || validated.categoryId),
+      type: modTx.type || validated.type,
+      amount: finalAmount,
+      currency: finalCurrency,
+      description: modTx.description || validated.description,
+      notes: modTx.notes || undefined,
       date: validated.date,
-      tags: validated.tags || [],
-      isRecurring: validated.isRecurring || false,
-      recurringId: validated.recurringId || undefined,
+      tags: modTx.tags || [],
+      isRecurring: modTx.isRecurring || false,
+      recurringId: modTx.recurringId || undefined,
+      budgetId: modTx.budgetId || undefined,
+      isFlagged: modTx.isFlagged !== undefined ? modTx.isFlagged : (validated.isFlagged || false),
+      needsReview: modTx.needsReview !== undefined ? modTx.needsReview : (validated.needsReview || false),
+      splitMode: finalSplitMode,
+      splits: processedSplits,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 1,
@@ -73,14 +140,29 @@ export async function createTransaction(input: TransactionInput) {
 
     const result = await transactionsColl.insertOne(tx as Transaction)
 
+    // 4. Update stats for applied rules in database (outside pure engine)
+    if (engineResult.matchedRulesCount > 0) {
+      const rulesToUpdate = engineResult.appliedRules.map(ar => new ObjectId(ar.ruleId))
+      if (rulesToUpdate.length > 0) {
+        await rulesColl.updateMany(
+          { _id: { $in: rulesToUpdate } },
+          {
+            $inc: { executionCount: 1 },
+            $set: { lastExecutedAt: new Date(), lastMatchedAt: new Date() }
+          }
+        )
+      }
+    }
+
     // Update balance
-    const balanceChange = validated.type === "income" ? validated.amount : -validated.amount
-    await updateWalletBalance(scope, validated.walletId, balanceChange)
+    const balanceChange = tx.type === "income" ? tx.amount : -tx.amount
+    await updateWalletBalance(scope, finalWalletId, balanceChange)
 
     updateTag("transactions")
     updateTag("wallets")
+    updateTag("automation-rules")
     revalidatePath("/transactions")
-    revalidatePath(`/wallets/${validated.walletId}`)
+    revalidatePath(`/wallets/${finalWalletId}`)
     revalidatePath("/", "layout")
     return { success: true, id: result.insertedId.toString() }
   } else {
@@ -293,13 +375,22 @@ export async function updateTransaction(id: string, input: TransactionInput) {
       await transactionsColl.deleteOne({ _id: linkedOid, ...getScopeFilter(scope) })
     }
 
+    const hasSplits = validated.splits && validated.splits.length > 0
+    const processedSplits = validated.splits?.map(split => ({
+      id: split.id || generateSplitId(),
+      categoryId: split.categoryId,
+      amount: split.amount,
+      percentage: split.percentage,
+      notes: split.notes,
+    }))
+
     // Update the main transaction document
     await transactionsColl.updateOne(
       { _id: txOid },
       {
         $set: {
           walletId: validated.walletId,
-          categoryId: validated.categoryId,
+          categoryId: hasSplits ? null : (validated.categoryId || null),
           type: validated.type,
           amount: validated.amount,
           currency: sourceWallet.currency, // Force currency to match the source wallet
@@ -308,12 +399,16 @@ export async function updateTransaction(id: string, input: TransactionInput) {
           date: validated.date,
           tags: validated.tags || [],
           isRecurring: validated.isRecurring || false,
+          isFlagged: validated.isFlagged || false,
+          needsReview: validated.needsReview || false,
+          ...(hasSplits ? { splitMode: validated.splitMode || "amount", splits: processedSplits } : {}),
           updatedAt: new Date(),
           updatedBy: scope.userId,
         },
         $unset: {
           linkedTransactionId: "",
           transferType: "",
+          ...(!hasSplits ? { splitMode: "", splits: "" } : {}),
         },
         $inc: { version: 1 }
       }
@@ -356,6 +451,8 @@ export async function updateTransaction(id: string, input: TransactionInput) {
       date: validated.date,
       tags: validated.tags || [],
       isRecurring: validated.isRecurring || false,
+      isFlagged: validated.isFlagged || false,
+      needsReview: validated.needsReview || false,
       linkedTransactionId: txOid.toString(),
       createdAt: linkedTx?.createdAt || tx.createdAt || new Date(),
       updatedAt: new Date(),
@@ -379,6 +476,8 @@ export async function updateTransaction(id: string, input: TransactionInput) {
           date: validated.date,
           tags: validated.tags || [],
           isRecurring: validated.isRecurring || false,
+          isFlagged: validated.isFlagged || false,
+          needsReview: validated.needsReview || false,
           linkedTransactionId: linkedOid.toString(),
           updatedAt: new Date(),
           updatedBy: scope.userId,
@@ -412,13 +511,73 @@ export async function getTransactionWalletId(id: string): Promise<string | null>
   return tx ? tx.walletId : null
 }
 
+// Helper to apply automation rules to scanned receipt data
+async function applyRulesToScannedData(data: {
+  merchant: string
+  amount: number
+  date: Date
+  categoryName: string
+  currency: string
+  description: string
+}, scope: any) {
+  try {
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const activeRules = await rulesColl.find({ ...getScopeFilter(scope), status: "active" }).toArray()
+    if (activeRules.length === 0) return data
+
+    const categoriesColl = await getCollection<Category>("categories")
+    const categories = await categoriesColl.find({
+      $or: [getScopeFilter(scope), { userId: null }]
+    }).toArray()
+
+    const currentCategory = categories.find(c => c.name.toLowerCase() === data.categoryName.toLowerCase())
+    const currentCategoryId = currentCategory ? currentCategory._id.toString() : categories[0]._id.toString()
+
+    const result = executeAutomationRules(
+      {
+        description: data.merchant || data.description,
+        amount: data.amount,
+        currency: data.currency,
+        categoryId: currentCategoryId,
+        date: data.date
+      },
+      activeRules,
+      { trigger: "receipt" }
+    )
+
+    const mod = result.modifiedTransaction
+
+    let finalCategoryName = data.categoryName
+    if (mod.categoryId !== currentCategoryId && mod.categoryId) {
+      const newCategory = categories.find(c => c._id.toString() === mod.categoryId)
+      if (newCategory) {
+        finalCategoryName = newCategory.name
+      }
+    }
+
+    return {
+      ...data,
+      merchant: mod.description || data.merchant,
+      amount: mod.amount || data.amount,
+      categoryName: finalCategoryName,
+      currency: mod.currency || data.currency,
+      description: mod.description || data.description
+    }
+  } catch (err) {
+    console.error("Error applying rules to scanned receipt data:", err)
+    return data
+  }
+}
+
 export async function scanReceiptAction(base64Image: string, filename: string) {
   await requireApprovedUser()
+  const scope = await getFinancialScope()
 
   // Delay helper to simulate network/processing time
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
   const lowerName = filename.toLowerCase()
+  let rawData: any = null
 
   // Case 1: Check for Gemini API key
   if (process.env.GEMINI_API_KEY) {
@@ -461,16 +620,13 @@ export async function scanReceiptAction(base64Image: string, filename: string) {
       const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text
       if (textResponse) {
         const parsed = JSON.parse(textResponse.trim())
-        return {
-          success: true,
-          data: {
-            merchant: parsed.merchant || "Unknown Merchant",
-            amount: typeof parsed.amount === "number" ? parsed.amount : 0,
-            date: parsed.date ? new Date(parsed.date) : new Date(),
-            categoryName: parsed.categoryName || "Other",
-            currency: parsed.currency || "USD",
-            description: parsed.description || "AI Scanned Receipt",
-          },
+        rawData = {
+          merchant: parsed.merchant || "Unknown Merchant",
+          amount: typeof parsed.amount === "number" ? parsed.amount : 0,
+          date: parsed.date ? new Date(parsed.date) : new Date(),
+          categoryName: parsed.categoryName || "Other",
+          currency: parsed.currency || "USD",
+          description: parsed.description || "AI Scanned Receipt",
         }
       }
     } catch (err) {
@@ -479,77 +635,65 @@ export async function scanReceiptAction(base64Image: string, filename: string) {
   }
 
   // Case 2: Simulation fallback (highly interactive and deterministic for testing)
-  await delay(1800) // Simulate processing time
+  if (!rawData) {
+    await delay(1800) // Simulate processing time
 
-  if (lowerName.includes("coffee") || lowerName.includes("starbucks")) {
-    return {
-      success: true,
-      data: {
+    if (lowerName.includes("coffee") || lowerName.includes("starbucks")) {
+      rawData = {
         merchant: "Starbucks Coffee",
         amount: 1450, // $14.50
         date: new Date(),
         categoryName: "Food & Dining",
         currency: "USD",
         description: "Caramel Macchiato & Croissant",
-      },
-    }
-  }
-
-  if (lowerName.includes("grocery") || lowerName.includes("walmart") || lowerName.includes("food")) {
-    return {
-      success: true,
-      data: {
+      }
+    } else if (lowerName.includes("grocery") || lowerName.includes("walmart") || lowerName.includes("food")) {
+      rawData = {
         merchant: "Walmart Supercenter",
         amount: 8420, // $84.20
         date: new Date(),
         categoryName: "Food & Dining",
         currency: "USD",
         description: "Weekly Household Groceries",
-      },
-    }
-  }
-
-  if (lowerName.includes("flight") || lowerName.includes("delta") || lowerName.includes("travel")) {
-    return {
-      success: true,
-      data: {
+      }
+    } else if (lowerName.includes("flight") || lowerName.includes("delta") || lowerName.includes("travel")) {
+      rawData = {
         merchant: "Delta Air Lines",
         amount: 35000, // $350.00
         date: new Date(),
         categoryName: "Travel",
         currency: "USD",
         description: "Flight Ticket NYC to LAX",
-      },
-    }
-  }
-
-  if (lowerName.includes("netflix") || lowerName.includes("subscription")) {
-    return {
-      success: true,
-      data: {
+      }
+    } else if (lowerName.includes("netflix") || lowerName.includes("subscription")) {
+      rawData = {
         merchant: "Netflix Inc.",
         amount: 1549, // $15.49
         date: new Date(),
         categoryName: "Subscriptions",
         currency: "USD",
         description: "Premium Streaming Subscription",
-      },
+      }
+    } else {
+      // Random generic fallback
+      const randomAmount = Math.round((Math.random() * 45 + 5) * 100)
+      rawData = {
+        merchant: "Local Retailer Store",
+        amount: randomAmount,
+        date: new Date(),
+        categoryName: "Shopping",
+        currency: "USD",
+        description: "Miscellaneous retail purchase",
+      }
     }
   }
 
-  // Random generic fallback
-  const randomAmount = Math.round((Math.random() * 45 + 5) * 100)
-  return {
-    success: true,
-    data: {
-      merchant: "Local Retailer Store",
-      amount: randomAmount,
-      date: new Date(),
-      categoryName: "Shopping",
-      currency: "USD",
-      description: "Miscellaneous retail purchase",
-    },
+  if (rawData) {
+    const finalData = await applyRulesToScannedData(rawData, scope)
+    return { success: true, data: finalData }
   }
+
+  return { success: false, error: "Failed to parse receipt data" }
 }
 
 export interface ImportedTransactionInput {
@@ -581,6 +725,7 @@ export async function importTransactionsAction(walletId: string, transactionsLis
   const walletsColl = await getCollection<Wallet>("wallets")
   const transactionsColl = await getCollection<Transaction>("transactions")
   const categoriesColl = await getCollection<Category>("categories")
+  const rulesColl = await getCollection<AutomationRule>("automation_rules")
 
   // Verify wallet exists
   const wallet = await walletsColl.findOne({ _id: new ObjectId(walletId), ...getScopeFilter(scope) })
@@ -594,8 +739,14 @@ export async function importTransactionsAction(walletId: string, transactionsLis
   const defaultCategory = categories.find(c => c.name === "Other") || categories[0]
   const defaultCategoryId = defaultCategory ? defaultCategory._id.toString() : new ObjectId().toString()
 
-  let totalBalanceChange = 0
+  // Load active automation rules
+  const activeRules = await rulesColl.find({ ...getScopeFilter(scope), status: "active" }).toArray()
+
   const documentsToInsert: Transaction[] = []
+  const walletBalanceAdjustments: Record<string, number> = {}
+
+  // Track rule stats to update in bulk
+  const ruleMatchedCounts: Record<string, number> = {}
 
   for (const item of transactionsList) {
     let resolvedCategoryId = item.categoryId
@@ -614,7 +765,58 @@ export async function importTransactionsAction(walletId: string, transactionsLis
     const type = item.type === "income" ? "income" : "expense"
     const amount = Math.abs(Math.round(item.amount))
 
-    totalBalanceChange += type === "income" ? amount : -amount
+    // Run rules engine
+    const engineResult = executeAutomationRules(
+      {
+        walletId,
+        categoryId: resolvedCategoryId,
+        type,
+        amount,
+        currency: wallet.currency,
+        description: item.description || "Imported Transaction",
+        notes: item.notes || "Imported via CSV Wizard",
+        tags: item.tags || ["imported"],
+      },
+      activeRules,
+      { trigger: "csv_import", wallet }
+    )
+
+    const modTx = engineResult.modifiedTransaction
+
+    // Record stats
+    if (engineResult.matchedRulesCount > 0) {
+      for (const ar of engineResult.appliedRules) {
+        ruleMatchedCounts[ar.ruleId] = (ruleMatchedCounts[ar.ruleId] || 0) + 1
+      }
+    }
+
+    // Resolve wallet swaps
+    let finalWalletId = modTx.walletId || walletId
+    let finalAmount = modTx.amount || amount
+    let finalCurrency = modTx.currency || wallet.currency
+
+    if (finalWalletId !== walletId) {
+      const targetWallet = await walletsColl.findOne({ _id: new ObjectId(finalWalletId), ...getScopeFilter(scope) })
+      if (targetWallet) {
+        finalCurrency = targetWallet.currency
+        finalAmount = await convertCurrency(amount, wallet.currency, targetWallet.currency)
+      } else {
+        finalWalletId = walletId
+      }
+    }
+
+    // Accumulate wallet balance changes
+    const change = modTx.type === "income" ? finalAmount : -finalAmount
+    walletBalanceAdjustments[finalWalletId] = (walletBalanceAdjustments[finalWalletId] || 0) + change
+
+    const hasSplits = modTx.splits && modTx.splits.length > 0
+    const processedSplits = modTx.splits?.map(split => ({
+      id: split.id || generateSplitId(),
+      categoryId: split.categoryId,
+      amount: split.amount,
+      percentage: split.percentage,
+      notes: split.notes,
+    }))
 
     const tx: Transaction = {
       _id: new ObjectId(),
@@ -623,16 +825,21 @@ export async function importTransactionsAction(walletId: string, transactionsLis
       ownerUserId: scope.userId,
       createdBy: scope.userId,
       updatedBy: scope.userId,
-      walletId,
-      categoryId: resolvedCategoryId,
-      type,
-      amount,
-      currency: wallet.currency,
-      description: item.description || "Imported Transaction",
-      notes: item.notes || "Imported via CSV Wizard",
+      walletId: finalWalletId,
+      categoryId: hasSplits ? null : (modTx.categoryId || resolvedCategoryId),
+      type: modTx.type as "income" | "expense",
+      amount: finalAmount,
+      currency: finalCurrency,
+      description: modTx.description || item.description || "Imported Transaction",
+      notes: modTx.notes || item.notes || "Imported via CSV Wizard",
       date: item.date ? new Date(item.date) : new Date(),
-      tags: item.tags || ["imported"],
-      isRecurring: false,
+      tags: modTx.tags || ["imported"],
+      isRecurring: modTx.isRecurring || false,
+      budgetId: modTx.budgetId || undefined,
+      isFlagged: modTx.isFlagged || false,
+      needsReview: modTx.needsReview || false,
+      splitMode: hasSplits ? "amount" : undefined,
+      splits: processedSplits,
       createdAt: new Date(),
       updatedAt: new Date(),
       version: 1,
@@ -645,18 +852,38 @@ export async function importTransactionsAction(walletId: string, transactionsLis
     // 1. Insert all transactions
     await transactionsColl.insertMany(documentsToInsert)
 
-    // 2. Update wallet balance
-    await walletsColl.updateOne(
-      { _id: wallet._id, ...getScopeFilter(scope) },
-      { 
-        $inc: { balance: totalBalanceChange, version: 1 }, 
-        $set: { updatedAt: new Date(), updatedBy: scope.userId } 
+    // 2. Perform bulk wallet balance updates
+    const walletBulkOps = Object.entries(walletBalanceAdjustments).map(([wId, change]) => ({
+      updateOne: {
+        filter: { _id: new ObjectId(wId), ...getScopeFilter(scope) },
+        update: {
+          $inc: { balance: change, version: 1 },
+          $set: { updatedAt: new Date(), updatedBy: scope.userId }
+        }
       }
-    )
+    }))
+    if (walletBulkOps.length > 0) {
+      await walletsColl.bulkWrite(walletBulkOps)
+    }
+
+    // 3. Batch stats updates in bulk
+    if (Object.keys(ruleMatchedCounts).length > 0) {
+      const ruleBulkOps = Object.entries(ruleMatchedCounts).map(([ruleId, count]) => ({
+        updateOne: {
+          filter: { _id: new ObjectId(ruleId) },
+          update: {
+            $inc: { executionCount: count },
+            $set: { lastExecutedAt: new Date(), lastMatchedAt: new Date() }
+          }
+        }
+      }))
+      await rulesColl.bulkWrite(ruleBulkOps)
+    }
   }
 
   updateTag("transactions")
   updateTag("wallets")
+  updateTag("automation-rules")
   revalidatePath("/transactions")
   revalidatePath(`/wallets/${walletId}`)
   revalidatePath("/", "layout")

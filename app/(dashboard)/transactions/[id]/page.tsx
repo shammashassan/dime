@@ -1,6 +1,6 @@
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getTransactionById } from "@/lib/queries/transactions"
-import { getCategoryById } from "@/lib/queries/categories"
+import { getCategoryById, getCategories } from "@/lib/queries/categories"
 import { getWalletById } from "@/lib/queries/wallets"
 import { notFound, unstable_rethrow } from "next/navigation"
 import { TransactionDetails } from "@/components/transactions/transaction-details"
@@ -31,18 +31,22 @@ export default async function TransactionDetailPage({
   let wallet = null
   let linkedWallet = null
 
+  let categories: any[] = []
+
   try {
     transaction = await getTransactionById(userId, id)
     if (!transaction) {
       notFound()
     }
 
-    const [cat, w] = await Promise.all([
-      getCategoryById(userId, transaction.categoryId),
+    const [cat, w, allCats] = await Promise.all([
+      getCategoryById(userId, transaction.categoryId || ""),
       getWalletById(userId, transaction.walletId),
+      getCategories(userId),
     ])
     category = cat
     wallet = w
+    categories = allCats
 
     if (transaction.type === "transfer" && transaction.linkedTransactionId) {
       const linkedTx = await getTransactionById(userId, transaction.linkedTransactionId)
@@ -72,6 +76,7 @@ export default async function TransactionDetailPage({
           category={serializeData(category)}
           wallet={serializeData(wallet)}
           linkedWallet={serializeData(linkedWallet)}
+          categories={serializeData(categories)}
         />
       </div>
     </div>

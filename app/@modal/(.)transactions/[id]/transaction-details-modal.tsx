@@ -10,6 +10,7 @@ interface TransactionDetailsModalProps {
   category: Category | null
   wallet: Wallet | null
   linkedWallet: Wallet | null
+  categories?: Category[]
 }
 
 export function TransactionDetailsModal({
@@ -17,6 +18,7 @@ export function TransactionDetailsModal({
   category,
   wallet,
   linkedWallet,
+  categories,
 }: TransactionDetailsModalProps) {
   const router = useRouter()
 
@@ -36,6 +38,7 @@ export function TransactionDetailsModal({
             category={category}
             wallet={wallet}
             linkedWallet={linkedWallet}
+            categories={categories}
           />
         </div>
       </DialogContent>

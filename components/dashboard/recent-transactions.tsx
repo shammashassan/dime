@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { ArrowUpRight, ArrowDownRight, ArrowLeftRight, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 interface RecentTransactionsProps {
   userId: string
@@ -63,7 +64,7 @@ export async function RecentTransactions({ userId }: RecentTransactionsProps) {
               </TableHeader>
               <TableBody>
                 {transactions.map((tx) => {
-                  const category = categoryMap.get(tx.categoryId)
+                  const category = categoryMap.get(tx.categoryId || "")
                   const wallet = walletMap.get(tx.walletId)
 
                   let amountColor = "text-foreground"
@@ -95,7 +96,30 @@ export async function RecentTransactions({ userId }: RecentTransactionsProps) {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {category ? (
+                        {tx.splits && tx.splits.length > 0 ? (
+                          <div className="flex flex-col gap-1 max-w-[150px]">
+                            <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider select-none">Split ({tx.splits.length})</span>
+                            <div className="flex flex-wrap gap-1">
+                              {tx.splits.slice(0, 1).map((split, i) => {
+                                const splitCat = categoryMap.get(split.categoryId)
+                                return (
+                                  <Badge key={split.id || i} variant="outline" className="text-[9px] px-1.5 py-0.5 whitespace-nowrap bg-muted/30 max-w-[120px] truncate">
+                                    <span
+                                      className="size-1 rounded-full shrink-0 mr-1"
+                                      style={{ backgroundColor: splitCat?.color || "gray" }}
+                                    />
+                                    {splitCat?.name || "Uncategorized"}
+                                  </Badge>
+                                )
+                              })}
+                              {tx.splits.length > 1 && (
+                                <Badge variant="outline" className="text-[9px] px-1 py-0.5 text-muted-foreground bg-muted/10">
+                                  +{tx.splits.length - 1} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        ) : category ? (
                           <div className="flex items-center gap-2">
                             <span
                               className="size-2 rounded-full shrink-0"

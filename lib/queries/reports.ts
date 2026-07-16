@@ -8,6 +8,7 @@ import { getCurrencyConverter } from "@/lib/currency"
 import { Transaction, Category } from "@/types"
 import { subDays, subMonths } from "date-fns"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { expandTransactions } from "@/lib/split-utils"
 
 
 // 1. Income vs Expense Trend: Area (dual-line) - 3 / 6 / 12 months
@@ -165,10 +166,12 @@ export const getCategoryBreakdown = cache(async (userId: string, start?: Date, e
 
   const breakdown: Record<string, { category: string; value: number; color: string; icon: string }> = {}
 
-  transactions.forEach((tx) => {
+  const expandedTxs = expandTransactions(transactions)
+
+  expandedTxs.forEach((tx) => {
     if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
       const convertedAmount = convert(tx.amount, tx.currency)
-      const catId = tx.categoryId
+      const catId = tx.categoryId || "uncategorized"
       const cat = categoryMap.get(catId)
       const catName = cat ? cat.name : "Uncategorized"
       const catColor = cat ? cat.color : "#94a3b8"
@@ -405,7 +408,10 @@ export const getBudgetPerformance = cache(async (userId: string) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const query: any = {
         ...filter,
-        categoryId: budget.categoryId,
+        $or: [
+          { categoryId: budget.categoryId },
+          { "splits.categoryId": budget.categoryId }
+        ],
         type: { $in: ["expense", "transfer"] },
         date: { $gte: start },
       }
@@ -417,10 +423,14 @@ export const getBudgetPerformance = cache(async (userId: string) => {
       }
 
       const txs = await transactionsColl.find(query).toArray()
-      const convert = await getCurrencyConverter(budget.currency, txs.map(tx => tx.currency))
+      const expandedTxs = expandTransactions(txs)
+      const convert = await getCurrencyConverter(budget.currency, expandedTxs.map(tx => tx.currency))
 
-      const spent = txs.reduce((sum, tx) => {
-        if (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) {
+      const spent = expandedTxs.reduce((sum, tx) => {
+        if (
+          (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) &&
+          tx.categoryId === budget.categoryId
+        ) {
           const convertedAmount = convert(tx.amount, tx.currency)
           return sum + convertedAmount
         }

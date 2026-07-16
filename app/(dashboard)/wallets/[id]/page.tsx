@@ -179,7 +179,7 @@ export default async function WalletDetailPage({ params }: PageProps) {
                 </thead>
                 <tbody>
                   {transactions.map((tx) => {
-                    const category = categoryMap.get(tx.categoryId);
+                    const category = categoryMap.get(tx.categoryId || "");
                     const isIncome = tx.type === "income";
                     const isExpense = tx.type === "expense";
                     const isTransfer = tx.type === "transfer";
@@ -190,7 +190,32 @@ export default async function WalletDetailPage({ params }: PageProps) {
                           {tx.description}
                         </td>
                         <td className="py-4 px-4">
-                          {category ? (
+                          {tx.splits && tx.splits.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 max-w-[200px]">
+                              {tx.splits.slice(0, 2).map((split, i) => {
+                                const splitCat = categoryMap.get(split.categoryId);
+                                return (
+                                  <Badge
+                                    key={split.id || i}
+                                    variant="outline"
+                                    className="rounded-full px-1.5 py-0.5 text-[10px] font-medium border-border/40 whitespace-nowrap"
+                                    style={{
+                                      backgroundColor: (splitCat?.color || "#A0A0A0") + "15",
+                                      color: splitCat?.color || "#A0A0A0",
+                                      borderColor: (splitCat?.color || "#A0A0A0") + "30",
+                                    }}
+                                  >
+                                    {splitCat?.name || "Uncategorized"}
+                                  </Badge>
+                                );
+                              })}
+                              {tx.splits.length > 2 && (
+                                <Badge variant="outline" className="rounded-full px-1.5 py-0.5 text-[10px] font-medium border-border/40 text-muted-foreground">
+                                  +{tx.splits.length - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : category ? (
                             <Badge
                               variant="outline"
                               className="rounded-full px-2 py-0.5 text-xs font-medium border-border/40"

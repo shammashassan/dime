@@ -43,6 +43,15 @@ export async function initDatabase() {
     await categories.createIndex({ userId: 1 })
     await categories.createIndex({ organizationId: 1 })
 
+    // Create indexes for automation rules and jobs
+    const automationRules = db.collection("automation_rules")
+    await automationRules.createIndex({ userId: 1, priority: -1 })
+    await automationRules.createIndex({ organizationId: 1, priority: -1 })
+
+    const automationJobs = db.collection("automation_jobs")
+    await automationJobs.createIndex({ userId: 1 })
+    await automationJobs.createIndex({ organizationId: 1 })
+
     // 5. Create indexes for user lookup
     const users = db.collection("user")
     await users.createIndex({ approved: 1, role: 1 })

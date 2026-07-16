@@ -31,6 +31,7 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
   const [category, setCategory] = useState(searchParams.get("categories") || "all")
   const [minAmount, setMinAmount] = useState(searchParams.get("minAmount") || "")
   const [maxAmount, setMaxAmount] = useState(searchParams.get("maxAmount") || "")
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("status") || "all")
 
   // Date Range state
   const fromParam = searchParams.get("from")
@@ -55,6 +56,7 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
     setCategory(searchParams.get("categories") || "all")
     setMinAmount(searchParams.get("minAmount") || "")
     setMaxAmount(searchParams.get("maxAmount") || "")
+    setStatusFilter(searchParams.get("status") || "all")
 
     if (fromParam && toParam) {
       setDateRange({ from: new Date(fromParam), to: new Date(toParam) })
@@ -90,6 +92,9 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
     if (maxAmount) params.set("maxAmount", maxAmount)
     else params.delete("maxAmount")
 
+    if (statusFilter && statusFilter !== "all") params.set("status", statusFilter)
+    else params.delete("status")
+
     if (dateRange?.from) {
       params.set("from", dateRange.from.toISOString())
     } else {
@@ -113,6 +118,7 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
     setMinAmount("")
     setMaxAmount("")
     setDateRange(undefined)
+    setStatusFilter("all")
     router.push(pathname)
   }
 
@@ -124,7 +130,8 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
     searchParams.has("minAmount") ||
     searchParams.has("maxAmount") ||
     searchParams.has("from") ||
-    searchParams.has("to")
+    searchParams.has("to") ||
+    (searchParams.has("status") && searchParams.get("status") !== "all")
 
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-border/40 bg-card shadow-sm">
@@ -191,6 +198,20 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
                 </div>
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Status Select */}
+      <div className="w-full sm:w-40">
+        <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
+          <SelectTrigger className="w-full h-9">
+            <SelectValue placeholder="All Statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="flagged">Flagged</SelectItem>
+            <SelectItem value="review">Needs Review</SelectItem>
           </SelectContent>
         </Select>
       </div>

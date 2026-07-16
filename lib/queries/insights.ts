@@ -3,6 +3,7 @@ import { getCollection } from "@/lib/db/collections"
 import { Transaction, Category } from "@/types"
 import { subDays } from "date-fns"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { expandTransactions } from "@/lib/split-utils"
 
 export interface FinancialInsight {
   id: string
@@ -107,9 +108,12 @@ export const getFinancialInsights = cache(async (userId: string): Promise<Financ
   const catExpenses: Record<string, number> = {}
   let totalExpenses30Days = 0
 
-  txs.forEach(t => {
+  const expandedTxs = expandTransactions(txs)
+
+  expandedTxs.forEach(t => {
     if (t.type === "expense") {
-      catExpenses[t.categoryId] = (catExpenses[t.categoryId] || 0) + t.amount
+      const catId = t.categoryId || "uncategorized"
+      catExpenses[catId] = (catExpenses[catId] || 0) + t.amount
       totalExpenses30Days += t.amount
     }
   })

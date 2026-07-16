@@ -39,6 +39,7 @@ async function TransactionsContent({
     sortBy?: string
     sortOrder?: string
     pageSize?: string
+    status?: string
   }>
 }) {
   const session = await requireApprovedUser()
@@ -65,6 +66,8 @@ async function TransactionsContent({
     maxAmount: params.maxAmount ? Math.round(parseFloat(params.maxAmount) * 100) : undefined,
     startDate: params.from ? new Date(new Date(params.from).toISOString().slice(0, 10) + "T00:00:00.000Z") : undefined,
     endDate: params.to ? new Date(new Date(params.to).toISOString().slice(0, 10) + "T23:59:59.999Z") : undefined,
+    isFlagged: params.status === "flagged" ? true : undefined,
+    needsReview: params.status === "review" ? true : undefined,
   }
 
   // Parse sort
