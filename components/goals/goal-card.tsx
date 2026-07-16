@@ -105,7 +105,7 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
           </div>
 
           {/* Action buttons (hover visible) */}
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
+          <div className="flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
