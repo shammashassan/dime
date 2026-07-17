@@ -293,19 +293,19 @@ export function RecurringView({ rules, categories, wallets }: RecurringViewProps
 
       {/* ── Metrics ── */}
       {activeTab === "subscription" ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1 w-full">
           <MetricCard icon={CreditCard} color="#6366f1" label="Active Subs" value={metrics.activeCount} />
           <MetricCard icon={ArrowDownRight} color="#f43f5e" label="Monthly Cost" value={formatCurrency(metrics.monthlyExpense, defaultCurrency)} />
           <MetricCard icon={PiggyBank} color="#f59e0b" label="Annual Cost" value={formatCurrency(metrics.annualCost, defaultCurrency)} />
           <MetricCard icon={AlertTriangle} color="#f59e0b" label="Trials Ending Soon" value={metrics.trialEndingSoonCount} valueClassName="text-amber-500" />
         </div>
       ) : activeTab === "bill" ? (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1 w-full">
           <MetricCard icon={FileText} color="#6366f1" label="Active Bills" value={metrics.activeCount} />
           <MetricCard icon={ArrowDownRight} color="#f43f5e" label="Monthly Cost" value={formatCurrency(metrics.monthlyExpense, defaultCurrency)} />
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-1 w-full">
           <MetricCard icon={RefreshCw} color="#6366f1" label="Active Rules" value={metrics.activeCount} />
           <MetricCard icon={TrendingUp} color="#10b981" label="Monthly Income" value={formatCurrency(metrics.monthlyIncome, defaultCurrency)} valueClassName="text-emerald-500" />
           <MetricCard icon={TrendingDown} color="#f43f5e" label="Monthly Expense" value={formatCurrency(metrics.monthlyExpense, defaultCurrency)} />
