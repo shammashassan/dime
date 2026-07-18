@@ -59,11 +59,21 @@ interface AssetDialogProps {
   initialAsset?: Asset
   trigger?: React.ReactNode
   onSuccess?: () => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function AssetDialog({ initialAsset, trigger, onSuccess }: AssetDialogProps) {
+export function AssetDialog({
+  initialAsset,
+  trigger,
+  onSuccess,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: AssetDialogProps) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const open = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen
+  const setOpen = controlledOnOpenChange !== undefined ? controlledOnOpenChange : setUncontrolledOpen
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
