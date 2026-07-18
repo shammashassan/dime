@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { NetWorthBreakdown, HistoricalNetWorthPoint } from "@/lib/net-worth/types"
+import { NetWorthBreakdown, HistoricalNetWorthPoint } from "@/types"
 import { formatCurrency } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"

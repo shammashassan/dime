@@ -1,5 +1,5 @@
 import { Wallet, Transaction, Loan, LoanRepayment, Asset, AssetValuation } from "../types";
-import { calculateCurrentNetWorth, calculateNetWorthHistory } from "../lib/net-worth/calculations";
+import { calculateCurrentNetWorth, calculateNetWorthHistory } from "../lib/calculations/net-worth";
 
 const mockWallets: Wallet[] = [
   {

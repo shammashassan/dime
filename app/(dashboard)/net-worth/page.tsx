@@ -4,7 +4,7 @@ import { getAllWalletsIncludingArchived } from "@/lib/queries/wallets"
 import { getLoans, getActiveBaseCurrency } from "@/lib/queries/loans"
 import { getAssetsAndValuationsForScope } from "@/lib/queries/assets"
 import { getCurrencyConverter } from "@/lib/currency"
-import { calculateCurrentNetWorth, calculateNetWorthHistory } from "@/lib/net-worth/calculations"
+import { calculateCurrentNetWorth, calculateNetWorthHistory } from "@/lib/calculations/net-worth"
 import { db } from "@/lib/db/client"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { serializeData } from "@/lib/utils"
@@ -14,7 +14,7 @@ import { NetWorthOverview } from "@/components/net-worth/net-worth-overview"
 import { AssetsListTab } from "@/components/net-worth/assets-list-tab"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export const experimental_ppr = true // Opt-in to PPR as per workspace rule
+export const ppr = true // Opt-in to PPR as per workspace rule
 
 function NetWorthSkeleton() {
   return (
