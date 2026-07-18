@@ -43,6 +43,14 @@ export async function initDatabase() {
     await categories.createIndex({ userId: 1 })
     await categories.createIndex({ organizationId: 1 })
 
+    const assets = db.collection("assets")
+    await assets.createIndex({ userId: 1, organizationId: 1, status: 1 })
+    await assets.createIndex({ kind: 1, category: 1 })
+
+    const assetValuations = db.collection("asset_valuations")
+    await assetValuations.createIndex({ assetId: 1, date: -1 })
+    await assetValuations.createIndex({ userId: 1, date: -1 })
+
     // Create indexes for automation rules and jobs
     const automationRules = db.collection("automation_rules")
     await automationRules.createIndex({ userId: 1, priority: -1 })
@@ -51,6 +59,18 @@ export async function initDatabase() {
     const automationJobs = db.collection("automation_jobs")
     await automationJobs.createIndex({ userId: 1 })
     await automationJobs.createIndex({ organizationId: 1 })
+
+    // Create indexes for contacts, loans, and loan repayments
+    const contacts = db.collection("contacts")
+    await contacts.createIndex({ userId: 1, name: 1 })
+    await contacts.createIndex({ organizationId: 1, name: 1 })
+
+    const loans = db.collection("loans")
+    await loans.createIndex({ userId: 1, date: -1 })
+    await loans.createIndex({ organizationId: 1, date: -1 })
+
+    const loanRepayments = db.collection("loan_repayments")
+    await loanRepayments.createIndex({ loanId: 1 })
 
     // 5. Create indexes for user lookup
     const users = db.collection("user")

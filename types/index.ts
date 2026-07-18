@@ -41,6 +41,8 @@ export interface Transaction {
   needsReview?: boolean
   splitMode?: "amount" | "percentage" | "equal"
   splits?: { id: string; categoryId: string; amount: number; percentage?: number; notes?: string }[]
+  loanId?: string
+  isLoanPrincipal?: boolean
   createdAt: Date
   updatedAt: Date
   organizationId?: string | null
@@ -113,6 +115,21 @@ export interface RecurringRule {
   createdBy?: string
   updatedBy?: string
   version?: number
+  
+  // Subscription / Bill specific fields
+  kind?: "recurring" | "subscription" | "bill"
+  providerName?: string
+  providerUrl?: string
+  cancellationUrl?: string
+  trialEndDate?: Date
+  reminderDaysBefore?: number
+  nextRenewalDate?: Date
+  lastRenewalDate?: Date
+  renewalPrice?: number
+  cancelledAt?: Date
+  cancelReason?: string
+  status?: "active" | "trial" | "paused" | "cancelled" | "expired"
+  lastReminderSentAt?: Date
 }
 
 export interface ExchangeRate {
@@ -313,3 +330,126 @@ export interface AutomationJob {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface Contact {
+  _id: ObjectId
+  userId: string
+  organizationId: string | null
+  name: string
+  email?: string
+  phone?: string
+  notes?: string
+  metadata?: Record<string, any>
+  createdAt: Date
+  updatedAt: Date
+  version: number
+}
+
+export interface Loan {
+  _id: ObjectId
+  userId: string
+  organizationId: string | null
+  type: "lent" | "borrowed"
+  contactId: string
+  personName: string
+  amount: number
+  currency: string
+  interestRate?: number
+  walletId: string
+  transactionId: string
+  date: Date
+  dueDate?: Date
+  notes?: string
+  status: "active" | "partially_repaid" | "fully_repaid" | "overdue" | "cancelled"
+  remainingAmount: number
+  reminderSchedule: number[]
+  sentReminders: number[]
+  lastOverdueReminderSentAt?: Date
+  metadata?: Record<string, any>
+  createdAt: Date
+  updatedAt: Date
+  version: number
+}
+
+export interface LoanRepayment {
+  _id: ObjectId
+  loanId: string
+  transactionId: string
+  amount: number
+  date: Date
+  notes?: string
+  createdAt: Date
+}
+
+export interface BillInstance {
+  _id: ObjectId
+  userId: string
+  organizationId?: string | null
+  ruleId: string // Reference to the RecurringRule template
+  description: string
+  expectedAmount?: number
+  actualAmount?: number
+  currency: string
+  dueDate: Date
+  paidDate?: Date
+  status: "pending" | "paid" | "overdue"
+  transactionId?: string // Link to actual transaction once paid
+  createdAt: Date
+  updatedAt: Date
+  version: number
+}
+
+export type AssetKind = "asset" | "liability";
+
+export type AssetValuationMethod = "manual" | "market" | "calculated";
+
+export type AssetValuationSource = "manual" | "market" | "imported";
+
+export type AssetCategory =
+  | "real_estate"
+  | "vehicle"
+  | "gold"
+  | "crypto"
+  | "investment"
+  | "cash"
+  | "other"
+  | "mortgage"
+  | "student_loan"
+  | "auto_loan"
+  | "personal_loan"
+  | "credit_card";
+
+export type AssetStatus = "active" | "archived";
+
+export interface Asset {
+  _id: any; // ObjectId
+  userId: string;
+  organizationId: string | null;
+  name: string;
+  kind: AssetKind;
+  category: AssetCategory;
+  currency: string;
+  currentValue: number; // Stored in cents/paise
+  valuationMethod: AssetValuationMethod;
+  ownershipPercentage: number;
+  acquiredAt?: Date;
+  notes?: string;
+  status: AssetStatus;
+  isArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
+export interface AssetValuation {
+  _id: any; // ObjectId
+  assetId: string;
+  userId: string;
+  organizationId: string | null;
+  date: Date;
+  value: number; // Stored in cents/paise
+  source: AssetValuationSource;
+  notes?: string;
+  createdAt: Date;
+}
+
