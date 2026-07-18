@@ -33,6 +33,8 @@ export type AssetCategory =
   | "personal_loan"
   | "credit_card";
 
+export type AssetStatus = "active" | "archived";
+
 export interface Asset {
   _id: ObjectId;
   userId: string;
@@ -46,7 +48,8 @@ export interface Asset {
   ownershipPercentage: number;          // Default: 100
   acquiredAt?: Date;                    // Date of acquisition
   notes?: string;
-  isArchived: boolean;
+  status: AssetStatus;                  // "active" | "archived" (Lifecycle status)
+  isArchived: boolean;                  // Duplicate flag kept for application-wide wallet compatibility
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -55,7 +58,7 @@ export interface Asset {
 
 ### 1.2 `AssetValuation` Document (`asset_valuations` Collection)
 
-Stores point-in-time snapshots of an asset's valuation.
+Stores point-in-time snapshots of an asset's valuation. These are historical records and are never modified except for explicit user corrections.
 
 ```typescript
 export type AssetValuationSource = "manual" | "market" | "imported";
@@ -76,7 +79,7 @@ export interface AssetValuation {
 ### 1.3 Database Indexes
 
 * **`assets` collection**:
-  * `{ userId: 1, organizationId: 1, isArchived: 1 }`
+  * `{ userId: 1, organizationId: 1, status: 1 }`
   * `{ kind: 1, category: 1 }`
 * **`asset_valuations` collection**:
   * `{ assetId: 1, date: -1 }`
@@ -100,30 +103,40 @@ To separate business logic from data access and UI presentation, we introduce a 
   * Finds the latest valuation record for this asset where `valuation.date <= date`.
   * Returns `valuation.value * (asset.ownershipPercentage / 100)`. If no valuation is found before `date`, returns `0`.
 
-### 2.2 Historical Net Worth Generator
+### 2.2 Calculations Return Models
 
-* `calculateNetWorthHistory(params: { wallets: Wallet[], transactions: Transaction[], loans: Loan[], repayments: LoanRepayment[], assets: Asset[], valuations: AssetValuation[], convert: (amount: number, from: string) => number, dates: Date[] })`
-  * Evaluates net worth across the requested list of `dates` (which can represent daily, weekly, monthly, or yearly intervals).
-  * For each date `D`, it sums:
-    * **Assets**: Converted backtracked balances of Asset wallets, Active loans (lent), and Manual assets.
-    * **Liabilities**: Converted backtracked credit card wallets (negated), Active loans (borrowed), and Manual liabilities.
-  * Returns a structured timeline of historical breakdowns:
-    ```typescript
-    interface NetWorthHistoryPoint {
-      dateStr: string; // Formatted date
-      netWorth: number;
-      assets: number;
-      liabilities: number;
-      breakdown: {
-        walletsAsset: number;
-        walletsLiability: number;
-        loansAsset: number;
-        loansLiability: number;
-        manualAsset: number;
-        manualLiability: number;
-      }
-    }
-    ```
+Both current and historical calculations return structured breakdown objects, ensuring a stable API contract:
+
+```typescript
+export interface NetWorthBreakdown {
+  netWorth: number;
+  totalAssets: number;
+  totalLiabilities: number;
+  assetsBreakdown: {
+    cash: number;
+    bank: number;
+    investments: number;
+    loans: number;
+    manualAssets: number;
+  };
+  liabilitiesBreakdown: {
+    creditCards: number;
+    loans: number;
+    manualLiabilities: number;
+  };
+  currencyBreakdown: Record<string, { assets: number; liabilities: number; netWorth: number }>;
+}
+
+export interface HistoricalNetWorthPoint extends NetWorthBreakdown {
+  date: Date;
+  dateStr: string;
+}
+```
+
+* `calculateCurrentNetWorth(params: { wallets: Wallet[], loans: Loan[], assets: Asset[], convert: (amount: number, from: string) => number }): NetWorthBreakdown`
+  * Aggregates the current balances of all financial assets and liabilities.
+* `calculateNetWorthHistory(params: { wallets: Wallet[], transactions: Transaction[], loans: Loan[], repayments: LoanRepayment[], assets: Asset[], valuations: AssetValuation[], convert: (amount: number, from: string) => number, dates: Date[] }): HistoricalNetWorthPoint[]`
+  * Evaluates historical net worth data over the requested intervals.
 
 ---
 
@@ -131,7 +144,7 @@ To separate business logic from data access and UI presentation, we introduce a 
 
 ### 3.1 Queries (`lib/queries/assets.ts`)
 
-* `getAssets()`: Retrieves active assets within the current financial scope.
+* `getAssets()`: Retrieves active assets within the current financial scope (where `status === "active"`).
 * `getAssetById(id)`: Retrieves a single asset.
 * `getAssetValuations(assetId)`: Retrieves all valuations for a specific asset sorted by date descending.
 * `getAssetsAndValuationsForScope()`: Retrieves all active assets and their valuations for the current scope in one database operation (used to feed the calculation layer).
@@ -140,7 +153,7 @@ To separate business logic from data access and UI presentation, we introduce a 
 
 * `createAsset(input)`: Inserts a new `Asset` document, and automatically writes the initial `AssetValuation` entry matching `currentValue` at `acquiredAt` or `createdAt`. Revalidates `net-worth` and `wallets`.
 * `updateAsset(id, input)`: Updates canonical fields of the `Asset` document.
-* `addAssetValuation(assetId, date, value, notes)`: Inserts an `AssetValuation`. Checks if this valuation is the newest chronologically; if so, updates `Asset.currentValue`.
+* `addAssetValuation(assetId, date, value, notes)`: Inserts an `AssetValuation` record. Checks if this valuation is the newest chronologically; if so, updates `Asset.currentValue`.
 * `deleteAssetValuation(valuationId)`: Removes a valuation. Updates `Asset.currentValue` if the removed valuation was the latest.
 * `deleteAsset(id)`: Deletes the asset and all its valuation logs.
 
@@ -156,7 +169,7 @@ We will structure the Net Worth module into two main dashboard tabs and an asset
   * Current Net Worth, Total Assets, Total Liabilities, and Monthly Growth Rate.
 * **Overview Tab (Analytics Only)**:
   * **Net Worth History Chart**: An interactive Area/Line chart demonstrating assets vs liabilities and net worth progression. Supports date range filter toggles.
-  * **Allocation Section**: Two separate Donut/Pie charts mapping assets breakdown (Cash, Bank, Investments, Loans, Manual Assets) and liabilities breakdown (Credit Cards, Loans, Manual Liabilities).
+  * **Allocation Section**: Two separate Donut/Pie charts mapping assets breakdown and liabilities breakdown.
   * **Currency Breakdown**: Displays the balance held per currency and its base-currency equivalent.
 * **Assets & Liabilities Tab (Management)**:
   * Grouped display of assets and liabilities.
@@ -170,7 +183,7 @@ A dedicated details page for a single manual asset/liability.
 * **Left Column / Core details**:
   * Name, kind, category, valuation method, acquisition date, and ownership percentage.
   * Persistent notes section.
-  * Placeholders for future attachments, market sync status, and transaction relationships.
+  * **UX Pattern Reserved Slots**: Future slots for attachments, market sync status, and transaction relationships.
 * **Right Column / History & Metrics**:
   * Line chart showing the asset's individual valuation progression.
   * "Log Valuation" action to insert new point-in-time values.
@@ -179,10 +192,9 @@ A dedicated details page for a single manual asset/liability.
 
 ---
 
-## 5. Revalidation Strategy
+## 5. Architectural Boundaries Checklist
 
-After any Asset or Valuation write action, only the relevant path and tags are invalidated to optimize cache hit rates:
-* `revalidatePath("/net-worth")`
-* `revalidatePath("/net-worth/assets/[id]")`
-* `revalidatePath("/", "layout")` (for dashboard metrics sync)
-* Cache tag: `"assets"`, `"asset_valuations"`
+* **Query Layer**: Strictly database read-only. Uses `React.cache()` and returns typed models.
+* **Server Actions**: Validates input using Zod, performs authorization, runs database mutations, and revalidates cache paths/tags. No financial logic occurs here.
+* **Net Worth Calculation Layer**: Pure financial math calculations. Accepts parsed database objects and returns formatted net worth aggregates.
+* **UI Components**: Presentation only. Consumes metrics and models to render tables, charts, and pages.
