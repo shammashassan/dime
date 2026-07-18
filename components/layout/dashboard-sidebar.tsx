@@ -17,6 +17,9 @@ import {
   Shield,
   LogOut,
   ChevronsUpDown,
+  HandCoins,
+  Users,
+  TrendingUp,
 } from "lucide-react"
 import { LogoMark } from "@/components/brand/logo-mark"
 import { SpaceSwitcher } from "@/components/layout/space-switcher"
@@ -63,8 +66,11 @@ const NAV_ITEMS = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { title: "Transactions", href: "/transactions", icon: ArrowLeftRight },
   { title: "Wallets", href: "/wallets", icon: Wallet },
+  { title: "Net Worth", href: "/net-worth", icon: TrendingUp },
   { title: "Budgets", href: "/budgets", icon: PiggyBank },
   { title: "Goals", href: "/goals", icon: Target },
+  { title: "Loans", href: "/loans", icon: HandCoins },
+  { title: "Contacts", href: "/contacts", icon: Users },
   { title: "Recurring", href: "/recurring", icon: Repeat },
   { title: "Reports", href: "/reports", icon: BarChart3 },
   { title: "Categories", href: "/categories", icon: Tags },
