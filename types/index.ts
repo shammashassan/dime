@@ -422,7 +422,7 @@ export type AssetCategory =
 export type AssetStatus = "active" | "archived";
 
 export interface Asset {
-  _id: any; // ObjectId
+  _id: ObjectId;
   userId: string;
   organizationId: string | null;
   name: string;
@@ -442,7 +442,7 @@ export interface Asset {
 }
 
 export interface AssetValuation {
-  _id: any; // ObjectId
+  _id: ObjectId;
   assetId: string;
   userId: string;
   organizationId: string | null;
