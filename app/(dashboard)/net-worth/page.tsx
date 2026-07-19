@@ -5,30 +5,38 @@ import { getLoans, getActiveBaseCurrency } from "@/lib/queries/loans"
 import { getAssetsAndValuationsForScope } from "@/lib/queries/assets"
 import { getCurrencyConverter } from "@/lib/currency"
 import { calculateCurrentNetWorth, calculateNetWorthHistory } from "@/lib/calculations/net-worth"
+import { generateNetWorthOverviewViewModel } from "@/lib/calculations/net-worth-viewmodel"
 import { db } from "@/lib/db/client"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { serializeData } from "@/lib/utils"
-import { endOfMonth, subMonths, startOfMonth } from "date-fns"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { subMonths, startOfMonth, eachDayOfInterval, startOfDay } from "date-fns"
 import { NetWorthOverview } from "@/components/net-worth/net-worth-overview"
-import { AssetsListTab } from "@/components/net-worth/assets-list-tab"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export const ppr = true // Opt-in to PPR as per workspace rule
+export const ppr = true
 
 function NetWorthSkeleton() {
   return (
-    <div className="flex flex-col gap-6 w-full animate-pulse p-6">
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-8 w-48 rounded-lg" />
-        <Skeleton className="h-4 w-72 rounded-lg" />
+    <div className="flex flex-col gap-7 w-full animate-pulse p-1">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-12 w-12 rounded-2xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Skeleton className="h-32 rounded-2xl" />
-        <Skeleton className="h-32 rounded-2xl" />
-        <Skeleton className="h-32 rounded-2xl" />
+      <div className="flex flex-wrap gap-4 mt-2">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-[90px] flex-1 min-w-[220px] rounded-2xl" />
+        ))}
       </div>
-      <Skeleton className="h-[300px] w-full rounded-2xl" />
+      <Skeleton className="h-9 w-64 rounded-xl" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Skeleton className="h-[320px] w-full rounded-2xl md:col-span-2" />
+        <Skeleton className="h-[320px] w-full rounded-2xl" />
+      </div>
     </div>
   )
 }
@@ -43,18 +51,21 @@ async function NetWorthContent() {
     getAllWalletsIncludingArchived(userId),
     getLoans(),
     getAssetsAndValuationsForScope(),
-    getActiveBaseCurrency()
+    getActiveBaseCurrency(),
   ])
 
-  const loanIds = loans.map(l => l._id.toString())
+  const loanIds = loans.map((l) => l._id.toString())
   const [repayments, transactions] = await Promise.all([
     loanIds.length > 0
-      ? db.collection("loan_repayments").find({ loanId: { $in: loanIds } }).toArray() as any
+      ? (db.collection("loan_repayments").find({ loanId: { $in: loanIds } }).toArray() as any)
       : Promise.resolve([]),
-    db.collection("transactions").find({
-      ...filter,
-      date: { $gte: startOfMonth(subMonths(new Date(), 5)) }
-    }).toArray() as any
+    db
+      .collection("transactions")
+      .find({
+        ...filter,
+        date: { $gte: startOfMonth(subMonths(new Date(), 5)) },
+      })
+      .toArray() as any,
   ])
 
   const serialized = serializeData({
@@ -63,28 +74,24 @@ async function NetWorthContent() {
     repayments,
     transactions,
     assets,
-    valuations
+    valuations,
   })
 
-  const sourceCurrencies = Array.from(new Set([
-    ...serialized.wallets.map((w: any) => w.currency),
-    ...serialized.loans.map((l: any) => l.currency),
-    ...serialized.assets.map((a: any) => a.currency)
-  ]))
-  
+  const sourceCurrencies = Array.from(
+    new Set([
+      ...serialized.wallets.map((w: any) => w.currency),
+      ...serialized.loans.map((l: any) => l.currency),
+      ...serialized.assets.map((a: any) => a.currency),
+    ])
+  )
+
   const convert = await getCurrencyConverter(baseCurrency, sourceCurrencies)
 
-  const currentBreakdown = calculateCurrentNetWorth({
-    wallets: serialized.wallets,
-    loans: serialized.loans,
-    assets: serialized.assets,
-    convert
+  const historyStart = startOfMonth(subMonths(new Date(), 5))
+  const dates: Date[] = eachDayOfInterval({
+    start: historyStart,
+    end: startOfDay(new Date()),
   })
-
-  const dates: Date[] = []
-  for (let i = 5; i >= 0; i--) {
-    dates.push(endOfMonth(subMonths(new Date(), i)))
-  }
 
   const history = calculateNetWorthHistory({
     wallets: serialized.wallets,
@@ -94,41 +101,30 @@ async function NetWorthContent() {
     assets: serialized.assets,
     valuations: serialized.valuations,
     convert,
-    dates
+    dates,
   })
 
+  const viewModel = generateNetWorthOverviewViewModel({
+    wallets: serialized.wallets,
+    loans: serialized.loans,
+    assets: serialized.assets,
+    valuations: serialized.valuations,
+    repayments: serialized.repayments,
+    transactions: serialized.transactions,
+    convert,
+    baseCurrency,
+    history,
+  })
+
+  const serializedViewModel = serializeData(viewModel)
+  const serializedHistory = serializeData(history)
+
   return (
-    <div className="space-y-6 w-full max-w-7xl mx-auto p-4 md:p-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-black tracking-tight">Net Worth</h1>
-        <p className="text-sm text-muted-foreground">
-          Track assets, liabilities, allocations, and historical trends across currencies.
-        </p>
-      </div>
-
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="bg-muted/50 rounded-xl p-1 border border-border/40">
-          <TabsTrigger value="overview" className="rounded-lg px-4 py-2 font-semibold">
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="assets-list" className="rounded-lg px-4 py-2 font-semibold">
-            Assets & Liabilities
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="mt-0 outline-none">
-          <NetWorthOverview
-            current={currentBreakdown}
-            history={history}
-            currency={baseCurrency}
-          />
-        </TabsContent>
-
-        <TabsContent value="assets-list" className="mt-0 outline-none">
-          <AssetsListTab assets={serialized.assets} />
-        </TabsContent>
-      </Tabs>
-    </div>
+    <NetWorthOverview
+      viewModel={serializedViewModel}
+      historyData={serializedHistory}
+      assets={serialized.assets}
+    />
   )
 }
 
