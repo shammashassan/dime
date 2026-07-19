@@ -4,9 +4,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { RadialBarChart, RadialBar, PolarRadiusAxis, Label } from "recharts"
 import { formatCurrency, cn } from "@/lib/utils"
-import { NetWorthOverviewViewModel } from "@/types"
+import { NetWorthOverviewViewModel, NetWorthBreakdown } from "@/types"
 
-export function CurrencyAllocationCard({ viewModel, currencyBreakdown }: { viewModel: NetWorthOverviewViewModel; currencyBreakdown: any }) {
+export function CurrencyAllocationCard({ viewModel, currencyBreakdown }: { viewModel: NetWorthOverviewViewModel; currencyBreakdown: NetWorthBreakdown["currencyBreakdown"] }) {
   const { netWorth, currency } = viewModel
 
   const currencyEntries = Object.entries(currencyBreakdown || {})
@@ -14,17 +14,17 @@ export function CurrencyAllocationCard({ viewModel, currencyBreakdown }: { viewM
   const currencyChartConfig = currencyEntries.reduce((acc, [curr], idx) => {
     acc[curr] = { label: curr, color: radialColors[idx % radialColors.length] }
     return acc
-  }, {} as any)
+  }, {} as Record<string, { label: string; color: string }>)
 
   const radialData = currencyEntries.length > 0
     ? [
-      currencyEntries.reduce((acc, [curr, breakd]: any) => {
+      currencyEntries.reduce((acc, [curr, breakd]) => {
         acc[curr] = Math.abs(breakd.netWorth) / 100
         return acc
       }, {} as Record<string, number>),
     ]
     : []
-  const totalCurrencyMagnitude = currencyEntries.reduce((sum, [, breakd]: any) => sum + Math.abs(breakd.netWorth), 0)
+  const totalCurrencyMagnitude = currencyEntries.reduce((sum, [, breakd]) => sum + Math.abs(breakd.netWorth), 0)
 
   const getPct = (val: number, total: number) => {
     if (total === 0) return 0
@@ -84,7 +84,7 @@ export function CurrencyAllocationCard({ viewModel, currencyBreakdown }: { viewM
       </CardContent>
       {currencyEntries.length > 0 && (
         <CardFooter className="flex-col gap-0 border-t p-0 [.border-t]:pt-0 text-xs">
-          {currencyEntries.map(([curr, breakd]: any) => (
+          {currencyEntries.map(([curr, breakd]) => (
             <div key={curr} className="flex w-full items-center justify-between gap-2 px-5 py-2 not-last:border-b">
               <span className="flex items-center gap-2 font-medium">
                 <span

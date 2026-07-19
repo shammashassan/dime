@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { NetWorthOverviewViewModel, Asset } from "@/types"
+import { NetWorthOverviewViewModel, Asset, HistoricalNetWorthPoint } from "@/types"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AssetsListTab } from "./assets-list-tab"
 import { Landmark } from "lucide-react"
@@ -22,7 +22,7 @@ import { InsightsCard } from "./overview/insights-card"
 
 interface NetWorthOverviewProps {
   viewModel: NetWorthOverviewViewModel
-  historyData: any[] // pass raw history points for Recharts timeline
+  historyData: HistoricalNetWorthPoint[] // pass raw history points for Recharts timeline
   assets: Asset[]
 }
 
@@ -80,15 +80,17 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
         return <AssetAllocationCard key={card.id} viewModel={viewModel} breakdowns={currentBreakdown} />
       case "currency_allocation":
         // Extract currency breakdown mapping for radial bar
-        const currencyMap: Record<string, any> = {}
+        const currencyMap: Record<string, { assets: number; liabilities: number; netWorth: number }> = {}
         const allHoldings = [...viewModel.topAssets, ...viewModel.topLiabilities]
         allHoldings.forEach(h => {
           if (!currencyMap[h.originalCurrency]) {
-            currencyMap[h.originalCurrency] = { netWorth: 0 }
+            currencyMap[h.originalCurrency] = { assets: 0, liabilities: 0, netWorth: 0 }
           }
           if (h.kind === "asset") {
+            currencyMap[h.originalCurrency].assets += h.originalValue
             currencyMap[h.originalCurrency].netWorth += h.originalValue
           } else {
+            currencyMap[h.originalCurrency].liabilities += h.originalValue
             currencyMap[h.originalCurrency].netWorth -= h.originalValue
           }
         })
@@ -157,7 +159,7 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
         </div>
 
         <div className="sm:hidden w-full">
-          <Select value={activeTab} onValueChange={(val: any) => setActiveTab(val)}>
+          <Select value={activeTab} onValueChange={(val) => setActiveTab(val as "overview" | "assets-list")}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder={tabNames[activeTab]} />
             </SelectTrigger>

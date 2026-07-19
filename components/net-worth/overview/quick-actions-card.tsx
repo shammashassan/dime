@@ -102,7 +102,7 @@ export function QuickActionsCard({ assets, onRefresh }: { assets: Asset[]; onRef
         <AssetDialog
           open={assetOpen}
           onOpenChange={setAssetOpen}
-          initialAsset={{ kind: assetKind } as any}
+          initialAsset={{ kind: assetKind } as Asset}
           onSuccess={() => {
             setAssetOpen(false)
             onRefresh()

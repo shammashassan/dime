@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { PieChart, Pie, Label } from "recharts"
 import { formatCurrency } from "@/lib/utils"
-import { NetWorthOverviewViewModel } from "@/types"
+import { NetWorthOverviewViewModel, NetWorthBreakdown } from "@/types"
 
 const assetPieConfig = {
   value: {
@@ -33,7 +33,7 @@ const assetPieConfig = {
   },
 } as const
 
-export function AssetAllocationCard({ viewModel, breakdowns }: { viewModel: NetWorthOverviewViewModel; breakdowns: any }) {
+export function AssetAllocationCard({ viewModel, breakdowns }: { viewModel: NetWorthOverviewViewModel; breakdowns: NetWorthBreakdown["assetsBreakdown"] }) {
   const { totalAssets, currency } = viewModel
 
   const getPct = (val: number, total: number) => {

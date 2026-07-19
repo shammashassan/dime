@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis } from "recharts"
 import { formatCurrency } from "@/lib/utils"
+import { HistoricalNetWorthPoint } from "@/types"
 
 const areaChartConfig = {
   netWorth: {
@@ -21,7 +22,7 @@ const areaChartConfig = {
   },
 } as const
 
-export function TimelineCard({ historyData, currency }: { historyData: any[]; currency: string }) {
+export function TimelineCard({ historyData, currency }: { historyData: HistoricalNetWorthPoint[]; currency: string }) {
   return (
     <Card className="rounded-2xl border border-border/40 shadow-sm p-0 overflow-hidden h-full flex flex-col justify-between">
       <CardHeader className="border-b py-4 px-6 [.border-b]:pb-4">

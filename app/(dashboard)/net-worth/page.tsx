@@ -4,16 +4,17 @@ import { getAllWalletsIncludingArchived } from "@/lib/queries/wallets"
 import { getLoans, getActiveBaseCurrency } from "@/lib/queries/loans"
 import { getAssetsAndValuationsForScope } from "@/lib/queries/assets"
 import { getCurrencyConverter } from "@/lib/currency"
-import { calculateCurrentNetWorth, calculateNetWorthHistory } from "@/lib/calculations/net-worth"
+import { calculateNetWorthHistory } from "@/lib/calculations/net-worth"
 import { generateNetWorthOverviewViewModel } from "@/lib/calculations/net-worth-viewmodel"
-import { db } from "@/lib/db/client"
+import { loanRepaymentsCollection, transactionsCollection } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { serializeData } from "@/lib/utils"
 import { subMonths, startOfMonth, eachDayOfInterval, startOfDay } from "date-fns"
 import { NetWorthOverview } from "@/components/net-worth/net-worth-overview"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Wallet, Loan, LoanRepayment, Asset } from "@/types"
 
-export const ppr = true
+export const experimental_ppr = true
 
 function NetWorthSkeleton() {
   return (
@@ -57,15 +58,14 @@ async function NetWorthContent() {
   const loanIds = loans.map((l) => l._id.toString())
   const [repayments, transactions] = await Promise.all([
     loanIds.length > 0
-      ? (db.collection("loan_repayments").find({ loanId: { $in: loanIds } }).toArray() as any)
-      : Promise.resolve([]),
-    db
-      .collection("transactions")
+      ? loanRepaymentsCollection.find({ loanId: { $in: loanIds } }).toArray()
+      : Promise.resolve([] as LoanRepayment[]),
+    transactionsCollection
       .find({
         ...filter,
         date: { $gte: startOfMonth(subMonths(new Date(), 5)) },
       })
-      .toArray() as any,
+      .toArray(),
   ])
 
   const serialized = serializeData({
@@ -79,9 +79,9 @@ async function NetWorthContent() {
 
   const sourceCurrencies = Array.from(
     new Set([
-      ...serialized.wallets.map((w: any) => w.currency),
-      ...serialized.loans.map((l: any) => l.currency),
-      ...serialized.assets.map((a: any) => a.currency),
+      ...serialized.wallets.map((w: Wallet) => w.currency),
+      ...serialized.loans.map((l: Loan) => l.currency),
+      ...serialized.assets.map((a: Asset) => a.currency),
     ])
   )
 

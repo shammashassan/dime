@@ -294,8 +294,8 @@ export interface RuleConflict {
   winningRuleName: string
   losingRuleId: string
   losingRuleName: string
-  valueAttempted: any
-  valueApplied: any
+  valueAttempted: unknown
+  valueApplied: unknown
 }
 
 export interface RuleExecutionResult {
@@ -339,7 +339,7 @@ export interface Contact {
   email?: string
   phone?: string
   notes?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   createdAt: Date
   updatedAt: Date
   version: number
@@ -365,7 +365,7 @@ export interface Loan {
   reminderSchedule: number[]
   sentReminders: number[]
   lastOverdueReminderSentAt?: Date
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   createdAt: Date
   updatedAt: Date
   version: number

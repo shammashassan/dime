@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { NetWorthOverviewViewModel } from "@/types"
 import { Sparkles, Info, CheckCircle, AlertTriangle } from "lucide-react"
 
-const iconsMap: Record<string, any> = {
+const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {
   success: CheckCircle,
   warning: AlertTriangle,
   info: Info,

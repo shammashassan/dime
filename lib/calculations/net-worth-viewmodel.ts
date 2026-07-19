@@ -1,4 +1,4 @@
-import { Wallet, Transaction, Loan, LoanRepayment, Asset, AssetValuation, NetWorthOverviewViewModel, NetWorthHolding, NetWorthActivityEvent, NetWorthInsight } from "@/types"
+import { Wallet, Transaction, Loan, LoanRepayment, Asset, AssetValuation, NetWorthOverviewViewModel, NetWorthHolding, NetWorthActivityEvent, NetWorthInsight, HistoricalNetWorthPoint } from "@/types"
 import { calculateCurrentNetWorth } from "./net-worth"
 
 export function generateNetWorthOverviewViewModel(params: {
@@ -10,7 +10,7 @@ export function generateNetWorthOverviewViewModel(params: {
   transactions: Transaction[]
   convert: (amount: number, from: string) => number
   baseCurrency: string
-  history: any[]
+  history: HistoricalNetWorthPoint[]
 }): NetWorthOverviewViewModel {
   const { wallets, loans, assets, valuations, repayments, transactions, convert, baseCurrency, history } = params
 
@@ -122,9 +122,13 @@ export function generateNetWorthOverviewViewModel(params: {
   // 4. Activity events
   const activityEvents: NetWorthActivityEvent[] = []
 
+  // Create lookup maps for O(1) key searches, avoiding quadratic iteration in the loop
+  const assetsMap = new Map(assets.map((a) => [a._id.toString(), a]))
+  const loansMap = new Map(loans.map((l) => [l._id.toString(), l]))
+
   // Add valuation updates
   for (const v of valuations) {
-    const asset = assets.find((a) => a._id.toString() === v.assetId)
+    const asset = assetsMap.get(v.assetId)
     if (!asset) continue
     activityEvents.push({
       id: v._id.toString(),
@@ -140,7 +144,7 @@ export function generateNetWorthOverviewViewModel(params: {
 
   // Add repayments
   for (const rep of repayments) {
-    const loan = loans.find((l) => l._id.toString() === rep.loanId)
+    const loan = loansMap.get(rep.loanId)
     if (!loan) continue
     activityEvents.push({
       id: rep._id.toString(),

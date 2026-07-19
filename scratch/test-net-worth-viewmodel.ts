@@ -258,16 +258,24 @@ const transactions: Transaction[] = [
 // 7. History
 const history: HistoricalNetWorthPoint[] = [
   {
-    date: "2026-06-01",
+    date: new Date("2026-06-01"),
+    dateStr: "2026-06-01",
     netWorth: 10000000, // $100,000.00
-    assets: 10500000,
-    liabilities: 500000,
+    totalAssets: 10500000,
+    totalLiabilities: 500000,
+    assetsBreakdown: { cash: 0, bank: 0, investments: 0, loans: 0, manualAssets: 0 },
+    liabilitiesBreakdown: { creditCards: 0, loans: 0, manualLiabilities: 0 },
+    currencyBreakdown: {},
   },
   {
-    date: "2026-07-01",
+    date: new Date("2026-07-01"),
+    dateStr: "2026-07-01",
     netWorth: 11000000, // $110,000.00
-    assets: 11600000,
-    liabilities: 600000,
+    totalAssets: 11600000,
+    totalLiabilities: 600000,
+    assetsBreakdown: { cash: 0, bank: 0, investments: 0, loans: 0, manualAssets: 0 },
+    liabilitiesBreakdown: { creditCards: 0, loans: 0, manualLiabilities: 0 },
+    currencyBreakdown: {},
   }
 ]
 

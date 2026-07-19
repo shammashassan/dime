@@ -6,7 +6,7 @@ import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { Wallet, HandCoins, Layers, Landmark } from "lucide-react"
 
-const iconsMap: Record<string, any> = {
+const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wallet,
   HandCoins,
   Layers,
