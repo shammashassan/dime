@@ -392,7 +392,7 @@ export interface BillInstance {
   currency: string
   dueDate: Date
   paidDate?: Date
-  status: "pending" | "paid" | "overdue"
+  status: "pending" | "paid" | "overdue" | "skipped"
   transactionId?: string // Link to actual transaction once paid
   createdAt: Date
   updatedAt: Date
@@ -476,4 +476,61 @@ export interface HistoricalNetWorthPoint extends NetWorthBreakdown {
   date: Date;
   dateStr: string;
 }
+
+export interface NetWorthHolding {
+  id: string
+  name: string
+  source: "wallet" | "loan" | "asset"
+  kind: "asset" | "liability"
+  category: string
+  currentValue: number     // Converted to base currency, stored in cents
+  percentage: number       // Percentage of total assets (or total liabilities)
+  currency: string         // Base currency
+  originalValue: number    // Value in original currency
+  originalCurrency: string
+  icon: string             // Icon name string
+  href?: string            // Path to detail page (/wallets/[id], /loans/[id], etc.)
+}
+
+export interface NetWorthActivityEvent {
+  id: string
+  type: "valuation" | "repayment" | "new_loan" | "new_asset" | "transaction"
+  date: Date
+  title: string
+  description: string
+  amount?: number          // Value in original currency
+  currency?: string
+  href?: string
+}
+
+export interface NetWorthInsight {
+  id: string
+  type: "info" | "warning" | "success"
+  text: string
+  metric?: string
+}
+
+export interface NetWorthOverviewViewModel {
+  currency: string
+  netWorth: number
+  totalAssets: number
+  totalLiabilities: number
+  moMChangePct: number
+  largestAsset?: { name: string; value: number }
+  
+  // Health Metrics
+  liquidityRatio: number
+  debtRatio: number
+  largestLiability?: { name: string; value: number }
+  netWorthTrend: "up" | "down" | "flat"
+
+  // Holdings Lists
+  topAssets: NetWorthHolding[]
+  topLiabilities: NetWorthHolding[]
+
+  // Activity & Insights
+  recentActivity: NetWorthActivityEvent[]
+  insights: NetWorthInsight[]
+}
+
 
