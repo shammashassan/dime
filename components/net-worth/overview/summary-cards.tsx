@@ -12,7 +12,7 @@ export function SummaryCards({ viewModel }: { viewModel: NetWorthOverviewViewMod
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {/* Net Worth */}
-      <Card className="rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-primary/5 to-card dark:bg-card shadow-sm hover:border-primary/20 hover:shadow-md gap-0 py-0 overflow-hidden">
+      <Card className="net-worth-card rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-primary/5 to-card dark:bg-card shadow-sm hover:border-primary/20 hover:shadow-md gap-0 py-0 overflow-hidden">
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <div className="space-y-1.5">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block leading-none">Net Worth</span>
@@ -39,7 +39,7 @@ export function SummaryCards({ viewModel }: { viewModel: NetWorthOverviewViewMod
       </Card>
 
       {/* Assets */}
-      <Card className="rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-emerald-500/5 to-card dark:bg-card shadow-sm hover:border-emerald-500/20 hover:shadow-md gap-0 py-0 overflow-hidden">
+      <Card className="net-worth-card rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-emerald-500/5 to-card dark:bg-card shadow-sm hover:border-emerald-500/20 hover:shadow-md gap-0 py-0 overflow-hidden">
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <div className="space-y-1.5">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block leading-none">Total Assets</span>
@@ -68,7 +68,7 @@ export function SummaryCards({ viewModel }: { viewModel: NetWorthOverviewViewMod
       </Card>
 
       {/* Liabilities */}
-      <Card className="rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-rose-500/5 to-card dark:bg-card shadow-sm hover:border-rose-500/20 hover:shadow-md gap-0 py-0 overflow-hidden">
+      <Card className="net-worth-card rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-rose-500/5 to-card dark:bg-card shadow-sm hover:border-rose-500/20 hover:shadow-md gap-0 py-0 overflow-hidden">
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <div className="space-y-1.5">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block leading-none">Total Liabilities</span>
@@ -93,7 +93,7 @@ export function SummaryCards({ viewModel }: { viewModel: NetWorthOverviewViewMod
       </Card>
 
       {/* Growth change */}
-      <Card className="rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-primary/5 to-card dark:bg-card shadow-sm hover:border-primary/20 hover:shadow-md gap-0 py-0 overflow-hidden">
+      <Card className="net-worth-card rounded-2xl border border-border/40 transition-all duration-200 bg-linear-to-t from-primary/5 to-card dark:bg-card shadow-sm hover:border-primary/20 hover:shadow-md gap-0 py-0 overflow-hidden">
         <div className="flex items-center justify-between px-5 pt-5 pb-4">
           <div className="space-y-1.5">
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block leading-none">Trend Period</span>
