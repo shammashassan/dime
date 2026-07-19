@@ -14,7 +14,7 @@ import { NetWorthOverview } from "@/components/net-worth/net-worth-overview"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Wallet, Loan, LoanRepayment, Asset } from "@/types"
 
-export const experimental_ppr = true
+
 
 function NetWorthSkeleton() {
   return (
