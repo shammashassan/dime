@@ -93,6 +93,7 @@ export async function initDatabase() {
 
     const watchlistItems = db.collection("watchlist_items")
     await watchlistItems.createIndex({ watchlistId: 1, symbol: 1 }, { unique: true })
+    await watchlistItems.createIndex({ watchlistId: 1, sortOrder: 1 })
     await watchlistItems.createIndex({ symbol: 1 })
     await watchlistItems.createIndex({ assetType: 1 })
 

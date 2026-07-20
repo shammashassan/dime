@@ -590,6 +590,7 @@ export interface InvestmentTransaction {
   notes?: string
   metadata?: Record<string, unknown>
   createdAt: Date
+  updatedAt: Date
 }
 
 export interface InvestmentPrice {
