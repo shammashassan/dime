@@ -508,6 +508,7 @@ export interface NetWorthInsight {
   type: "info" | "warning" | "success"
   text: string
   metric?: string
+  href?: string
 }
 
 export interface NetWorthOverviewViewModel {
@@ -531,6 +532,109 @@ export interface NetWorthOverviewViewModel {
   // Activity & Insights
   recentActivity: NetWorthActivityEvent[]
   insights: NetWorthInsight[]
+}
+
+export interface InvestmentHolding {
+  _id: ObjectId
+  userId: string
+  organizationId: string | null
+  walletId: string
+  symbol: string
+  name: string
+  assetType: "stock" | "etf" | "crypto" | "mutual_fund" | "bond" | "commodity" | "other"
+  quantity: number
+  averageCostBasis: number
+  totalCostBasis: number
+  currentPrice: number
+  status: "active" | "closed"
+  realizedGain: number
+  currency: string
+  exchange?: string
+  isin?: string
+  cusip?: string
+  metadata?: Record<string, unknown>
+  createdAt: Date
+  updatedAt: Date
+}
+
+export type InvestmentTransactionType =
+  | "buy"
+  | "sell"
+  | "cash_dividend"
+  | "reinvested_dividend"
+  | "stock_split"
+  | "reverse_split"
+  | "interest"
+  | "fee"
+  | "transfer_in"
+  | "transfer_out"
+  | "adjustment"
+
+export interface InvestmentTransaction {
+  _id: ObjectId
+  userId: string
+  organizationId: string | null
+  walletId: string
+  holdingId: string
+  symbol: string
+  assetType: "stock" | "etf" | "crypto" | "mutual_fund" | "bond" | "commodity" | "other"
+  type: InvestmentTransactionType
+  quantity: number
+  price: number
+  grossAmount: number
+  fees: number
+  cashImpact: number
+  realizedGain?: number
+  dividendAmount?: number
+  date: Date
+  notes?: string
+  metadata?: Record<string, unknown>
+  createdAt: Date
+}
+
+export interface InvestmentPrice {
+  _id: ObjectId
+  holdingId: string
+  price: number
+  date: Date
+  source: "manual" | "market"
+  createdAt: Date
+}
+
+export interface Watchlist {
+  _id: ObjectId
+  userId: string
+  organizationId: string | null
+  name: string
+  description?: string
+  color?: string
+  icon?: string
+  sortOrder: number
+  status: "active" | "archived"
+  archivedAt?: Date
+  metadata?: Record<string, unknown>
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface WatchlistItem {
+  _id: ObjectId
+  watchlistId: string
+  symbol: string
+  name: string
+  assetType: "stock" | "etf" | "crypto" | "mutual_fund" | "bond" | "commodity" | "other"
+  sortOrder: number
+  exchange?: string
+  isin?: string
+  cusip?: string
+  notes?: string
+  targetPrice?: number
+  targetDirection?: "above" | "below"
+  alertEnabled?: boolean
+  lastAlertTriggeredAt?: Date
+  metadata?: Record<string, unknown>
+  createdAt: Date
+  updatedAt: Date
 }
 
 

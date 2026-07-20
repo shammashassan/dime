@@ -72,6 +72,30 @@ export async function initDatabase() {
     const loanRepayments = db.collection("loan_repayments")
     await loanRepayments.createIndex({ loanId: 1 })
 
+    // Investment Indexes
+    const investmentHoldings = db.collection("investment_holdings")
+    await investmentHoldings.createIndex({ walletId: 1, symbol: 1 }, { unique: true })
+    await investmentHoldings.createIndex({ userId: 1, walletId: 1 })
+    await investmentHoldings.createIndex({ organizationId: 1 })
+
+    const investmentTransactions = db.collection("investment_transactions")
+    await investmentTransactions.createIndex({ holdingId: 1, date: -1 })
+    await investmentTransactions.createIndex({ userId: 1, walletId: 1, date: -1 })
+    await investmentTransactions.createIndex({ organizationId: 1, date: -1 })
+
+    const investmentPrices = db.collection("investment_prices")
+    await investmentPrices.createIndex({ holdingId: 1, date: -1 })
+
+    // Watchlist Indexes
+    const watchlists = db.collection("watchlists")
+    await watchlists.createIndex({ userId: 1, sortOrder: 1 })
+    await watchlists.createIndex({ organizationId: 1, name: 1 })
+
+    const watchlistItems = db.collection("watchlist_items")
+    await watchlistItems.createIndex({ watchlistId: 1, symbol: 1 }, { unique: true })
+    await watchlistItems.createIndex({ symbol: 1 })
+    await watchlistItems.createIndex({ assetType: 1 })
+
     // 5. Create indexes for user lookup
     const users = db.collection("user")
     await users.createIndex({ approved: 1, role: 1 })

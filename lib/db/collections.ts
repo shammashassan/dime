@@ -1,5 +1,26 @@
 import { db } from "./client"
-import { Wallet, Transaction, Category, Budget, RecurringRule, ExchangeRate, OrganizationSettings, Notification, AutomationRule, AutomationJob, Contact, Loan, LoanRepayment, Asset, AssetValuation } from "@/types"
+import {
+  Wallet,
+  Transaction,
+  Category,
+  Budget,
+  RecurringRule,
+  ExchangeRate,
+  OrganizationSettings,
+  Notification,
+  AutomationRule,
+  AutomationJob,
+  Contact,
+  Loan,
+  LoanRepayment,
+  Asset,
+  AssetValuation,
+  InvestmentHolding,
+  InvestmentTransaction,
+  InvestmentPrice,
+  Watchlist,
+  WatchlistItem
+} from "@/types"
 
 export const walletsCollection = db.collection<Wallet>("wallets")
 export const transactionsCollection = db.collection<Transaction>("transactions")
@@ -16,6 +37,11 @@ export const loansCollection = db.collection<Loan>("loans")
 export const loanRepaymentsCollection = db.collection<LoanRepayment>("loan_repayments")
 export const assetsCollection = db.collection<Asset>("assets")
 export const assetValuationsCollection = db.collection<AssetValuation>("asset_valuations")
+export const investmentHoldingsCollection = db.collection<InvestmentHolding>("investment_holdings")
+export const investmentTransactionsCollection = db.collection<InvestmentTransaction>("investment_transactions")
+export const investmentPricesCollection = db.collection<InvestmentPrice>("investment_prices")
+export const watchlistsCollection = db.collection<Watchlist>("watchlists")
+export const watchlistItemsCollection = db.collection<WatchlistItem>("watchlist_items")
 
 export async function getCollection<T extends object>(name: string) {
   return db.collection<T>(name)
