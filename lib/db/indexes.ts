@@ -1,5 +1,4 @@
 import { db } from "./client"
-import { categoriesCollection } from "./collections"
 
 const globalWithMongo = global as typeof globalThis & {
   _dbInitialized?: boolean
@@ -110,6 +109,7 @@ export async function initDatabase() {
     console.log("Database indexes verified/created.")
 
     // 5. Seed default categories if none exist
+    const categoriesCollection = db.collection("categories")
     const categoryCount = await categoriesCollection.countDocuments({ userId: null })
     if (categoryCount === 0) {
       console.log("Seeding system default categories...")

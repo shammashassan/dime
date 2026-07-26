@@ -1,6 +1,5 @@
 import { MongoClient, Db } from "mongodb"
 import { cache } from "react"
-import { initDatabase } from "./indexes"
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
@@ -46,6 +45,7 @@ clientPromise = globalWithMongo._mongoClientPromise!
 export const getDb = cache(async (): Promise<Db> => {
   const connectedClient = await clientPromise
   const database = connectedClient.db()
+  const { initDatabase } = await import("./indexes")
   await initDatabase()
   return database
 })
