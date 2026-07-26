@@ -1,4 +1,6 @@
 import { MongoClient, Db } from "mongodb"
+import { cache } from "react"
+import { initDatabase } from "./indexes"
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"')
@@ -12,18 +14,43 @@ const options = {
   socketTimeoutMS: 45000,
 }
 
+let client: MongoClient
+let clientPromise: Promise<MongoClient>
+
 const globalWithMongo = global as typeof globalThis & {
   _mongoClient?: MongoClient
   _mongoDb?: Db
+  _mongoClientPromise?: Promise<MongoClient>
 }
 
 if (!globalWithMongo._mongoClient) {
   globalWithMongo._mongoClient = new MongoClient(uri, options)
   globalWithMongo._mongoDb = globalWithMongo._mongoClient.db()
+
+  let connectPromise: Promise<MongoClient> | null = null
+  globalWithMongo._mongoClientPromise = new Proxy({} as Promise<MongoClient>, {
+    get(target, prop) {
+      if (!connectPromise) {
+        connectPromise = globalWithMongo._mongoClient!.connect()
+      }
+      const val = Reflect.get(connectPromise, prop)
+      return typeof val === "function" ? val.bind(connectPromise) : val
+    },
+  })
 }
 
-const client: MongoClient = globalWithMongo._mongoClient
-const db: Db = globalWithMongo._mongoDb as Db
+client = globalWithMongo._mongoClient!
+const db: Db = globalWithMongo._mongoDb!
+clientPromise = globalWithMongo._mongoClientPromise!
 
-export { client, db }
+export const getDb = cache(async (): Promise<Db> => {
+  const connectedClient = await clientPromise
+  const database = connectedClient.db()
+  await initDatabase()
+  return database
+})
+
+export { client, db, clientPromise }
+export default clientPromise
+
 
