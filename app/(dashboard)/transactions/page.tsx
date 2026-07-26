@@ -78,11 +78,12 @@ async function TransactionsContent({
   const sortOrder = params.sortOrder === "asc" ? "asc" : "desc"
 
   // Fetch in parallel
-  const [wallets, categories, transactions, totalCount] = await Promise.all([
+  const [wallets, categories, transactions, totalCount, hasAnyTransactions] = await Promise.all([
     getWallets(userId),
     getCategories(userId),
     getFilteredTransactions(userId, filters, { limit: pageSize, skip }, { sortBy, sortOrder }),
     getFilteredTransactionsCount(userId, filters),
+    getFilteredTransactionsCount(userId, {}).then(c => c > 0)
   ])
 
   return (
@@ -95,6 +96,7 @@ async function TransactionsContent({
       pageSize={pageSize}
       sortBy={sortBy}
       sortOrder={sortOrder}
+      hasAnyTransactions={hasAnyTransactions}
     />
   )
 }

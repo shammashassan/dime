@@ -1,11 +1,14 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
-import { getWallets } from "./wallets"
+import { getAllWalletsIncludingArchived } from "./wallets"
 import { getCategories } from "./categories"
 import { getActiveBudgets } from "./budgets"
 import { getPreferences } from "./preferences"
 import { getCurrencyConverter } from "@/lib/currency"
-import { Transaction, Category } from "@/types"
+import { getLoans, getActiveBaseCurrency } from "./loans"
+import { getAssetsAndValuationsForScope } from "./assets"
+import { calculateNetWorthHistory } from "@/lib/calculations/net-worth"
+import { Transaction, Category, LoanRepayment } from "@/types"
 import { subDays, subMonths } from "date-fns"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { expandTransactions } from "@/lib/split-utils"
@@ -227,101 +230,64 @@ export const getSpendingByDayOfWeek = cache(async (userId: string) => {
 })
 
 // 4. Wallet Balance History: Multi-line - 3 / 6 / 12 months
+// Upgraded to calculate true Net Worth history (Assets, Liabilities, Net Worth)
 export const getWalletBalanceHistory = cache(async (userId: string, monthsCount: number = 6) => {
   const scope = await getFinancialScope()
   const filter = getScopeFilter(scope)
-  const wallets = await getWallets(userId)
-  const transactionsColl = await getCollection<Transaction>("transactions")
 
-  const prefs = await getPreferences(userId)
-  const targetCurrency = prefs.defaultCurrency || "USD"
-  const walletCurrencies = wallets.map(w => w.currency)
-  const convert = await getCurrencyConverter(targetCurrency, walletCurrencies)
+  const [wallets, loans, { assets, valuations }, baseCurrency] = await Promise.all([
+    getAllWalletsIncludingArchived(userId),
+    getLoans(),
+    getAssetsAndValuationsForScope(),
+    getActiveBaseCurrency(),
+  ])
 
-  // We want to reconstruct end-of-month balances for the last N months
-  // We'll generate the month end UTC dates
+  const loanIds = loans.map((l) => l._id.toString())
+  const [repayments, transactions] = await Promise.all([
+    loanIds.length > 0
+      ? (await getCollection<LoanRepayment>("loan_repayments")).find({ loanId: { $in: loanIds } }).toArray()
+      : Promise.resolve([] as LoanRepayment[]),
+    (await getCollection<Transaction>("transactions")).find(filter).toArray(),
+  ])
+
+  const sourceCurrencies = Array.from(
+    new Set([
+      ...wallets.map((w) => w.currency),
+      ...loans.map((l) => l.currency),
+      ...assets.map((a) => a.currency),
+    ])
+  )
+
+  const targetCurrency = baseCurrency || "USD"
+  const convert = await getCurrencyConverter(targetCurrency, sourceCurrencies)
+
   const now = new Date()
-  const months: Date[] = []
+  const dates: Date[] = []
   for (let i = 0; i < monthsCount; i++) {
-    // Use UTC end-of-month (last ms of the last day) so date comparison is timezone-safe
+    // Generate dates representing the end of each month
     const d = subMonths(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 15)), i)
     const utcMonthEnd = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0, 23, 59, 59, 999))
-    months.push(utcMonthEnd)
+    dates.push(utcMonthEnd)
   }
-  months.sort((a, b) => a.getTime() - b.getTime()) // Chronological order
+  dates.sort((a, b) => a.getTime() - b.getTime()) // Chronological order
 
-  // Fetch all transactions after the oldest month's start, to backtrack
-  const oldestStart = months[0]
-  const oldestStartDate = new Date(Date.UTC(oldestStart.getUTCFullYear(), oldestStart.getUTCMonth(), 1, 0, 0, 0, 0))
-  const transactions = await transactionsColl.find({
-    ...filter,
-    date: { $gte: oldestStartDate },
-  }).sort({ date: -1 }).toArray() // Descending order for backtracking
-
-  // Create current balance states
-  const currentBalances: Record<string, number> = {}
-  wallets.forEach((w) => {
-    currentBalances[w._id.toString()] = w.balance
+  const history = calculateNetWorthHistory({
+    wallets,
+    transactions,
+    loans,
+    repayments,
+    assets,
+    valuations,
+    convert,
+    dates,
   })
 
-  // Copy current balances
-  const balances = { ...currentBalances }
-  let txIndex = 0
-
-  // We backtrack month-by-month (from latest month to oldest)
-  // Wait, let's backtrack from latest to oldest, recording balances along the way.
-  // Actually, we can backtrack chronological-reverse:
-  // e.g. End of Month 3 (May), End of Month 2 (April), End of Month 1 (March).
-  // Current time is past the end of May.
-  // First, we backtrack from "now" to end of May: undo all transactions after end of May.
-  // Then we record May's balance.
-  // Then we backtrack from end of May to end of April: undo transactions between end of April and end of May.
-  // Then we record April's balance.
-  // And so on.
-
-  const reverseMonths = [...months].reverse() // [May 31, Apr 30, Mar 31]
-  const recordedBalances: Record<string, Record<string, number>> = {}
-
-  reverseMonths.forEach((monthEnd) => {
-    // Undo transactions that happened AFTER monthEnd
-    while (txIndex < transactions.length && transactions[txIndex].date > monthEnd) {
-      const tx = transactions[txIndex]
-      const wId = tx.walletId
-      
-      if (balances[wId] !== undefined) {
-        if (tx.type === "expense") {
-          balances[wId] += tx.amount // Undo expense by adding it back
-        } else if (tx.type === "income") {
-          balances[wId] -= tx.amount // Undo income by subtracting it
-        } else if (tx.type === "transfer") {
-          if (tx.transferType === "debit") {
-            balances[wId] += tx.amount // Undo debit by adding it back
-          } else if (tx.transferType === "credit") {
-            balances[wId] -= tx.amount // Undo credit by subtracting it
-          }
-        }
-      }
-      txIndex++
-    }
-
-    // Record the balance at this monthEnd
-    recordedBalances[monthEnd.getTime().toString()] = { ...balances }
-  })
-
-  // Format into final history array (chronological order)
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  return months.map((monthEnd) => {
-    const data: Record<string, string | number> = {
-      month: `${monthNames[monthEnd.getUTCMonth()]} ${monthEnd.getUTCFullYear().toString().slice(-2)}`,
-    }
-    const monthBalances = recordedBalances[monthEnd.getTime().toString()] || {}
-    wallets.forEach((w) => {
-      const originalBalance = monthBalances[w._id.toString()] || 0
-      const convertedBalance = convert(originalBalance, w.currency)
-      data[w.name] = convertedBalance / 100
-    })
-    return data
-  })
+  return history.map((pt) => ({
+    month: pt.dateStr,
+    netWorth: pt.netWorth / 100,
+    totalAssets: pt.totalAssets / 100,
+    totalLiabilities: pt.totalLiabilities / 100,
+  }))
 })
 
 // 5. Monthly Net Savings: Pos/neg bar - Last 12 months

@@ -13,6 +13,20 @@ export const recurringRuleSchema = z
     endDate: z.coerce.date().optional().nullable(),
     isActive: z.boolean().default(true),
     tags: z.array(z.string()).default([]),
+    
+    // Subscription / Bill specific fields
+    kind: z.enum(["recurring", "subscription", "bill"]).default("recurring").optional(),
+    providerName: z.string().max(100).optional().nullable(),
+    providerUrl: z.string().url().max(500).optional().nullable().or(z.literal("")),
+    cancellationUrl: z.string().url().max(500).optional().nullable().or(z.literal("")),
+    trialEndDate: z.coerce.date().optional().nullable(),
+    reminderDaysBefore: z.coerce.number().int().min(0).max(60).optional().nullable(),
+    nextRenewalDate: z.coerce.date().optional().nullable(),
+    lastRenewalDate: z.coerce.date().optional().nullable(),
+    renewalPrice: z.coerce.number().positive().optional().nullable(),
+    cancelledAt: z.coerce.date().optional().nullable(),
+    cancelReason: z.string().max(500).optional().nullable(),
+    status: z.enum(["active", "trial", "paused", "cancelled", "expired"]).optional().nullable(),
   })
   .refine(
     (data) => {

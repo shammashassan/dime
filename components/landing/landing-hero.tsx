@@ -143,8 +143,8 @@ export function LandingHero({ startAnimation }: { startAnimation: boolean }) {
           className="mt-8 max-w-2xl mx-auto text-lg sm:text-xl text-muted-foreground leading-relaxed"
           style={{ opacity: 0 }}
         >
-          A beautiful, security-first expense tracker. Track multi-currency wallets, monitor budgets,
-          scan receipts with AI, and collaborate with shared accounts.
+          A beautiful, security-first personal finance tracker. Take control of your money,
+          automate transaction logs, and track your global net worth with absolute clarity.
         </p>
 
         {/* ── CTA buttons ──────────────────────────────────── */}

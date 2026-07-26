@@ -28,6 +28,7 @@ interface TransactionsViewProps {
   pageSize: number
   sortBy?: "date" | "amount" | "description"
   sortOrder?: "asc" | "desc"
+  hasAnyTransactions: boolean
 }
 
 export function TransactionsView({
@@ -39,6 +40,7 @@ export function TransactionsView({
   pageSize,
   sortBy = "date",
   sortOrder = "desc",
+  hasAnyTransactions,
 }: TransactionsViewProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [importOpen, setImportOpen] = useState(false)
@@ -196,6 +198,7 @@ export function TransactionsView({
         pageSize={pageSize}
         sortBy={sortBy}
         sortOrder={sortOrder}
+        hasAnyTransactions={hasAnyTransactions}
         onEditClick={(tx) => setEditingTransaction(tx)}
       />
 

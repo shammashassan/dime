@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyMedia
+} from "@/components/ui/empty"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +24,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogMedia,
 } from "@/components/ui/alert-dialog"
 import { CategoryForm } from "./category-form"
 import { MergeDialog } from "./merge-dialog"
@@ -104,99 +113,108 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
         {customCategories.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
             {customCategories.map((c) => (
-              <div
+              <Card
                 key={c._id.toString()}
-                className="group relative overflow-hidden rounded-xl border border-border/50 bg-card hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
+                className="group relative py-0 gap-0 overflow-hidden rounded-xl border border-border/50 bg-card hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
               >
                 {/* Left colour strip */}
-                <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ backgroundColor: c.color }} />
+                <div className="absolute left-0 top-0 bottom-0 w-[3px] shrink-0" style={{ backgroundColor: c.color }} />
 
-                {/* Top row: icon + name + action buttons in their own fixed row */}
-                <div className="flex items-center pl-4 pr-2 pt-3 pb-1 gap-2.5">
-                  <div
-                    className="size-8 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110"
-                    style={{ backgroundColor: c.color + "18", color: c.color }}
-                  >
-                    <CategoryIcon name={c.icon} className="size-3.5" />
-                  </div>
-
-                  {/* Name — truncates, never fights with buttons */}
-                  <p className="text-[13px] font-bold text-foreground truncate leading-tight flex-1 min-w-0">
-                    {c.name}
-                  </p>
-
-                  {/* Buttons — size-8, icon size-3.5, always visible width reserved */}
-                  <div className="flex items-center gap-0.5 shrink-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost" size="icon"
-                          className="size-8 rounded-lg hover:bg-muted/70"
-                          onClick={() => setEditingCategory(c)}
-                        >
-                          <Edit className="size-3.5 text-muted-foreground" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="rounded-xl font-medium">
-                        Edit category
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost" size="icon"
-                          className="size-8 rounded-lg text-amber-500 hover:bg-amber-500/10"
-                          onClick={() => setMergingCategory(c)}
-                        >
-                          <ArrowRightLeft className="size-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="rounded-xl font-medium">
-                        Merge category
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost" size="icon"
-                          className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
-                          onClick={() => setDeletingCategoryId(c._id.toString())}
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="rounded-xl font-medium">
-                        Delete category
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </div>
-
-                {/* Type badges — own row, indented past the icon, free to wrap */}
-                <div className="flex flex-wrap gap-1 pl-[54px] pr-3 pb-3 pt-0.5">
-                  {typeList(c).map((t) => (
-                    <Badge
-                      key={t}
-                      variant="secondary"
-                      className="rounded-full text-[8px] uppercase py-0 px-1.5 font-bold tracking-wider h-[14px]"
+                <CardContent className="p-0 flex flex-col justify-between h-full">
+                  {/* Top row: icon + name + action buttons in their own fixed row */}
+                  <div className="flex items-center pl-4 pr-2 pt-3 pb-1 gap-2.5">
+                    <div
+                      className="size-8 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110"
+                      style={{ backgroundColor: c.color + "18", color: c.color }}
                     >
-                      {t}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+                      <CategoryIcon name={c.icon} className="size-3.5" />
+                    </div>
+
+                    {/* Name — truncates, never fights with buttons */}
+                    <p className="text-[13px] font-bold text-foreground truncate leading-tight flex-1 min-w-0">
+                      {c.name}
+                    </p>
+
+                    {/* Buttons — size-8, icon size-3.5, always visible width reserved */}
+                    <div className="flex items-center gap-0.5 shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost" size="icon"
+                            className="size-8 rounded-lg hover:bg-muted/70"
+                            onClick={() => setEditingCategory(c)}
+                          >
+                            <Edit className="size-3.5 text-muted-foreground" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="rounded-xl font-medium">
+                          Edit category
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost" size="icon"
+                            className="size-8 rounded-lg text-amber-500 hover:bg-amber-500/10"
+                            onClick={() => setMergingCategory(c)}
+                          >
+                            <ArrowRightLeft className="size-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="rounded-xl font-medium">
+                          Merge category
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost" size="icon"
+                            className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
+                            onClick={() => setDeletingCategoryId(c._id.toString())}
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="rounded-xl font-medium">
+                          Delete category
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+
+                  {/* Type badges — own row, indented past the icon, free to wrap */}
+                  <div className="flex flex-wrap gap-1 pl-[54px] pr-3 pb-3 pt-0.5">
+                    {typeList(c).map((t) => (
+                      <Badge
+                        key={t}
+                        variant="secondary"
+                        className="rounded-full text-[8px] uppercase py-0 px-1.5 font-bold tracking-wider h-[14px]"
+                      >
+                        {t}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center border border-dashed border-border/50 rounded-2xl p-10 text-center bg-muted/10">
-            <Folder className="size-8 text-muted-foreground/25 mb-2.5" />
-            <p className="text-sm font-semibold text-muted-foreground">No custom categories yet</p>
-            <Button variant="outline" size="sm" onClick={() => setIsCreateOpen(true)} className="mt-3 rounded-lg font-semibold h-8">
-              Create one
-            </Button>
-          </div>
+          <Card className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full col-span-full">
+            <Empty>
+              <EmptyMedia className="bg-primary/5 text-primary">
+                <Folder className="size-8" />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle>No custom categories yet</EmptyTitle>
+                <EmptyDescription>Create a custom category for your specific needs.</EmptyDescription>
+              </EmptyHeader>
+              <div className="mt-4">
+                <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2"><Plus className="size-4" /> Create Category</Button>
+              </div>
+            </Empty>
+          </Card>
         )}
       </section>
 
@@ -212,37 +230,39 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
           {systemCategories.map((c) => (
-            <div
+            <Card
               key={c._id.toString()}
-              className="relative overflow-hidden rounded-xl border border-border/30 bg-muted/20 flex flex-col cursor-not-allowed opacity-60"
+              className="relative py-0 gap-0 overflow-hidden rounded-xl border border-border/30 bg-muted/20 flex flex-col cursor-not-allowed opacity-60"
             >
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] opacity-40" style={{ backgroundColor: c.color }} />
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] opacity-40 shrink-0" style={{ backgroundColor: c.color }} />
 
-              <div className="flex items-center pl-4 pr-3 pt-3 pb-1 gap-2.5">
-                <div
-                  className="size-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: c.color + "0d", color: c.color + "80" }}
-                >
-                  <CategoryIcon name={c.icon} className="size-3.5" />
-                </div>
-                <p className="text-[13px] font-semibold text-foreground/70 truncate leading-tight flex-1 min-w-0">
-                  {c.name}
-                </p>
-                <Lock className="size-3.5 text-muted-foreground/30 shrink-0" />
-              </div>
-
-              <div className="flex flex-wrap gap-1 pl-[54px] pr-3 pb-3 pt-0.5">
-                {typeList(c).map((t) => (
-                  <Badge
-                    key={t}
-                    variant="secondary"
-                    className="rounded-full text-[8px] uppercase py-0 px-1.5 font-bold tracking-wider h-[14px] bg-muted-foreground/10 text-muted-foreground/70"
+              <CardContent className="p-0 flex flex-col justify-between h-full">
+                <div className="flex items-center pl-4 pr-3 pt-3 pb-1 gap-2.5">
+                  <div
+                    className="size-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: c.color + "0d", color: c.color + "80" }}
                   >
-                    {t}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+                    <CategoryIcon name={c.icon} className="size-3.5" />
+                  </div>
+                  <p className="text-[13px] font-semibold text-foreground/70 truncate leading-tight flex-1 min-w-0">
+                    {c.name}
+                  </p>
+                  <Lock className="size-3.5 text-muted-foreground/30 shrink-0" />
+                </div>
+
+                <div className="flex flex-wrap gap-1 pl-[54px] pr-3 pb-3 pt-0.5">
+                  {typeList(c).map((t) => (
+                    <Badge
+                      key={t}
+                      variant="secondary"
+                      className="rounded-full text-[8px] uppercase py-0 px-1.5 font-bold tracking-wider h-[14px] bg-muted-foreground/10 text-muted-foreground/70"
+                    >
+                      {t}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </section>
@@ -276,18 +296,21 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
       </Dialog>
 
       <AlertDialog open={!!deletingCategoryId} onOpenChange={(open) => !open && setDeletingCategoryId(null)}>
-        <AlertDialogContent className="rounded-2xl border border-border/50 shadow-xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-bold text-rose-600 dark:text-rose-400">Delete Category</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+              <Trash2 />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogDescription>
               Transactions in this category will become uncategorized. Use <span className="font-semibold">Merge</span> to move them first.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-semibold">Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isPending}
-              className="rounded-xl font-semibold bg-rose-600 hover:bg-rose-500 text-white gap-1.5">
-              {isPending && <Loader2 className="size-3.5 animate-spin" />}Delete Category
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin" data-icon="inline-start" />}
+              Delete Category
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

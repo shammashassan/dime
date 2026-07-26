@@ -14,6 +14,8 @@ import {
   Tags,
   Cog,
   Shield,
+  HandCoins,
+  Users,
 } from "lucide-react"
 import {
   CommandDialog,
@@ -56,6 +58,8 @@ export function SearchCommand() {
     { path: "/wallets", label: "Wallets", icon: Wallet },
     { path: "/budgets", label: "Budgets", icon: PiggyBank },
     { path: "/goals", label: "Savings Goals", icon: Target },
+    { path: "/loans", label: "Loans & Lending", icon: HandCoins },
+    { path: "/contacts", label: "Contacts Directory", icon: Users },
     { path: "/recurring", label: "Recurring Transactions", icon: Repeat },
     { path: "/reports", label: "Reports & Analytics", icon: BarChart3 },
     { path: "/categories", label: "Categories", icon: Tags },

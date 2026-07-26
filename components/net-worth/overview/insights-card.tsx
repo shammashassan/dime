@@ -1,8 +1,17 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { NetWorthOverviewViewModel } from "@/types"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sparkles, Info, CheckCircle, AlertTriangle } from "lucide-react"
+import { cn } from "@/lib/utils"
+import Link from "next/link"
+import {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+} from "@/components/ui/item"
 
 const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {
   success: CheckCircle,
@@ -20,42 +29,49 @@ export function InsightsCard({ viewModel }: { viewModel: NetWorthOverviewViewMod
   const { insights } = viewModel
 
   return (
-    <Card className="rounded-2xl border border-border/40 shadow-sm p-0 overflow-hidden h-full flex flex-col justify-between col-span-full">
-      <CardHeader className="border-b py-4 px-6 [.border-b]:pb-4">
-        <div>
-          <CardTitle className="text-base font-bold flex items-center gap-1.5">
-            <Sparkles className="size-4.5 text-primary" />
-            Financial Insights
-          </CardTitle>
-          <CardDescription className="text-xs">Dynamic rule-based diagnostics</CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent className="p-5 flex-1">
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-full flex flex-col bg-card">
+      <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+        <Sparkles className="size-3.5 text-muted-foreground" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Financial Insights</span>
+      </div>
+
+      <div className="flex-1">
         {insights.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {insights.map((insight) => {
-              const Icon = iconsMap[insight.type] || Info
-              return (
-                <div key={insight.id} className="flex gap-3.5 p-3 rounded-xl border border-border/20 bg-card/30">
-                  <div className={`size-8 rounded-lg border flex items-center justify-center shrink-0 ${colorMap[insight.type]}`}>
-                    <Icon className="size-4" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-[11px] font-medium leading-relaxed text-foreground">{insight.text}</p>
-                    {insight.metric && (
-                      <span className="inline-block text-[10px] font-bold text-muted-foreground">
-                        Metric: {insight.metric}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          <ScrollArea className="h-[215px] px-1">
+            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0">
+              {insights.map((insight) => {
+                const Icon = iconsMap[insight.type] || Info
+                const iconColor = colorMap[insight.type]
+                return (
+                  <Item
+                    key={insight.id}
+                    asChild
+                    className="items-start px-2 cursor-pointer"
+                  >
+                    <Link href={insight.href || "#"} className="w-full flex items-start gap-2.5">
+                      <ItemMedia className={cn("size-7 rounded-lg border", iconColor)}>
+                        <Icon className="size-3.5" />
+                      </ItemMedia>
+                      <ItemContent className="min-w-0">
+                        <p className="text-[11px] font-medium leading-relaxed text-foreground">{insight.text}</p>
+                        {insight.metric && (
+                          <ItemDescription className="inline-block text-[10px] font-bold mt-0.5 leading-none">
+                            Metric: {insight.metric}
+                          </ItemDescription>
+                        )}
+                      </ItemContent>
+                    </Link>
+                  </Item>
+                )
+              })}
+            </ItemGroup>
+          </ScrollArea>
         ) : (
-          <div className="text-xs text-muted-foreground py-12 text-center">No insights calculated at this time.</div>
+          <div className="text-xs text-muted-foreground py-14 text-center h-[280px] flex items-center justify-center">
+            No insights calculated at this time.
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

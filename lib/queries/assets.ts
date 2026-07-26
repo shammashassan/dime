@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb"
 import { getCollection } from "@/lib/db/collections"
 import { Asset, AssetValuation } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { unstable_rethrow } from "next/navigation"
 
 export const getAssets = cache(async (): Promise<Asset[]> => {
   const scope = await getFinancialScope()
@@ -21,11 +22,20 @@ export const getAssetById = cache(async (id: string): Promise<Asset | null> => {
     const filter = getScopeFilter(scope)
     const assetsColl = await getCollection<Asset>("assets")
 
-    return assetsColl.findOne({
+    console.log("[getAssetById] Input ID:", id)
+    console.log("[getAssetById] Resolved Scope:", JSON.stringify(scope))
+    console.log("[getAssetById] Generated Filter:", JSON.stringify(filter))
+
+    const asset = await assetsColl.findOne({
       _id: new ObjectId(id),
       ...filter
     })
-  } catch {
+
+    console.log("[getAssetById] Query Result:", asset ? `${asset.name} (${asset._id})` : "null")
+    return asset
+  } catch (e) {
+    unstable_rethrow(e)
+    console.error("Error in getAssetById:", e)
     return null
   }
 })

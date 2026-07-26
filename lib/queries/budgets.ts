@@ -1,6 +1,6 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
-import { ObjectId } from "mongodb"
+import { ObjectId, Filter } from "mongodb"
 import { Budget, Transaction } from "@/types"
 import { getCategories } from "./categories"
 import { getWallets } from "./wallets"
@@ -102,3 +102,83 @@ export const getBudgetsWithSpending = cache(async (userId: string): Promise<Budg
   return budgetsWithSpending
 })
 
+// Builds the same category/wallet/date-range query used for spend calculation,
+// shared by getBudgetWithSpendingById and getBudgetTransactions so both stay in sync.
+function buildBudgetTransactionQuery(
+  budget: Budget,
+  scopeFilter: Filter<Transaction>
+): Filter<Transaction> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const query: any = {
+    ...scopeFilter,
+    $or: [
+      { categoryId: budget.categoryId },
+      { "splits.categoryId": budget.categoryId }
+    ],
+    type: { $in: ["expense", "transfer"] },
+    date: { $gte: budget.startDate },
+  }
+  if (budget.endDate) {
+    query.date.$lte = budget.endDate
+  }
+  if (budget.walletId) {
+    query.walletId = budget.walletId
+  }
+  return query
+}
+
+export const getBudgetWithSpendingById = cache(
+  async (userId: string, budgetId: string): Promise<BudgetWithSpending | null> => {
+    const budget = await getBudgetById(userId, budgetId)
+    if (!budget) return null
+
+    const scope = await getFinancialScope()
+    const filter = getScopeFilter(scope)
+    const transactionsColl = await getCollection<Transaction>("transactions")
+    const [categories, wallets] = await Promise.all([
+      getCategories(userId),
+      getWallets(userId),
+    ])
+
+    const cat = categories.find((c) => c._id.toString() === budget.categoryId)
+    const wallet = budget.walletId ? wallets.find((w) => w._id.toString() === budget.walletId) : undefined
+
+    const query = buildBudgetTransactionQuery(budget, filter)
+    const txs = await transactionsColl.find(query).toArray()
+    const expandedTxs = expandTransactions(txs)
+    const convert = await getCurrencyConverter(budget.currency, expandedTxs.map((tx) => tx.currency))
+    const spent = expandedTxs.reduce((sum, tx) => {
+      if (
+        (tx.type === "expense" || (tx.type === "transfer" && tx.transferType === "debit")) &&
+        tx.categoryId === budget.categoryId
+      ) {
+        return sum + convert(tx.amount, tx.currency)
+      }
+      return sum
+    }, 0)
+
+    return {
+      ...budget,
+      spent,
+      categoryName: cat ? cat.name : "Category",
+      categoryColor: cat ? cat.color : "#94a3b8",
+      walletName: wallet ? wallet.name : undefined,
+    }
+  }
+)
+
+// Returns the raw transaction list backing a budget's spend total, for display
+// on the budget detail page (most recent first).
+export const getBudgetTransactions = cache(
+  async (userId: string, budgetId: string): Promise<Transaction[]> => {
+    const budget = await getBudgetById(userId, budgetId)
+    if (!budget) return []
+
+    const scope = await getFinancialScope()
+    const filter = getScopeFilter(scope)
+    const transactionsColl = await getCollection<Transaction>("transactions")
+
+    const query = buildBudgetTransactionQuery(budget, filter)
+    return transactionsColl.find(query).sort({ date: -1 }).toArray()
+  }
+)

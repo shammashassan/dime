@@ -1,19 +1,26 @@
 import { Suspense } from "react"
 import { LayoutDashboard } from "lucide-react"
 import { requireApprovedUser } from "@/lib/auth-guard"
-import { NetWorthCard } from "@/components/dashboard/net-worth-card"
-import { MonthlySummary } from "@/components/dashboard/monthly-summary"
+import { DashboardMetrics } from "@/components/dashboard/dashboard-metrics"
 import { SpendingTrendChart } from "@/components/dashboard/spending-trend-chart"
 import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
 import { BudgetProgressList } from "@/components/dashboard/budget-progress-list"
+import { UpcomingRecurring } from "@/components/dashboard/upcoming-recurring"
 import { RecentTransactions } from "@/components/dashboard/recent-transactions"
 import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/reports"
 import { getPreferences } from "@/lib/queries/preferences"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AIInsights } from "@/components/dashboard/ai-insights"
 
-function CardSkeleton() {
-  return <Skeleton className="h-40 w-full rounded-xl" />
+
+function MetricsRowSkeleton() {
+  return (
+    <div className="flex flex-wrap gap-4">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
+      ))}
+    </div>
+  )
 }
 
 function ChartSkeleton() {
@@ -48,18 +55,11 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Top row: Net worth and Monthly stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Suspense fallback={<CardSkeleton />}>
-            <NetWorthCard userId={userId} className="h-full" />
-          </Suspense>
-        </div>
-        <div className="lg:col-span-2">
-          <Suspense fallback={<CardSkeleton />}>
-            <MonthlySummary userId={userId} className="h-full" />
-          </Suspense>
-        </div>
+      {/* Top row: Metrics */}
+      <div className="grid grid-cols-1 gap-6">
+        <Suspense fallback={<MetricsRowSkeleton />}>
+          <DashboardMetrics userId={userId} />
+        </Suspense>
       </div>
 
       {/* AI Insights and Category Breakdown Row */}
@@ -85,9 +85,12 @@ export default async function DashboardPage() {
 
       {/* Lists row: Budgets and Recent Transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 flex flex-col gap-6">
           <Suspense fallback={<ChartSkeleton />}>
             <BudgetProgressList userId={userId} />
+          </Suspense>
+          <Suspense fallback={<ChartSkeleton />}>
+            <UpcomingRecurring userId={userId} />
           </Suspense>
         </div>
         <div className="lg:col-span-2">

@@ -11,6 +11,7 @@ Disallow: /reset-password
 Disallow: /verify-email
 Disallow: /2fa
 Disallow: /pending-approval
+Disallow: /accept-invitation
 
 # Protected application routes (authenticated dashboard)
 Disallow: /dashboard
@@ -23,6 +24,10 @@ Disallow: /reports
 Disallow: /categories
 Disallow: /settings
 Disallow: /admin
+Disallow: /loans
+Disallow: /net-worth
+Disallow: /contacts
+Disallow: /notifications
 
 # API routes
 Disallow: /api/

@@ -56,13 +56,15 @@ function formatMonthDay(dateStr: string) {
 
 export function WalletDetailChart({ initialData = [], currency }: WalletDetailChartProps) {
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState(() => isMobile ? "7d" : "90d")
+  const [timeRange, setTimeRange] = React.useState("90d")
+  const [prevIsMobile, setPrevIsMobile] = React.useState(isMobile)
 
-  React.useEffect(() => {
+  if (isMobile !== prevIsMobile) {
+    setPrevIsMobile(isMobile)
     if (isMobile) {
       setTimeRange("7d")
     }
-  }, [isMobile])
+  }
 
   // Map initialData { date, balance } to match dashboard-chart's { date, sales } schema
   const chartData = React.useMemo(() => {
@@ -87,20 +89,6 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
 
     return chartData.slice(-limit)
   }, [chartData, timeRange])
-
-  // Calculate Y-axis domain to prevent visual clipping
-  const yAxisDomain = React.useMemo(() => {
-    if (filteredData.length === 0) return [0, 100]
-
-    const balances = filteredData.map(d => d.sales || 0)
-    const minVal = Math.min(...balances)
-    const maxVal = Math.max(...balances)
-
-    const start = minVal < 0 ? Math.floor(minVal * 1.1) : 0
-    const end = Math.ceil(maxVal * 1.1)
-
-    return [start, end]
-  }, [filteredData])
 
   return (
     <Card className="@container/card">
@@ -161,7 +149,7 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
                   <stop
                     offset="5%"
                     stopColor="var(--color-sales)"
-                    stopOpacity={1.0}
+                    stopOpacity={0.8}
                   />
                   <stop
                     offset="95%"
@@ -187,12 +175,20 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
                     indicator="dot"
                     labelFormatter={(value) => formatMonthDay(value)}
                     formatter={(value) => (
-                      <div className="flex flex-1 justify-between items-center gap-6 leading-none">
-                        <span className="text-muted-foreground">Balance</span>
-                        <span className="font-mono font-medium text-foreground tabular-nums">
-                          {formatCurrency(Number(value) * 100, currency)}
-                        </span>
-                      </div>
+                      <>
+                        <div
+                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                          style={{
+                            backgroundColor: "var(--chart-1)",
+                          }}
+                        />
+                        <div className="flex flex-1 justify-between items-center gap-6 leading-none">
+                          <span className="text-muted-foreground">Balance</span>
+                          <span className="font-mono font-medium text-foreground tabular-nums">
+                            {formatCurrency(Number(value) * 100, currency)}
+                          </span>
+                        </div>
+                      </>
                     )}
                   />
                 }

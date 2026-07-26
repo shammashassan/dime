@@ -15,6 +15,7 @@ interface AdminUsersTabsProps {
   pendingTab: React.ReactNode
   bannedTab: React.ReactNode
   adminsTab: React.ReactNode
+  defaultTab?: string
 }
 
 export function AdminUsersTabs({
@@ -22,15 +23,17 @@ export function AdminUsersTabs({
   pendingTab,
   bannedTab,
   adminsTab,
+  defaultTab,
 }: AdminUsersTabsProps) {
-  const [activeTab, setActiveTab] = useState("all")
-
   const tabNames: Record<string, string> = {
     all: "All Users",
     pending: "Pending Approval",
     banned: "Banned Users",
     admins: "Administrators",
   }
+
+  const initialTab = defaultTab && tabNames[defaultTab] ? defaultTab : "all"
+  const [activeTab, setActiveTab] = useState(initialTab)
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

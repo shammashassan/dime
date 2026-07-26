@@ -22,6 +22,11 @@ function AssetDetailSkeleton() {
           <Skeleton className="h-9 w-24 rounded-xl" />
         </div>
       </div>
+      <div className="flex flex-wrap gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
+        ))}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Skeleton className="h-[250px] w-full rounded-2xl" />

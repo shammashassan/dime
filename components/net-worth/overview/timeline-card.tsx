@@ -1,41 +1,46 @@
 "use client"
 
 import * as React from "react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
-import { AreaChart, Area, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
 import { formatCurrency } from "@/lib/utils"
 import { HistoricalNetWorthPoint } from "@/types"
 
-const areaChartConfig = {
-  netWorth: {
-    label: "Net Worth",
-    color: "var(--chart-1)",
-  },
-  totalAssets: {
-    label: "Total Assets",
-    color: "var(--chart-2)",
-  },
-  totalLiabilities: {
-    label: "Total Liabilities",
-    color: "var(--chart-5)",
-  },
-} as const
+const chartConfig = {
+  netWorth: { label: "Net Worth", color: "var(--chart-1)" },
+  totalAssets: { label: "Total Assets", color: "var(--chart-2)" },
+  totalLiabilities: { label: "Total Liabilities", color: "var(--chart-5)" },
+} satisfies ChartConfig
 
-export function TimelineCard({ historyData, currency }: { historyData: HistoricalNetWorthPoint[]; currency: string }) {
+export function TimelineCard({
+  historyData,
+  currency,
+}: {
+  historyData: HistoricalNetWorthPoint[]
+  currency: string
+}) {
   return (
-    <Card className="rounded-2xl border border-border/40 shadow-sm p-0 overflow-hidden h-full flex flex-col justify-between">
-      <CardHeader className="border-b py-4 px-6 [.border-b]:pb-4">
-        <div className="flex justify-between items-center w-full">
-          <div>
-            <CardTitle className="text-base font-bold">Net Worth Timeline</CardTitle>
-            <CardDescription className="text-xs">History of assets vs liabilities</CardDescription>
-          </div>
-        </div>
+    <Card className="h-full flex flex-col">
+      <CardHeader>
+        <CardTitle>Net Worth Timeline</CardTitle>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6 flex-1">
+      <CardContent className="flex-1 px-2 pt-4 sm:px-6">
         {historyData.length > 0 ? (
-          <ChartContainer config={areaChartConfig} className="aspect-auto h-[230px] w-full">
+          <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
             <AreaChart data={historyData}>
               <defs>
                 <linearGradient id="fillNetWorth" x1="0" y1="0" x2="0" y2="1">
@@ -59,36 +64,24 @@ export function TimelineCard({ historyData, currency }: { historyData: Historica
                 tickMargin={8}
                 minTickGap={32}
                 tickFormatter={(value) => {
-                  const d = new Date(value)
-                  if (Number.isNaN(d.getTime())) return String(value)
-                  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                }}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                tickFormatter={(val) => {
-                  if (val >= 100000000) return `${(val / 100000000).toFixed(0)}M`
-                  if (val >= 100000) return `${(val / 100000).toFixed(0)}k`
-                  if (val <= -100000) return `-${(Math.abs(val) / 100000).toFixed(0)}k`
-                  return (val / 100).toFixed(0)
+                  const date = new Date(value)
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
                 }}
               />
               <ChartTooltip
                 cursor={false}
                 content={
                   <ChartTooltipContent
-                    indicator="dot"
                     labelFormatter={(value) => {
-                      const d = new Date(value)
-                      if (Number.isNaN(d.getTime())) return String(value)
-                      return d.toLocaleDateString("en-US", {
+                      return new Date(value).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
-                        year: "numeric",
                       })
                     }}
+                    indicator="dot"
                     formatter={(value, name) => (
                       <>
                         <div
@@ -96,10 +89,10 @@ export function TimelineCard({ historyData, currency }: { historyData: Historica
                           style={{ backgroundColor: `var(--color-${name})` }}
                         />
                         <div className="flex flex-1 justify-between leading-none">
-                          <span className="text-muted-foreground text-[10px]">
-                            {areaChartConfig[name as keyof typeof areaChartConfig]?.label ?? name}
+                          <span className="text-muted-foreground">
+                            {chartConfig[name as keyof typeof chartConfig]?.label ?? name}
                           </span>
-                          <span className="font-mono text-[10px] font-medium tabular-nums text-foreground">
+                          <span className="font-mono font-medium tabular-nums text-foreground">
                             {formatCurrency(Number(value) / 100, currency)}
                           </span>
                         </div>
@@ -108,32 +101,32 @@ export function TimelineCard({ historyData, currency }: { historyData: Historica
                   />
                 }
               />
+              {/* Not stacked: these are three independent metrics
+                  (netWorth = totalAssets - totalLiabilities), not parts
+                  of a whole, so they must not share a stackId. */}
               <Area
                 dataKey="totalAssets"
-                type="natural"
+                type="monotone"
                 fill="url(#fillAssets)"
                 stroke="var(--color-totalAssets)"
-                stackId="a"
               />
               <Area
                 dataKey="totalLiabilities"
-                type="natural"
+                type="monotone"
                 fill="url(#fillLiabilities)"
                 stroke="var(--color-totalLiabilities)"
-                stackId="b"
               />
               <Area
                 dataKey="netWorth"
-                type="natural"
+                type="monotone"
                 fill="url(#fillNetWorth)"
                 stroke="var(--color-netWorth)"
-                stackId="c"
               />
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>
         ) : (
-          <div className="flex items-center justify-center h-[230px] text-muted-foreground text-sm">
+          <div className="flex items-center justify-center h-[250px] text-muted-foreground text-sm">
             No historical data available.
           </div>
         )}

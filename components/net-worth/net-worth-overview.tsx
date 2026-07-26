@@ -6,18 +6,12 @@ import { NetWorthOverviewViewModel, Asset, HistoricalNetWorthPoint } from "@/typ
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 import { AssetsListTab } from "./assets-list-tab"
-import { Landmark, Info, RefreshCw } from "lucide-react"
+import { Landmark, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { gsap } from "gsap"
-import { useGSAP } from "@gsap/react"
-
-gsap.registerPlugin(useGSAP)
-
 
 // Modular Dashboard sub-cards
 import { SummaryCards } from "./overview/summary-cards"
@@ -52,58 +46,28 @@ interface DashboardCardConfig {
   className?: string
 }
 
-// Extensible Layout Configuration — bento grid, dense rows, no orphaned gaps.
+// Extensible Layout Configuration — every card is now a uniform single/double-column
+// bento cell; Insights is vertical + scrollable so it fits the grid like the rest.
 const DEFAULT_BENTO_LAYOUT: DashboardCardConfig[] = [
   { id: "timeline", type: "timeline", className: "lg:col-span-2" },
   { id: "health", type: "health", className: "lg:col-span-1" },
+  { id: "recent_activity", type: "recent_activity", className: "lg:col-span-2" },
+  { id: "quick_actions", type: "quick_actions", className: "lg:col-span-1" },
+  { id: "insights", type: "insights", className: "lg:col-span-2" },
   { id: "asset_allocation", type: "asset_allocation", className: "lg:col-span-1" },
   { id: "currency_allocation", type: "currency_allocation", className: "lg:col-span-1" },
-  { id: "quick_actions", type: "quick_actions", className: "lg:col-span-1" },
   { id: "top_assets", type: "top_assets", className: "lg:col-span-1" },
   { id: "top_liabilities", type: "top_liabilities", className: "lg:col-span-1" },
-  { id: "recent_activity", type: "recent_activity", className: "lg:col-span-2" },
-  { id: "insights", type: "insights", className: "col-span-full" },
 ]
 
 export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOverviewProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = React.useState<"overview" | "assets-list">("overview")
   const [isRefreshing, setIsRefreshing] = React.useState(false)
-  const containerRef = React.useRef<HTMLDivElement>(null)
-
-  useGSAP(
-    () => {
-      if (activeTab !== "overview") return
-      const tiles = gsap.utils.toArray<HTMLElement>(".net-worth-card")
-      const mm = gsap.matchMedia()
-
-      gsap.set(tiles, { opacity: 0, y: 16 })
-
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(tiles, { opacity: 1, y: 0 })
-      })
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.to(tiles, {
-          opacity: 1,
-          y: 0,
-          duration: 0.55,
-          stagger: 0.05,
-          ease: "power2.out",
-          clearProps: "transform",
-        })
-      })
-
-      return () => mm.revert()
-    },
-    { dependencies: [activeTab], scope: containerRef }
-  )
 
   const handleRefresh = () => {
     setIsRefreshing(true)
     router.refresh()
-    // Router refresh is fire-and-forget; drop the spin state shortly after so the
-    // icon doesn't get stuck if refresh resolves faster than the animation frame.
     setTimeout(() => setIsRefreshing(false), 600)
   }
 
@@ -156,43 +120,50 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col gap-6 w-full">
-      {/* ── Page Header (Volt style reference) ── */}
-      <header className="flex flex-col gap-2 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
-            <p className="font-mono text-[10px] lowercase tracking-widest text-muted-foreground/50">
-              dime command center
-            </p>
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-mono font-medium text-primary border border-primary/20">
-              v2.0
-            </span>
+    <div className="flex flex-col gap-5 w-full">
+      {/* ── Header (matches Loan Detail page pattern: icon box + title + meta) ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="flex items-center justify-center size-11 shrink-0 rounded-2xl bg-primary/10 text-primary border border-primary/20 mt-0.5">
+            <Landmark className="size-5" />
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-            Net Worth overview
-          </h1>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-extrabold tracking-tight">Net Worth</h1>
+              <HoverCard openDelay={150}>
+                <HoverCardTrigger asChild>
+                  <Badge variant="outline" className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default">
+                    {viewModel.currency}
+                  </Badge>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start">
+                  All figures are converted to your base currency ({viewModel.currency}) using the latest exchange rates available at calculation time.
+                </HoverCardContent>
+              </HoverCard>
+            </div>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Assets, liabilities, allocations, and historical trends across currencies.
+            </p>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-4 shrink-0">
-          <p className="text-sm italic lowercase text-muted-foreground/60 hidden md:block">
-            track assets, liabilities, allocations, and historical trends.
-          </p>
+
+        <div className="flex items-center gap-2 shrink-0">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="outline"
                 size="icon"
-                className="size-10 rounded-xl bg-card border-border/40 hover:bg-muted/40 cursor-pointer active:scale-95 transition-all"
+                className="size-10 rounded-xl"
                 onClick={handleRefresh}
                 disabled={isRefreshing}
               >
                 <RefreshCw className={cn("size-4", isRefreshing && "animate-spin")} />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">Refresh data</TooltipContent>
+            <TooltipContent side="bottom">Refresh data</TooltipContent>
           </Tooltip>
         </div>
-      </header>
+      </div>
 
       {/* ── Summary Row ── */}
       <SummaryCards viewModel={viewModel} />
@@ -236,10 +207,9 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
       </div>
 
       {activeTab === "overview" ? (
-        // Dense bento grid — tight gap-4 (not gap-6) to match Loan Detail's compact rhythm.
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
           {DEFAULT_BENTO_LAYOUT.map((card) => (
-            <div key={card.id} className={cn("net-worth-card", card.className)}>
+            <div key={card.id} className={card.className}>
               {renderCard(card)}
             </div>
           ))}

@@ -12,7 +12,7 @@ import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { CalendarIcon, Loader2, Plus } from "lucide-react"
+import { CalendarIcon, Loader2, Plus, TrendingUp } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -104,23 +104,26 @@ export function ValuationDialog({ assetId, assetCurrency, trigger, onSuccess }: 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 p-6 shadow-xl">
+      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 shadow-xl p-6">
         <DialogHeader>
-          <DialogTitle>Log Valuation</DialogTitle>
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <TrendingUp className="size-5 text-primary" />
+            Log Valuation
+          </DialogTitle>
           <DialogDescription>
             Record a point-in-time value change for this asset/liability.
           </DialogDescription>
         </DialogHeader>
 
-        {error && (
-          <div className="p-3 text-xs bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl font-semibold">
-            {error}
-          </div>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-3">
+          {error && (
+            <div className="p-3 text-sm font-medium text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
           <FieldGroup className="space-y-3">
-            
+
             {/* Date picker */}
             <Field data-invalid={!!errors.date}>
               <FieldLabel>Valuation Date</FieldLabel>

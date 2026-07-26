@@ -1,24 +1,27 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Goal, Wallet } from "@/types"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { 
-  Target, 
-  PiggyBank, 
-  Car, 
-  Home, 
-  Gift, 
-  Gamepad2, 
-  Plane, 
-  Laptop, 
-  Calendar, 
-  Edit, 
-  Trash2, 
-  Plus, 
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import {
+  Target,
+  PiggyBank,
+  Car,
+  Home,
+  Gift,
+  Gamepad2,
+  Plane,
+  Laptop,
+  Calendar,
+  Edit,
+  Trash2,
+  Plus,
   Sparkles,
   Wallet as WalletIcon
 } from "lucide-react"
@@ -46,6 +49,7 @@ interface GoalCardProps {
 }
 
 export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
+  const router = useRouter()
   const [editOpen, setEditOpen] = useState(false)
   const [contributeOpen, setContributeOpen] = useState(false)
 
@@ -55,7 +59,7 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
     100
   )
   const remaining = Math.max(goal.targetAmount - goal.currentAmount, 0)
-  
+
   const formattedTargetDate = formatDate(goal.targetDate)
   const isCompleted = goal.currentAmount >= goal.targetAmount
   const isOverdue = new Date(goal.targetDate) < new Date() && !isCompleted
@@ -66,12 +70,15 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
 
   return (
     <>
-      <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
+      <Card
+        className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer"
+        onClick={() => router.push(`/goals/${goal._id.toString()}`)}
+      >
         {/* Top Accent line */}
-        <div className="h-[3px] w-full" style={{ backgroundColor: accentColor }} />
+        <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: accentColor }} />
 
         {/* ── Header ── */}
-        <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+        <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div
               className="size-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
@@ -105,7 +112,10 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
           </div>
 
           {/* Action buttons (hover visible) */}
-          <div className="flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
+          <div
+            className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -136,10 +146,10 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
               </TooltipContent>
             </Tooltip>
           </div>
-        </div>
+        </CardHeader>
 
         {/* ── Body ── */}
-        <div className="px-4 pb-3 flex flex-col gap-3">
+        <CardContent className="px-4 pb-3 flex flex-col gap-3">
           {/* Amounts saved vs percentage */}
           <div className="flex items-end justify-between">
             <div>
@@ -158,8 +168,8 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
 
           {/* Progress bar */}
           <div>
-            <Progress 
-              value={percentage} 
+            <Progress
+              value={percentage}
               indicatorStyle={{ backgroundColor: barColor }}
               className="h-2 bg-muted/60"
             />
@@ -176,17 +186,21 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
               <span>Target: {formatCurrency(goal.targetAmount, goal.currency)}</span>
             </div>
           </div>
-        </div>
+        </CardContent>
 
         {/* ── Footer ── */}
-        <div className="border-t border-border/20 px-4 py-2 flex items-center justify-between gap-1.5 mt-auto bg-muted/20">
+        <Separator className="bg-border/20" />
+        <CardFooter
+          className="px-4 py-2 flex items-center justify-between gap-1.5 mt-auto bg-muted/20"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center gap-1.5 min-w-0">
             <Calendar className="size-3 text-muted-foreground shrink-0" />
             <span className="text-[10px] text-muted-foreground font-semibold truncate">
               Target {formattedTargetDate}
             </span>
           </div>
-          
+
           {!isCompleted && (
             <Button
               size="sm"
@@ -196,13 +210,13 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
               <Plus className="mr-1 size-3" /> Contribute
             </Button>
           )}
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
 
-      <GoalFormDialog 
-        open={editOpen} 
-        onOpenChange={setEditOpen} 
-        goal={goal} 
+      <GoalFormDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        goal={goal}
       />
 
       <GoalContributionDialog

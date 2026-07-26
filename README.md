@@ -25,11 +25,16 @@ Dime operates on an **invite-only approval flow**. New sign-ups enter a pending 
 
 - 👛 **Multi-Currency Wallets**: Create and manage multiple accounts (bank, cash, credit card, savings, investment) with support for custom currencies and automatic cached exchange rate conversion.
 - 💸 **Transaction Tracking**: Comprehensive CRUD with support for income, expenses, and wallet-to-wallet transfers. Features server-side pagination, advanced filtering (by category, wallet, tags, date), and CSV export.
+- 🥞 **Transaction Splitting**: Divide a single transaction into multiple line items with different categories and custom tags for precise budgeting.
 - 🎯 **Smart Budgeting**: Establish budget targets by category with flexible periods (daily, weekly, monthly, yearly). Visual progress bars change color (green, amber, red) and alert users when thresholds are breached.
-- 🔁 **Recurring Rules**: Automate repeating expenses and income. Run rules instantly or via a secure, cron-triggered endpoint (`/api/cron/process-recurring`).
+- 🔁 **Recurring Platform**: Advanced bill tracking, subscription alerts, and recurring income scheduling, integrated with system alerts and automated cron runner processing (`/api/cron/process-recurring`).
+- ⚙️ **Automation Rules Engine**: Define triggers based on merchant names, wallets, or transaction amounts to automatically categorize, tag, or split transactions as they arrive.
+- 📊 **Net Worth Dashboard**: Real-time asset valuation tracker, historical net worth trend charts, asset class categorization, and sub-asset detail pages.
+- 🤝 **Loans & Lending (Personal Lending)**: Manage debts, record loan principal payments and interest, link with contacts, and view status logs.
+- 👥 **Couples & Shared Budgeting (Spaces)**: Secure organization spaces with email invites, role-based controls, and clean separation between personal and shared financial contexts.
 - 📈 **Interactive Reports**: Analyze spending habits with visual area, bar, and pie charts driven by Server Component queries.
 - 🛡️ **Advanced Authentication**: Fully integrated authentication powered by **Better Auth** supporting Email/Password, Usernames, Google OAuth, Magic Links, Passkeys (WebAuthn), and Two-Factor Authentication (TOTP, Email OTP, backup codes).
-- 👥 **Admin Dashboard**: Manage user signups, approve pending accounts, ban users, demote/promote administrators, and impersonate sessions for debugging.
+- 👑 **Admin Dashboard**: Manage user signups, approve pending accounts, ban users, demote/promote administrators, and impersonate sessions for debugging.
 
 ---
 

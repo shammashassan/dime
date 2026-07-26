@@ -13,9 +13,9 @@ import { serializeData } from "@/lib/utils"
 
 function StatsSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="flex flex-wrap gap-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-28 w-full rounded-xl" />
+        <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
       ))}
     </div>
   )
@@ -30,7 +30,12 @@ function TableSkeleton() {
   )
 }
 
-export default async function AdminUsersPage() {
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
+  const { tab } = await searchParams
   const session = await requireAdmin()
   const rawUsers = await getAdminUsers()
 
@@ -63,6 +68,7 @@ export default async function AdminUsersPage() {
 
       {/* Tabs list */}
       <AdminUsersTabs
+        defaultTab={tab}
         allTab={
           <Suspense fallback={<TableSkeleton />}>
             <UsersTable

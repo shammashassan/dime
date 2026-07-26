@@ -1,14 +1,20 @@
 import { db } from "./client"
 import { categoriesCollection } from "./collections"
 
-let isInitialized = false
+const globalWithMongo = global as typeof globalThis & {
+  _dbInitialized?: boolean
+  _dbInitializingPromise?: Promise<void>
+}
 
 export async function initDatabase() {
-  if (isInitialized) return
-  isInitialized = true
+  if (globalWithMongo._dbInitialized) return
+  if (globalWithMongo._dbInitializingPromise) {
+    return globalWithMongo._dbInitializingPromise
+  }
 
-  try {
-    console.log("Initializing database indexes...")
+  globalWithMongo._dbInitializingPromise = (async () => {
+    try {
+      console.log("Initializing database indexes...")
 
     // 1. Create indexes for transactions
     const transactions = db.collection("transactions")
@@ -194,9 +200,15 @@ export async function initDatabase() {
 
     // Call migration to migrate any legacy category schema to array types
     await migrateCategoryTypes()
+    globalWithMongo._dbInitialized = true
   } catch (error) {
     console.error("Error initializing database:", error)
+  } finally {
+    globalWithMongo._dbInitializingPromise = undefined
   }
+})()
+
+return globalWithMongo._dbInitializingPromise
 }
 
 async function migrateCategoryTypes() {

@@ -30,7 +30,7 @@ function NetWorthSkeleton() {
       </div>
       <div className="flex flex-wrap gap-4 mt-2">
         {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-[90px] flex-1 min-w-[220px] rounded-2xl" />
+          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
         ))}
       </div>
       <Skeleton className="h-9 w-64 rounded-xl" />

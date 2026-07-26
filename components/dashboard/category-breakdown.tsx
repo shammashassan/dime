@@ -5,11 +5,9 @@ import { useRouter } from "next/navigation"
 import {
   MoreHorizontal,
   TrendingUp,
-  Receipt,
   ArrowLeftRight,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -35,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { formatCurrency } from "@/lib/utils"
 
 interface CategoryItem {
@@ -65,7 +64,7 @@ export function CategoryBreakdown({ data = [], currency = "USD" }: CategoryBreak
   }, [data])
 
   return (
-    <Card className="w-full h-full max-h-[420px] flex flex-col border border-border/40 shadow-xl bg-card">
+    <Card className="w-full h-[400px] flex flex-col border border-border/40 shadow-xl bg-card">
       <CardHeader className="pb-4">
         <div className="flex flex-col gap-1">
           <CardTitle className="text-lg font-bold">Category Breakdown</CardTitle>
@@ -94,18 +93,17 @@ export function CategoryBreakdown({ data = [], currency = "USD" }: CategoryBreak
           </DropdownMenu>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 overflow-auto px-4 -mx-1">
+      <CardContent className="flex-1 min-h-0 flex flex-col px-4 pb-4">
         {sortedData.length === 0 ? (
-          <div className="flex justify-center items-center h-48 text-muted-foreground text-sm">
+          <div className="flex justify-center items-center flex-1 text-muted-foreground text-sm">
             No expenses recorded this month.
           </div>
         ) : (
-          <div className="w-full">
+          <ScrollArea className="flex-1 min-h-0 w-full pr-3">
             <Table>
               <TableHeader>
                 <TableRow className="border-border/40 hover:bg-transparent">
                   <TableHead className="text-left pl-2 text-xs font-semibold uppercase tracking-wider">Category</TableHead>
-                  <TableHead className="text-center text-xs font-semibold uppercase tracking-wider">Share</TableHead>
                   <TableHead className="text-right pr-2 text-xs font-semibold uppercase tracking-wider">Amount</TableHead>
                 </TableRow>
               </TableHeader>
@@ -114,20 +112,17 @@ export function CategoryBreakdown({ data = [], currency = "USD" }: CategoryBreak
                   const share = totalExpense > 0 ? (item.value / totalExpense) * 100 : 0
                   return (
                     <TableRow key={item.category} className="border-border/40 hover:bg-muted/40 transition-colors">
-                      <TableCell className="pl-2">
+                      <TableCell className="pl-2 py-2">
                         <div className="flex items-center gap-2">
                           <span
                             className="size-2 rounded-full shrink-0 border border-black/10"
                             style={{ backgroundColor: item.color }}
                           />
-                          <span className="font-semibold text-xs truncate max-w-[120px]">{item.category}</span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-xs truncate max-w-[160px]">{item.category}</span>
+                            <span className="text-[10px] text-muted-foreground font-normal">{share.toFixed(1)}%</span>
+                          </div>
                         </div>
-                      </TableCell>
-
-                      <TableCell className="text-center">
-                        <Badge variant="secondary" className="whitespace-nowrap font-normal text-[10px] px-2 py-0.5 rounded-full border border-border/30">
-                          {share.toFixed(1)}%
-                        </Badge>
                       </TableCell>
 
                       <TableCell className="text-right pr-2 font-mono font-bold text-xs">
@@ -138,7 +133,7 @@ export function CategoryBreakdown({ data = [], currency = "USD" }: CategoryBreak
                 })}
               </TableBody>
             </Table>
-          </div>
+          </ScrollArea>
         )}
       </CardContent>
     </Card>

@@ -22,8 +22,16 @@ const faqItems = [
     answer: "Simply drag and drop any receipt or invoice image. Dime utilizes Google Gemini OCR models to automatically extract the vendor name, transaction date, category, and total amount, completely saving you manual entry."
   },
   {
-    question: "Can I share wallets with other people?",
-    answer: "Yes. Dime supports shared accounts, allowing you to invite partners or household members to collaborate on specific wallets without sharing passwords or credentials."
+    question: "Can I share wallets or collaborate with others?",
+    answer: "Yes. Dime supports Couples & Shared Budgeting (Spaces), allowing you to invite partners or household members via email to join a shared organization workspace. You can switch between your personal space and shared workspaces seamlessly in real-time."
+  },
+  {
+    question: "How does the Automation Rules Engine and transaction splitting work?",
+    answer: "Dime features a powerful Automation Rules Engine that lets you write custom triggers (e.g. merchant matching, wallets, amounts) to automatically categorize, tag, or process transactions. You can also split any single transaction into multiple segments with distinct categories and tags for precise budgeting."
+  },
+  {
+    question: "How does the Net Worth Dashboard track my assets and debts?",
+    answer: "Dime aggregates your balances across all accounts and assets, including cash, bank accounts, real estate, and personal loans (Loans & Lending tracker). It automatically records monthly valuation logs and displays your total net worth over time with a fully interactive historical trend chart."
   },
   {
     question: "How does the multi-currency system work?",

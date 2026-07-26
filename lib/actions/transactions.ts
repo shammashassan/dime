@@ -3,7 +3,7 @@
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
 import { transactionSchema, TransactionInput } from "@/lib/validations/transaction.schema"
-import { Wallet, Transaction, Category, AutomationRule } from "@/types"
+import { Wallet, Transaction, Category, AutomationRule, BillInstance } from "@/types"
 import { executeAutomationRules } from "@/lib/automation-engine"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
@@ -267,10 +267,40 @@ export async function deleteTransaction(id: string) {
   const tx = await transactionsColl.findOne({ _id: new ObjectId(id), ...getScopeFilter(scope) })
   if (!tx) throw new Error("Transaction not found")
 
+  // Check if linked to a bill instance
+  try {
+    const billColl = await getCollection<BillInstance>("bill_instances")
+    const bill = await billColl.findOne({ transactionId: tx._id.toString() })
+    if (bill) {
+      await billColl.deleteOne({ _id: bill._id })
+    }
+  } catch (err) {
+    console.error("Failed to process bill deletion side effects:", err)
+  }
+
   // Revert balance change
   if (tx.type !== "transfer") {
     const balanceRevert = tx.type === "income" ? -tx.amount : tx.amount
     await updateWalletBalance(scope, tx.walletId, balanceRevert)
+
+    // Revert goal balance if linked to a goal
+    if (tx.goalId) {
+      try {
+        const goalsColl = await getCollection<any>("goals")
+        await goalsColl.updateOne(
+          { _id: new ObjectId(tx.goalId), ...getScopeFilter(scope) },
+          {
+            $inc: { currentAmount: -tx.amount, version: 1 },
+            $set: { updatedAt: new Date(), updatedBy: scope.userId }
+          }
+        )
+        updateTag("goals")
+        revalidatePath("/goals")
+      } catch (err) {
+        console.error("Failed to revert goal balance:", err)
+      }
+    }
+
     await transactionsColl.deleteOne({ _id: tx._id, ...getScopeFilter(scope) })
   } else {
     // Revert debit wallet
@@ -302,6 +332,14 @@ export async function deleteTransaction(id: string) {
       }
       await transactionsColl.deleteOne({ _id: tx._id, ...getScopeFilter(scope) })
     }
+  }
+
+  // Call loan hook
+  try {
+    const { handleTransactionDeletedHook } = await import("@/lib/actions/loans")
+    await handleTransactionDeletedHook(id, scope)
+  } catch (err) {
+    console.error("Failed to run loan delete hook:", err)
   }
 
   updateTag("transactions")
@@ -491,6 +529,14 @@ export async function updateTransaction(id: string, input: TransactionInput) {
     await updateWalletBalance(scope, validated.targetWalletId, targetAmount)
   }
 
+  // Call loan hook
+  try {
+    const { handleTransactionUpdatedHook } = await import("@/lib/actions/loans")
+    await handleTransactionUpdatedHook(id, validated.amount, validated.walletId, validated.date, scope)
+  } catch (err) {
+    console.error("Failed to run loan update hook:", err)
+  }
+
   updateTag("transactions")
   updateTag("wallets")
   revalidatePath("/transactions")
@@ -519,7 +565,7 @@ async function applyRulesToScannedData(data: {
   categoryName: string
   currency: string
   description: string
-}, scope: any) {
+}, scope: FinancialScope) {
   try {
     const rulesColl = await getCollection<AutomationRule>("automation_rules")
     const activeRules = await rulesColl.find({ ...getScopeFilter(scope), status: "active" }).toArray()
@@ -577,6 +623,7 @@ export async function scanReceiptAction(base64Image: string, filename: string) {
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
   const lowerName = filename.toLowerCase()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let rawData: any = null
 
   // Case 1: Check for Gemini API key

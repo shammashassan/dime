@@ -169,6 +169,7 @@ export function generateNetWorthOverviewViewModel(params: {
       description: tx.description || `${tx.type} transaction logged`,
       amount: tx.amount,
       currency: tx.currency,
+      href: `/transactions/${tx._id.toString()}`,
     })
   }
 
@@ -185,6 +186,7 @@ export function generateNetWorthOverviewViewModel(params: {
       type: moMChangePct >= 0 ? "success" : "warning",
       text: `Your net worth has ${moMChangePct >= 0 ? "increased" : "decreased"} by ${Math.abs(moMChangePct).toFixed(1)}% compared to the beginning of this history interval.`,
       metric: `${moMChangePct >= 0 ? "+" : ""}${moMChangePct.toFixed(1)}%`,
+      href: "/reports",
     })
   }
 
@@ -195,6 +197,7 @@ export function generateNetWorthOverviewViewModel(params: {
       type: "info",
       text: `Your largest asset is ${largest.name}, contributing ${largest.percentage}% of your total portfolio assets.`,
       metric: `${largest.percentage}%`,
+      href: largest.href || "/net-worth",
     })
   }
 
@@ -205,6 +208,7 @@ export function generateNetWorthOverviewViewModel(params: {
       liquidityRatio < 15 ? "Consider keeping more funds in liquid form." : "Your liquidity profile looks stable."
     }`,
     metric: `${liquidityRatio}%`,
+    href: "/wallets",
   })
 
   insights.push({
@@ -218,6 +222,7 @@ export function generateNetWorthOverviewViewModel(params: {
         : "Healthy balance sheet with low leverage."
     }`,
     metric: `${debtRatio}%`,
+    href: "/loans",
   })
 
   return {

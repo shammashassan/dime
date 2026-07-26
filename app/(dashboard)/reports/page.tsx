@@ -8,22 +8,20 @@ import {
   getMonthlyNetSavings,
   getBudgetPerformance,
 } from "@/lib/queries/reports"
-import { getWallets } from "@/lib/queries/wallets"
 import { getPreferences } from "@/lib/queries/preferences"
-import { serializeData, formatCurrency, cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils"
 import { IncomeExpenseTrendChart } from "@/components/reports/income-expense-trend-chart"
 import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart"
 import { SpendingDayChart } from "@/components/reports/spending-day-chart"
-import { WalletHistoryChart } from "@/components/reports/wallet-history-chart"
+import { NetWorthHistoryChart } from "@/components/reports/net-worth-history-chart"
 import { NetSavingsChart } from "@/components/reports/net-savings-chart"
 import { BudgetPerformanceChart } from "@/components/reports/budget-performance-chart"
 import { ReportFilters } from "@/components/reports/report-filters"
 import { MonthlySummaryTable } from "@/components/reports/monthly-summary-table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { MetricCard } from "@/components/ui/metric-card"
 import { unstable_rethrow } from "next/navigation"
-import { BarChart3, TrendingUp, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownRight, ArrowRight } from "lucide-react"
+import { BarChart3, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownRight } from "lucide-react"
 
 // Loading skeleton for reports content
 function ReportsSkeleton() {
@@ -44,21 +42,10 @@ function ReportsSkeleton() {
         </div>
       </div>
 
-      {/* Bento Grid Stats Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="border-border/40 shadow-xs">
-            <CardHeader className="pb-0">
-              <Skeleton className="h-4 w-24" />
-              <CardAction>
-                <Skeleton className="h-6 w-6 rounded-full" />
-              </CardAction>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Skeleton className="h-9 w-32" />
-              <Skeleton className="h-3 w-28" />
-            </CardContent>
-          </Card>
+      {/* MetricCards Skeleton */}
+      <div className="flex flex-wrap gap-4">
+        {[...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
         ))}
       </div>
 
@@ -97,13 +84,12 @@ async function ReportsContent({
     monthsCount = Math.max(1, Math.ceil(diffDays / 30))
   }
 
-  let trendData: any[] = []
-  let breakdownData: any[] = []
-  let spendingDayData: any[] = []
-  let walletHistoryData: any[] = []
-  let savingsData: any[] = []
-  let budgetPerformanceData: any[] = []
-  let wallets: any[] = []
+  let trendData: { month: string; income: number; expense: number }[] = []
+  let breakdownData: { category: string; value: number; color: string; icon: string }[] = []
+  let spendingDayData: { day: string; amount: number }[] = []
+  let walletHistoryData: { month: string; netWorth: number; totalAssets: number; totalLiabilities: number }[] = []
+  let savingsData: { month: string; savings: number }[] = []
+  let budgetPerformanceData: { name: string; category: string; limit: number; spent: number }[] = []
   let currency = "USD"
 
   try {
@@ -114,7 +100,6 @@ async function ReportsContent({
       fetchedWalletHistory,
       fetchedSavings,
       fetchedBudgetPerf,
-      fetchedWallets,
       prefs,
     ] = await Promise.all([
       getIncomeExpenseTrend(userId, monthsCount),
@@ -123,7 +108,6 @@ async function ReportsContent({
       getWalletBalanceHistory(userId, monthsCount),
       getMonthlyNetSavings(userId),
       getBudgetPerformance(userId),
-      getWallets(userId),
       getPreferences(userId),
     ])
 
@@ -133,7 +117,6 @@ async function ReportsContent({
     walletHistoryData = fetchedWalletHistory
     savingsData = fetchedSavings
     budgetPerformanceData = fetchedBudgetPerf
-    wallets = serializeData(fetchedWallets)
     currency = prefs?.defaultCurrency || "USD"
   } catch (error) {
     unstable_rethrow(error)
@@ -168,92 +151,43 @@ async function ReportsContent({
         </div>
       </div>
 
-      {/* Bento Grid Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Total Income */}
-        <Card className="relative overflow-hidden bg-linear-to-t from-primary/5 to-card dark:bg-card border border-border/40 shadow-xs hover:shadow-md transition-all duration-300">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Total Income</CardTitle>
-            <CardAction>
-              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <ArrowUpRight className="size-4" />
-              </div>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground truncate">
-              {formatCurrency(totalIncome * 100, currency)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Across the last {monthsCount} months
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Total Expenses */}
-        <Card className="relative overflow-hidden bg-linear-to-t from-primary/5 to-card dark:bg-card border border-border/40 shadow-xs hover:shadow-md transition-all duration-300">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Total Expenses</CardTitle>
-            <CardAction>
-              <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                <ArrowDownRight className="size-4" />
-              </div>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground truncate">
-              {formatCurrency(totalExpense * 100, currency)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Tracked expense transactions
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Net Savings */}
-        <Card className="relative overflow-hidden bg-linear-to-t from-primary/5 to-card dark:bg-card border border-border/40 shadow-xs hover:shadow-md transition-all duration-300">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Net Savings</CardTitle>
-            <CardAction>
-              <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
-                <Wallet className="size-4" />
-              </div>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground truncate">
-              {formatCurrency(netSavings * 100, currency)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Income minus expenses
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Savings Rate */}
-        <Card className="relative overflow-hidden bg-linear-to-t from-primary/5 to-card dark:bg-card border border-border/40 shadow-xs hover:shadow-md transition-all duration-300">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-sm font-semibold text-muted-foreground">Savings Rate</CardTitle>
-            <CardAction>
-              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                <Percent className="size-4" />
-              </div>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-foreground truncate">
-              {savingsRate.toFixed(1)}%
-            </div>
-            {/* Visual indicator using shadcn Progress component */}
-            <Progress
-              value={Math.min(100, Math.max(0, savingsRate))}
-              className="h-1.5 mt-3"
-              indicatorClassName={cn(
-                savingsRate >= 20 ? "bg-emerald-500" : savingsRate > 0 ? "bg-amber-500" : "bg-rose-500"
-              )}
-            />
-          </CardContent>
-        </Card>
+      {/* MetricCards row */}
+      <div className="flex flex-wrap gap-4">
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
+          icon={ArrowUpRight}
+          color="#10b981"
+          label="Total Income"
+          value={formatCurrency(totalIncome * 100, currency)}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
+          icon={ArrowDownRight}
+          color="#f43f5e"
+          label="Total Expenses"
+          value={formatCurrency(totalExpense * 100, currency)}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
+          icon={Wallet}
+          color="#8b5cf6"
+          label="Net Savings"
+          value={formatCurrency(netSavings * 100, currency)}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
+          icon={Percent}
+          color="#3b82f6"
+          label="Savings Rate"
+          value={`${savingsRate.toFixed(1)}%`}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
+          icon={TrendingDown}
+          color="#f59e0b"
+          label="Avg Monthly Expense"
+          value={formatCurrency((totalExpense / Math.max(1, monthsCount)) * 100, currency)}
+        />
       </div>
 
       {/* Bento grid of 6 charts */}
@@ -267,8 +201,8 @@ async function ReportsContent({
         {/* 3. Spending day Bar chart */}
         <SpendingDayChart data={spendingDayData} currency={currency} />
 
-        {/* 4. Wallet History line chart */}
-        <WalletHistoryChart data={walletHistoryData} wallets={wallets} currency={currency} />
+        {/* 4. Net Worth History line/area chart */}
+        <NetWorthHistoryChart data={walletHistoryData} monthsCount={monthsCount} currency={currency} />
 
         {/* 5. Net Savings positive/negative bar chart */}
         <NetSavingsChart data={savingsData} currency={currency} />

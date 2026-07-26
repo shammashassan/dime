@@ -1,10 +1,20 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { NetWorthOverviewViewModel } from "@/types"
 import { formatCurrency } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
 import Link from "next/link"
 import { Wallet, HandCoins, Layers, Landmark } from "lucide-react"
+import {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+  ItemGroup,
+} from "@/components/ui/item"
 
 const iconsMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Wallet,
@@ -17,53 +27,66 @@ export function TopAssetsCard({ viewModel }: { viewModel: NetWorthOverviewViewMo
   const { topAssets, currency } = viewModel
 
   return (
-    <Card className="rounded-2xl border border-border/40 shadow-sm p-0 overflow-hidden h-full flex flex-col justify-between">
-      <CardHeader className="border-b py-4 px-6 [.border-b]:pb-4">
-        <div>
-          <CardTitle className="text-base font-bold">Top Assets</CardTitle>
-          <CardDescription className="text-xs">Highest value holdings</CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent className="p-4 flex-1">
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-full flex flex-col bg-card">
+      <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+        <Layers className="size-3.5 text-muted-foreground" />
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Top Assets</span>
+      </div>
+
+      <div className="flex-1">
         {topAssets.length > 0 ? (
-          <div className="space-y-3">
-            {topAssets.map((asset) => {
-              const Icon = iconsMap[asset.icon] || Layers
-              return (
-                <div key={asset.id} className="group relative flex items-center justify-between p-3 rounded-xl border border-border/20 bg-card/50 hover:bg-muted/40 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="size-9 rounded-xl border flex items-center justify-center bg-emerald-500/10 border-emerald-500/20 text-emerald-500">
-                      <Icon className="size-4" />
-                    </div>
-                    <div>
-                      {asset.href ? (
-                        <Link href={asset.href} className="font-bold text-xs hover:underline block leading-tight text-foreground">
-                          {asset.name}
+          <ScrollArea className="h-[280px] px-1">
+            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0">
+              {topAssets.map((asset) => {
+                const Icon = iconsMap[asset.icon] || Layers
+                return (
+                  <HoverCard key={asset.id} openDelay={200}>
+                    <HoverCardTrigger asChild>
+                      <Item asChild className="cursor-pointer px-2">
+                        <Link href={asset.href || "#"}>
+                          <ItemMedia className="size-8 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-500">
+                            <Icon className="size-3.5" />
+                          </ItemMedia>
+                          <ItemContent className="min-w-0">
+                            <ItemTitle className="font-bold text-xs block leading-tight text-foreground truncate">
+                              {asset.name}
+                            </ItemTitle>
+                            <ItemDescription className="text-[10px] capitalize leading-tight">
+                              {asset.category.replace("_", " ")}
+                            </ItemDescription>
+                          </ItemContent>
+                          <ItemActions className="text-right shrink-0 pl-2 flex flex-col items-end gap-0.5">
+                            <span className="font-bold text-xs tabular-nums block leading-tight">
+                              {formatCurrency(asset.currentValue / 100, currency)}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground leading-tight">
+                              {asset.percentage}% of portfolio
+                            </span>
+                          </ItemActions>
                         </Link>
-                      ) : (
-                        <span className="font-bold text-xs block leading-tight text-foreground">{asset.name}</span>
-                      )}
-                      <span className="text-[10px] text-muted-foreground capitalize leading-tight">
-                        {asset.category.replace("_", " ")}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-bold text-xs tabular-nums block leading-tight">
-                      {formatCurrency(asset.currentValue / 100, currency)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground leading-tight">
-                      {asset.percentage}% of portfolio
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                      </Item>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-56 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="left">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className="size-6 rounded-lg border bg-emerald-500/10 border-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                          <Icon className="size-3" />
+                        </div>
+                        <p className="font-bold text-xs">{asset.name}</p>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {asset.percentage}% of total portfolio value, currently worth{" "}
+                        <span className="font-semibold text-foreground">{formatCurrency(asset.currentValue / 100, currency)}</span>.
+                      </p>
+                    </HoverCardContent>
+                  </HoverCard>
+                )
+              })}
+            </ItemGroup>
+          </ScrollArea>
         ) : (
-          <div className="text-xs text-muted-foreground py-16 text-center">No assets found.</div>
+          <div className="text-xs text-muted-foreground py-14 text-center flex items-center justify-center h-[280px]">No assets found.</div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

@@ -17,6 +17,7 @@ export interface TransactionFilters {
   search?: string
   isFlagged?: boolean
   needsReview?: boolean
+  recurringId?: string
 }
 
 function buildQuery(
@@ -83,6 +84,11 @@ function buildQuery(
 
   if (filters.needsReview !== undefined) {
     query.needsReview = filters.needsReview
+  }
+
+  if (filters.recurringId) {
+    query.recurringId = filters.recurringId
+    query.isRecurring = true
   }
 
   return query

@@ -24,6 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyMedia
+} from "@/components/ui/empty"
 import { Transaction, Category, Wallet } from "@/types"
 import { deleteTransaction } from "@/lib/actions/transactions"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -72,6 +79,7 @@ interface TransactionTableProps {
   pageSize: number
   sortBy?: "date" | "amount" | "description"
   sortOrder?: "asc" | "desc"
+  hasAnyTransactions: boolean
   onEditClick: (transaction: Transaction) => void
 }
 
@@ -84,6 +92,7 @@ export function TransactionTable({
   pageSize,
   sortBy = "date",
   sortOrder = "desc",
+  hasAnyTransactions,
   onEditClick,
 }: TransactionTableProps) {
   const router = useRouter()
@@ -233,8 +242,34 @@ export function TransactionTable({
         </div>
       )}
 
-      {/* Main Table */}
-      <div className="rounded-xl border border-border/40 overflow-hidden bg-card shadow-sm">
+      {!hasAnyTransactions ? (
+        <div className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full bg-card">
+          <Empty>
+            <EmptyMedia className="bg-primary/5 text-primary">
+              <ArrowLeftRight className="size-8" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No transactions yet</EmptyTitle>
+              <EmptyDescription>Add a transaction to start tracking your finances.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </div>
+      ) : optimisticTransactions.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full bg-card">
+          <Empty>
+            <EmptyMedia className="bg-primary/5 text-primary">
+              <ArrowLeftRight className="size-8" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No transactions found</EmptyTitle>
+              <EmptyDescription>Adjust your filters or search to find what you're looking for.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </div>
+      ) : (
+        <>
+          {/* Main Table */}
+          <div className="rounded-xl border border-border/40 overflow-hidden bg-card shadow-sm">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -282,14 +317,7 @@ export function TransactionTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {optimisticTransactions.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground text-xs">
-                    No transactions found. Add a transaction or adjust your filters.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                optimisticTransactions.map((tx) => {
+              {optimisticTransactions.map((tx) => {
                   const category = categoryMap.get(tx.categoryId || "")
                   const wallet = walletMap.get(tx.walletId)
                   const isSelected = selectedIds.includes(tx._id.toString())
@@ -444,8 +472,7 @@ export function TransactionTable({
                       </TableCell>
                     </TableRow>
                   )
-                })
-              )}
+                })}
             </TableBody>
           </Table>
         </div>
@@ -521,9 +548,7 @@ export function TransactionTable({
                   )}
                 />
               </PaginationItem>
-
-              {/* Last Page */}
-              <PaginationItem>
+              <PaginationItem className="hidden sm:inline-block">
                 <PaginationLast
                   href="#"
                   onClick={(e) => {
@@ -539,8 +564,10 @@ export function TransactionTable({
           </Pagination>
         </div>
       </div>
+      </>
+      )}
 
-      {/* Single Delete Alert */}
+      {/* Delete Confirmation */}
       <AlertDialog open={!!deletingTxId} onOpenChange={(open) => !open && setDeletingTxId(null)}>
         <AlertDialogContent className="bg-popover border border-border/40 shadow-xl">
           <AlertDialogHeader>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Budget, Category, Wallet } from "@/types"
 import { BudgetWithSpending } from "@/lib/queries/budgets"
 import { deleteBudget } from "@/lib/actions/budgets"
@@ -8,6 +9,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyMedia
+} from "@/components/ui/empty"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,11 +25,22 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogMedia,
 } from "@/components/ui/alert-dialog"
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { BudgetForm } from "./budget-form"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import {
   Edit,
   Trash2,
@@ -32,14 +51,32 @@ import {
   Wallet as WalletIcon,
   ShieldAlert,
   Loader2,
+  Search,
+  ArrowDownRight,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 interface BudgetsViewProps {
   budgets: BudgetWithSpending[]
   categories: Category[]
   wallets: Wallet[]
+}
+
+function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: any) {
+  return (
+    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]", className)} style={style}>
+      <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: `radial-gradient(120% 100% at 0% 0%, ${color}, transparent 60%)` }} />
+      <CardContent className="relative p-4 flex items-center gap-3">
+        <div className="size-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: color + "18", color }}>
+          <Icon className="size-[18px]" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 truncate">{label}</p>
+          <p className={cn("text-xl font-black tabular-nums leading-tight truncate", valueClassName)}>{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 function BudgetCard({
@@ -51,7 +88,7 @@ function BudgetCard({
   onEdit: () => void
   onDelete: () => void
 }) {
-
+  const router = useRouter()
 
   const percent = b.amount > 0 ? (b.spent / b.amount) * 100 : 0
   const remaining = Math.max(b.amount - b.spent, 0)
@@ -61,12 +98,15 @@ function BudgetCard({
   const pctColor = isOverBudget ? "text-rose-500" : percent >= 70 ? "text-amber-500" : "text-emerald-500"
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <Card
+      className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
+      onClick={() => router.push(`/budgets/${b._id.toString()}`)}
+    >
       {/* Top accent */}
-      <div className="h-[3px] w-full" style={{ backgroundColor: b.categoryColor }} />
+      <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: b.categoryColor }} />
 
       {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+      <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
         {/* Icon + name + badges */}
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <div
@@ -76,24 +116,27 @@ function BudgetCard({
             <PiggyBank className="size-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
-              {b.name}
-            </p>
-            <div className="flex flex-wrap gap-1 mt-1">
-              <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4"
+            <div className="flex items-center gap-1.5 min-w-0 pr-18">
+              <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
+                {b.name}
+              </p>
+              <Badge variant="secondary" className="rounded-full px-1.5 py-0 text-[8px] font-extrabold uppercase tracking-wider h-3.5 shrink-0 bg-muted/80 text-muted-foreground border border-border/50">
+                {b.period}
+              </Badge>
+            </div>
+            <div className="flex flex-nowrap items-center gap-1 mt-1.5 min-h-[16px] overflow-hidden w-full pr-2">
+              <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4 max-w-[100px] truncate shrink-0"
                 style={{ backgroundColor: b.categoryColor + "15", color: b.categoryColor, borderColor: b.categoryColor + "30" }}>
                 {b.categoryName}
               </Badge>
               {b.walletName && (
-                <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider text-muted-foreground border-border/50 h-4 gap-1">
-                  <WalletIcon className="size-2" />{b.walletName}
+                <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider text-muted-foreground border-border/50 h-4 gap-1 max-w-[140px] truncate shrink-0">
+                  <WalletIcon className="size-2 shrink-0" />
+                  <span className="truncate">{b.walletName}</span>
                 </Badge>
               )}
-              <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4">
-                {b.period}
-              </Badge>
               {!b.isActive && (
-                <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4">
+                <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4 shrink-0">
                   Inactive
                 </Badge>
               )}
@@ -101,8 +144,11 @@ function BudgetCard({
           </div>
         </div>
 
-        {/* Action buttons — no chip, just buttons */}
-        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
+        {/* Action buttons — absolutely positioned to prevent layout space reservation */}
+        <div
+          className="absolute top-3.5 right-3 flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -133,10 +179,10 @@ function BudgetCard({
             </TooltipContent>
           </Tooltip>
         </div>
-      </div>
+      </CardHeader>
 
       {/* ── Body ── */}
-      <div className="px-4 pb-3 flex flex-col gap-3">
+      <CardContent className="px-4 pb-3 flex flex-col gap-3">
         {/* Spent + Used % */}
         <div className="flex items-end justify-between">
           <div>
@@ -155,8 +201,8 @@ function BudgetCard({
 
         {/* Progress bar */}
         <div>
-          <Progress 
-            value={Math.min(percent, 100)} 
+          <Progress
+            value={Math.min(percent, 100)}
             indicatorStyle={{ backgroundColor: barColor }}
             className="h-2 bg-muted/60"
           />
@@ -180,17 +226,18 @@ function BudgetCard({
             }
           </div>
         )}
-      </div>
+      </CardContent>
 
       {/* ── Footer ── */}
-      <div className="border-t border-border/20 px-4 py-2.5 flex items-center gap-1.5 mt-auto">
+      <Separator className="bg-border/20" />
+      <CardFooter className="px-4 py-2.5 flex items-center gap-1.5 mt-auto bg-muted/20">
         <CalendarDays className="size-3 text-muted-foreground shrink-0" />
-        <span className="text-[10px] text-muted-foreground font-medium">
+        <span className="text-[10px] text-muted-foreground font-medium truncate">
           Started {formatDate(b.startDate)}
           {b.endDate && <span className="text-muted-foreground/60"> · ends {formatDate(b.endDate)}</span>}
         </span>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   )
 }
 
@@ -200,6 +247,38 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
   const [deletingBudgetId, setDeletingBudgetId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"all" | "under" | "over">("all")
+  const [search, setSearch] = useState("")
+
+  const displayedBudgets = budgets.filter(b => {
+    const isOver = b.spent > b.amount
+    if (activeTab === "under" && isOver) return false
+    if (activeTab === "over" && !isOver) return false
+    
+    if (search.trim()) {
+      const lowerSearch = search.toLowerCase()
+      if (!b.name.toLowerCase().includes(lowerSearch)) return false
+    }
+    return true
+  })
+
+  const tabCounts = {
+    all: budgets.length,
+    under: budgets.filter(b => b.spent <= b.amount).length,
+    over: budgets.filter(b => b.spent > b.amount).length,
+  }
+
+  const tabNames: Record<string, string> = {
+    all: `All (${tabCounts.all})`,
+    under: `Under Budget (${tabCounts.under})`,
+    over: `Over Budget (${tabCounts.over})`,
+  }
+
+  const metrics = {
+    totalBudgeted: budgets.reduce((sum, b) => sum + b.amount, 0),
+    totalSpent: budgets.reduce((sum, b) => sum + b.spent, 0),
+    overBudgetCount: tabCounts.over,
+  }
 
   const handleDelete = async () => {
     if (!deletingBudgetId) return
@@ -240,9 +319,99 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         </Button>
       </div>
 
-      {budgets.length > 0 ? (
+      <div className="flex flex-wrap gap-4">
+        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={PiggyBank} color="#6366f1" label="Total Budgeted" value={formatCurrency(metrics.totalBudgeted, wallets[0]?.currency || "USD")} />
+        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={ArrowDownRight} color="#f43f5e" label="Total Spent" value={formatCurrency(metrics.totalSpent, wallets[0]?.currency || "USD")} />
+        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={WalletIcon} color="#10b981" label="Remaining" value={formatCurrency(Math.max(0, metrics.totalBudgeted - metrics.totalSpent), wallets[0]?.currency || "USD")} />
+        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={ShieldAlert} color="#f59e0b" label="Over Budget" value={metrics.overBudgetCount} valueClassName={metrics.overBudgetCount > 0 ? "text-amber-500" : ""} />
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+        {/* Desktop Filter (visible on sm and larger screens) */}
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === "all"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            All ({tabCounts.all})
+          </button>
+          <button
+            onClick={() => setActiveTab("under")}
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === "under"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Under Budget ({tabCounts.under})
+          </button>
+          <button
+            onClick={() => setActiveTab("over")}
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === "over"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Over Budget ({tabCounts.over})
+          </button>
+        </div>
+
+        {/* Mobile Filter (visible on smaller screens) */}
+        <div className="sm:hidden w-full">
+          <Select value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+            <SelectTrigger className="w-full border-border/40 bg-card h-10">
+              <SelectValue placeholder={tabNames[activeTab]} />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border/40 rounded-xl">
+              <SelectItem value="all" className="rounded-lg">
+                All ({tabCounts.all})
+              </SelectItem>
+              <SelectItem value="under" className="rounded-lg">
+                Under Budget ({tabCounts.under})
+              </SelectItem>
+              <SelectItem value="over" className="rounded-lg">
+                Over Budget ({tabCounts.over})
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex w-full sm:w-auto items-center gap-3">
+          <InputGroup className="w-full sm:w-60">
+            <InputGroupInput
+              placeholder="Search by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="rounded-xl pl-9"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+          </InputGroup>
+        </div>
+      </div>
+
+      {budgets.length === 0 ? (
+        <Card className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full col-span-full">
+          <Empty>
+            <EmptyMedia className="bg-primary/5 text-primary">
+              <PiggyBank className="size-8" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No budgets yet</EmptyTitle>
+              <EmptyDescription>Create a budget to monitor and control your spending.</EmptyDescription>
+            </EmptyHeader>
+            <div className="mt-4">
+              <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2"><Plus className="size-4" /> Create First Budget</Button>
+            </div>
+          </Empty>
+        </Card>
+      ) : displayedBudgets.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {budgets.map((b) => (
+          {displayedBudgets.map((b) => (
             <BudgetCard
               key={b._id.toString()}
               b={b}
@@ -252,14 +421,17 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center border border-dashed border-border/50 rounded-2xl p-12 text-center bg-muted/10">
-          <PiggyBank className="size-10 text-muted-foreground/25 mb-3" />
-          <p className="text-sm font-bold">No budgets yet</p>
-          <p className="text-xs text-muted-foreground mt-1 max-w-xs">Create a budget to monitor your spending limits.</p>
-          <Button onClick={() => setIsCreateOpen(true)} className="mt-4 rounded-xl font-bold gap-2 h-9">
-            <Plus className="size-4" />Create First Budget
-          </Button>
-        </div>
+        <Card className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full col-span-full">
+          <Empty>
+            <EmptyMedia className="bg-primary/5 text-primary">
+              <PiggyBank className="size-8" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No budgets found</EmptyTitle>
+              <EmptyDescription>Adjust your filters or search to find what you're looking for.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </Card>
       )}
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -279,16 +451,19 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
       </Dialog>
 
       <AlertDialog open={!!deletingBudgetId} onOpenChange={(open) => !open && setDeletingBudgetId(null)}>
-        <AlertDialogContent className="rounded-2xl border border-border/50 shadow-xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-bold text-rose-600 dark:text-rose-400">Delete Budget</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">This action is permanent and cannot be undone.</AlertDialogDescription>
+            <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+              <Trash2 />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete Budget</AlertDialogTitle>
+            <AlertDialogDescription>This action is permanent and cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-semibold">Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isPending}
-              className="rounded-xl font-semibold bg-rose-600 hover:bg-rose-500 text-white gap-1.5">
-              {isPending && <Loader2 className="size-3.5 animate-spin" />}Delete Permanently
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin" data-icon="inline-start" />}
+              Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -14,12 +14,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Loader2, Repeat, CreditCard, FileText } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 const clientRuleSchema = z
   .object({
+    kind: z.enum(["recurring", "subscription", "bill"]).default("recurring"),
     description: z.string().min(1, "Description is required").max(100, "Description must be 100 characters or less"),
     walletId: z.string().min(1, "Wallet is required"),
     categoryId: z.string().min(1, "Category is required"),
@@ -31,6 +33,14 @@ const clientRuleSchema = z
     endDate: z.coerce.date().optional().nullable(),
     isActive: z.boolean().default(true),
     tags: z.string().optional(),
+
+    // Subscription / Bill fields
+    providerName: z.string().max(100).optional().nullable(),
+    providerUrl: z.string().url().max(500).optional().nullable().or(z.literal("")),
+    cancellationUrl: z.string().url().max(500).optional().nullable().or(z.literal("")),
+    trialEndDate: z.coerce.date().optional().nullable(),
+    reminderDaysBefore: z.coerce.number().int().min(0).max(60).optional().nullable(),
+    status: z.enum(["active", "trial", "paused", "cancelled", "expired"]).optional().nullable(),
   })
   .refine(
     (data) => {
@@ -62,6 +72,7 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
   const isEditing = !!initialRule
 
   const defaultValues: Partial<ClientRuleInput> = {
+    kind: (initialRule?.kind as any) || "recurring",
     description: initialRule?.description || "",
     walletId: initialRule?.walletId || (wallets[0]?._id?.toString() || ""),
     categoryId: initialRule?.categoryId || "",
@@ -73,6 +84,13 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
     endDate: initialRule?.endDate ? new Date(initialRule.endDate) : null,
     isActive: initialRule?.isActive ?? true,
     tags: initialRule?.tags ? initialRule.tags.join(", ") : "",
+
+    providerName: initialRule?.providerName || "",
+    providerUrl: initialRule?.providerUrl || "",
+    cancellationUrl: initialRule?.cancellationUrl || "",
+    trialEndDate: initialRule?.trialEndDate ? new Date(initialRule.trialEndDate) : null,
+    reminderDaysBefore: initialRule?.reminderDaysBefore ?? 3,
+    status: initialRule?.status || "active",
   }
 
   const {
@@ -89,14 +107,16 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
 
   const selectedType = watch("type")
   const selectedWalletId = watch("walletId")
+  const selectedKind = watch("kind")
   const selectedWallet = wallets.find((w) => w._id.toString() === selectedWalletId)
   const walletCurrency = selectedWallet?.currency || "USD"
 
   const filteredCategories = categories.filter((c) => {
+    // If it's a subscription or bill, we probably lock it to "expense" below,
+    // but visually we filter to match the selectedType
     if (Array.isArray(c.type)) {
       return c.type.includes(selectedType)
     }
-    // Legacy string fallback
     if (c.type === "both") return true
     return c.type === selectedType
   })
@@ -109,13 +129,17 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
       try {
         const tagsArray = data.tags
           ? data.tags
-              .split(",")
-              .map((t: string) => t.trim())
-              .filter(Boolean)
+            .split(",")
+            .map((t: string) => t.trim())
+            .filter(Boolean)
           : []
 
+        if (data.kind === "subscription" && !tagsArray.includes("subscription")) {
+          tagsArray.push("subscription")
+        }
+
         const amountInCents = Math.round(data.amount * 100)
-        
+
         const payload = {
           ...data,
           amount: amountInCents,
@@ -171,13 +195,56 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
         </div>
       )}
 
+      {/* Kind Selector */}
+      <Field data-invalid={!!errors.kind}>
+        <Controller
+          control={control}
+          name="kind"
+          render={({ field }) => (
+            <div className="grid grid-cols-3 gap-2 bg-muted/30 p-1.5 rounded-2xl border border-border/50">
+              {[
+                { id: "recurring", label: "Recurring", icon: Repeat },
+                { id: "subscription", label: "Subscription", icon: CreditCard },
+                { id: "bill", label: "Bill", icon: FileText },
+              ].map((k) => {
+                const Icon = k.icon
+                const isActive = field.value === k.id
+                return (
+                  <button
+                    key={k.id}
+                    type="button"
+                    onClick={() => {
+                      field.onChange(k.id)
+                      // Force subscriptions and bills to be expenses by default
+                      if (k.id !== "recurring") {
+                        setValue("type", "expense", { shouldDirty: true })
+                      }
+                    }}
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 border",
+                      isActive
+                        ? "bg-card border-border/60 shadow-sm text-foreground scale-[1.02]"
+                        : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    )}
+                  >
+                    <Icon className={cn("size-4", isActive && "text-primary")} />
+                    {k.label}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        />
+        {errors.kind && <FieldError>{(errors.kind as any).message}</FieldError>}
+      </Field>
+
       <FieldGroup>
         {/* Description */}
         <Field data-invalid={!!errors.description}>
-          <FieldLabel>Description / Title</FieldLabel>
+          <FieldLabel>{selectedKind === "subscription" ? "Subscription Name" : selectedKind === "bill" ? "Bill Name" : "Description / Title"}</FieldLabel>
           <InputGroup>
             <InputGroupInput
-              placeholder="e.g. Netflix Subscription, Monthly Rent"
+              placeholder={selectedKind === "subscription" ? "e.g. Netflix" : "e.g. Rent, Utilities"}
               aria-invalid={!!errors.description}
               {...register("description")}
             />
@@ -185,31 +252,33 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
           {errors.description && <FieldError>{(errors.description as any).message}</FieldError>}
         </Field>
 
-        {/* Rule Type */}
-        <Field>
-          <FieldLabel>Transaction Type</FieldLabel>
-          <Controller
-            control={control}
-            name="type"
-            render={({ field }) => (
-              <ToggleGroup
-                type="single"
-                value={field.value}
-                onValueChange={(val) => val && field.onChange(val)}
-                variant="outline"
-                spacing={0}
-                className="w-full flex"
-              >
-                <ToggleGroupItem value="expense" className="flex-1 rounded-none rounded-l-3xl py-2 text-xs font-semibold">
-                  Expense
-                </ToggleGroupItem>
-                <ToggleGroupItem value="income" className="flex-1 rounded-none rounded-r-3xl py-2 text-xs font-semibold">
-                  Income
-                </ToggleGroupItem>
-              </ToggleGroup>
-            )}
-          />
-        </Field>
+        {/* Rule Type - Only show for standard recurring, since Subs/Bills are typically expenses */}
+        <div className={cn("transition-all duration-300 overflow-hidden", selectedKind === "recurring" ? "opacity-100 max-h-24" : "opacity-0 max-h-0 hidden")}>
+          <Field>
+            <FieldLabel>Transaction Type</FieldLabel>
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <ToggleGroup
+                  type="single"
+                  value={field.value}
+                  onValueChange={(val) => val && field.onChange(val)}
+                  variant="outline"
+                  spacing={0}
+                  className="w-full flex"
+                >
+                  <ToggleGroupItem value="expense" className="flex-1 rounded-none rounded-l-3xl py-2 text-xs font-semibold">
+                    Expense
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="income" className="flex-1 rounded-none rounded-r-3xl py-2 text-xs font-semibold">
+                    Income
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              )}
+            />
+          </Field>
+        </div>
 
         {/* Wallet & Category */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -273,79 +342,53 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
           </Field>
         </div>
 
-        {/* Frequency ToggleGroup */}
-        <Field data-invalid={!!errors.frequency}>
-          <FieldLabel>Frequency</FieldLabel>
-          <Controller
-            control={control}
-            name="frequency"
-            render={({ field }) => (
-              <>
-                {/* Desktop ToggleGroup (visible on sm and larger screens) */}
-                <ToggleGroup
-                  type="single"
-                  value={field.value}
-                  onValueChange={(val) => val && field.onChange(val)}
-                  variant="outline"
-                  spacing={0}
-                  className="hidden sm:flex w-full border border-border/30 rounded-3xl overflow-hidden bg-card"
-                >
-                  {["daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"].map((freq, idx, arr) => (
-                    <ToggleGroupItem
-                      key={freq}
-                      value={freq}
-                      className={`flex-1 rounded-none py-2 text-[10px] font-bold capitalize ${
-                        idx === 0 ? "rounded-l-3xl" : idx === arr.length - 1 ? "rounded-r-3xl" : ""
-                      }`}
-                    >
-                      {freq}
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
+        {/* Frequency & Amount */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field data-invalid={!!errors.amount}>
+            <FieldLabel>Amount</FieldLabel>
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <InputGroupText>{walletCurrency}</InputGroupText>
+              </InputGroupAddon>
+              <InputGroupInput
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                aria-invalid={!!errors.amount}
+                {...register("amount")}
+              />
+            </InputGroup>
+            {errors.amount && <FieldError>{(errors.amount as any).message}</FieldError>}
+          </Field>
 
-                {/* Mobile Select (visible on smaller screens) */}
-                <div className="sm:hidden w-full">
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full h-10 rounded-xl border border-border/30 bg-card">
-                      <SelectValue placeholder="Select Frequency" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-popover border border-border/40 rounded-xl">
-                      {["daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"].map((freq) => (
-                        <SelectItem key={freq} value={freq} className="rounded-lg capitalize">
-                          {freq}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
-            )}
-          />
-          {errors.frequency && <FieldError>{(errors.frequency as any).message}</FieldError>}
-        </Field>
-
-        {/* Amount */}
-        <Field data-invalid={!!errors.amount}>
-          <FieldLabel>Amount</FieldLabel>
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <InputGroupText>{walletCurrency}</InputGroupText>
-            </InputGroupAddon>
-            <InputGroupInput
-              type="number"
-              step="0.01"
-              placeholder="0.00"
-              aria-invalid={!!errors.amount}
-              {...register("amount")}
+          <Field data-invalid={!!errors.frequency}>
+            <FieldLabel>Billing Cycle</FieldLabel>
+            <Controller
+              control={control}
+              name="frequency"
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger className="capitalize">
+                    <SelectValue placeholder="Select Frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"].map((freq) => (
+                      <SelectItem key={freq} value={freq} className="capitalize">
+                        {freq}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
-          </InputGroup>
-          {errors.amount && <FieldError>{(errors.amount as any).message}</FieldError>}
-        </Field>
+            {errors.frequency && <FieldError>{(errors.frequency as any).message}</FieldError>}
+          </Field>
+        </div>
 
-        {/* Start Date & End Date */}
+        {/* Start Date & End Date/Trial End Date */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field data-invalid={!!errors.startDate}>
-            <FieldLabel>Start Date</FieldLabel>
+            <FieldLabel>{selectedKind === "subscription" ? "Next Billing Date" : "Start Date"}</FieldLabel>
             <Controller
               control={control}
               name="startDate"
@@ -374,36 +417,125 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
             {errors.startDate && <FieldError>{(errors.startDate as any).message}</FieldError>}
           </Field>
 
-          <Field data-invalid={!!errors.endDate}>
-            <FieldLabel>End Date (Optional)</FieldLabel>
-            <Controller
-              control={control}
-              name="endDate"
-              render={({ field }) => (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
-                    >
-                      <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
-                      {field.value ? format(field.value, "PPP") : <span>No end date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value || undefined}
-                      onSelect={(val) => field.onChange(val || null)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            />
-            {errors.endDate && <FieldError>{(errors.endDate as any).message}</FieldError>}
-          </Field>
+          {selectedKind === "recurring" ? (
+            <Field data-invalid={!!errors.endDate}>
+              <FieldLabel>End Date (Optional)</FieldLabel>
+              <Controller
+                control={control}
+                name="endDate"
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
+                      >
+                        <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
+                        {field.value ? format(field.value, "PPP") : <span>No end date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value || undefined}
+                        onSelect={(val) => field.onChange(val || null)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.endDate && <FieldError>{(errors.endDate as any).message}</FieldError>}
+            </Field>
+          ) : (
+            <Field data-invalid={!!errors.trialEndDate}>
+              <FieldLabel>Trial End Date (Optional)</FieldLabel>
+              <Controller
+                control={control}
+                name="trialEndDate"
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
+                      >
+                        <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
+                        {field.value ? format(field.value, "PPP") : <span>No trial</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value || undefined}
+                        onSelect={(val) => field.onChange(val || null)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.trialEndDate && <FieldError>{(errors.trialEndDate as any).message}</FieldError>}
+            </Field>
+          )}
         </div>
+
+        {/* Subscription / Bill specific fields */}
+        {selectedKind !== "recurring" && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field data-invalid={!!errors.status}>
+                <FieldLabel>Status</FieldLabel>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={!!errors.status} className="h-10 rounded-xl">
+                        <SelectValue placeholder="Select Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["active", "trial", "paused", "cancelled", "expired"].map((s) => (
+                          <SelectItem key={s} value={s} className="capitalize">
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.status && <FieldError>{(errors.status as any).message}</FieldError>}
+              </Field>
+
+              <Field data-invalid={!!errors.reminderDaysBefore}>
+                <FieldLabel>Reminder (Days Before)</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type="number"
+                    min="0"
+                    max="60"
+                    aria-invalid={!!errors.reminderDaysBefore}
+                    {...register("reminderDaysBefore", { valueAsNumber: true })}
+                  />
+                </InputGroup>
+                {errors.reminderDaysBefore && <FieldError>{(errors.reminderDaysBefore as any).message}</FieldError>}
+              </Field>
+            </div>
+
+            <Field data-invalid={!!errors.cancellationUrl}>
+              <FieldLabel>Cancellation URL (Optional)</FieldLabel>
+              <InputGroup>
+                <InputGroupInput
+                  type="url"
+                  placeholder="https://..."
+                  aria-invalid={!!errors.cancellationUrl}
+                  {...register("cancellationUrl")}
+                />
+              </InputGroup>
+              {errors.cancellationUrl && <FieldError>{(errors.cancellationUrl as any).message}</FieldError>}
+            </Field>
+          </>
+        )}
 
         {/* Tags */}
         <Field data-invalid={!!errors.tags}>

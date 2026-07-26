@@ -65,13 +65,15 @@ const formatMonthDay = (dateStr: string | Date) => {
 
 export function SpendingTrendChart({ initialData = [], currency = "USD" }: SpendingTrendChartProps) {
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState(() => isMobile ? "7d" : "90d")
+  const [timeRange, setTimeRange] = React.useState("90d")
+  const [prevIsMobile, setPrevIsMobile] = React.useState(isMobile)
 
-  React.useEffect(() => {
+  if (isMobile !== prevIsMobile) {
+    setPrevIsMobile(isMobile)
     if (isMobile) {
       setTimeRange("7d")
     }
-  }, [isMobile])
+  }
 
   // Memoize filtered data for performance
   const filteredData = React.useMemo(() => {
@@ -153,7 +155,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                   <stop
                     offset="5%"
                     stopColor="var(--color-income)"
-                    stopOpacity={1.0}
+                    stopOpacity={0.8}
                   />
                   <stop
                     offset="95%"

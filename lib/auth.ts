@@ -132,6 +132,21 @@ export const auth = betterAuth({
             },
           }
         },
+        after: async (user) => {
+          const admins = await db.collection("user").find({ role: "admin" }).toArray()
+          if (admins.length > 0) {
+            const notifications = admins.map((admin) => ({
+              userId: admin.id || admin._id?.toString(),
+              title: "New User Registration",
+              message: `${user.name || user.email || 'A new user'} has registered and is pending approval.`,
+              type: "system",
+              link: "/admin/users?tab=pending",
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }))
+            await db.collection("notifications").insertMany(notifications)
+          }
+        },
       },
     },
     session: {

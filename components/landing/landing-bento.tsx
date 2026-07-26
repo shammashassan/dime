@@ -12,6 +12,12 @@ import {
   BarChart3,
   ArrowLeftRight,
   ShieldCheck,
+  Zap,
+  LineChart,
+  Handshake,
+  Repeat,
+  Scissors,
+  Clock,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -207,6 +213,83 @@ export function LandingBento() {
       }
     )
 
+    // Rules Engine Trigger
+    gsap.fromTo(
+      ".bento-rule-trigger",
+      { autoAlpha: 0, y: -5 },
+      {
+        autoAlpha: 1, y: 0,
+        duration: 0.5,
+        scrollTrigger: { trigger: ".bento-rule-trigger", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+    // Rules Engine Actions
+    gsap.fromTo(
+      ".bento-rule-action",
+      { autoAlpha: 0, scale: 0.9 },
+      {
+        autoAlpha: 1, scale: 1,
+        duration: 0.6, stagger: 0.15, ease: "back.out(1.4)",
+        scrollTrigger: { trigger: ".bento-rule-action", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+
+    // Net Worth Chart Line & Area
+    gsap.fromTo(
+      ".bento-networth-line",
+      { strokeDashoffset: 400 },
+      {
+        strokeDashoffset: 0,
+        duration: 1.5,
+        ease: "power2.inOut",
+        scrollTrigger: { trigger: ".bento-networth-line", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+    gsap.fromTo(
+      ".bento-networth-area",
+      { autoAlpha: 0 },
+      {
+        autoAlpha: 1,
+        duration: 0.8,
+        delay: 0.6,
+        ease: "power2.out",
+        scrollTrigger: { trigger: ".bento-networth-area", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+
+    // Loan Progress Bar
+    gsap.fromTo(
+      ".bento-loan-progress",
+      { width: "0%" },
+      {
+        width: "33.3%",
+        duration: 1.2, ease: "power2.out",
+        scrollTrigger: { trigger: ".bento-loan-progress", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+
+    // Recurring Items
+    gsap.fromTo(
+      ".bento-recurring-item",
+      { autoAlpha: 0, y: 8 },
+      {
+        autoAlpha: 1, y: 0,
+        duration: 0.6, stagger: 0.12, ease: "power2.out",
+        scrollTrigger: { trigger: ".bento-recurring-item", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+
+    // Split Items
+    gsap.fromTo(
+      ".bento-split-item",
+      { autoAlpha: 0, x: -10 },
+      {
+        autoAlpha: 1, x: 0,
+        duration: 0.5, stagger: 0.15, ease: "power2.out",
+        scrollTrigger: { trigger: ".bento-split-item", start: "top 90%", toggleActions: "play none none none" }
+      }
+    )
+
   }, { scope: containerRef })
 
   return (
@@ -272,8 +355,8 @@ export function LandingBento() {
         {/* Row 2 */}
         <FeatureCard
           icon={<Users className="size-6" />}
-          title="Shared Accounts"
-          description="Collaborate with your partner or household. Safely share access to specific wallets and monitor collective expenses without sharing passwords."
+          title="Shared Budgeting (Spaces)"
+          description="Collaborate with your partner or household. Safely share access to organization spaces and track joint categories in real-time."
           badge="Collaboration"
         >
           <div className="flex items-center gap-3 w-full justify-center">
@@ -282,75 +365,63 @@ export function LandingBento() {
               <div className="bento-avatar size-8 rounded-full border-2 border-background bg-purple-500/20 flex items-center justify-center text-[10px] font-bold shadow-xs">AS</div>
             </div>
             <div className="text-left">
-              <p className="text-xs font-semibold text-foreground">Household Wallet</p>
-              <p className="text-[10px] text-muted-foreground">Live syncing active</p>
+              <p className="text-xs font-semibold text-foreground">Household Workspace</p>
+              <p className="text-[10px] text-muted-foreground">Sync active</p>
             </div>
           </div>
         </FeatureCard>
 
         <FeatureCard
-          icon={<ArrowLeftRight className="size-6" />}
-          title="CSV / Bank Importer"
-          description="Bulk-import transactions using a simple CSV mapping wizard. Select columns and preview validation errors before saving."
-          badge="Wizard"
-          className="md:col-span-2 bg-linear-to-bl from-card/20 via-card/45 to-indigo-500/5"
+          icon={<Zap className="size-6" />}
+          title="Automation Rules Engine"
+          description="Define triggers based on merchant names, wallets, or amounts to automatically categorize and tag transactions as they arrive."
+          badge="Automation"
         >
-          <div className="w-full overflow-hidden rounded-xl border border-border/20 bg-background/40 text-[10px] font-mono shadow-xs">
-            <div className="bg-muted/40 px-2.5 py-1 border-b border-border/20 flex justify-between text-muted-foreground text-[9px] uppercase font-bold tracking-wider">
-              <span>CSV Column</span>
-              <span>Dime Field</span>
-            </div>
-            <div className="p-2 space-y-1 bg-background/10">
-              <div className="bento-importer-row flex justify-between items-center px-0.5">
-                <span className="text-muted-foreground text-[9px]">&quot;Transaction Date&quot;</span>
-                <span className="text-emerald-500 font-semibold">→ Date ✓</span>
+          <div className="w-full relative overflow-hidden rounded-xl border border-border/20 bg-background/40 p-2.5 shadow-xs">
+            <div className="space-y-1.5 text-[10px] font-mono">
+              <div className="bento-rule-trigger flex items-center justify-between border-b border-border/10 pb-1">
+                <span className="text-muted-foreground text-[9px]">IF MERCHANT:</span>
+                <span className="font-semibold text-foreground">&quot;Uber&quot;</span>
               </div>
-              <div className="bento-importer-row flex justify-between items-center px-0.5">
-                <span className="text-muted-foreground text-[9px]">&quot;Payee Name&quot;</span>
-                <span className="text-emerald-500 font-semibold">→ Description ✓</span>
+              <div className="bento-rule-action bg-primary/10 border border-primary/20 rounded-md p-1 text-center">
+                <span className="text-primary text-[9px] font-bold">Category → Transport</span>
               </div>
             </div>
           </div>
         </FeatureCard>
 
-        {/* Row 3 */}
         <FeatureCard
-          icon={<BarChart3 className="size-6" />}
-          title="Dynamic Reports"
-          description="Visualise monthly trend areas, category breakdowns, day-of-week spendings, and net-worth history. Fully interactive."
-          className="md:col-span-2 bg-linear-to-tr from-card/20 via-card/45 to-purple-500/5"
+          icon={<LineChart className="size-6" />}
+          title="Net Worth Dashboard"
+          description="Real-time asset valuation tracker. Aggregate your bank balances, savings, real estate, and loans into a single view."
+          badge="Overview"
         >
-          <div className="flex items-end justify-between h-14 w-full gap-2 px-2">
-            {[24, 36, 48, 40, 56].map((h, i) => (
-              <div
-                key={i}
-                className="bento-chart-bar w-full rounded-t-md hover:opacity-80 transition-opacity border border-primary/10 origin-bottom transform-gpu"
-                style={{
-                  height: `${h}px`,
-                  backgroundColor: `rgba(var(--primary), ${0.2 + i * 0.12})`,
-                }}
+          <div className="w-full h-16 relative flex items-end">
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 150 48" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="netWorthGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(var(--primary), 0.35)" />
+                  <stop offset="100%" stopColor="rgba(var(--primary), 0)" />
+                </linearGradient>
+              </defs>
+              <path
+                className="bento-networth-area"
+                d="M0 48 L0 32 Q25 15 50 28 T100 10 T150 4 L150 48 Z"
+                fill="url(#netWorthGrad)"
               />
-            ))}
-          </div>
-        </FeatureCard>
-
-        <FeatureCard
-          icon={<Target className="size-6" />}
-          title="Financial Goals"
-          description="Build targets for vacations, emergency funds, or debt payoffs. Automatically allocate contributions from your wallets."
-          badge="New"
-        >
-          <div className="space-y-2 w-full">
-            <div className="flex justify-between text-xs font-semibold px-0.5">
-              <span className="text-muted-foreground text-[11px]">Europe Trip</span>
-              <span className="text-primary font-bold text-[11px]">75%</span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-background/60 p-0.5 border border-border/20 overflow-hidden">
-              <div className="bento-goal-progress h-full rounded-full bg-primary" style={{ width: "0%" }} />
-            </div>
-            <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
-              <span>$3,750 saved</span>
-              <span>$5,000 target</span>
+              <path
+                className="bento-networth-line"
+                d="M0 32 Q25 15 50 28 T100 10 T150 4"
+                fill="none"
+                stroke="rgba(var(--primary), 1)"
+                strokeWidth="2.5"
+                strokeDasharray="200"
+                strokeDashoffset="200"
+              />
+            </svg>
+            <div className="absolute top-0.5 left-1 flex flex-col text-left">
+              <span className="text-[8px] text-muted-foreground uppercase font-mono tracking-wider">Net Worth</span>
+              <span className="text-xs font-bold text-foreground">$316K</span>
             </div>
           </div>
         </FeatureCard>

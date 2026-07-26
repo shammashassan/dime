@@ -7,6 +7,7 @@ import {
   HelpCircle, Edit2, Loader2, Sparkles, CheckSquare, X, Edit, Eye
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -23,7 +24,8 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
+  AlertDialogMedia
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -59,6 +61,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRule, setEditingRule] = useState<AutomationRule | null>(null)
   const [deletingRuleId, setDeletingRuleId] = useState<string | null>(null)
+  const [isDeletingRule, setIsDeletingRule] = useState(false)
 
   // Rule Form State
   const [name, setName] = useState("")
@@ -238,10 +241,12 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
 
   const handleExecuteDeleteRule = async () => {
     if (!deletingRuleId) return
+    setIsDeletingRule(true)
     try {
       const res = await deleteAutomationRuleAction(deletingRuleId)
       if (res.success) {
         toast.success("Rule deleted successfully.")
+        setDeletingRuleId(null)
         loadRules()
       } else {
         toast.error("Failed to delete rule.")
@@ -250,7 +255,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
       console.error(err)
       toast.error("An error occurred.")
     } finally {
-      setDeletingRuleId(null)
+      setIsDeletingRule(false)
     }
   }
 
@@ -524,16 +529,16 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                     </span>
                   </AlertTitle>
                   <AlertDescription className="space-y-2 mt-2">
-                    <Progress 
-                      value={jobStatus.total > 0 ? (jobStatus.processed / jobStatus.total) * 100 : 0} 
+                    <Progress
+                      value={jobStatus.total > 0 ? (jobStatus.processed / jobStatus.total) * 100 : 0}
                       className="h-2 bg-muted/60"
                     />
                     <p className="text-xs text-muted-foreground font-semibold leading-normal">
-                      {jobStatus.status === "completed" 
+                      {jobStatus.status === "completed"
                         ? `Successfully scanned all ${jobStatus.processed} transactions and updated ${jobStatus.matched} matches!`
                         : jobStatus.status === "failed"
-                        ? `Failed to apply rules: ${jobStatus.error}`
-                        : `Matched & updated ${jobStatus.matched} transactions so far. Please keep the window open.`
+                          ? `Failed to apply rules: ${jobStatus.error}`
+                          : `Matched & updated ${jobStatus.matched} transactions so far. Please keep the window open.`
                       }
                     </p>
                   </AlertDescription>
@@ -613,9 +618,9 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                   const isThemeColor = ruleColor === "var(--primary)"
 
                   return (
-                    <div
+                    <Card
                       key={rule._id.toString()}
-                      className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col min-h-[220px]"
+                      className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col min-h-[220px]"
                     >
                       {/* Top Accent Line */}
                       <div
@@ -624,7 +629,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                       />
 
                       {/* Header */}
-                      <div className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
+                      <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <div
                             className={cn(
@@ -662,8 +667,8 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                           </div>
                         </div>
 
-                        {/* Inline actions - fade in on hover */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
+                        {/* Inline actions — always visible on mobile, hover-revealed on desktop */}
+                        <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
@@ -696,17 +701,17 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                             </TooltipContent>
                           </Tooltip>
                         </div>
-                      </div>
-
-                      {/* Description if present */}
-                      {rule.description && (
-                        <p className="px-4 pb-2 text-[11px] text-muted-foreground font-semibold line-clamp-2">
-                          {rule.description}
-                        </p>
-                      )}
+                      </CardHeader>
 
                       {/* Redesigned Card Body (Rule matching pipeline) */}
-                      <div className="px-4 pb-3 flex-1 flex flex-col gap-3 justify-center">
+                      <CardContent className="px-4 pb-3 flex-1 flex flex-col gap-3 justify-center">
+                        {/* Description if present */}
+                        {rule.description && (
+                          <p className="text-[11px] text-muted-foreground font-semibold line-clamp-2 mb-1">
+                            {rule.description}
+                          </p>
+                        )}
+
                         {/* Conditions */}
                         <div className="space-y-1">
                           <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground">Conditions (IF)</p>
@@ -768,33 +773,33 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                             })}
                           </div>
                         </div>
-                      </div>
+                      </CardContent>
 
                       {/* Footer */}
-                      <div className="border-t border-border/20 px-4 py-2.5 flex items-center justify-between bg-muted/10 mt-auto shrink-0">
+                      <Separator className="bg-border/20" />
+                      <CardFooter className="px-4 py-2.5 flex items-center justify-between bg-muted/20 mt-auto shrink-0">
                         <div className="text-[10px] text-muted-foreground font-semibold flex items-center gap-2">
                           <span>Matches: <strong className="text-foreground">{rule.executionCount || 0}</strong></span>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1.5">
                           <Button
-                            size="xs"
-                            variant="ghost"
-                            className="h-6 py-0 px-2 rounded-md text-[10px] text-primary font-bold hover:bg-primary/5 hover:text-primary gap-1"
+                            size="sm"
+                            className="h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0 gap-1"
                             onClick={() => handlePreviewRetroactive(rule._id.toString())}
                           >
-                            <Play className="size-2.5" /> Retroactive
+                            <Play className="size-3" /> Retroactive
                           </Button>
                           <Button
-                            size="xs"
-                            variant="ghost"
-                            className="h-6 py-0 px-2 rounded-md text-[10px] font-semibold"
+                            size="sm"
+                            variant="outline"
+                            className="h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
                             onClick={() => handleToggleRule(rule._id.toString(), rule.status)}
                           >
                             {rule.status === "active" ? "Disable" : "Enable"}
                           </Button>
                         </div>
-                      </div>
-                    </div>
+                      </CardFooter>
+                    </Card>
                   )
                 })}
               </div>
@@ -1250,17 +1255,25 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
 
         {/* 6. Rule Deletion Confirmation Dialog */}
         <AlertDialog open={!!deletingRuleId} onOpenChange={(open) => !open && setDeletingRuleId(null)}>
-          <AlertDialogContent className="rounded-3xl p-6">
+          <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Automation Rule?</AlertDialogTitle>
+              <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                <Trash2 />
+              </AlertDialogMedia>
+              <AlertDialogTitle>Delete Automation Rule</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to permanently delete this automation rule? Any future transactions matching these conditions will no longer be automated. Existing transactions will remain unaffected.
+                This will permanently delete this rule. Future transactions matching its conditions will no longer be automated; existing transactions remain unaffected.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex gap-2 justify-end">
-              <AlertDialogCancel className="rounded-xl font-bold">Cancel</AlertDialogCancel>
-              <AlertDialogAction className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl font-bold" onClick={handleExecuteDeleteRule}>
-                Delete Rule
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={handleExecuteDeleteRule}
+                disabled={isDeletingRule}
+              >
+                {isDeletingRule && <Loader2 className="animate-spin" data-icon="inline-start" />}
+                Delete Permanently
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

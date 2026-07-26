@@ -1,52 +1,211 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { NetWorthOverviewViewModel } from "@/types"
+import { formatCurrency, cn } from "@/lib/utils"
+import { format } from "date-fns"
 import Link from "next/link"
-import { formatDistanceToNow } from "date-fns"
-import { History } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  History,
+  TrendingUp,
+  CheckCircle2,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Clock,
+  HandCoins,
+  Plus,
+} from "lucide-react"
+import {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemHeader,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+  ItemGroup,
+} from "@/components/ui/item"
 
-export function RecentActivityCard({ viewModel }: { viewModel: NetWorthOverviewViewModel }) {
+interface RecentActivityCardProps {
+  viewModel: NetWorthOverviewViewModel
+}
+
+function getActivityStyle(type: string, title?: string) {
+  switch (type) {
+    case "valuation":
+      return {
+        icon: TrendingUp,
+        color: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      }
+    case "repayment":
+      return {
+        icon: CheckCircle2,
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      }
+    case "transaction":
+      if (title === "High Income") {
+        return {
+          icon: ArrowDownLeft,
+          color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+        }
+      }
+      return {
+        icon: ArrowUpRight,
+        color: "bg-rose-500/10 text-rose-500 border-rose-500/20",
+      }
+    case "new_loan":
+      return {
+        icon: HandCoins,
+        color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+      }
+    case "new_asset":
+      return {
+        icon: Plus,
+        color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      }
+    default:
+      return {
+        icon: Clock,
+        color: "bg-muted text-muted-foreground border-border/40",
+      }
+  }
+}
+
+export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
   const { recentActivity } = viewModel
 
   return (
-    <Card className="rounded-2xl border border-border/40 shadow-sm p-0 overflow-hidden h-full flex flex-col justify-between">
-      <CardHeader className="border-b py-4 px-6 [.border-b]:pb-4">
-        <div>
-          <CardTitle className="text-base font-bold flex items-center gap-1.5">
-            <History className="size-4.5 text-primary" />
-            Recent Financial Activity
-          </CardTitle>
-          <CardDescription className="text-xs">Latest log activity feed</CardDescription>
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-full flex flex-col bg-card">
+      {/* Header */}
+      <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <History className="size-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Recent Activity</span>
         </div>
-      </CardHeader>
-      <CardContent className="p-5 flex-1">
+        <span className="font-mono text-[10px] text-muted-foreground/60 tabular-nums shrink-0">
+          {recentActivity.length} event{recentActivity.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* Quick stat strip */}
+      <div className="grid grid-cols-3 divide-x divide-border/30 border-b border-border/30 bg-muted/5">
+        <div className="px-4 py-2.5 flex flex-col gap-0.5">
+          <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Last Activity</span>
+          <span className="text-xs font-bold">
+            {recentActivity[0] ? format(new Date(recentActivity[0].date), "MMM d, yyyy") : "—"}
+          </span>
+        </div>
+        <div className="px-4 py-2.5 flex flex-col gap-0.5">
+          <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Total Events</span>
+          <span className="text-xs font-bold">{recentActivity.length}</span>
+        </div>
+        <div className="px-4 py-2.5 flex flex-col gap-0.5">
+          <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">MoM Change</span>
+          <span
+            className={cn(
+              "text-xs font-bold",
+              viewModel.moMChangePct > 0
+                ? "text-emerald-500"
+                : viewModel.moMChangePct < 0
+                  ? "text-rose-500"
+                  : "text-muted-foreground"
+            )}
+          >
+            {viewModel.moMChangePct >= 0 ? "+" : ""}
+            {viewModel.moMChangePct.toFixed(1)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Row-card timeline list inside ScrollArea */}
+      <div className="flex-1">
         {recentActivity.length > 0 ? (
-          <div className="relative pl-4 space-y-4 border-l border-border/30">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="relative group flex flex-col gap-0.5">
-                {/* Bullet */}
-                <div className="absolute -left-[21px] top-1 size-2 rounded-full border border-primary bg-background group-hover:scale-125 transition-transform" />
-                <div className="flex items-center justify-between text-xs flex-wrap gap-2">
-                  {activity.href ? (
-                    <Link href={activity.href} className="font-semibold text-foreground hover:underline text-xs">
-                      {activity.title}
-                    </Link>
-                  ) : (
-                    <span className="font-semibold text-foreground text-xs">{activity.title}</span>
-                  )}
-                  <span className="text-[10px] text-muted-foreground">
-                    {formatDistanceToNow(new Date(activity.date), { addSuffix: true })}
-                  </span>
-                </div>
-                <p className="text-[11px] text-muted-foreground leading-snug">{activity.description}</p>
-              </div>
-            ))}
-          </div>
+          <ScrollArea className="h-[215px] px-1">
+            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0">
+              {recentActivity.map((activity) => {
+                const { icon: DotIcon, color: iconColor } = getActivityStyle(activity.type, activity.title)
+
+                return (
+                  <Item
+                    key={activity.id}
+                    asChild
+                    className={cn(
+                      "px-2",
+                      activity.href ? "cursor-pointer" : "cursor-default"
+                    )}
+                  >
+                    {activity.href ? (
+                      <Link href={activity.href} className="w-full flex items-center gap-2.5">
+                        <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
+                          <DotIcon className="size-3.5" />
+                        </ItemMedia>
+
+                        <ItemContent className="min-w-0">
+                          <ItemHeader>
+                            <ItemTitle className="text-xs font-bold text-foreground">
+                              {activity.title}
+                            </ItemTitle>
+                            <span className="text-[10px] font-normal text-muted-foreground shrink-0">
+                              {format(new Date(activity.date), "PP")}
+                            </span>
+                          </ItemHeader>
+                          <ItemDescription className="text-[11px] leading-relaxed truncate mt-0.5">
+                            {activity.description}
+                          </ItemDescription>
+                        </ItemContent>
+
+                        {activity.amount !== undefined && (
+                          <ItemActions className="shrink-0">
+                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-[76px] text-right">
+                              {activity.title === "High Expense" ? "-" : ""}
+                              {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
+                            </span>
+                            <div className="size-6 shrink-0" />
+                          </ItemActions>
+                        )}
+                      </Link>
+                    ) : (
+                      <div className="w-full flex items-center gap-2.5">
+                        <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
+                          <DotIcon className="size-3.5" />
+                        </ItemMedia>
+
+                        <ItemContent className="min-w-0">
+                          <ItemHeader>
+                            <ItemTitle className="text-xs font-bold text-foreground">
+                              {activity.title}
+                            </ItemTitle>
+                            <span className="text-[10px] font-normal text-muted-foreground shrink-0">
+                              {format(new Date(activity.date), "PP")}
+                            </span>
+                          </ItemHeader>
+                          <ItemDescription className="text-[11px] leading-relaxed truncate mt-0.5">
+                            {activity.description}
+                          </ItemDescription>
+                        </ItemContent>
+
+                        {activity.amount !== undefined && (
+                          <ItemActions className="shrink-0">
+                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-[76px] text-right">
+                              {activity.title === "High Expense" ? "-" : ""}
+                              {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
+                            </span>
+                            <div className="size-6 shrink-0" />
+                          </ItemActions>
+                        )}
+                      </div>
+                    )}
+                  </Item>
+                )
+              })}
+            </ItemGroup>
+          </ScrollArea>
         ) : (
-          <div className="text-xs text-muted-foreground py-16 text-center">No recent financial logs.</div>
+          <div className="text-xs text-muted-foreground py-14 text-center flex items-center justify-center h-[280px]">
+            No recent financial logs.
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

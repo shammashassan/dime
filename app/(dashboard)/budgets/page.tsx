@@ -20,6 +20,11 @@ function BudgetsSkeleton() {
         </div>
         <Skeleton className="h-10 w-32 rounded-xl" />
       </div>
+      <div className="flex flex-wrap gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
+        ))}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Skeleton className="h-56 w-full rounded-2xl" />
         <Skeleton className="h-56 w-full rounded-2xl" />

@@ -1,21 +1,34 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useMemo } from "react"
 import { Asset, AssetValuation } from "@/types"
-import { formatCurrency, formatDate } from "@/lib/utils"
+import { formatCurrency, formatDate, cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
+import { MetricCard } from "@/components/ui/metric-card"
 import { Badge } from "@/components/ui/badge"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  AlertDialogMedia,
+} from "@/components/ui/alert-dialog"
 import { AssetDialog } from "./asset-dialog"
 import { ValuationDialog } from "./valuation-dialog"
 import { deleteAsset, deleteAssetValuation } from "@/lib/actions/assets"
 import { toast } from "sonner"
-import { cn } from "@/lib/utils"
-import { LineChart, Line, CartesianGrid, XAxis, YAxis } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { AreaChart, Area, CartesianGrid, XAxis, YAxis } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   ArrowLeft,
   Building,
@@ -32,14 +45,14 @@ import {
   Calendar,
   Percent,
   Trash2,
-  Pencil,
-  Loader2,
+  Edit,
   Info,
   Layers,
   Sparkles,
   Link2,
-  FileText,
-  Plus
+  Plus,
+  Clock,
+  PlusCircle,
 } from "lucide-react"
 
 const categoryIconMap: Record<string, React.ElementType> = {
@@ -81,9 +94,9 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const [editOpen, setEditOpen] = useState(false)
 
   const isAsset = asset.kind === "asset"
+  const accent = isAsset ? "#10b981" : "#ef4444"
   const Icon = categoryIconMap[asset.category] || HelpCircle
   const categoryLabel = categoryLabels[asset.category] || asset.category
 
@@ -93,10 +106,146 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   )
 
-  const chartData = sortedValuations.map((v) => ({
-    dateStr: formatDate(v.date),
-    value: v.value / 100,
-  }))
+  const [timeRange, setTimeRange] = useState("all")
+
+  const chartConfig = {
+    value: {
+      label: "Value",
+      color: isAsset ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)",
+    },
+  } satisfies ChartConfig
+
+  const { chartData, filteredData } = useMemo(() => {
+    // chartData maps all raw logged valuations
+    const rawData = sortedValuations.map((v) => ({
+      dateStr: formatDate(v.date),
+      dateStrShort: new Date(v.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      }),
+      date: new Date(v.date),
+      value: v.value / 100,
+    }))
+
+    if (rawData.length === 0) {
+      return { chartData: [], filteredData: [] }
+    }
+
+    // Function to construct a daily time-series filled forward
+    const getDailyFilledData = (startDate: Date, endDate: Date) => {
+      const result = []
+      
+      const getValuationForDate = (date: Date) => {
+        let lastVal = sortedValuations[0]
+        for (const val of sortedValuations) {
+          const valDate = new Date(val.date)
+          valDate.setUTCHours(0, 0, 0, 0)
+          if (valDate <= date) {
+            lastVal = val
+          } else {
+            break
+          }
+        }
+        return lastVal.value / 100
+      }
+
+      // Determine step interval based on length of timeframe to optimize performance
+      let stepDays = 1
+      const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      
+      if (diffDays > 365) {
+        stepDays = 7 // Weekly steps for > 1 year
+      }
+      if (diffDays > 365 * 3) {
+        stepDays = 30 // Monthly steps for > 3 years
+      }
+
+      const current = new Date(startDate)
+      current.setUTCHours(0, 0, 0, 0)
+
+      while (current <= endDate) {
+        const dateStr = formatDate(current)
+        const dateStrShort = current.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          timeZone: "UTC",
+        })
+
+        result.push({
+          dateStr,
+          dateStrShort,
+          date: new Date(current),
+          value: getValuationForDate(current),
+        })
+
+        current.setUTCDate(current.getUTCDate() + stepDays)
+      }
+
+      // Ensure the last valuation point is always added exactly at the endDate
+      const lastPoint = result[result.length - 1]
+      if (lastPoint && lastPoint.date.getTime() !== endDate.getTime()) {
+        result.push({
+          dateStr: formatDate(endDate),
+          dateStrShort: endDate.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            timeZone: "UTC",
+          }),
+          date: new Date(endDate),
+          value: getValuationForDate(endDate),
+        })
+      }
+
+      return result
+    }
+
+    const latestValuationDate = new Date(sortedValuations[sortedValuations.length - 1].date)
+    latestValuationDate.setUTCHours(0, 0, 0, 0)
+
+    // Calculate start date
+    let startDate = new Date(latestValuationDate)
+    if (timeRange === "all") {
+      startDate = new Date(sortedValuations[0].date)
+    } else {
+      let daysToSubtract = 90
+      if (timeRange === "30d") {
+        daysToSubtract = 30
+      } else if (timeRange === "7d") {
+        daysToSubtract = 7
+      }
+      startDate.setUTCDate(startDate.getUTCDate() - daysToSubtract)
+    }
+    startDate.setUTCHours(0, 0, 0, 0)
+
+    const dailyData = getDailyFilledData(startDate, latestValuationDate)
+
+    return { chartData: rawData, filteredData: dailyData }
+  }, [sortedValuations, timeRange])
+
+  // Change since first recorded valuation
+  const valueChange = (() => {
+    if (sortedValuations.length < 2) return null
+    const first = sortedValuations[0].value
+    const latest = sortedValuations[sortedValuations.length - 1].value
+    if (first === 0) return null
+    const diff = latest - first
+    const pct = (diff / Math.abs(first)) * 100
+    return { diff, pct, isPositive: diff >= 0 }
+  })()
+
+  // Timeline events, newest first — mirrors Loans timeline pattern
+  const timelineEvents = [...sortedValuations]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .map((v, idx, arr) => ({
+      id: v._id.toString(),
+      date: new Date(v.date),
+      value: v.value,
+      source: v.source,
+      notes: v.notes,
+      isBaseline: idx === arr.length - 1,
+    }))
 
   const handleDeleteAsset = () => {
     startTransition(async () => {
@@ -134,330 +283,430 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-      {/* Header section */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border/20 pb-5">
-        <div className="flex items-center gap-3 min-w-0">
-          <Button variant="outline" size="icon" className="size-9 rounded-xl shrink-0" asChild>
-            <Link href="/net-worth">
-              <ArrowLeft className="size-4" />
-              <span className="sr-only">Back</span>
-            </Link>
-          </Button>
-          <div className="min-w-0">
+    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto">
+      {/* ── Header (matches Loan detail page pattern) ────────────── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <Link
+            href="/net-worth"
+            className="flex items-center justify-center size-11 shrink-0 border border-border/40 hover:bg-muted/50 rounded-2xl transition-colors mt-0.5"
+          >
+            <ArrowLeft className="size-4" />
+          </Link>
+          <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-black tracking-tight truncate">{asset.name}</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{asset.name}</h1>
               <Badge
                 variant="outline"
-                className={cn(
-                  "rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0",
-                  isAsset
-                    ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-500"
-                    : "border-rose-500/20 bg-rose-500/5 text-rose-500"
-                )}
+                className="rounded-md font-semibold text-[10px] h-5"
+                style={{ backgroundColor: `${accent}15`, color: accent, borderColor: `${accent}30` }}
               >
-                {asset.kind}
+                {isAsset ? "Asset" : "Liability"}
               </Badge>
-              <Badge variant="outline" className="rounded-lg text-[10px] uppercase font-bold tracking-wider">
-                {categoryLabel}
-              </Badge>
+              {asset.status === "archived" && (
+                <Badge variant="outline" className="rounded-md font-semibold text-muted-foreground text-[10px] h-5">
+                  Archived
+                </Badge>
+              )}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Manual tracking page for individual assets and liabilities.
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {categoryLabel} · Manual tracking item
             </p>
           </div>
         </div>
 
-        <div className="flex gap-2">
-          {/* Edit Dialog Button */}
-          <AssetDialog
-            initialAsset={asset}
+        <div className="flex items-center gap-2 shrink-0">
+          <ValuationDialog
+            assetId={asset._id.toString()}
+            assetCurrency={asset.currency}
             trigger={
-              <Button variant="outline" className="rounded-xl font-semibold shrink-0">
-                <Pencil className="size-4 mr-1.5" />
-                Edit Item
+              <Button className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">
+                <Plus className="size-4" />
+                Add Valuation
               </Button>
             }
             onSuccess={() => router.refresh()}
           />
-          {/* Delete Action Trigger */}
-          <Button
-            variant="outline"
-            className="rounded-xl font-semibold text-rose-500 border-rose-500/20 hover:bg-rose-500/10 hover:text-rose-500 shrink-0"
-            onClick={() => setDeleteOpen(true)}
-          >
-            <Trash2 className="size-4 mr-1.5" />
-            Delete
-          </Button>
+          <AssetDialog
+            initialAsset={asset}
+            trigger={
+              <Button variant="outline" size="icon" className="size-10 rounded-xl">
+                <Edit className="size-4" />
+              </Button>
+            }
+            onSuccess={() => router.refresh()}
+          />
+          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-10 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500"
+              onClick={() => setDeleteOpen(true)}
+            >
+              <Trash2 className="size-4" />
+            </Button>
+            <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
+              <AlertDialogHeader>
+                <AlertDialogMedia>
+                  <Trash2 />
+                </AlertDialogMedia>
+                <AlertDialogTitle>Delete this item?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete this manual item and all of its historical valuation records. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="rounded-xl font-semibold" disabled={isPending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  className="rounded-xl font-semibold"
+                  disabled={isPending}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleDeleteAsset()
+                  }}
+                >
+                  {isPending ? "Deleting..." : "Delete Item"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Valuation history list and Chart (takes 2 cols) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Historical Valuations Chart */}
-          <Card className="rounded-2xl border border-border/40 bg-card">
-            <CardHeader className="p-5 pb-2">
-              <CardTitle className="text-sm font-bold">Valuation Trend</CardTitle>
-              <CardDescription>Value history over time (in {asset.currency}).</CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 pt-2">
-              {chartData.length > 0 ? (
+      {/* ── Metric Cards (wide, dense) ── */}
+      <div className="flex flex-wrap gap-4">
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={Icon}
+          color={accent}
+          label="Current Value"
+          value={formatCurrency(asset.currentValue / 100, asset.currency)}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={HandCoins}
+          color={isAsset ? "#10b981" : "#f43f5e"}
+          label="Net Value Owned"
+          value={formatCurrency(netOwnedValue / 100, asset.currency)}
+          valueClassName={isAsset ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={TrendingUp}
+          color="#3b82f6"
+          label="Value Change"
+          value={valueChange ? `${valueChange.isPositive ? "+" : ""}${valueChange.pct.toFixed(1)}%` : "—"}
+          valueClassName={valueChange ? (valueChange.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400") : ""}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={Calendar}
+          color="#f59e0b"
+          label="Acquisition Date"
+          value={asset.acquiredAt ? formatDate(asset.acquiredAt) : "Unknown"}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* ── Left column: Item Info + Notes + placeholders ── */}
+        <div className="lg:col-span-1 flex flex-col gap-4">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+              <Info className="size-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Item Information</span>
+            </div>
+            <div className="p-4 grid grid-cols-2 gap-x-3 gap-y-3.5 text-xs">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider flex items-center gap-1">
+                  <Layers className="size-3" /> Type
+                </span>
+                <span className="font-semibold">{isAsset ? "Asset" : "Liability"}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider flex items-center gap-1">
+                  <Coins className="size-3" /> Denomination
+                </span>
+                <span className="font-semibold">{asset.currency}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider flex items-center gap-1">
+                  <Percent className="size-3" /> Ownership
+                </span>
+                <span className="font-semibold">{asset.ownershipPercentage}%</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider flex items-center gap-1">
+                  <Calendar className="size-3" /> Acquired
+                </span>
+                <span className="font-semibold">{asset.acquiredAt ? formatDate(asset.acquiredAt) : "None"}</span>
+              </div>
+
+              {asset.notes && (
+                <div className="col-span-2 pt-2.5 border-t border-border/30">
+                  <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider block mb-1">Notes</span>
+                  <p className="text-[11px] bg-muted/30 p-2 rounded-lg border border-border/20 italic leading-relaxed">
+                    {asset.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+              <Link2 className="size-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Attachments</span>
+            </div>
+            <div className="p-4 text-[11px] text-muted-foreground leading-relaxed">
+              Upload invoices, land registers, vehicle certificates, and tax records. (Coming soon)
+            </div>
+          </Card>
+
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+              <Globe className="size-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Market Sync</span>
+            </div>
+            <div className="p-4 text-[11px] text-muted-foreground leading-relaxed">
+              Real-time synchronization with gold/silver indices, crypto accounts, and stock indices. (Coming soon)
+            </div>
+          </Card>
+
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+              <Sparkles className="size-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">AI Valuation Insights</span>
+            </div>
+            <div className="p-4 text-[11px] text-muted-foreground leading-relaxed">
+              Predictive evaluations, depreciation calculations, and health insights. (Coming soon)
+            </div>
+          </Card>
+        </div>
+
+        {/* ── Right column: Chart + Timeline ───────────── */}
+        <div className="lg:col-span-2 flex flex-col gap-4 lg:h-0 lg:min-h-full">
+          {/* Chart */}
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="size-3.5 text-muted-foreground" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Valuation Trend</span>
+              </div>
+              {chartData.length > 0 && (
+                <Select value={timeRange} onValueChange={setTimeRange}>
+                  <SelectTrigger
+                    className="h-7 w-[120px] rounded-lg text-[10px] bg-transparent border-border/40"
+                    size="sm"
+                    aria-label="Select timeframe"
+                  >
+                    <SelectValue placeholder="All time" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all" className="rounded-lg text-[11px]">
+                      All time
+                    </SelectItem>
+                    <SelectItem value="90d" className="rounded-lg text-[11px]">
+                      Last 90 days
+                    </SelectItem>
+                    <SelectItem value="30d" className="rounded-lg text-[11px]">
+                      Last 30 days
+                    </SelectItem>
+                    <SelectItem value="7d" className="rounded-lg text-[11px]">
+                      Last 7 days
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+            <div className="p-4">
+              {chartData.length === 0 ? (
+                <div className="flex items-center justify-center h-[200px] text-muted-foreground text-xs">
+                  No historical valuations logged.
+                </div>
+              ) : filteredData.length === 0 ? (
+                <div className="flex items-center justify-center h-[200px] text-muted-foreground text-xs">
+                  No valuations in selected timeframe.
+                </div>
+              ) : (
                 <ChartContainer
-                  config={{
-                    value: {
-                      label: "Value",
-                      color: isAsset ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)",
-                    },
-                  }}
+                  config={chartConfig}
                   className="h-[200px] w-full"
                 >
-                  <LineChart data={chartData} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
+                  <AreaChart data={filteredData} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="fillValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop
+                          offset="5%"
+                          stopColor="var(--color-value)"
+                          stopOpacity={0.8}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="var(--color-value)"
+                          stopOpacity={0.1}
+                        />
+                      </linearGradient>
+                    </defs>
                     <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted/30" />
                     <XAxis
-                      dataKey="dateStr"
+                      dataKey="dateStrShort"
                       tickLine={false}
                       axisLine={false}
                       tickMargin={8}
+                      minTickGap={16}
                       className="text-[10px] font-medium text-muted-foreground"
                     />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tickMargin={8}
-                      className="text-[10px] font-medium text-muted-foreground"
-                      tickFormatter={(val) => val.toFixed(0)}
-                    />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={8} className="text-[10px] font-medium text-muted-foreground" tickFormatter={(val) => val.toFixed(0)} />
                     <ChartTooltip
                       cursor={false}
                       content={
                         <ChartTooltipContent
                           indicator="dot"
+                          labelFormatter={(_, payload) => {
+                            if (payload && payload.length > 0) {
+                              return payload[0].payload.dateStr
+                            }
+                            return ""
+                          }}
                           formatter={(value) => (
-                            <div className="flex flex-1 justify-between items-center leading-none gap-4">
-                              <span className="text-muted-foreground">Value</span>
-                              <span className="font-mono font-medium text-foreground tabular-nums">
-                                {formatCurrency(Number(value), asset.currency)}
-                              </span>
-                            </div>
+                            <>
+                              <div
+                                className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                style={{
+                                  backgroundColor: isAsset ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)",
+                                }}
+                              />
+                              <div className="flex flex-1 justify-between items-center leading-none gap-4">
+                                <span className="text-muted-foreground">Value</span>
+                                <span className="font-mono font-medium text-foreground tabular-nums">
+                                  {formatCurrency(Number(value), asset.currency)}
+                                </span>
+                              </div>
+                            </>
                           )}
                         />
                       }
                     />
-                    <Line
+                    <Area
                       dataKey="value"
                       type="monotone"
-                      stroke={isAsset ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"}
+                      fill="url(#fillValue)"
+                      stroke="var(--color-value)"
                       strokeWidth={2.5}
-                      dot={{ strokeWidth: 1.5, r: 3 }}
-                      activeDot={{ r: 5 }}
                       isAnimationActive={true}
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ChartContainer>
-              ) : (
-                <div className="flex items-center justify-center h-[200px] text-muted-foreground text-xs">
-                  No historical valuations logged.
-                </div>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Valuation timeline list */}
-          <Card className="rounded-2xl border border-border/40 bg-card">
-            <CardHeader className="p-5 pb-3 border-b border-border/20 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-sm font-bold">Valuation Timeline</CardTitle>
-                <CardDescription>All point-in-time value adjustments recorded.</CardDescription>
-              </div>
-              <ValuationDialog
-                assetId={asset._id.toString()}
-                assetCurrency={asset.currency}
-                trigger={
-                  <Button variant="outline" size="sm" className="rounded-xl font-semibold">
-                    <Plus className="size-4 mr-1.5" />
-                    Add Entry
-                  </Button>
-                }
-                onSuccess={() => router.refresh()}
-              />
-            </CardHeader>
-            <CardContent className="p-0">
-              {valuations.length === 0 ? (
-                <div className="text-center py-8 text-xs text-muted-foreground">
-                  No valuation entries registered yet.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-border/20 bg-muted/20 text-muted-foreground font-black uppercase tracking-wider">
-                        <th className="p-4">Date</th>
-                        <th className="p-4">Recorded Value</th>
-                        <th className="p-4">Method / Source</th>
-                        <th className="p-4">Notes</th>
-                        <th className="p-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {valuations.map((v) => (
-                        <tr key={v._id.toString()} className="border-b border-border/10 hover:bg-muted/10 transition-colors">
-                          <td className="p-4 font-semibold text-foreground">{formatDate(v.date)}</td>
-                          <td className="p-4 font-black tabular-nums">
-                            {formatCurrency(v.value / 100, asset.currency)}
-                          </td>
-                          <td className="p-4">
-                            <Badge variant="outline" className="rounded-md text-[10px] uppercase font-bold tracking-wider">
-                              {v.source}
-                            </Badge>
-                          </td>
-                          <td className="p-4 text-muted-foreground max-w-[200px] truncate">{v.notes || "—"}</td>
-                          <td className="p-4 text-right">
-                            {valuations.length > 1 ? (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="size-8 rounded-lg text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/30"
-                                disabled={isPending}
-                                onClick={() => handleDeleteValuation(v._id.toString())}
-                              >
-                                <Trash2 className="size-3.5" />
-                              </Button>
-                            ) : (
-                              <span className="text-[10px] text-muted-foreground font-medium pr-2">Baseline</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column: Details & Extensible sections */}
-        <div className="space-y-6">
-          {/* Metadata Card */}
-          <Card className="rounded-2xl border border-border/40 bg-card p-5 space-y-4">
-            <h3 className="font-bold text-sm">Item Details</h3>
-            
-            <div className="space-y-3.5">
-              <div className="flex justify-between border-b border-border/20 pb-2">
-                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Coins className="size-3.5" /> Denomination
-                </span>
-                <span className="text-xs font-bold">{asset.currency}</span>
-              </div>
-              <div className="flex justify-between border-b border-border/20 pb-2">
-                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Layers className="size-3.5" /> Valuation Method
-                </span>
-                <span className="text-xs font-bold capitalize">{asset.valuationMethod}</span>
-              </div>
-              <div className="flex justify-between border-b border-border/20 pb-2">
-                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Percent className="size-3.5" /> Ownership Weight
-                </span>
-                <span className="text-xs font-bold">{asset.ownershipPercentage}%</span>
-              </div>
-              {asset.acquiredAt && (
-                <div className="flex justify-between border-b border-border/20 pb-2">
-                  <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <Calendar className="size-3.5" /> Acquisition Date
-                  </span>
-                  <span className="text-xs font-bold">{formatDate(asset.acquiredAt)}</span>
-                </div>
-              )}
-              <div className="flex justify-between pt-1">
-                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <HandCoins className="size-3.5" /> Net Value Owned
-                </span>
-                <span className={cn(
-                  "text-sm font-black tabular-nums",
-                  isAsset ? "text-emerald-500" : "text-rose-500"
-                )}>
-                  {formatCurrency(netOwnedValue / 100, asset.currency)}
-                </span>
-              </div>
             </div>
           </Card>
 
-          {/* Notes Card */}
-          <Card className="rounded-2xl border border-border/40 bg-card p-5 space-y-3">
-            <h3 className="font-bold text-sm flex items-center gap-1.5">
-              <FileText className="size-4 text-primary" /> Notes
-            </h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {asset.notes || "No notes available for this manual item."}
-            </p>
-          </Card>
+          {/* Valuation Timeline — row-card pattern like Loan History & Timeline */}
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 flex-1 min-h-0 overflow-hidden">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="size-3.5 text-muted-foreground" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Valuation Timeline</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[10px] text-muted-foreground/60 tabular-nums">
+                  {timelineEvents.length} entr{timelineEvents.length !== 1 ? "ies" : "y"}
+                </span>
+                <ValuationDialog
+                  assetId={asset._id.toString()}
+                  assetCurrency={asset.currency}
+                  trigger={
+                    <Button variant="outline" size="sm" className="h-7 rounded-lg text-[11px] font-bold px-2.5">
+                      <PlusCircle className="size-3 mr-1" />
+                      Add Entry
+                    </Button>
+                  }
+                  onSuccess={() => router.refresh()}
+                />
+              </div>
+            </div>
 
-          {/* Attachments Card Placeholder */}
-          <Card className="rounded-2xl border border-border/40 bg-card p-5 space-y-2 opacity-75">
-            <h3 className="font-bold text-sm text-muted-foreground flex items-center gap-1.5">
-              <Link2 className="size-4" /> Attachments
-            </h3>
-            <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
-              Upload invoices, land registers, vehicle certificates, and tax records. (Coming soon)
-            </p>
-          </Card>
+            {timelineEvents.length === 0 ? (
+              <div className="text-center py-8 text-xs text-muted-foreground">
+                No valuation entries registered yet.
+              </div>
+            ) : (
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="flex flex-col divide-y divide-border/30">
+                  {timelineEvents.map((event) => (
+                    <div key={event.id} className="group flex items-center gap-3 px-4 py-3.5 hover:bg-muted/20 transition-colors">
+                      <div
+                        className={cn(
+                          "size-8 rounded-xl flex items-center justify-center border shrink-0",
+                          isAsset ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" : "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                        )}
+                      >
+                        <TrendingUp className="size-3.5" />
+                      </div>
 
-          {/* Market Sync status placeholder */}
-          <Card className="rounded-2xl border border-border/40 bg-card p-5 space-y-2 opacity-75">
-            <h3 className="font-bold text-sm text-muted-foreground flex items-center gap-1.5">
-              <Globe className="size-4" /> Market Synchronization
-            </h3>
-            <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
-              Real-time synchronization with gold/silver indices, crypto accounts, and stock indices. (Coming soon)
-            </p>
-          </Card>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-bold text-foreground">
+                            {formatCurrency(event.value / 100, asset.currency)}
+                          </span>
+                          <span className="text-[10px] font-normal text-muted-foreground">{formatDate(event.date)}</span>
+                          <Badge variant="outline" className="rounded-md text-[9px] uppercase font-bold tracking-wider h-4 px-1.5">
+                            {event.source}
+                          </Badge>
+                          {event.isBaseline && (
+                            <Badge variant="outline" className="rounded-md text-[9px] uppercase font-bold tracking-wider h-4 px-1.5 text-muted-foreground">
+                              Baseline
+                            </Badge>
+                          )}
+                        </div>
+                        {event.notes && (
+                          <p className="text-[11px] text-muted-foreground leading-relaxed truncate mt-0.5">
+                            &ldquo;{event.notes}&rdquo;
+                          </p>
+                        )}
+                      </div>
 
-          {/* AI insights status placeholder */}
-          <Card className="rounded-2xl border border-border/40 bg-card p-5 space-y-2 opacity-75">
-            <h3 className="font-bold text-sm text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="size-4" /> AI Valuation Insights
-            </h3>
-            <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
-              Predictive evaluations, depreciation calculations, and health insights for your net worth assets. (Coming soon)
-            </p>
+                      <div className="size-6 flex items-center justify-center shrink-0">
+                        {!event.isBaseline && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
+                              <AlertDialogHeader>
+                                <AlertDialogMedia>
+                                  <Trash2 />
+                                </AlertDialogMedia>
+                                <AlertDialogTitle>Delete this valuation?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This will remove this point-in-time value record. This cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="rounded-xl font-semibold">Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  variant="destructive"
+                                  className="rounded-xl font-semibold"
+                                  onClick={() => handleDeleteValuation(event.id)}
+                                >
+                                  Delete Entry
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
           </Card>
         </div>
       </div>
-
-      {/* Delete asset alert dialog */}
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent className="rounded-2xl border border-border/40 shadow-xl max-w-[400px] p-6">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this manual item and all of its historical valuation records. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex gap-2 pt-2">
-            <AlertDialogCancel className="rounded-xl flex-1 mt-0">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="rounded-xl flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold"
-              disabled={isPending}
-              onClick={(e) => {
-                e.preventDefault()
-                handleDeleteAsset()
-              }}
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

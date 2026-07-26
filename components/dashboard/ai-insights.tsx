@@ -54,7 +54,7 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
   const insights = await getFinancialInsights(userId)
 
   return (
-    <Card className={cn("relative overflow-hidden bg-card transition-colors duration-300", className)}>
+    <Card className={cn("relative overflow-hidden bg-card transition-colors duration-300 h-[400px] flex flex-col", className)}>
       {/* Top background accent */}
       <div className="absolute right-0 top-0 -z-10 translate-x-12 -translate-y-12 size-40 rounded-full bg-primary/5 blur-[40px]" />
 
@@ -68,7 +68,7 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-3 pb-6 max-h-[310px] overflow-y-auto scrollbar-hide">
+      <CardContent className="flex-1 min-h-0 overflow-y-auto scrollbar-hide flex flex-col gap-3 pb-6">
         {insights.map((ins) => {
           const style = INSIGHT_STYLES[ins.type] || INSIGHT_STYLES.info
           const Icon = style.icon

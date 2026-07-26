@@ -6,6 +6,7 @@ import { LandingHeader } from "@/components/landing/landing-header"
 import { LandingHero } from "@/components/landing/landing-hero"
 import { LandingWorkflow } from "@/components/landing/landing-workflow"
 import { LandingBento } from "@/components/landing/landing-bento"
+import { LandingWhy } from "@/components/landing/landing-why"
 import { LiveConversionShowcase } from "@/components/landing/live-conversion-showcase"
 import { LandingSecurity } from "@/components/landing/landing-security"
 import { LandingFAQ } from "@/components/landing/landing-faq"
@@ -34,9 +35,11 @@ export default function Home() {
         <main className="flex flex-col w-full">
           <LandingHero startAnimation={startReveals || !showPreloader} />
 
+          <LandingBento />
+
           <LandingWorkflow />
 
-          <LandingBento />
+          <LandingWhy />
 
           <LiveConversionShowcase />
 

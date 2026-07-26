@@ -21,9 +21,14 @@ https://dime-finance.vercel.app/
 - **Admin approval queue**: All signups default to `approved: false` and must be approved via the admin dashboard before accessing protected app routes.
 - **Dashboard Overview**: Net worth aggregation, monthly cashflow summary, interactive spending trend charts (area/pie), active budget progress trackers, and recent transaction list.
 - **Transactions Management**: Complete CRUD, advanced search parameters (type, wallet, category, date, amount, tags), bulk actions, CSV export, and parallel route modals for transaction details. Includes automatic source-to-destination transfer linking.
+- **Transaction Splitting**: Divide single transactions into multiple distinct parts with custom categories, tags, and amounts.
 - **Wallets & Multi-Currency**: Support for multiple currencies (ISO 4217), balance adjustments with logs, wallet transaction histories, and wallet archiving.
 - **Budgets**: Threshold alerts (0-100%), periods (daily, weekly, monthly, yearly), and visual progress bars.
-- **Recurring Transactions**: Automated rule processing via cron trigger (`/api/cron/process-recurring`).
+- **Recurring Platform**: Automated bill tracking, subscription alerts, and recurring income scheduling, integrated with system alerts and automated cron runner processing (`/api/cron/process-recurring`).
+- **Automation Rules Engine**: Define triggers based on merchant names, wallets, or transaction amounts to automatically categorize, tag, or split transactions as they arrive.
+- **Net Worth Dashboard**: Real-time asset valuation tracker, historical net worth trend charts, asset class categorization, and sub-asset detail pages.
+- **Loans & Lending (Personal Lending)**: Manage debts, record loan principal payments and interest, link with contacts, and view status logs.
+- **Couples & Shared Budgeting (Spaces)**: Secure organization spaces with email invites, role-based controls, and clean separation between personal and shared financial contexts.
 - **Visual Reports**: Area trend, category breakdowns, day-of-week spend bars, net savings, and budget performance charts.
 - **Category Control**: System defaults (Food, Transport, Salary, etc.), user-defined categories, and category merging (migrates transactions to target category before deletion).
 - **Settings**: Profile configuration, active session management, security dashboard, preferences, JSON/CSV data export, and full account deletion.
@@ -59,6 +64,7 @@ Avoid:
 - `/verify-email`
 - `/2fa`
 - `/pending-approval`
+- `/accept-invitation`
 - `/dashboard`
 - `/transactions`
 - `/wallets`
@@ -69,4 +75,8 @@ Avoid:
 - `/categories`
 - `/settings`
 - `/admin`
+- `/loans`
+- `/net-worth`
+- `/contacts`
+- `/notifications`
 - `/api/*`

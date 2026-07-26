@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
-import { Goal } from "@/types"
+import { Goal, Transaction } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
 export const getGoals = cache(async (userId: string): Promise<Goal[]> => {
@@ -20,4 +20,16 @@ export const getGoalById = cache(async (userId: string, id: string): Promise<Goa
   } catch {
     return null
   }
+})
+
+// Contributions are just transactions tagged with this goal's id (see contributeToGoal
+// in lib/actions/goals.ts, which logs an expense transaction with goalId set).
+export const getGoalContributions = cache(async (goalId: string): Promise<Transaction[]> => {
+  const scope = await getFinancialScope()
+  const filter = getScopeFilter(scope)
+  const transactionsColl = await getCollection<Transaction>("transactions")
+  return transactionsColl
+    .find({ ...filter, goalId })
+    .sort({ date: -1 })
+    .toArray()
 })

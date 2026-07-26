@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Label, PolarAngleAxis, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
+import { Cell, Pie, PieChart } from "recharts"
 import {
   Card,
   CardContent,
@@ -42,13 +42,6 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
     }, {} as ChartConfig)
   }, [activeData])
 
-  // Radial stacked chart expects a single-row object with category keys
-  const chartData = useMemo(() => {
-    return activeData.length > 0
-      ? [activeData.reduce((acc, item) => ({ ...acc, [getSafeKey(item.category)]: item.value }), {} as Record<string, number>)]
-      : []
-  }, [activeData])
-
   const totalExpense = useMemo(() => {
     return activeData.reduce((sum, d) => sum + d.value, 0)
   }, [activeData])
@@ -74,41 +67,60 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
             config={chartConfig}
             className="mx-auto aspect-5/3 w-full max-w-[250px]"
           >
-            <RadialBarChart
-              data={chartData}
-              endAngle={180}
-              innerRadius={80}
-              outerRadius={110}
-              cy="85%"
-            >
-              <PolarAngleAxis
-                type="number"
-                domain={[0, totalExpense]}
-                tick={false}
-              />
-              {activeData.map((item) => {
-                const safeKey = getSafeKey(item.category)
-                return (
-                  <RadialBar
-                    key={item.category}
-                    dataKey={safeKey}
-                    fill={`var(--color-${safeKey})`}
-                    stackId="a"
-                    cornerRadius={5}
-                    className="stroke-transparent stroke-2"
-                    isAnimationActive={true}
+            <PieChart>
+              <Pie
+                data={activeData}
+                dataKey="value"
+                nameKey="category"
+                cx="50%"
+                cy="85%"
+                startAngle={180}
+                endAngle={0}
+                innerRadius={80}
+                outerRadius={110}
+                cornerRadius={5}
+                paddingAngle={2}
+                minAngle={5}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(undefined)}
+              >
+                {activeData.map((entry, index) => (
+                  <Cell
+                    key={entry.category}
+                    fill={entry.color}
+                    style={{
+                      opacity: activeIndex === undefined || activeIndex === index ? 1 : 0.5,
+                      transition: "opacity 0.2s ease-in-out",
+                      outline: "none",
+                    }}
                   />
-                )
-              })}
+                ))}
+              </Pie>
+              {/* Center text positioned absolutely at the baseline center of the half-donut */}
+              <text x="50%" y="85%" textAnchor="middle" className="pointer-events-none">
+                <tspan
+                  x="50%"
+                  dy="-16"
+                  className="fill-foreground text-2xl font-bold"
+                >
+                  {formattedTotal}
+                </tspan>
+                <tspan
+                  x="50%"
+                  dy="20"
+                  className="fill-muted-foreground text-xs"
+                >
+                  Total
+                </tspan>
+              </text>
               <ChartTooltip
                 cursor={false}
                 content={
                   <ChartTooltipContent
                     hideLabel
                     formatter={(value, name, item) => {
-                      const safeName = String(name)
-                      const friendlyName = chartConfig[safeName]?.label || safeName
-                      const color = chartConfig[safeName]?.color || item.color || item.payload?.fill
+                      const categoryName = String(name)
+                      const color = item.payload?.color || item.color || item.payload?.fill
                       return (
                         <>
                           <div
@@ -118,7 +130,7 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
                             }}
                           />
                           <div className="flex flex-1 justify-between items-center leading-none">
-                            <span className="text-muted-foreground">{friendlyName}:</span>
+                            <span className="text-muted-foreground">{categoryName}:</span>
                             <span className="font-mono font-bold text-foreground ml-2">
                               {formatCurrency(Number(value) * 100, currency)}
                             </span>
@@ -129,33 +141,7 @@ export function CategoryBreakdownChart({ data, currency = "USD" }: CategoryBreak
                   />
                 }
               />
-              <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                <Label
-                  content={({ viewBox }) => {
-                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                      return (
-                        <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
-                          <tspan
-                            x={viewBox.cx}
-                            y={(viewBox.cy || 0) - 16}
-                            className="fill-foreground text-2xl font-bold"
-                          >
-                            {formattedTotal}
-                          </tspan>
-                          <tspan
-                            x={viewBox.cx}
-                            y={(viewBox.cy || 0) + 4}
-                            className="fill-muted-foreground text-xs"
-                          >
-                            Total
-                          </tspan>
-                        </text>
-                      )
-                    }
-                  }}
-                />
-              </PolarRadiusAxis>
-            </RadialBarChart>
+            </PieChart>
           </ChartContainer>
         ) : (
           <div className="flex items-center justify-center h-[250px] text-muted-foreground text-sm w-full">

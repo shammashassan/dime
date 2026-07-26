@@ -15,6 +15,11 @@ function WalletsSkeleton() {
         </div>
         <Skeleton className="h-10 w-32 rounded-xl" />
       </div>
+      <div className="flex flex-wrap gap-4">
+        {[...Array(3)].map((_, i) => (
+          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
+        ))}
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <Skeleton className="h-44 w-full rounded-2xl" />
         <Skeleton className="h-44 w-full rounded-2xl" />

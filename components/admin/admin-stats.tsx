@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { MetricCard } from "@/components/ui/metric-card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { getAdminStats } from "@/lib/queries/admin"
 import { Users, UserCheck, UserMinus, ShieldAlert, AlertTriangle } from "lucide-react"
@@ -18,62 +19,35 @@ export async function AdminStats() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Approved Users */}
-        <Card className="border border-border/40 shadow-md bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-              Approved Users
-            </CardDescription>
-            <UserCheck className="size-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.totalApproved}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Active registered accounts</p>
-          </CardContent>
-        </Card>
-
-        {/* Pending Approval */}
-        <Card className="border border-border/40 shadow-md bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-              Pending Approval
-            </CardDescription>
-            <Users className="size-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.pendingApproval}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Awaiting administrator review</p>
-          </CardContent>
-        </Card>
-
-        {/* Banned Users */}
-        <Card className="border border-border/40 shadow-md bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-              Banned Users
-            </CardDescription>
-            <UserMinus className="size-4 text-rose-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.banned}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Suspended user accounts</p>
-          </CardContent>
-        </Card>
-
-        {/* Admins */}
-        <Card className="border border-border/40 shadow-md bg-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
-              Administrators
-            </CardDescription>
-            <ShieldAlert className="size-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stats.admins}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Privileged admin accounts</p>
-          </CardContent>
-        </Card>
+      <div className="flex flex-wrap gap-4">
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={UserCheck}
+          color="#10b981"
+          label="Approved Users"
+          value={stats.totalApproved}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={Users}
+          color="#f59e0b"
+          label="Pending Approval"
+          value={stats.pendingApproval}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={UserMinus}
+          color="#f43f5e"
+          label="Banned Users"
+          value={stats.banned}
+        />
+        <MetricCard
+          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          icon={ShieldAlert}
+          color="#8b5cf6"
+          label="Administrators"
+          value={stats.admins}
+        />
       </div>
     </div>
   )

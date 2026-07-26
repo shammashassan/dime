@@ -15,7 +15,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { CalendarIcon, Loader2, Plus, Pencil, Percent } from "lucide-react"
+import { CalendarIcon, Loader2, Plus, Pencil, Percent, Layers } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -167,26 +167,31 @@ export function AssetDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button className="rounded-xl font-semibold">
-            {isEditing ? (
-              <>
-                <Pencil className="size-4 mr-1.5" />
-                Edit Item
-              </>
-            ) : (
-              <>
-                <Plus className="size-4 mr-1.5" />
-                Add Asset / Liability
-              </>
-            )}
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[440px] max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 p-6 shadow-xl">
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button className="rounded-xl font-semibold">
+              {isEditing ? (
+                <>
+                  <Pencil className="size-4 mr-1.5" />
+                  Edit Item
+                </>
+              ) : (
+                <>
+                  <Plus className="size-4 mr-1.5" />
+                  Add Asset / Liability
+                </>
+              )}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 shadow-xl p-6">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Item" : "Add Asset or Liability"}</DialogTitle>
+          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+            <Layers className="size-5 text-primary" />
+            {isEditing ? "Edit Item" : "Add Asset or Liability"}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
               ? "Update the details of your manual financial item."
@@ -200,9 +205,9 @@ export function AssetDialog({
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-3">
           <FieldGroup className="space-y-3">
-            
+
             {/* Type selection: Asset vs Liability */}
             <Field data-invalid={!!errors.kind}>
               <FieldLabel>Type</FieldLabel>
