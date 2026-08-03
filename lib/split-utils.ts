@@ -105,9 +105,6 @@ export function validateSplits(
       return "Split amounts must be positive values greater than zero."
     }
 
-    if (categoryIds.has(split.categoryId)) {
-      return "Duplicate categories are not allowed in splits. Please choose unique categories."
-    }
     categoryIds.add(split.categoryId)
 
     sum += split.amount
