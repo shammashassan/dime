@@ -66,7 +66,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
   // Rule Form State
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [priority, setPriority] = useState(0)
+  const [priority, setPriority] = useState<number | "">(0)
   const [stopProcessing, setStopProcessing] = useState(false)
   const [triggers, setTriggers] = useState<RuleTrigger[]>(["manual", "receipt", "csv_import"])
   const [conditionOperator, setConditionOperator] = useState<"and" | "or">("and")
@@ -206,7 +206,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
     const ruleData = {
       name,
       description,
-      priority,
+      priority: Number(priority) || 0,
       stopProcessing,
       triggers,
       conditionOperator,
@@ -305,7 +305,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
         }))
         const tempConfig = {
           name: name || "Unsaved Rule",
-          priority,
+          priority: Number(priority) || 0,
           stopProcessing,
           triggers,
           conditionOperator,
@@ -852,7 +852,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                       min={0}
                       max={1000}
                       value={priority}
-                      onChange={e => setPriority(Number(e.target.value))}
+                      onChange={e => setPriority(e.target.value === "" ? "" : Number(e.target.value))}
                     />
                   </Field>
                 </div>
