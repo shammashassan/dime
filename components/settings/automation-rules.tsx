@@ -331,10 +331,12 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
     try {
       const res = await startRetroactiveJobAction(ruleId)
       if (res.success) {
-        setActiveJobId(res.jobId)
+        setActiveJobId(res.jobId || null)
         setJobStatus({ status: "pending", total: 0, processed: 0, matched: 0 })
         setIsJobProgressModalOpen(true)
         setIsPreviewOpen(false)
+      } else {
+        toast.error(res.error || "Failed to start retroactive job.")
       }
     } catch (err) {
       console.error(err)

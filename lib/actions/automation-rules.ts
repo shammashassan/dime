@@ -31,199 +31,23 @@ async function verifyRuleManagementPermission() {
 }
 
 export async function createAutomationRuleAction(input: any) {
-  const scope = await verifyRuleManagementPermission()
-  const validated = automationRuleSchema.parse(input)
+  try {
+    const scope = await verifyRuleManagementPermission()
+    const validated = automationRuleSchema.parse(input)
 
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-  const rule: Omit<AutomationRule, "_id"> = {
-    userId: scope.userId,
-    organizationId: scope.organizationId,
-    name: validated.name,
-    description: validated.description,
-    status: validated.status || "active",
-    priority: validated.priority || 0,
-    stopProcessing: validated.stopProcessing || false,
-    triggers: validated.triggers,
-    conditions: validated.conditions,
-    conditionOperator: validated.conditionOperator || "and",
-    actions: validated.actions as any,
-    executionCount: 0,
-    lastExecutedAt: null,
-    lastMatchedAt: null,
-    version: 1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: scope.userId,
-    updatedBy: scope.userId,
-  }
-
-  const result = await rulesColl.insertOne(rule as AutomationRule)
-  
-  updateTag("automation-rules")
-  revalidatePath("/settings")
-  return { success: true, id: result.insertedId.toString() }
-}
-
-export async function updateAutomationRuleAction(id: string, input: any) {
-  const scope = await verifyRuleManagementPermission()
-  const validated = automationRuleSchema.partial().parse(input)
-
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-  const ruleOid = new ObjectId(id)
-
-  // Verify ownership
-  const existing = await rulesColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
-  if (!existing) throw new Error("Automation rule not found.")
-
-  const updateDoc: Partial<AutomationRule> = {
-    ...validated,
-    updatedAt: new Date(),
-    updatedBy: scope.userId,
-  }
-  if (existing.version !== undefined) {
-    updateDoc.version = existing.version + 1
-  }
-
-  await rulesColl.updateOne(
-    { _id: ruleOid, ...getScopeFilter(scope) },
-    { $set: updateDoc }
-  )
-
-  updateTag("automation-rules")
-  revalidatePath("/settings")
-  return { success: true }
-}
-
-export async function deleteAutomationRuleAction(id: string) {
-  const scope = await verifyRuleManagementPermission()
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-  const ruleOid = new ObjectId(id)
-
-  const existing = await rulesColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
-  if (!existing) throw new Error("Automation rule not found.")
-
-  await rulesColl.deleteOne({ _id: ruleOid, ...getScopeFilter(scope) })
-
-  updateTag("automation-rules")
-  revalidatePath("/settings")
-  return { success: true }
-}
-
-export async function toggleAutomationRuleAction(id: string, status: "draft" | "active" | "disabled") {
-  const scope = await verifyRuleManagementPermission()
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-  const ruleOid = new ObjectId(id)
-
-  const existing = await rulesColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
-  if (!existing) throw new Error("Automation rule not found.")
-
-  await rulesColl.updateOne(
-    { _id: ruleOid, ...getScopeFilter(scope) },
-    {
-      $set: {
-        status,
-        updatedAt: new Date(),
-        updatedBy: scope.userId,
-      },
-      $inc: { version: 1 }
-    }
-  )
-
-  updateTag("automation-rules")
-  revalidatePath("/settings")
-  return { success: true }
-}
-
-export async function installTemplateAction(templateKey: string) {
-  const scope = await verifyRuleManagementPermission()
-  const template = AUTOMATION_TEMPLATES.find(t => t.key === templateKey)
-  if (!template) throw new Error("Template not found.")
-
-  const categoriesColl = await getCollection<Category>("categories")
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-
-  // Resolve categories by name in current scope
-  const categories = await categoriesColl.find({
-    $or: [getScopeFilter(scope), { userId: null }]
-  }).toArray()
-
-  // Map template actions to actions with resolved IDs
-  const resolvedActions = template.actions.map(action => {
-    if (action.type === "assign_category" && action.categoryName) {
-      const match = categories.find(c => c.name.toLowerCase() === action.categoryName!.toLowerCase())
-      if (!match) {
-        // Fallback to "Other" or first category
-        const fallback = categories.find(c => c.name === "Other") || categories[0]
-        return { type: "assign_category", categoryId: fallback._id.toString() }
-      }
-      return { type: "assign_category", categoryId: match._id.toString() }
-    }
-    return action
-  }) as any
-
-  const rule: Omit<AutomationRule, "_id"> = {
-    userId: scope.userId,
-    organizationId: scope.organizationId,
-    name: template.name,
-    description: template.description,
-    status: "active",
-    priority: template.priority,
-    stopProcessing: template.stopProcessing,
-    triggers: template.triggers,
-    conditions: template.conditions as any,
-    conditionOperator: template.conditionOperator,
-    actions: resolvedActions,
-    executionCount: 0,
-    lastExecutedAt: null,
-    lastMatchedAt: null,
-    version: 1,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: scope.userId,
-    updatedBy: scope.userId,
-  }
-
-  const result = await rulesColl.insertOne(rule as AutomationRule)
-
-  updateTag("automation-rules")
-  revalidatePath("/settings")
-  return { success: true, id: result.insertedId.toString() }
-}
-
-export async function previewRetroactiveRulesAction(ruleId: string | null, tempRuleConfig?: any) {
-  const scope = await verifyRuleManagementPermission()
-
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-  const txColl = await getCollection<Transaction>("transactions")
-  const walletsColl = await getCollection<Wallet>("wallets")
-  const categoriesColl = await getCollection<Category>("categories")
-
-  // Load all user categories & wallets to show friendly names in diff
-  const [wallets, categories] = await Promise.all([
-    walletsColl.find(getScopeFilter(scope)).toArray(),
-    categoriesColl.find({ $or: [getScopeFilter(scope), { userId: null }] }).toArray()
-  ])
-
-  const walletMap = new Map(wallets.map(w => [w._id.toString(), w.name]))
-  const categoryMap = new Map(categories.map(c => [c._id.toString(), c.name]))
-
-  // Resolve the rule we are running preview for
-  let targetRule: AutomationRule | null = null
-  if (ruleId) {
-    targetRule = await rulesColl.findOne({ _id: new ObjectId(ruleId), ...getScopeFilter(scope) })
-  } else if (tempRuleConfig) {
-    targetRule = {
-      _id: new ObjectId(),
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const rule: Omit<AutomationRule, "_id"> = {
       userId: scope.userId,
       organizationId: scope.organizationId,
-      name: tempRuleConfig.name || "Preview Rule",
-      status: "active",
-      priority: tempRuleConfig.priority || 0,
-      stopProcessing: tempRuleConfig.stopProcessing || false,
-      triggers: tempRuleConfig.triggers || ["manual"],
-      conditions: tempRuleConfig.conditions || [],
-      conditionOperator: tempRuleConfig.conditionOperator || "and",
-      actions: tempRuleConfig.actions || [],
+      name: validated.name,
+      description: validated.description,
+      status: validated.status || "active",
+      priority: validated.priority || 0,
+      stopProcessing: validated.stopProcessing || false,
+      triggers: validated.triggers,
+      conditions: validated.conditions,
+      conditionOperator: validated.conditionOperator || "and",
+      actions: validated.actions as any,
       executionCount: 0,
       lastExecutedAt: null,
       lastMatchedAt: null,
@@ -231,11 +55,209 @@ export async function previewRetroactiveRulesAction(ruleId: string | null, tempR
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: scope.userId,
-      updatedBy: scope.userId
+      updatedBy: scope.userId,
     }
-  }
 
-  if (!targetRule) throw new Error("No rule configuration provided for preview.")
+    const result = await rulesColl.insertOne(rule as AutomationRule)
+    
+    updateTag("automation-rules")
+    revalidatePath("/settings")
+    return { success: true, id: result.insertedId.toString() }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to create rule." }
+  }
+}
+
+export async function updateAutomationRuleAction(id: string, input: any) {
+  try {
+    const scope = await verifyRuleManagementPermission()
+    // Cannot use .partial() on ZodEffects from .superRefine, but full payload is sent anyway
+    const validated = automationRuleSchema.parse(input)
+
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const ruleOid = new ObjectId(id)
+
+    // Verify ownership
+    const existing = await rulesColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
+    if (!existing) return { success: false, error: "Automation rule not found." }
+
+    const updateDoc: Partial<AutomationRule> = {
+      ...validated,
+      updatedAt: new Date(),
+      updatedBy: scope.userId,
+    }
+    if (existing.version !== undefined) {
+      updateDoc.version = existing.version + 1
+    }
+
+    await rulesColl.updateOne(
+      { _id: ruleOid, ...getScopeFilter(scope) },
+      { $set: updateDoc }
+    )
+
+    updateTag("automation-rules")
+    revalidatePath("/settings")
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to update rule." }
+  }
+}
+
+export async function deleteAutomationRuleAction(id: string) {
+  try {
+    const scope = await verifyRuleManagementPermission()
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const ruleOid = new ObjectId(id)
+
+    const existing = await rulesColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
+    if (!existing) return { success: false, error: "Automation rule not found." }
+
+    await rulesColl.deleteOne({ _id: ruleOid, ...getScopeFilter(scope) })
+
+    updateTag("automation-rules")
+    revalidatePath("/settings")
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to delete rule." }
+  }
+}
+
+export async function toggleAutomationRuleAction(id: string, status: "draft" | "active" | "disabled") {
+  try {
+    const scope = await verifyRuleManagementPermission()
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const ruleOid = new ObjectId(id)
+
+    const existing = await rulesColl.findOne({ _id: ruleOid, ...getScopeFilter(scope) })
+    if (!existing) return { success: false, error: "Automation rule not found." }
+
+    await rulesColl.updateOne(
+      { _id: ruleOid, ...getScopeFilter(scope) },
+      {
+        $set: {
+          status,
+          updatedAt: new Date(),
+          updatedBy: scope.userId,
+        },
+        $inc: { version: 1 }
+      }
+    )
+
+    updateTag("automation-rules")
+    revalidatePath("/settings")
+    return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to toggle rule." }
+  }
+}
+
+export async function installTemplateAction(templateKey: string) {
+  try {
+    const scope = await verifyRuleManagementPermission()
+    const template = AUTOMATION_TEMPLATES.find(t => t.key === templateKey)
+    if (!template) return { success: false, error: "Template not found." }
+
+    const categoriesColl = await getCollection<Category>("categories")
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+
+    // Resolve categories by name in current scope
+    const categories = await categoriesColl.find({
+      $or: [getScopeFilter(scope), { userId: null }]
+    }).toArray()
+
+    // Map template actions to actions with resolved IDs
+    const resolvedActions = template.actions.map(action => {
+      if (action.type === "assign_category" && action.categoryName) {
+        const match = categories.find(c => c.name.toLowerCase() === action.categoryName!.toLowerCase())
+        if (!match) {
+          // Fallback to "Other" or first category
+          const fallback = categories.find(c => c.name === "Other") || categories[0]
+          return { type: "assign_category", categoryId: fallback._id.toString() }
+        }
+        return { type: "assign_category", categoryId: match._id.toString() }
+      }
+      return action
+    }) as any
+
+    const rule: Omit<AutomationRule, "_id"> = {
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+      name: template.name,
+      description: template.description,
+      status: "active",
+      priority: template.priority,
+      stopProcessing: template.stopProcessing,
+      triggers: template.triggers,
+      conditions: template.conditions as any,
+      conditionOperator: template.conditionOperator,
+      actions: resolvedActions,
+      executionCount: 0,
+      lastExecutedAt: null,
+      lastMatchedAt: null,
+      version: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: scope.userId,
+      updatedBy: scope.userId,
+    }
+
+    const result = await rulesColl.insertOne(rule as AutomationRule)
+
+    updateTag("automation-rules")
+    revalidatePath("/settings")
+    return { success: true, id: result.insertedId.toString() }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to install template." }
+  }
+}
+
+export async function previewRetroactiveRulesAction(ruleId: string | null, tempRuleConfig?: any) {
+  try {
+    const scope = await verifyRuleManagementPermission()
+
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const txColl = await getCollection<Transaction>("transactions")
+    const walletsColl = await getCollection<Wallet>("wallets")
+    const categoriesColl = await getCollection<Category>("categories")
+
+    // Load all user categories & wallets to show friendly names in diff
+    const [wallets, categories] = await Promise.all([
+      walletsColl.find(getScopeFilter(scope)).toArray(),
+      categoriesColl.find({ $or: [getScopeFilter(scope), { userId: null }] }).toArray()
+    ])
+
+    const walletMap = new Map(wallets.map(w => [w._id.toString(), w.name]))
+    const categoryMap = new Map(categories.map(c => [c._id.toString(), c.name]))
+
+    // Resolve the rule we are running preview for
+    let targetRule: AutomationRule | null = null
+    if (ruleId) {
+      targetRule = await rulesColl.findOne({ _id: new ObjectId(ruleId), ...getScopeFilter(scope) })
+    } else if (tempRuleConfig) {
+      targetRule = {
+        _id: new ObjectId(),
+        userId: scope.userId,
+        organizationId: scope.organizationId,
+        name: tempRuleConfig.name || "Preview Rule",
+        status: "active",
+        priority: tempRuleConfig.priority || 0,
+        stopProcessing: tempRuleConfig.stopProcessing || false,
+        triggers: tempRuleConfig.triggers || ["manual"],
+        conditions: tempRuleConfig.conditions || [],
+        conditionOperator: tempRuleConfig.conditionOperator || "and",
+        actions: tempRuleConfig.actions || [],
+        executionCount: 0,
+        lastExecutedAt: null,
+        lastMatchedAt: null,
+        version: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: scope.userId,
+        updatedBy: scope.userId
+      }
+    }
+
+    if (!targetRule) return { success: false, error: "No rule configuration provided for preview." }
 
   // Fetch all transactions in current scope
   const transactions = await txColl.find(getScopeFilter(scope)).sort({ date: -1 }).toArray()
@@ -328,57 +350,68 @@ export async function previewRetroactiveRulesAction(ruleId: string | null, tempR
     }
   }
 
-  return { success: true, count: matches.length, matches }
+    return { success: true, count: matches.length, matches }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to preview rules." }
+  }
 }
 
 export async function startRetroactiveJobAction(ruleId: string) {
-  const scope = await verifyRuleManagementPermission()
+  try {
+    const scope = await verifyRuleManagementPermission()
 
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-  const jobsColl = await getCollection<AutomationJob>("automation_jobs")
-  const txColl = await getCollection<Transaction>("transactions")
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const jobsColl = await getCollection<AutomationJob>("automation_jobs")
+    const txColl = await getCollection<Transaction>("transactions")
 
-  const rule = await rulesColl.findOne({ _id: new ObjectId(ruleId), ...getScopeFilter(scope) })
-  if (!rule) throw new Error("Automation rule not found.")
+    const rule = await rulesColl.findOne({ _id: new ObjectId(ruleId), ...getScopeFilter(scope) })
+    if (!rule) return { success: false, error: "Automation rule not found." }
 
-  const totalTransactions = await txColl.countDocuments(getScopeFilter(scope))
+    const totalTransactions = await txColl.countDocuments(getScopeFilter(scope))
 
-  const jobDoc: Omit<AutomationJob, "_id"> = {
-    userId: scope.userId,
-    organizationId: scope.organizationId,
-    ruleId,
-    status: "pending",
-    totalTransactions,
-    processedTransactions: 0,
-    matchedTransactions: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    const jobDoc: Omit<AutomationJob, "_id"> = {
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+      ruleId,
+      status: "pending",
+      totalTransactions,
+      processedTransactions: 0,
+      matchedTransactions: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    const result = await jobsColl.insertOne(jobDoc as AutomationJob)
+    const jobId = result.insertedId
+
+    // Kick off background execution process
+    // Note: we run it asynchronously and don't await the process in the response
+    runRetroactiveJobBackground(jobId.toString(), ruleId, scope).catch(err => {
+      console.error("Background retroactive job execution failed:", err)
+    })
+
+    return { success: true, jobId: jobId.toString() }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to start retroactive job." }
   }
-
-  const result = await jobsColl.insertOne(jobDoc as AutomationJob)
-  const jobId = result.insertedId
-
-  // Kick off background execution process
-  // Note: we run it asynchronously and don't await the process in the response
-  runRetroactiveJobBackground(jobId.toString(), ruleId, scope).catch(err => {
-    console.error("Background retroactive job execution failed:", err)
-  })
-
-  return { success: true, jobId: jobId.toString() }
 }
 
 export async function getJobStatusAction(jobId: string) {
-  const scope = await verifyRuleManagementPermission()
-  const jobsColl = await getCollection<AutomationJob>("automation_jobs")
-  const job = await jobsColl.findOne({ _id: new ObjectId(jobId), ...getScopeFilter(scope) })
-  if (!job) throw new Error("Job not found.")
-  return {
-    success: true,
-    status: job.status,
-    total: job.totalTransactions,
-    processed: job.processedTransactions,
-    matched: job.matchedTransactions,
-    error: job.error,
+  try {
+    const scope = await verifyRuleManagementPermission()
+    const jobsColl = await getCollection<AutomationJob>("automation_jobs")
+    const job = await jobsColl.findOne({ _id: new ObjectId(jobId), ...getScopeFilter(scope) })
+    if (!job) return { success: false, error: "Job not found." }
+    return {
+      success: true,
+      status: job.status,
+      total: job.totalTransactions,
+      processed: job.processedTransactions,
+      matched: job.matchedTransactions,
+      error: job.error,
+    }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to get job status." }
   }
 }
 
@@ -555,8 +588,12 @@ async function runRetroactiveJobBackground(jobId: string, ruleId: string, scope:
 }
 
 export async function getAutomationRulesAction() {
-  const scope = await getFinancialScope()
-  const rulesColl = await getCollection<AutomationRule>("automation_rules")
-  const rules = await rulesColl.find(getScopeFilter(scope)).sort({ priority: -1 }).toArray()
-  return { success: true, rules: serializeData(rules) }
+  try {
+    const scope = await getFinancialScope()
+    const rulesColl = await getCollection<AutomationRule>("automation_rules")
+    const rules = await rulesColl.find(getScopeFilter(scope)).sort({ priority: -1 }).toArray()
+    return { success: true, rules: serializeData(rules) }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to load rules.", rules: [] }
+  }
 }
