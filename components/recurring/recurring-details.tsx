@@ -269,7 +269,7 @@ export function RecurringDetails({
       {/* ── Metric Cards ── */}
       <div className="flex flex-wrap gap-4">
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={rule.type === "income" ? TrendingUp : TrendingDown}
           color={accent}
           label="Amount"
@@ -277,14 +277,14 @@ export function RecurringDetails({
           valueClassName={rule.type === "income" ? "text-emerald-600 dark:text-emerald-400" : ""}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Calendar}
           color="#3b82f6"
           label="Next Due"
           value={formatDate(rule.nextDueDate)}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={RefreshCw}
           color="#f59e0b"
           label="Frequency"
@@ -292,7 +292,7 @@ export function RecurringDetails({
           valueClassName="capitalize"
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Clock}
           color="#10b981"
           label="Avg. Amount"
@@ -429,7 +429,7 @@ export function RecurringDetails({
 
         {/* ── Right column: History Timeline ── */}
         <div className="lg:col-span-2 lg:h-0 lg:min-h-full flex flex-col gap-4">
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 flex-1 min-h-0 overflow-hidden">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 max-h-[480px] lg:max-h-none flex-1 min-h-0 overflow-hidden">
             <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Clock className="size-3.5 text-muted-foreground" />
@@ -664,7 +664,7 @@ export function RecurringDetails({
           </Card>
 
           {/* Trend & Reliability Card */}
-          <Card className="rounded-2xl border border-border/40 shadow-sm p-4 h-[160px] flex flex-col justify-between shrink-0">
+          <Card className="rounded-2xl border border-border/40 shadow-sm p-4 h-40 flex flex-col justify-between shrink-0">
             <div className="flex items-center justify-between border-b border-border/30 pb-2 shrink-0">
               <div className="flex items-center gap-2">
                 <Activity className="size-4" style={{ color: accent }} />
@@ -707,7 +707,7 @@ export function RecurringDetails({
                             formatter={(value) => (
                               <>
                                 <div
-                                  className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                  className="h-2.5 w-2.5 shrink-0 rounded-xs"
                                   style={{
                                     backgroundColor: accent,
                                   }}

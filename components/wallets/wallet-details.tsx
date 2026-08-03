@@ -257,14 +257,14 @@ export function WalletDetails({
             {/* ── Metric Cards ── */}
             <div className="flex flex-wrap gap-4">
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={Icon}
                     color={accent}
                     label="Current Balance"
                     value={formatCurrency(wallet.balance, wallet.currency)}
                 />
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={netFlow >= 0 ? ArrowDownRight : ArrowUpRight}
                     color={netFlow >= 0 ? "#10b981" : "#f43f5e"}
                     label="Net Flow"
@@ -272,14 +272,14 @@ export function WalletDetails({
                     valueClassName={netFlow >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
                 />
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={ArrowDownRight}
                     color="#10b981"
                     label="Income"
                     value={formatCurrency(totalIncome, wallet.currency)}
                 />
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={ArrowUpRight}
                     color="#f43f5e"
                     label="Expense"
@@ -402,7 +402,7 @@ export function WalletDetails({
 
                 {/* ── Right column: Transactions Timeline ── */}
                 <div className="lg:col-span-2 flex flex-col gap-4">
-                    <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 h-[350px] overflow-hidden">
+                    <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 max-h-[380px] lg:max-h-none lg:h-[350px] overflow-hidden">
                         <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
                                 <Receipt className="size-3.5 text-muted-foreground" />

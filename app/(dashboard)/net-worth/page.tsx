@@ -3,6 +3,7 @@ import { requireApprovedUser } from "@/lib/auth-guard"
 import { getAllWalletsIncludingArchived } from "@/lib/queries/wallets"
 import { getLoans, getActiveBaseCurrency } from "@/lib/queries/loans"
 import { getAssetsAndValuationsForScope } from "@/lib/queries/assets"
+import { getPortfolioHoldings } from "@/lib/queries/investments"
 import { getCurrencyConverter } from "@/lib/currency"
 import { calculateNetWorthHistory } from "@/lib/calculations/net-worth"
 import { generateNetWorthOverviewViewModel } from "@/lib/calculations/net-worth-viewmodel"
@@ -13,8 +14,6 @@ import { subMonths, startOfMonth, eachDayOfInterval, startOfDay } from "date-fns
 import { NetWorthOverview } from "@/components/net-worth/net-worth-overview"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Wallet, Loan, LoanRepayment, Asset } from "@/types"
-
-
 
 function NetWorthSkeleton() {
   return (
@@ -48,11 +47,12 @@ async function NetWorthContent() {
   const scope = await getFinancialScope()
   const filter = getScopeFilter(scope)
 
-  const [wallets, loans, { assets, valuations }, baseCurrency] = await Promise.all([
+  const [wallets, loans, { assets, valuations }, baseCurrency, investmentHoldings] = await Promise.all([
     getAllWalletsIncludingArchived(userId),
     getLoans(),
     getAssetsAndValuationsForScope(),
     getActiveBaseCurrency(),
+    getPortfolioHoldings(),
   ])
 
   const loanIds = loans.map((l) => l._id.toString())
@@ -75,6 +75,7 @@ async function NetWorthContent() {
     transactions,
     assets,
     valuations,
+    investmentHoldings,
   })
 
   const sourceCurrencies = Array.from(
@@ -100,6 +101,7 @@ async function NetWorthContent() {
     repayments: serialized.repayments,
     assets: serialized.assets,
     valuations: serialized.valuations,
+    investmentHoldings: serialized.investmentHoldings,
     convert,
     dates,
   })
@@ -111,6 +113,7 @@ async function NetWorthContent() {
     valuations: serialized.valuations,
     repayments: serialized.repayments,
     transactions: serialized.transactions,
+    investmentHoldings: serialized.investmentHoldings,
     convert,
     baseCurrency,
     history,

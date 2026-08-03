@@ -5,7 +5,7 @@ import React from "react"
 interface MetricCardProps {
   icon: React.ElementType
   color: string
-  label: string
+  label: React.ReactNode
   value: React.ReactNode
   valueClassName?: string
   className?: string
@@ -21,7 +21,7 @@ export function MetricCard({ icon: Icon, color, label, value, valueClassName, cl
           <Icon className="size-[18px]" />
         </div>
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 truncate">{label}</p>
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 truncate">{label}</div>
           <div className={cn("text-xl font-black tabular-nums leading-tight truncate", valueClassName)}>{value}</div>
         </div>
       </CardContent>

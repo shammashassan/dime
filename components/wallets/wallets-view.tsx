@@ -84,18 +84,18 @@ function CardChip() {
     <div className="size-5 rounded-sm border border-amber-400/30 bg-amber-400/10 relative overflow-hidden flex items-center justify-center shrink-0">
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-amber-400/25" />
       <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-amber-400/25" />
-      <div className="size-2.5 rounded-[2px] border border-amber-400/30 bg-amber-400/10 z-10" />
+      <div className="size-2.5 rounded-xs border border-amber-400/30 bg-amber-400/10 z-10" />
     </div>
   )
 }
 
 function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: any) {
   return (
-    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]", className)} style={style}>
+    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-50", className)} style={style}>
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: `radial-gradient(120% 100% at 0% 0%, ${color}, transparent 60%)` }} />
       <CardContent className="relative p-4 flex items-center gap-3">
         <div className="size-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: color + "18", color }}>
-          <Icon className="size-[18px]" />
+          <Icon className="size-4.5" />
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 truncate">{label}</p>
@@ -198,7 +198,7 @@ export function WalletsView({ wallets }: WalletsViewProps) {
   const renderActiveCard = (w: Wallet) => {
     const Icon = iconMap[w.icon] || WalletIcon
     const isOwner = session?.user && w.userId === session.user.id
-    
+
     return (
       <Card
         key={w._id.toString()}
@@ -206,7 +206,7 @@ export function WalletsView({ wallets }: WalletsViewProps) {
         onClick={() => router.push(`/wallets/${w._id.toString()}`)}
       >
         {/* Top accent */}
-        <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: w.color }} />
+        <div className="h-0.75 w-full shrink-0" style={{ backgroundColor: w.color }} />
 
         {/* Header */}
         <CardHeader className="flex items-center justify-between gap-2 px-4 pt-4 pb-3 flex-row">
@@ -245,10 +245,12 @@ export function WalletsView({ wallets }: WalletsViewProps) {
           <div className="flex items-center gap-0.5">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                  onClick={() => router.push(`/wallets/${w._id.toString()}`)}>
-                  <Eye className="size-3" />
-                </Button>
+                <span>
+                  <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                    onClick={() => router.push(`/wallets/${w._id.toString()}`)}>
+                    <Eye className="size-3" />
+                  </Button>
+                </span>
               </TooltipTrigger>
               <TooltipContent side="top" className="rounded-xl font-medium">
                 View transactions
@@ -258,10 +260,12 @@ export function WalletsView({ wallets }: WalletsViewProps) {
             {isOwner && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                    onClick={() => setEditingWallet(w)}>
-                    <Edit className="size-3" />
-                  </Button>
+                  <span>
+                    <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                      onClick={() => setEditingWallet(w)}>
+                      <Edit className="size-3" />
+                    </Button>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="rounded-xl font-medium">
                   Edit wallet
@@ -272,10 +276,12 @@ export function WalletsView({ wallets }: WalletsViewProps) {
             {isOwner && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                    onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}>
-                    <Archive className="size-3" />
-                  </Button>
+                  <span>
+                    <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                      onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}>
+                      <Archive className="size-3" />
+                    </Button>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="rounded-xl font-medium">
                   Archive wallet
@@ -286,11 +292,13 @@ export function WalletsView({ wallets }: WalletsViewProps) {
           {isOwner && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon"
-                  className="size-6 rounded-md text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-100 translate-x-0 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 lg:translate-x-1 lg:group-hover:translate-x-0"
-                  onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
-                  <Trash2 className="size-3" />
-                </Button>
+                <span>
+                  <Button variant="ghost" size="icon"
+                    className="size-6 rounded-md text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-100 translate-x-0 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 lg:translate-x-1 lg:group-hover:translate-x-0"
+                    onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
+                    <Trash2 className="size-3" />
+                  </Button>
+                </span>
               </TooltipTrigger>
               <TooltipContent side="top" className="rounded-xl font-medium">
                 Delete wallet
@@ -306,11 +314,15 @@ export function WalletsView({ wallets }: WalletsViewProps) {
     <div className="flex flex-col gap-7 w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0"><Landmark className="size-6" /></div>
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <WalletIcon className="size-6" />
+          </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Wallets</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Manage your bank accounts, cards, and cash.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Wallets</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Manage your bank accounts, credit cards, cash, and digital wallets.
+            </p>
           </div>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -335,31 +347,28 @@ export function WalletsView({ wallets }: WalletsViewProps) {
         <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
           <button
             onClick={() => setActiveTab("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "all"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             All ({tabCounts.all})
           </button>
           <button
             onClick={() => setActiveTab("active")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "active"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "active"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Active ({tabCounts.active})
           </button>
           <button
             onClick={() => setActiveTab("archived")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "archived"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "archived"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Archived ({tabCounts.archived})
           </button>
@@ -420,7 +429,7 @@ export function WalletsView({ wallets }: WalletsViewProps) {
             return (
               <Card key={w._id.toString()} className="relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/40 bg-muted/30 flex flex-col cursor-pointer h-full"
                 onClick={() => router.push(`/wallets/${w._id.toString()}`)}>
-                <div className="h-[3px] w-full bg-muted shrink-0" />
+                <div className="h-0.75 w-full bg-muted shrink-0" />
                 <CardHeader className="flex items-center gap-2.5 px-4 py-3 flex-row justify-start">
                   <div className="size-9 rounded-xl flex items-center justify-center shrink-0 bg-muted/60 text-muted-foreground"><Icon className="size-4.5" /></div>
                   <div className="min-w-0">
@@ -440,10 +449,12 @@ export function WalletsView({ wallets }: WalletsViewProps) {
                   </Button>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10"
-                        onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
-                        <Trash2 className="size-3" />
-                      </Button>
+                      <span>
+                        <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10"
+                          onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
+                          <Trash2 className="size-3" />
+                        </Button>
+                      </span>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="rounded-xl font-medium">
                       Delete wallet
@@ -472,8 +483,8 @@ export function WalletsView({ wallets }: WalletsViewProps) {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingWallet} onOpenChange={(open) => !open && setEditingWallet(null)}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
-          <DialogHeader><DialogTitle className="text-xl font-extrabold">Edit Wallet</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto min-w-0">
+          <DialogHeader><DialogTitle>Edit Wallet</DialogTitle></DialogHeader>
           <div className="py-2">{editingWallet && <WalletForm initialWallet={editingWallet} onSuccess={() => setEditingWallet(null)} />}</div>
         </DialogContent>
       </Dialog>

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { PlusCircle, RefreshCw, Zap } from "lucide-react"
 
-export function QuickActionsCard({ assets, onRefresh }: { assets: Asset[]; onRefresh: () => void }) {
+export function QuickActionsCard({ assets }: { assets: Asset[] }) {
   const [assetOpen, setAssetOpen] = React.useState(false)
   const [assetKind, setAssetKind] = React.useState<"asset" | "liability">("asset")
   const [selectedAssetId, setSelectedAssetId] = React.useState<string>("")
@@ -79,7 +79,6 @@ export function QuickActionsCard({ assets, onRefresh }: { assets: Asset[]; onRef
                 assetCurrency={selectedAsset.currency}
                 onSuccess={() => {
                   setSelectedAssetId("")
-                  onRefresh()
                 }}
                 trigger={
                   <Button className="w-full rounded-xl text-xs font-bold h-9 gap-1.5 cursor-pointer active:scale-95 transition-all">
@@ -110,7 +109,6 @@ export function QuickActionsCard({ assets, onRefresh }: { assets: Asset[]; onRef
           initialAsset={{ kind: assetKind } as Asset}
           onSuccess={() => {
             setAssetOpen(false)
-            onRefresh()
           }}
         />
       </div>

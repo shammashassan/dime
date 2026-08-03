@@ -119,7 +119,7 @@ export function LandingWhy() {
                       <Icon className="size-6" />
                     </div>
                     <div className="min-w-0 text-left">
-                      <h4 className="truncate text-base font-bold text-foreground">{module.title}</h4>
+                      <h3 className="truncate text-base font-bold text-foreground">{module.title}</h3>
                       <p className="line-clamp-1 text-sm text-muted-foreground mt-0.5">{module.desc}</p>
                     </div>
                   </div>

@@ -34,7 +34,7 @@ function GSAPSync() {
     }
 
     gsap.ticker.add(onTick)
-    gsap.ticker.lagSmoothing(0)
+    gsap.ticker.lagSmoothing(500, 33)
 
     return () => {
       gsap.ticker.remove(onTick)

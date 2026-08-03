@@ -1,4 +1,4 @@
-import { Wallet, Transaction, Loan, LoanRepayment, Asset, AssetValuation, NetWorthBreakdown, HistoricalNetWorthPoint } from "@/types";
+import { Wallet, Transaction, Loan, LoanRepayment, Asset, AssetValuation, NetWorthBreakdown, HistoricalNetWorthPoint, InvestmentHolding } from "@/types";
 
 // Reusable backtracking helpers
 export function getWalletBalanceAt(
@@ -75,9 +75,10 @@ export function calculateCurrentNetWorth(params: {
   wallets: Wallet[];
   loans: Loan[];
   assets: Asset[];
+  investmentHoldings?: InvestmentHolding[];
   convert: (amount: number, from: string) => number;
 }): NetWorthBreakdown {
-  const { wallets, loans, assets, convert } = params;
+  const { wallets, loans, assets, investmentHoldings, convert } = params;
 
   let totalAssets = 0;
   let totalLiabilities = 0;
@@ -104,7 +105,12 @@ export function calculateCurrentNetWorth(params: {
   for (const w of wallets) {
     if (w.isArchived) continue;
     
-    const balance = w.balance;
+    let balance = w.balance;
+    if (w.type === "investment" && investmentHoldings) {
+      const wHoldings = investmentHoldings.filter(h => h.walletId === w._id.toString() && h.status === "active");
+      balance = wHoldings.reduce((sum, h) => sum + (h.quantity * h.currentPrice), 0);
+    }
+    
     const converted = convert(balance, w.currency);
 
     if (w.type === "credit_card") {
@@ -178,10 +184,11 @@ export function calculateNetWorthHistory(params: {
   repayments: LoanRepayment[];
   assets: Asset[];
   valuations: AssetValuation[];
+  investmentHoldings?: InvestmentHolding[];
   convert: (amount: number, from: string) => number;
   dates: Date[];
 }): HistoricalNetWorthPoint[] {
-  const { wallets, transactions, loans, repayments, assets, valuations, convert, dates } = params;
+  const { wallets, transactions, loans, repayments, assets, valuations, investmentHoldings, convert, dates } = params;
 
   // Sort transactions descending for faster backtracking
   const sortedTxs = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -211,6 +218,7 @@ export function calculateNetWorthHistory(params: {
       wallets: dateWallets,
       loans: dateLoans,
       assets: dateAssets,
+      investmentHoldings,
       convert
     });
 

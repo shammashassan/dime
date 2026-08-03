@@ -14,7 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Loader2 } from "lucide-react"
+import { CalendarIcon, Loader2, Sun, CalendarRange, CalendarDays } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { toast } from "sonner"
 
@@ -235,27 +236,33 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
             control={control}
             name="period"
             render={({ field }) => (
-              <ToggleGroup
-                type="single"
-                value={field.value}
-                onValueChange={(val) => val && field.onChange(val)}
-                variant="outline"
-                spacing={0}
-                className="w-full flex"
-              >
-                <ToggleGroupItem value="daily" className="flex-1 rounded-none rounded-l-3xl py-2 text-xs font-semibold">
-                  Daily
-                </ToggleGroupItem>
-                <ToggleGroupItem value="weekly" className="flex-1 rounded-none py-2 text-xs font-semibold">
-                  Weekly
-                </ToggleGroupItem>
-                <ToggleGroupItem value="monthly" className="flex-1 rounded-none py-2 text-xs font-semibold">
-                  Monthly
-                </ToggleGroupItem>
-                <ToggleGroupItem value="yearly" className="flex-1 rounded-none rounded-r-3xl py-2 text-xs font-semibold">
-                  Yearly
-                </ToggleGroupItem>
-              </ToggleGroup>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                  {[
+                    { value: "daily", label: "Daily", icon: Sun },
+                    { value: "weekly", label: "Weekly", icon: CalendarRange },
+                    { value: "monthly", label: "Monthly", icon: CalendarIcon },
+                    { value: "yearly", label: "Yearly", icon: CalendarDays },
+                  ].map((p) => {
+                    const Icon = p.icon
+                    const isSelected = field.value === p.value
+                    return (
+                      <button
+                        key={p.value}
+                        type="button"
+                        onClick={() => field.onChange(p.value)}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-md transition-all text-center cursor-pointer min-w-0",
+                          isSelected
+                            ? "bg-background text-foreground shadow-xs font-bold"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="size-3.5 shrink-0" />
+                        <span className="truncate">{p.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
             )}
           />
           {errors.period && <FieldError>{(errors.period as any).message}</FieldError>}

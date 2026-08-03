@@ -147,7 +147,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
         {filteredData.length > 0 ? (
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
+            className="aspect-auto h-62.5 w-full"
           >
             <AreaChart data={filteredData}>
               <defs>
@@ -203,7 +203,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                       return (
                         <>
                           <div
-                            className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                            className="h-2.5 w-2.5 shrink-0 rounded-xs"
                             style={{
                               backgroundColor: colorVar,
                             }}
@@ -240,7 +240,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
             </AreaChart>
           </ChartContainer>
         ) : (
-          <div className="flex items-center justify-center h-[250px] text-muted-foreground text-sm">
+          <div className="flex items-center justify-center h-62.5 text-muted-foreground text-sm">
             No transaction trend data available.
           </div>
         )}

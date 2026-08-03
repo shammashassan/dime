@@ -188,7 +188,7 @@ export function ContactsView({ contacts }: ContactsViewProps) {
             <Users className="size-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Contacts Directory</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Contacts Directory</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Manage your personal contacts and track receivables or payables per contact.
             </p>

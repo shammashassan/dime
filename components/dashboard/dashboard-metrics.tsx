@@ -6,6 +6,7 @@ import { getPreferences } from "@/lib/queries/preferences"
 import { calculateCurrentNetWorth } from "@/lib/calculations/net-worth"
 import { getCurrencyConverter } from "@/lib/currency"
 import { formatCurrency } from "@/lib/utils"
+import { getPortfolioHoldings } from "@/lib/queries/investments"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Landmark, ArrowUpRight, ArrowDownRight, Wallet, TrendingUp, TrendingDown } from "lucide-react"
 
@@ -15,13 +16,14 @@ interface DashboardMetricsProps {
 
 export async function DashboardMetrics({ userId }: DashboardMetricsProps) {
   // Parallel fetching for all required elements to construct the true net worth
-  const [wallets, loans, { assets }, baseCurrency, trend, prefs] = await Promise.all([
+  const [wallets, loans, { assets }, baseCurrency, trend, prefs, investmentHoldings] = await Promise.all([
     getAllWalletsIncludingArchived(userId),
     getLoans(),
     getAssetsAndValuationsForScope(),
     getActiveBaseCurrency(),
     getIncomeExpenseTrend(userId, 2),
-    getPreferences(userId)
+    getPreferences(userId),
+    getPortfolioHoldings()
   ])
 
   const targetCurrency = baseCurrency || prefs.defaultCurrency || "USD"
@@ -41,6 +43,7 @@ export async function DashboardMetrics({ userId }: DashboardMetricsProps) {
     wallets,
     loans,
     assets,
+    investmentHoldings,
     convert
   })
 

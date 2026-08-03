@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Loader2, Repeat, CreditCard, FileText } from "lucide-react"
+import { CalendarIcon, Loader2, Repeat, CreditCard, FileText, ArrowDownRight, ArrowUpRight } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -201,7 +201,7 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
           control={control}
           name="kind"
           render={({ field }) => (
-            <div className="grid grid-cols-3 gap-2 bg-muted/30 p-1.5 rounded-2xl border border-border/50">
+            <div className="grid grid-cols-3 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
               {[
                 { id: "recurring", label: "Recurring", icon: Repeat },
                 { id: "subscription", label: "Subscription", icon: CreditCard },
@@ -215,19 +215,18 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
                     type="button"
                     onClick={() => {
                       field.onChange(k.id)
-                      // Force subscriptions and bills to be expenses by default
                       if (k.id !== "recurring") {
                         setValue("type", "expense", { shouldDirty: true })
                       }
                     }}
                     className={cn(
-                      "flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 border",
+                      "flex items-center justify-center gap-1.5 py-2 px-3 rounded-md transition-all text-center cursor-pointer",
                       isActive
-                        ? "bg-card border-border/60 shadow-sm text-foreground scale-[1.02]"
-                        : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                        ? "bg-background text-foreground shadow-xs font-bold"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    <Icon className={cn("size-4", isActive && "text-primary")} />
+                    <Icon className="size-3.5 shrink-0" />
                     {k.label}
                   </button>
                 )
@@ -260,21 +259,31 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
               control={control}
               name="type"
               render={({ field }) => (
-                <ToggleGroup
-                  type="single"
-                  value={field.value}
-                  onValueChange={(val) => val && field.onChange(val)}
-                  variant="outline"
-                  spacing={0}
-                  className="w-full flex"
-                >
-                  <ToggleGroupItem value="expense" className="flex-1 rounded-none rounded-l-3xl py-2 text-xs font-semibold">
-                    Expense
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="income" className="flex-1 rounded-none rounded-r-3xl py-2 text-xs font-semibold">
-                    Income
-                  </ToggleGroupItem>
-                </ToggleGroup>
+                <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                  {[
+                    { value: "expense", label: "Expense", icon: ArrowDownRight },
+                    { value: "income", label: "Income", icon: ArrowUpRight },
+                  ].map((t) => {
+                    const Icon = t.icon
+                    const isSelected = field.value === t.value
+                    return (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => field.onChange(t.value)}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 py-2 px-3 rounded-md transition-all text-center cursor-pointer",
+                          isSelected
+                            ? "bg-background text-foreground shadow-xs font-bold"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="size-3.5 shrink-0" />
+                        {t.label}
+                      </button>
+                    )
+                  })}
+                </div>
               )}
             />
           </Field>

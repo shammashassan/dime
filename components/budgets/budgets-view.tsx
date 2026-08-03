@@ -307,11 +307,15 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
   return (
     <div className="flex flex-col gap-7 w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0"><PiggyBank className="size-6" /></div>
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <PiggyBank className="size-6" />
+          </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Budgets</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Set spending limits and track performance.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Budgets</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Set spending limits per category and track your progress throughout the month.
+            </p>
           </div>
         </div>
         <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">
@@ -381,8 +385,8 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
           </Select>
         </div>
 
-        <div className="flex w-full sm:w-auto items-center gap-3">
-          <InputGroup className="w-full sm:w-60">
+        <div className="flex w-full sm:w-auto items-center gap-3 min-w-0">
+          <InputGroup className="w-full sm:w-60 min-w-0">
             <InputGroupInput
               placeholder="Search by name..."
               value={search}
@@ -435,15 +439,15 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
       )}
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
-          <DialogHeader><DialogTitle className="text-xl font-extrabold">Create Budget</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto min-w-0">
+          <DialogHeader><DialogTitle>Create Budget</DialogTitle></DialogHeader>
           <div className="py-2"><BudgetForm categories={categories} wallets={wallets} onSuccess={() => setIsCreateOpen(false)} /></div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!editingBudget} onOpenChange={(open) => !open && setEditingBudget(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
-          <DialogHeader><DialogTitle className="text-xl font-extrabold">Edit Budget</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto min-w-0">
+          <DialogHeader><DialogTitle>Edit Budget</DialogTitle></DialogHeader>
           <div className="py-2">
             {editingBudget && <BudgetForm categories={categories} wallets={wallets} initialBudget={editingBudget} onSuccess={() => setEditingBudget(null)} />}
           </div>

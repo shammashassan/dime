@@ -141,7 +141,7 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
         {filteredData.length > 0 ? (
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-[250px] w-full"
+            className="aspect-auto h-62.5 w-full"
           >
             <AreaChart data={filteredData}>
               <defs>
@@ -177,7 +177,7 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
                     formatter={(value) => (
                       <>
                         <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                          className="h-2.5 w-2.5 shrink-0 rounded-xs"
                           style={{
                             backgroundColor: "var(--chart-1)",
                           }}
@@ -203,7 +203,7 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
             </AreaChart>
           </ChartContainer>
         ) : (
-          <div className="flex items-center justify-center h-[250px] text-muted-foreground text-sm">
+          <div className="flex items-center justify-center h-62.5 text-muted-foreground text-sm">
             No history data available for this wallet.
           </div>
         )}

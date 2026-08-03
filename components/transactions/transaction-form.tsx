@@ -17,11 +17,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Loader2, Sparkles, Trash2, Plus } from "lucide-react"
+import { CalendarIcon, Loader2, Sparkles, Trash2, Plus, ArrowDownRight, ArrowUpRight, ArrowLeftRight } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { ReceiptScannerModal } from "@/components/transactions/receipt-scanner-modal"
 import { generateSplitId, validateSplits } from "@/lib/split-utils"
+import { cn } from "@/lib/utils"
 
 const clientSchema = z
   .object({
@@ -458,9 +459,9 @@ export function TransactionForm({
   return (
     <>
       {!isEditing && (
-        <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-primary/10 gap-4 mb-6">
+        <div className="flex items-center justify-between p-3.5 bg-muted/30 rounded-xl border border-border/40 gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Sparkles className="size-4 animate-pulse" />
             </div>
             <div className="text-left">
@@ -473,7 +474,7 @@ export function TransactionForm({
             variant="outline"
             size="sm"
             onClick={() => setScannerOpen(true)}
-            className="rounded-lg font-bold border-primary/20 text-primary hover:bg-primary/5 cursor-pointer"
+            className="font-semibold cursor-pointer"
           >
             Scan Receipt
           </Button>
@@ -495,29 +496,32 @@ export function TransactionForm({
               control={control}
               name="type"
               render={({ field }) => (
-                <ToggleGroup
-                  type="single"
-                  value={field.value}
-                  onValueChange={(val) => {
-                    if (val) {
-                      field.onChange(val)
-                      // If transfer, target categories might change, let's keep it clean
-                    }
-                  }}
-                  variant="outline"
-                  spacing={0}
-                  className="w-full flex"
-                >
-                  <ToggleGroupItem value="expense" className="flex-1 rounded-none rounded-l-3xl py-2 text-xs font-semibold">
-                    Expense
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="income" className="flex-1 rounded-none py-2 text-xs font-semibold">
-                    Income
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="transfer" className="flex-1 rounded-none rounded-r-3xl py-2 text-xs font-semibold">
-                    Transfer
-                  </ToggleGroupItem>
-                </ToggleGroup>
+                <div className="grid grid-cols-3 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                  {[
+                    { value: "expense", label: "Expense", icon: ArrowDownRight },
+                    { value: "income", label: "Income", icon: ArrowUpRight },
+                    { value: "transfer", label: "Transfer", icon: ArrowLeftRight },
+                  ].map((t) => {
+                    const Icon = t.icon
+                    const isSelected = field.value === t.value
+                    return (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => field.onChange(t.value)}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 py-2 px-3 rounded-md transition-all text-center cursor-pointer",
+                          isSelected
+                            ? "bg-background text-foreground shadow-xs font-bold"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="size-3.5 shrink-0" />
+                        {t.label}
+                      </button>
+                    )
+                  })}
+                </div>
               )}
             />
           </Field>

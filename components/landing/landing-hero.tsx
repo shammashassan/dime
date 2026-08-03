@@ -205,7 +205,7 @@ export function LandingHero({ startAnimation }: { startAnimation: boolean }) {
         <Card className="floating-card rounded-2xl border border-border/50 bg-card/65 shadow-xl backdrop-blur-md text-left">
           <CardHeader className="p-6 pb-4">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2 py-0.5 rounded-full bg-primary/10 flex items-center gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/30 flex items-center gap-1">
                 <Sparkles className="size-3" /> AI Extracted
               </span>
               <span className="text-xs text-muted-foreground">Just now</span>

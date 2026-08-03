@@ -29,16 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { 
-  Target, 
-  PiggyBank, 
-  Car, 
-  Home, 
-  Gift, 
-  Gamepad2, 
-  Plane, 
-  Laptop 
-} from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { CalendarIcon, Target, PiggyBank, Car, Home, Gift, Gamepad2, Plane, Laptop } from "lucide-react"
+import { format } from "date-fns"
 
 const ICONS = ["Target", "PiggyBank", "Car", "Home", "Gift", "Gamepad2", "Plane", "Laptop"]
 const COLORS = ["#8b5cf6", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#06b6d4", "#64748b"]
@@ -157,9 +151,9 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-border/50 shadow-2xl p-6 sm:p-8">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
+          <DialogTitle>
             {isEditing ? "Edit Savings Goal" : "Create Savings Goal"}
           </DialogTitle>
         </DialogHeader>
@@ -241,20 +235,35 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
               </Field>
 
               <Field data-invalid={!!errors.targetDate}>
-                <FieldLabel htmlFor="target-date">Target Date</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput
-                    id="target-date"
-                    type="date"
-                    value={formattedDate}
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setValue("targetDate", new Date(e.target.value), { shouldDirty: true })
-                      }
-                    }}
-                    aria-invalid={!!errors.targetDate}
-                  />
-                </InputGroup>
+                <FieldLabel>Target Date</FieldLabel>
+                <Controller
+                  control={control}
+                  name="targetDate"
+                  render={({ field }) => (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          className="w-full justify-start font-normal min-w-0"
+                        >
+                          <CalendarIcon className="mr-2 size-4 text-muted-foreground shrink-0" />
+                          <span className="truncate flex-1 text-left">
+                            {field.value ? format(new Date(field.value), "PP") : "Pick a date"}
+                          </span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? new Date(field.value) : undefined}
+                          onSelect={(val) => val && field.onChange(val)}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                />
                 {errors.targetDate && <FieldError>{(errors.targetDate as any).message}</FieldError>}
               </Field>
             </div>

@@ -102,6 +102,21 @@ export async function initDatabase() {
     await watchlistItems.createIndex({ symbol: 1 })
     await watchlistItems.createIndex({ assetType: 1 })
 
+    // Shared Expenses & Settlements Indexes
+    const sharedExpenses = db.collection("shared_expenses")
+    await sharedExpenses.createIndex({ userId: 1, date: -1 })
+    await sharedExpenses.createIndex({ organizationId: 1, date: -1 })
+    await sharedExpenses.createIndex({ "participants.participantId": 1 })
+    await sharedExpenses.createIndex({ transactionId: 1 })
+    await sharedExpenses.createIndex({ status: 1 })
+
+    const sharedSettlements = db.collection("shared_settlements")
+    await sharedSettlements.createIndex({ userId: 1, settledAt: -1 })
+    await sharedSettlements.createIndex({ organizationId: 1, settledAt: -1 })
+    await sharedSettlements.createIndex({ fromParticipantId: 1 })
+    await sharedSettlements.createIndex({ toParticipantId: 1 })
+    await sharedSettlements.createIndex({ expenseId: 1 })
+
     // 5. Create indexes for user lookup
     const users = db.collection("user")
     await users.createIndex({ approved: 1, role: 1 })

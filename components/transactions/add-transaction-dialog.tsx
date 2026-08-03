@@ -22,9 +22,9 @@ export function AddTransactionDialog({ categories, wallets }: AddTransactionDial
           <Plus className="size-4" /> Add Transaction
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-background border border-border/40 rounded-2xl shadow-xl">
+      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] min-w-0">
         <DialogHeader>
-          <DialogTitle className="text-xl font-extrabold tracking-tight">Add Transaction</DialogTitle>
+          <DialogTitle>Add Transaction</DialogTitle>
         </DialogHeader>
         <div className="py-2">
           <TransactionForm

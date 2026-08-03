@@ -1,6 +1,8 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { sharedExpensesCollection, sharedSettlementsCollection } from "@/lib/db/collections"
 import { getContactById, getLoansByContact, getActiveBaseCurrency, getContactBalanceDailyHistory, getLoanRepayments } from "@/lib/queries/loans"
 import { ContactDetails } from "@/components/contacts/contact-details"
 import { unstable_rethrow } from "next/navigation"
@@ -53,12 +55,16 @@ interface PageProps {
 
 async function ContactDetailContent({ id }: { id: string }) {
   await requireApprovedUser()
+  const scope = await getFinancialScope()
+  const scopeFilter = getScopeFilter(scope)
 
   let contact
   let loans
   let baseCurrency
   let history
   let repayments: any[] = []
+  let sharedExpenses: any[] = []
+  let sharedSettlements: any[] = []
 
   try {
     contact = await getContactById(id)
@@ -66,15 +72,29 @@ async function ContactDetailContent({ id }: { id: string }) {
       notFound()
     }
     // Fetch in parallel
-    const [fetchedLoans, fetchedBaseCurrency, fetchedHistory] = await Promise.all([
+    const [fetchedLoans, fetchedBaseCurrency, fetchedHistory, fetchedExpenses, fetchedSettlements] = await Promise.all([
       getLoansByContact(id, contact.name),
       getActiveBaseCurrency(),
-      getContactBalanceDailyHistory(id, contact.name, 90)
+      getContactBalanceDailyHistory(id, contact.name, 90),
+      sharedExpensesCollection
+        .find({
+          ...scopeFilter,
+          "participants.participantId": id,
+        })
+        .toArray(),
+      sharedSettlementsCollection
+        .find({
+          ...scopeFilter,
+          $or: [{ fromParticipantId: id }, { toParticipantId: id }],
+        })
+        .toArray(),
     ])
 
     loans = fetchedLoans
     baseCurrency = fetchedBaseCurrency
     history = fetchedHistory
+    sharedExpenses = fetchedExpenses
+    sharedSettlements = fetchedSettlements
 
     // Fetch repayments for every loan tied to this contact, in parallel
     const repaymentLists = await Promise.all(loans.map((loan) => getLoanRepayments(loan._id.toString())))
@@ -91,6 +111,8 @@ async function ContactDetailContent({ id }: { id: string }) {
       baseCurrency={baseCurrency}
       history={serializeData(history)}
       repayments={serializeData(repayments)}
+      sharedExpenses={serializeData(sharedExpenses)}
+      sharedSettlements={serializeData(sharedSettlements)}
     />
   )
 }

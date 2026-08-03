@@ -104,9 +104,9 @@ export function ValuationDialog({ assetId, assetCurrency, trigger, onSuccess }: 
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 shadow-xl p-6">
+      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2">
             <TrendingUp className="size-5 text-primary" />
             Log Valuation
           </DialogTitle>

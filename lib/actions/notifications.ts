@@ -116,8 +116,8 @@ export async function createNotification({
     title,
     message,
     type,
-    link,
-    image,
+    link: link || null,
+    image: image || null,
     createdAt: new Date(),
     updatedAt: new Date(),
   }

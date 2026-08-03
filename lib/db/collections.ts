@@ -19,7 +19,10 @@ import {
   InvestmentTransaction,
   InvestmentPrice,
   Watchlist,
-  WatchlistItem
+  WatchlistItem,
+  SharedExpense,
+  SharedSettlement,
+  PlannerScenario
 } from "@/types"
 
 export const walletsCollection = db.collection<Wallet>("wallets")
@@ -42,6 +45,9 @@ export const investmentTransactionsCollection = db.collection<InvestmentTransact
 export const investmentPricesCollection = db.collection<InvestmentPrice>("investment_prices")
 export const watchlistsCollection = db.collection<Watchlist>("watchlists")
 export const watchlistItemsCollection = db.collection<WatchlistItem>("watchlist_items")
+export const sharedExpensesCollection = db.collection<SharedExpense>("shared_expenses")
+export const sharedSettlementsCollection = db.collection<SharedSettlement>("shared_settlements")
+export const plannerScenariosCollection = db.collection<PlannerScenario>("planner_scenarios")
 
 export async function getCollection<T extends object>(name: string) {
   return db.collection<T>(name)

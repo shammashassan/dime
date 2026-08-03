@@ -26,6 +26,7 @@ const PAGE_LABELS: Record<string, string> = {
   "recurring": "Recurring",
   "reports": "Reports",
   "categories": "Categories",
+  "planner": "Financial Planner",
   "settings": "Settings",
   "admin": "Admin",
   "users": "User Management",

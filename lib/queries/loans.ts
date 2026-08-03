@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { ObjectId } from "mongodb"
 import { getCollection } from "@/lib/db/collections"
-import { Loan, LoanRepayment, Contact } from "@/types"
+import { Loan, LoanRepayment, Contact, SharedExpense, SharedSettlement } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { getOrganizationSettings } from "@/lib/queries/organization"
 import { getPreferences } from "@/lib/queries/preferences"
@@ -153,6 +153,7 @@ export interface ContactWithSummary extends Omit<Contact, "_id"> {
   _id: string | any
   loanCount: number
   activeLoanCount: number
+  sharedExpenseCount?: number
   totalOwed: number // Net amount (positive means they owe you, negative means you owe them)
   baseCurrency: string
 }
@@ -161,12 +162,15 @@ export const getContactsWithSummaries = cache(async (): Promise<ContactWithSumma
   const scope = await getFinancialScope()
   const contactsColl = await getCollection<Contact>("contacts")
   const loansColl = await getCollection<Loan>("loans")
+  const sharedExpensesColl = await getCollection<SharedExpense>("shared_expenses")
+  const sharedSettlementsColl = await getCollection<SharedSettlement>("shared_settlements")
 
   const contacts = await contactsColl.find(getScopeFilter(scope)).sort({ name: 1 }).toArray()
   const loans = await loansColl.find(getScopeFilter(scope)).toArray()
+  const sharedExpenses = await sharedExpensesColl.find(getScopeFilter(scope)).toArray()
+  const sharedSettlements = await sharedSettlementsColl.find(getScopeFilter(scope)).toArray()
 
-  // Find user settings/baseCurrency from profile, default INR/USD
-  const baseCurrency = "INR" // Dime default base currency
+  const baseCurrency = await getActiveBaseCurrency()
 
   const contactsWithSummary: ContactWithSummary[] = []
 
@@ -179,6 +183,8 @@ export const getContactsWithSummaries = cache(async (): Promise<ContactWithSumma
     const activeLoans = contactLoans.filter((l) => ["active", "partially_repaid", "overdue"].includes(l.status))
 
     let netOwed = 0
+
+    // 1. Loan debts
     for (const loan of contactLoans) {
       if (loan.status === "cancelled") continue
 
@@ -190,10 +196,49 @@ export const getContactsWithSummaries = cache(async (): Promise<ContactWithSumma
       }
     }
 
+    // 2. Shared Expenses
+    const contactExpenses = sharedExpenses.filter((e) =>
+      e.participants.some((p) => p.participantId === contactIdStr)
+    )
+
+    for (const expense of contactExpenses) {
+      const contactP = expense.participants.find((p) => p.participantId === contactIdStr)
+      const userP = expense.participants.find((p) => p.participantType === "user")
+
+      if (!contactP || !userP) continue
+
+      if (expense.paidByParticipantId === userP.participantId) {
+        // User paid upfront -> Contact owes user contactP.amountOwed
+        const converted = await convertCurrency(contactP.amountOwed, expense.currency, baseCurrency)
+        netOwed += converted
+      } else if (expense.paidByParticipantId === contactIdStr) {
+        // Contact paid upfront -> User owes contact userP.amountOwed
+        const converted = await convertCurrency(userP.amountOwed, expense.currency, baseCurrency)
+        netOwed -= converted
+      }
+    }
+
+    // 3. Shared Settlements
+    const contactSettlements = sharedSettlements.filter(
+      (s) => s.fromParticipantId === contactIdStr || s.toParticipantId === contactIdStr
+    )
+
+    for (const s of contactSettlements) {
+      const converted = await convertCurrency(s.amount, s.currency, baseCurrency)
+      if (s.fromParticipantId === contactIdStr) {
+        // Contact paid User -> reduces debt contact owes user
+        netOwed -= converted
+      } else if (s.toParticipantId === contactIdStr) {
+        // User paid Contact -> reduces debt user owes contact
+        netOwed += converted
+      }
+    }
+
     contactsWithSummary.push({
       ...contact,
       loanCount: contactLoans.length,
       activeLoanCount: activeLoans.length,
+      sharedExpenseCount: contactExpenses.length,
       totalOwed: netOwed,
       baseCurrency
     })
@@ -244,12 +289,50 @@ export const getContactBalanceDailyHistory = cache(async (contactId: string, con
     ? await repaymentsColl.find({ loanId: { $in: loanIds } }).toArray()
     : []
 
+  const sharedExpensesColl = await getCollection<SharedExpense>("shared_expenses")
+  const sharedExpenses = await sharedExpensesColl.find({
+    ...filter,
+    "participants.participantId": contactId,
+  }).toArray()
+
+  const sharedSettlementsColl = await getCollection<SharedSettlement>("shared_settlements")
+  const sharedSettlements = await sharedSettlementsColl.find({
+    ...filter,
+    $or: [{ fromParticipantId: contactId }, { toParticipantId: contactId }],
+  }).toArray()
+
   let currentBalance = 0
+
+  // 1. Loans current remaining
   loans.forEach(loan => {
     if (loan.type === "lent") {
       currentBalance += loan.remainingAmount
     } else {
       currentBalance -= loan.remainingAmount
+    }
+  })
+
+  // 2. Shared Expenses current remaining
+  const contactIdStr = contact._id.toString()
+  sharedExpenses.forEach((exp) => {
+    const contactP = exp.participants.find((p) => p.participantId === contactIdStr)
+    const userP = exp.participants.find((p) => p.participantType === "user")
+
+    if (!contactP || !userP) return
+
+    if (exp.paidByParticipantId === userP.participantId) {
+      currentBalance += contactP.amountOwed
+    } else if (exp.paidByParticipantId === contactIdStr) {
+      currentBalance -= userP.amountOwed
+    }
+  })
+
+  // 3. Shared Settlements current remaining
+  sharedSettlements.forEach((s) => {
+    if (s.fromParticipantId === contactIdStr) {
+      currentBalance -= s.amount
+    } else if (s.toParticipantId === contactIdStr) {
+      currentBalance += s.amount
     }
   })
 
@@ -274,6 +357,32 @@ export const getContactBalanceDailyHistory = cache(async (contactId: string, con
     events.push({
       date: new Date(rep.date),
       delta: loan.type === "lent" ? -rep.amount : rep.amount
+    })
+  })
+
+  sharedExpenses.forEach(exp => {
+    const contactP = exp.participants.find((p) => p.participantId === contactIdStr)
+    const userP = exp.participants.find((p) => p.participantType === "user")
+
+    if (!contactP || !userP) return
+
+    if (exp.paidByParticipantId === userP.participantId) {
+      events.push({
+        date: new Date(exp.date),
+        delta: contactP.amountOwed,
+      })
+    } else if (exp.paidByParticipantId === contactIdStr) {
+      events.push({
+        date: new Date(exp.date),
+        delta: -userP.amountOwed,
+      })
+    }
+  })
+
+  sharedSettlements.forEach(s => {
+    events.push({
+      date: new Date(s.settledAt),
+      delta: s.fromParticipantId === contactIdStr ? -s.amount : s.amount,
     })
   })
 

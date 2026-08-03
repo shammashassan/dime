@@ -56,14 +56,14 @@ export async function getUserInvitationsAction() {
           id: invite.organizationId
         });
         return {
-          id: invite._id.toString(),
+          id: invite._id ? invite._id.toString() : "",
           organizationId: invite.organizationId ? invite.organizationId.toString() : "",
           organizationName: org?.name || "Shared Workspace",
           inviterEmail: invite.inviterEmail || "Collaborator",
           role: invite.role,
           status: invite.status,
-          expiresAt: invite.expiresAt ? invite.expiresAt.toISOString() : null,
-          createdAt: invite.createdAt ? invite.createdAt.toISOString() : null,
+          expiresAt: invite.expiresAt ? (invite.expiresAt instanceof Date ? invite.expiresAt.toISOString() : new Date(invite.expiresAt).toISOString()) : null,
+          createdAt: invite.createdAt ? (invite.createdAt instanceof Date ? invite.createdAt.toISOString() : new Date(invite.createdAt).toISOString()) : null,
         };
       })
     );

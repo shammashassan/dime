@@ -47,7 +47,7 @@ export function LandingFooter() {
           </div>
 
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">Product</h4>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">Product</h3>
             <nav className="flex flex-col gap-2.5">
               <Link href="#features" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Features
@@ -62,7 +62,7 @@ export function LandingFooter() {
           </div>
 
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">Legal</h4>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">Legal</h3>
             <nav className="flex flex-col gap-2.5">
               <Link href="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Privacy Policy
@@ -74,7 +74,7 @@ export function LandingFooter() {
           </div>
 
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">Connect</h4>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">Connect</h3>
             <nav className="flex flex-col gap-2.5">
               <a
                 href="https://x.com"

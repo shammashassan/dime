@@ -75,7 +75,7 @@ export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
   const { recentActivity } = viewModel
 
   return (
-    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-full flex flex-col bg-card">
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto lg:h-full flex flex-col bg-card">
       {/* Header */}
       <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -118,10 +118,10 @@ export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
       </div>
 
       {/* Row-card timeline list inside ScrollArea */}
-      <div className="flex-1">
+      <div className="flex-1 min-h-0 overflow-hidden">
         {recentActivity.length > 0 ? (
-          <ScrollArea className="h-[215px] px-1">
-            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0">
+          <ScrollArea className="h-[220px] w-full px-2">
+            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0 py-2">
               {recentActivity.map((activity) => {
                 const { icon: DotIcon, color: iconColor } = getActivityStyle(activity.type, activity.title)
 
@@ -130,7 +130,7 @@ export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
                     key={activity.id}
                     asChild
                     className={cn(
-                      "px-2",
+                      "px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl",
                       activity.href ? "cursor-pointer" : "cursor-default"
                     )}
                   >
@@ -156,7 +156,7 @@ export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
 
                         {activity.amount !== undefined && (
                           <ItemActions className="shrink-0">
-                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-[76px] text-right">
+                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-19 text-right">
                               {activity.title === "High Expense" ? "-" : ""}
                               {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
                             </span>
@@ -186,7 +186,7 @@ export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
 
                         {activity.amount !== undefined && (
                           <ItemActions className="shrink-0">
-                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-[76px] text-right">
+                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-19 text-right">
                               {activity.title === "High Expense" ? "-" : ""}
                               {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
                             </span>
@@ -201,7 +201,7 @@ export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
             </ItemGroup>
           </ScrollArea>
         ) : (
-          <div className="text-xs text-muted-foreground py-14 text-center flex items-center justify-center h-[280px]">
+          <div className="text-xs text-muted-foreground py-10 text-center flex items-center justify-center h-53.75">
             No recent financial logs.
           </div>
         )}

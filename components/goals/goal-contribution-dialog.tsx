@@ -97,9 +97,9 @@ export function GoalContributionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px] rounded-3xl border border-border/50 shadow-2xl">
+      <DialogContent className="sm:max-w-[420px] min-w-0">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2">
             <Sparkles className="size-5 text-primary animate-pulse" />
             Contribute to Goal
           </DialogTitle>

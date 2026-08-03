@@ -9,15 +9,20 @@ export async function updatePreferences(input: Omit<UserPreferences, "userId">) 
   const session = await requireApprovedUser()
   const prefColl = await getCollection<UserPreferences>("preferences")
 
+  const updateData: Record<string, any> = {
+    defaultCurrency: input.defaultCurrency,
+    dateFormat: input.dateFormat,
+  }
+
+  if (input.defaultWalletId) {
+    updateData.defaultWalletId = input.defaultWalletId
+  } else {
+    updateData.defaultWalletId = null
+  }
+
   await prefColl.updateOne(
     { userId: session.user.id },
-    {
-      $set: {
-        defaultCurrency: input.defaultCurrency,
-        defaultWalletId: input.defaultWalletId,
-        dateFormat: input.dateFormat,
-      },
-    },
+    { $set: updateData },
     { upsert: true }
   )
 

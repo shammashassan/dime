@@ -1,59 +1,134 @@
 "use client"
 
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { PieChart, Pie, Label } from "recharts"
-import { formatCurrency } from "@/lib/utils"
+import * as React from "react"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { PieChart, Pie, Cell, Label } from "recharts"
+import { formatCurrency, cn } from "@/lib/utils"
 import { NetWorthOverviewViewModel, NetWorthBreakdown } from "@/types"
 import { PieChart as PieChartIcon } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-const assetPieConfig = {
-  value: { label: "Value", color: undefined },
-  cash: { label: "Cash", color: "var(--chart-1)" },
-  bank: { label: "Bank", color: "var(--chart-2)" },
-  investments: { label: "Investments", color: "var(--chart-3)" },
-  loans: { label: "Receivables", color: "var(--chart-4)" },
-  manualAssets: { label: "Other Assets", color: "var(--chart-5)" },
-} as const
+const ASSET_TYPE_LABELS: Record<string, string> = {
+  cash: "Cash",
+  bank: "Bank",
+  investments: "Investments",
+  loans: "Receivables",
+  manualAssets: "Other Assets",
+}
 
-export function AssetAllocationCard({ viewModel, breakdowns }: { viewModel: NetWorthOverviewViewModel; breakdowns: NetWorthBreakdown["assetsBreakdown"] }) {
+const ASSET_TYPE_COLORS: Record<string, string> = {
+  cash: "var(--chart-1)",
+  bank: "var(--chart-2)",
+  investments: "var(--chart-3)",
+  loans: "var(--chart-4)",
+  manualAssets: "var(--chart-5)",
+}
+
+export function AssetAllocationCard({
+  viewModel,
+  breakdowns,
+}: {
+  viewModel: NetWorthOverviewViewModel
+  breakdowns: NetWorthBreakdown["assetsBreakdown"]
+}) {
   const { totalAssets, currency } = viewModel
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>(undefined)
 
-  const getPct = (val: number, total: number) => {
-    if (total === 0) return 0
-    return Math.round((val / total) * 100)
-  }
+  const activeData = React.useMemo(() => {
+    const rawItems = [
+      { type: "cash", rawValue: breakdowns.cash },
+      { type: "bank", rawValue: breakdowns.bank },
+      { type: "investments", rawValue: breakdowns.investments },
+      { type: "loans", rawValue: breakdowns.loans },
+      { type: "manualAssets", rawValue: breakdowns.manualAssets },
+    ].filter((item) => item.rawValue > 0)
 
-  const assetPieData = [
-    { type: "cash", value: breakdowns.cash / 100, fill: "var(--color-cash)" },
-    { type: "bank", value: breakdowns.bank / 100, fill: "var(--color-bank)" },
-    { type: "investments", value: breakdowns.investments / 100, fill: "var(--color-investments)" },
-    { type: "loans", value: breakdowns.loans / 100, fill: "var(--color-loans)" },
-    { type: "manualAssets", value: breakdowns.manualAssets / 100, fill: "var(--color-manualAssets)" },
-  ].filter((item) => item.value > 0)
+    const total = rawItems.reduce((sum, item) => sum + item.rawValue, 0)
+
+    return rawItems
+      .sort((a, b) => b.rawValue - a.rawValue)
+      .map((item) => {
+        const val = item.rawValue / 100
+        const pct = total > 0 ? (item.rawValue / total) * 100 : 0
+        const label = ASSET_TYPE_LABELS[item.type] || item.type
+        const color = ASSET_TYPE_COLORS[item.type] || "var(--primary)"
+
+        return {
+          category: label,
+          type: item.type,
+          value: val,
+          rawValue: item.rawValue,
+          percentage: pct,
+          color,
+        }
+      })
+  }, [breakdowns])
+
+  const chartConfig = React.useMemo(() => {
+    return activeData.reduce((acc, item) => {
+      acc[item.type] = { label: item.category, color: item.color }
+      return acc
+    }, {} as ChartConfig)
+  }, [activeData])
 
   return (
     <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-full flex flex-col bg-card">
-      <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
-        <PieChartIcon className="size-3.5 text-muted-foreground" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Asset Allocation</span>
+      {/* Header */}
+      <div className="px-4 py-2.5 border-b border-border/30 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <PieChartIcon className="size-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Asset Allocation</span>
+        </div>
+        <span className="text-[10px] font-semibold text-muted-foreground">
+          {activeData.length} categories
+        </span>
       </div>
 
-      <div className="flex flex-1 items-center justify-center p-3">
-        {assetPieData.length > 0 ? (
-          <ChartContainer config={assetPieConfig} className="mx-auto aspect-square w-full max-w-[180px] h-[180px]">
+      {/* Main Large Center Donut Pie Chart */}
+      <div className="p-3 flex-1 flex flex-col items-center justify-center min-h-[140px]">
+        {activeData.length > 0 ? (
+          <ChartContainer
+            config={chartConfig}
+            className="w-full max-w-[210px] h-[165px] mx-auto overflow-visible"
+          >
             <PieChart>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-              <Pie data={assetPieData} dataKey="value" nameKey="type" innerRadius={48} strokeWidth={4}>
+              <Pie
+                data={activeData}
+                dataKey="value"
+                nameKey="category"
+                cx="50%"
+                cy="50%"
+                innerRadius={54}
+                outerRadius={82}
+                cornerRadius={5}
+                paddingAngle={3}
+                minAngle={12}
+                stroke="var(--card)"
+                strokeWidth={2}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(undefined)}
+              >
+                {activeData.map((entry, index) => (
+                  <Cell
+                    key={entry.category}
+                    fill={entry.color}
+                    style={{
+                      opacity: activeIndex === undefined || activeIndex === index ? 1 : 0.35,
+                      transition: "opacity 0.2s ease-in-out",
+                      outline: "none",
+                    }}
+                  />
+                ))}
                 <Label
                   content={({ viewBox }) => {
                     if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                       return (
-                        <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                          <tspan x={viewBox.cx} y={(viewBox.cy || 0) - 8} className="fill-foreground text-sm font-bold">
+                        <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle" className="pointer-events-none">
+                          <tspan x={viewBox.cx} y={(viewBox.cy || 0) - 6} className="fill-foreground text-lg sm:text-xl font-extrabold tabular-nums tracking-tight">
                             {formatCurrency(totalAssets / 100, currency)}
                           </tspan>
-                          <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 12} className="fill-muted-foreground text-[10px]">
-                            Assets
+                          <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 16} className="fill-muted-foreground text-[9px] font-bold uppercase tracking-wider">
+                            Total Assets
                           </tspan>
                         </text>
                       )
@@ -61,26 +136,63 @@ export function AssetAllocationCard({ viewModel, breakdowns }: { viewModel: NetW
                   }}
                 />
               </Pie>
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    hideLabel
+                    formatter={(value, name, item) => {
+                      const categoryName = String(name)
+                      const color = item.payload?.color || item.color || item.payload?.fill
+                      const rawVal = item.payload?.rawValue ?? (Number(value) * 100)
+                      return (
+                        <>
+                          <div
+                            className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                            style={{ backgroundColor: color }}
+                          />
+                          <div className="flex flex-1 justify-between items-center leading-none gap-2">
+                            <span className="text-muted-foreground font-medium">{categoryName}:</span>
+                            <span className="font-mono font-bold text-foreground">
+                              {formatCurrency(rawVal / 100, currency)}
+                            </span>
+                          </div>
+                        </>
+                      )
+                    }}
+                  />
+                }
+              />
             </PieChart>
           </ChartContainer>
         ) : (
-          <div className="text-xs text-muted-foreground py-14">No assets to allocate.</div>
+          <div className="text-xs text-muted-foreground py-6 text-center">No assets to allocate.</div>
         )}
       </div>
 
-      {assetPieData.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 py-2.5 px-4 border-t border-border/30 text-[11px]">
-          {assetPieData.map((item) => (
-            <span key={item.type} className="flex items-center gap-1.5 text-muted-foreground">
-              <span
-                className="size-1.5 rounded-full shrink-0"
-                style={{ backgroundColor: assetPieConfig[item.type as keyof typeof assetPieConfig]?.color as string }}
-              />
-              {assetPieConfig[item.type as keyof typeof assetPieConfig]?.label}
-              <span className="text-foreground font-medium">{getPct(item.value, totalAssets / 100)}%</span>
-            </span>
-          ))}
-        </div>
+      {/* shadcn ScrollArea for Legend Row */}
+      {activeData.length > 0 && (
+        <ScrollArea className="max-h-[56px] w-full border-t border-border/30 bg-muted/5 px-3 py-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
+            {activeData.map((entry, index) => (
+              <div
+                key={entry.category}
+                className={cn(
+                  "flex items-center gap-1.5 text-xs transition-opacity cursor-default",
+                  activeIndex !== undefined && activeIndex !== index ? "opacity-30" : "opacity-100"
+                )}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(undefined)}
+              >
+                <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                <span className="font-bold text-foreground">{entry.category}</span>
+                <span className="text-[10px] font-extrabold text-muted-foreground/80 bg-muted/40 px-1.5 py-0.5 rounded-full border border-border/30">
+                  {entry.percentage.toFixed(1)}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       )}
     </div>
   )

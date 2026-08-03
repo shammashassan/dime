@@ -215,7 +215,7 @@ export function LiveConversionShowcase() {
                 <div ref={resultRef} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-primary/5 border border-primary/10 rounded-2xl p-5 w-full">
                   <div className="space-y-1 text-left">
                     <p className="text-xs font-semibold text-muted-foreground">Estimated Result</p>
-                    <h4 className="text-2xl font-black text-foreground break-all">
+                    <h3 className="text-2xl font-black text-foreground break-all">
                       {loading ? (
                         <span className="text-muted-foreground animate-pulse text-lg">Fetching rates...</span>
                       ) : converted !== null ? (
@@ -223,7 +223,7 @@ export function LiveConversionShowcase() {
                       ) : (
                         "0.00"
                       )}
-                    </h4>
+                    </h3>
                   </div>
                   <div className="text-left sm:text-right text-xs text-muted-foreground shrink-0">
                     <p>1 {fromCurrency} =</p>

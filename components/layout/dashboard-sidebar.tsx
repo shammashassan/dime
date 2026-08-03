@@ -20,6 +20,9 @@ import {
   HandCoins,
   Users,
   TrendingUp,
+  LineChart,
+  Users2,
+  Calculator,
 } from "lucide-react"
 import { LogoMark } from "@/components/brand/logo-mark"
 import { SpaceSwitcher } from "@/components/layout/space-switcher"
@@ -66,11 +69,14 @@ const NAV_ITEMS = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { title: "Transactions", href: "/transactions", icon: ArrowLeftRight },
   { title: "Wallets", href: "/wallets", icon: Wallet },
+  { title: "Investments", href: "/investments", icon: LineChart },
   { title: "Net Worth", href: "/net-worth", icon: TrendingUp },
+  { title: "Planner", href: "/planner", icon: Calculator },
   { title: "Budgets", href: "/budgets", icon: PiggyBank },
   { title: "Goals", href: "/goals", icon: Target },
   { title: "Loans", href: "/loans", icon: HandCoins },
   { title: "Contacts", href: "/contacts", icon: Users },
+  { title: "Shared Expenses", href: "/shared-expenses", icon: Users2 },
   { title: "Recurring", href: "/recurring", icon: Repeat },
   { title: "Reports", href: "/reports", icon: BarChart3 },
   { title: "Categories", href: "/categories", icon: Tags },

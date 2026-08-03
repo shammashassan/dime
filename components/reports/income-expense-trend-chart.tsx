@@ -81,7 +81,7 @@ export function IncomeExpenseTrendChart({ data, monthsCount, currency = "USD" }:
                     formatter={(value, name, item) => (
                       <>
                         <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                          className="h-2.5 w-2.5 shrink-0 rounded-xs"
                           style={{
                             backgroundColor: item.color || item.payload?.fill,
                           }}
@@ -117,7 +117,7 @@ export function IncomeExpenseTrendChart({ data, monthsCount, currency = "USD" }:
             </AreaChart>
           </ChartContainer>
         ) : (
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
+          <div className="flex items-center justify-center h-75 text-muted-foreground text-sm">
             No transaction trend data available.
           </div>
         )}

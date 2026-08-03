@@ -208,9 +208,9 @@ export function LoansList({
             <HandCoins className="size-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Loans & Lending</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Loans & Lending</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Track what you owe, what others owe you, and manage repayments.
+              Manage personal loans, borrowed money, and repayment schedules.
             </p>
           </div>
         </div>

@@ -132,9 +132,9 @@ export function RepaymentDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 shadow-xl p-6">
+      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2">
             <HandCoins className="size-5 text-primary" />
             Log Repayment
           </DialogTitle>
@@ -210,10 +210,12 @@ export function RepaymentDialog({
                       <Button
                         variant="outline"
                         type="button"
-                        className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9"
+                        className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {field.value ? format(field.value, "PPP") : <span>Pick date</span>}
+                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="truncate flex-1 text-left">
+                          {field.value ? format(field.value, "PP") : "Pick date"}
+                        </span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">

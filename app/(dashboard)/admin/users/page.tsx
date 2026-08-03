@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { Users } from "lucide-react"
+import { Users, Shield } from "lucide-react"
 import { requireAdmin } from "@/lib/auth-guard"
 import { getAdminUsers } from "@/lib/queries/admin"
 import { AdminStats } from "@/components/admin/admin-stats"
@@ -9,7 +9,6 @@ import { BannedTable } from "@/components/admin/banned-table"
 import { AdminUsersTabs } from "@/components/admin/admin-users-tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
-
 
 function StatsSkeleton() {
   return (
@@ -49,15 +48,17 @@ export default async function AdminUsersPage({
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Title */}
-      <div className="flex items-center gap-3.5">
-        <div className="p-3.5 bg-primary/10 text-primary rounded-2xl shadow-xs shrink-0">
-          <Users className="h-7 w-7" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">User Management</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Review pending registrations, assign administrative privileges, and manage banned users.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <Shield className="size-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">User Management</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Manage registered users, review sign-up approvals, roles, and access permissions.
+            </p>
+          </div>
         </div>
       </div>
 

@@ -144,10 +144,12 @@ export function PayBillForm({ bill, rule, wallets, onSuccess }: PayBillFormProps
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
+                    className="w-full justify-start font-normal min-w-0"
                   >
-                    <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
-                    {field.value ? format(field.value as Date, "PPP") : <span>Pick a date</span>}
+                    <CalendarIcon className="mr-2 size-4 text-muted-foreground shrink-0" />
+                    <span className="truncate flex-1 text-left">
+                      {field.value ? format(field.value as Date, "PP") : "Pick a date"}
+                    </span>
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">

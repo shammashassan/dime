@@ -18,7 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { CalendarIcon, Loader2, Plus, Users, HandCoins, Mail, Phone, Percent, Info } from "lucide-react"
+import { CalendarIcon, Loader2, Plus, Users, HandCoins, Mail, Phone, Percent, Info, ArrowUpRight, ArrowDownLeft } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { cn, formatCurrency } from "@/lib/utils"
@@ -214,9 +214,9 @@ export function LoanDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 shadow-xl p-6">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2">
             <HandCoins className="size-5 text-primary" />
             {isEditing ? "Edit Loan Details" : "Record New Loan"}
           </DialogTitle>
@@ -241,25 +241,31 @@ export function LoanDialog({
               control={control}
               name="type"
               render={({ field }) => (
-                <ToggleGroup
-                  type="single"
-                  value={field.value}
-                  onValueChange={(val) => val && field.onChange(val)}
-                  className="grid grid-cols-2 gap-2"
-                >
-                  <ToggleGroupItem
-                    value="lent"
-                    className="py-2.5 rounded-xl border border-border/50 text-sm font-semibold data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                  >
-                    I Lent Money
-                  </ToggleGroupItem>
-                  <ToggleGroupItem
-                    value="borrowed"
-                    className="py-2.5 rounded-xl border border-border/50 text-sm font-semibold data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                  >
-                    I Borrowed Money
-                  </ToggleGroupItem>
-                </ToggleGroup>
+                <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                  {[
+                    { value: "lent", label: "I Lent Money", icon: ArrowUpRight },
+                    { value: "borrowed", label: "I Borrowed Money", icon: ArrowDownLeft },
+                  ].map((t) => {
+                    const Icon = t.icon
+                    const isSelected = field.value === t.value
+                    return (
+                      <button
+                        key={t.value}
+                        type="button"
+                        onClick={() => field.onChange(t.value)}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 py-2 px-3 rounded-md transition-all text-center cursor-pointer",
+                          isSelected
+                            ? "bg-background text-foreground shadow-xs font-bold"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="size-3.5 shrink-0" />
+                        {t.label}
+                      </button>
+                    )
+                  })}
+                </div>
               )}
             />
           </Field>
@@ -440,7 +446,7 @@ export function LoanDialog({
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Date */}
             <Field data-invalid={!!errors.date}>
               <FieldLabel>Start Date</FieldLabel>
@@ -453,10 +459,12 @@ export function LoanDialog({
                       <Button
                         variant="outline"
                         type="button"
-                        className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9"
+                        className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {field.value ? format(field.value, "PPP") : <span>Pick date</span>}
+                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="truncate flex-1 text-left">
+                          {field.value ? format(field.value, "PP") : "Pick date"}
+                        </span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
@@ -485,10 +493,12 @@ export function LoanDialog({
                       <Button
                         variant="outline"
                         type="button"
-                        className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9"
+                        className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {field.value ? format(field.value, "PPP") : <span className="text-muted-foreground">None</span>}
+                        <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="truncate flex-1 text-left">
+                          {field.value ? format(field.value, "PP") : <span className="text-muted-foreground">None</span>}
+                        </span>
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">

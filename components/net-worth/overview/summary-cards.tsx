@@ -13,28 +13,28 @@ export function SummaryCards({ viewModel }: { viewModel: NetWorthOverviewViewMod
   return (
     <div className="flex flex-wrap gap-4">
       <MetricCard
-        style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+        style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
         icon={Landmark}
         color="#8b5cf6"
         label="Net Worth"
         value={formatCurrency(netWorth / 100, currency)}
       />
       <MetricCard
-        style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+        style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
         icon={ArrowUpRight}
         color="#10b981"
         label="Total Assets"
         value={formatCurrency(totalAssets / 100, currency)}
       />
       <MetricCard
-        style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+        style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
         icon={ArrowDownRight}
         color="#f43f5e"
         label="Total Liabilities"
         value={formatCurrency(totalLiabilities / 100, currency)}
       />
       <MetricCard
-        style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+        style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
         icon={isPositive ? TrendingUp : TrendingDown}
         color={isPositive ? "#10b981" : "#f43f5e"}
         label="Trend Period"

@@ -6,6 +6,7 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -34,14 +35,17 @@ export function TimelineCard({
   currency: string
 }) {
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
+    <Card className="flex flex-col">
+      <CardHeader className="pb-2">
         <CardTitle>Net Worth Timeline</CardTitle>
+        <CardDescription>
+          Historical trajectory of total assets, liabilities, and overall net worth over time.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 px-2 pt-4 sm:px-6">
+      <CardContent className="px-2 pt-1 pb-3 sm:px-6">
         {historyData.length > 0 ? (
-          <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
-            <AreaChart data={historyData}>
+          <ChartContainer config={chartConfig} className="aspect-auto h-47.5 w-full">
+            <AreaChart data={historyData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="fillNetWorth" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--color-netWorth)" stopOpacity={0.8} />
@@ -67,7 +71,7 @@ export function TimelineCard({
                   const date = new Date(value)
                   return date.toLocaleDateString("en-US", {
                     month: "short",
-                    day: "numeric",
+                    year: "2-digit",
                   })
                 }}
               />
@@ -79,25 +83,30 @@ export function TimelineCard({
                       return new Date(value).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
+                        year: "numeric",
                       })
                     }}
                     indicator="dot"
-                    formatter={(value, name) => (
-                      <>
-                        <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                          style={{ backgroundColor: `var(--color-${name})` }}
-                        />
-                        <div className="flex flex-1 justify-between leading-none">
-                          <span className="text-muted-foreground">
-                            {chartConfig[name as keyof typeof chartConfig]?.label ?? name}
-                          </span>
-                          <span className="font-mono font-medium tabular-nums text-foreground">
+                    formatter={(value, name, item) => {
+                      const label = chartConfig[name as keyof typeof chartConfig]?.label || String(name)
+                      const indicatorColor = item.color || `var(--color-${name})`
+                      return (
+                        <div className="flex flex-1 justify-between items-center leading-none gap-4">
+                          <div className="flex items-center gap-1.5">
+                            <div
+                              className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                              style={{ backgroundColor: indicatorColor }}
+                            />
+                            <span className="text-muted-foreground font-medium">
+                              {label}
+                            </span>
+                          </div>
+                          <span className="font-mono font-bold text-foreground">
                             {formatCurrency(Number(value) / 100, currency)}
                           </span>
                         </div>
-                      </>
-                    )}
+                      )
+                    }}
                   />
                 }
               />
@@ -126,7 +135,7 @@ export function TimelineCard({
             </AreaChart>
           </ChartContainer>
         ) : (
-          <div className="flex items-center justify-center h-[250px] text-muted-foreground text-sm">
+          <div className="flex items-center justify-center h-47.5 text-muted-foreground text-sm">
             No historical data available.
           </div>
         )}

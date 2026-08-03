@@ -81,7 +81,7 @@ const ICON_COMPONENTS: Record<string, React.ComponentType<{ className?: string }
 }
 
 interface WalletFormProps {
-  initialWallet?: Wallet
+  initialWallet?: Partial<Wallet>
   onSuccess?: () => void
 }
 
@@ -90,9 +90,9 @@ export function WalletForm({ initialWallet, onSuccess }: WalletFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const isEditing = !!initialWallet
+  const isEditing = !!(initialWallet && "_id" in initialWallet && initialWallet._id)
   const isCustomColor = initialWallet?.color
-    ? !PRESETS.colors.some((c) => c.toLowerCase() === initialWallet.color.toLowerCase())
+    ? !PRESETS.colors.some((c) => c.toLowerCase() === initialWallet.color!.toLowerCase())
     : false
   const [showCustomColor, setShowCustomColor] = useState(isCustomColor)
 
@@ -102,7 +102,7 @@ export function WalletForm({ initialWallet, onSuccess }: WalletFormProps) {
     currency: initialWallet?.currency || "USD",
     balance: initialWallet?.balance ? initialWallet.balance / 100 : 0,
     color: initialWallet?.color || PRESETS.colors[0],
-    icon: initialWallet?.icon || "Wallet",
+    icon: initialWallet?.icon || (initialWallet?.type === "investment" ? "TrendingUp" : "Wallet"),
     isArchived: initialWallet?.isArchived || false,
   }
 
@@ -139,7 +139,7 @@ export function WalletForm({ initialWallet, onSuccess }: WalletFormProps) {
         }
 
         let result
-        if (isEditing && initialWallet) {
+        if (isEditing && initialWallet && "_id" in initialWallet && initialWallet._id) {
           result = await updateWallet(initialWallet._id.toString(), payload)
         } else {
           result = await createWallet(payload)

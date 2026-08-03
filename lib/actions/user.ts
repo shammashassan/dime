@@ -21,7 +21,7 @@ export async function deleteUserAccount() {
   await db.collection("passkey").deleteMany({ userId })
   await db.collection("session").deleteMany({ userId })
   await db.collection("account").deleteMany({ userId })
-  await db.collection("user").deleteOne({ id: userId })
+  await db.collection("user").deleteMany({ $or: [{ id: userId }, { _id: userId as any }] })
 
   return { success: true }
 }
@@ -39,24 +39,28 @@ export async function getUserExportData() {
   return {
     transactions: transactions.map(t => ({
       ...t,
-      _id: t._id.toString(),
-      date: t.date instanceof Date ? t.date.toISOString() : new Date(t.date).toISOString(),
-      walletId: t.walletId.toString(),
-      categoryId: t.categoryId?.toString() || null,
-      transferWalletId: (t as any).transferWalletId?.toString() || null,
+      _id: t._id ? t._id.toString() : "",
+      date: t.date instanceof Date ? t.date.toISOString() : (t.date ? new Date(t.date).toISOString() : new Date().toISOString()),
+      walletId: t.walletId ? t.walletId.toString() : "",
+      categoryId: t.categoryId ? t.categoryId.toString() : null,
+      transferWalletId: (t as any).transferWalletId ? (t as any).transferWalletId.toString() : null,
     })),
     wallets: wallets.map(w => ({
       ...w,
-      _id: w._id.toString(),
+      _id: w._id ? w._id.toString() : "",
     })),
     budgets: budgets.map(b => ({
       ...b,
-      _id: b._id.toString(),
-      categoryIds: (b as any).categoryIds ? (b as any).categoryIds.map((cId: any) => cId.toString()) : [b.categoryId],
+      _id: b._id ? b._id.toString() : "",
+      categoryIds: (b as any).categoryIds
+        ? (b as any).categoryIds.map((cId: any) => (cId ? cId.toString() : ""))
+        : b.categoryId
+        ? [b.categoryId.toString()]
+        : [],
     })),
     categories: categories.map(c => ({
       ...c,
-      _id: c._id.toString(),
+      _id: c._id ? c._id.toString() : "",
     })),
   }
 }
@@ -74,7 +78,7 @@ export async function lookupUserByUsername(username: string) {
   if (!user) return null
 
   return {
-    id: user._id.toString(),
+    id: (user.id || user._id?.toString() || "") as string,
     name: user.name as string,
     email: user.email as string,
     username: user.username as string,

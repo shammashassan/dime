@@ -638,4 +638,218 @@ export interface WatchlistItem {
   updatedAt: Date
 }
 
+// ==========================================
+// Shared Expenses & Settlement Domain Types
+// ==========================================
+
+export type ParticipantType = "user" | "contact"
+
+export interface SharedExpenseParticipant {
+  participantId: string
+  participantType: ParticipantType
+  name: string
+  email?: string
+  amountOwed: number      // In smallest currency unit (cents / paise)
+  amountPaid: number      // In smallest currency unit
+  percentage?: number     // Optional stored percentage for % split mode
+}
+
+export type SharedExpenseStatus = "unsettled" | "partially_settled" | "settled"
+
+export interface SharedExpense {
+  _id: ObjectId
+  userId: string                    // Creator/Owner user ID
+  organizationId: string | null     // Shared Space ID if scope is group space
+  transactionId?: string            // Optional link to wallet transaction
+  title: string
+  totalAmount: number               // In smallest currency unit (cents / paise)
+  currency: string                  // ISO 4217 code
+  paidByParticipantId: string       // User ID or Contact ID who paid upfront
+  paidByParticipantType: ParticipantType
+  splitMode: "equal" | "percentage" | "custom"
+  participants: SharedExpenseParticipant[]
+  status: SharedExpenseStatus
+  date: Date
+  notes?: string
+  createdAt: Date
+  updatedAt: Date
+  version: number
+}
+
+export interface SharedSettlement {
+  _id: ObjectId
+  userId: string                    // Creator/Record owner
+  organizationId: string | null     // Shared Space ID if applicable
+  expenseId?: string                // Optional link to a specific SharedExpense
+  fromParticipantId: string         // Payer participant ID
+  fromParticipantType: ParticipantType
+  toParticipantId: string           // Receiver participant ID
+  toParticipantType: ParticipantType
+  amount: number                    // Amount settled in cents/paise
+  currency: string
+  paymentMethod?: string            // "cash", "upi", "bank_transfer", "other"
+  transactionId?: string            // Optional linked wallet transaction
+  settledAt: Date
+  notes?: string
+  createdAt: Date
+}
+
+// View Models for Shared Expenses UI
+
+export interface PairwiseBalance {
+  fromParticipantId: string
+  fromParticipantName: string
+  fromParticipantType: ParticipantType
+  toParticipantId: string
+  toParticipantName: string
+  toParticipantType: ParticipantType
+  netAmount: number                // In cents. Positive means 'from' owes 'to'
+  currency: string
+}
+
+export interface ParticipantSummary {
+  id: string
+  type: ParticipantType
+  name: string
+  email?: string
+  totalPaid: number                // Total paid across expenses
+  totalShare: number               // Total expense share owed
+  netBalance: number               // >0 means owed to participant, <0 means owes money
+  currency: string
+}
+
+export interface SimplifiedDebtTransfer {
+  fromParticipantId: string
+  fromParticipantName: string
+  fromParticipantType: ParticipantType
+  toParticipantId: string
+  toParticipantName: string
+  toParticipantType: ParticipantType
+  amount: number                    // In cents
+  currency: string
+}
+
+export interface SharedExpensesOverviewViewModel {
+  currency: string
+  totalSharedAmount: number         // Total volume of shared expenses
+  userNetBalance: number            // Current user's net position (>0: user is owed, <0: user owes)
+  userTotalOwedToOthers: number     // Sum of money user owes
+  userTotalOwedFromOthers: number   // Sum of money owed to user
+  activeExpenseCount: number
+  participants: ParticipantSummary[]
+  pairwiseBalances: PairwiseBalance[]
+  simplifiedTransfers: SimplifiedDebtTransfer[]
+  recentExpenses: SharedExpense[]
+  recentSettlements: SharedSettlement[]
+}
+
+// ── Financial Planner & Forecasting Types ──
+
+export interface PlannerScenario {
+  _id: ObjectId
+  userId: string
+  name: string
+  description?: string
+  isDefault?: boolean
+  monthlyIncomeAdjustment: number    // In cents (+ or -)
+  monthlyExpenseAdjustment: number   // In cents (+ or -)
+  extraLoanRepayment: number         // In cents (+ applied monthly to loans)
+  extraGoalContribution: number      // In cents (+ applied monthly to active goals)
+  pausedRecurringIds: string[]       // Array of RecurringRule _id strings
+  investmentReturnRate: number       // Annual ROI % (e.g., 7 for 7%)
+  savingsApy?: number                // High-yield savings APY % (e.g., 4 for 4%)
+  horizonMonths: number              // Horizon in months (e.g. 6, 12, 24, 36, 60)
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface SerializedPlannerScenario {
+  _id: string
+  userId: string
+  name: string
+  description?: string
+  isDefault?: boolean
+  monthlyIncomeAdjustment: number
+  monthlyExpenseAdjustment: number
+  extraLoanRepayment: number
+  extraGoalContribution: number
+  pausedRecurringIds: string[]
+  investmentReturnRate: number
+  savingsApy?: number
+  horizonMonths: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ForecastPoint {
+  monthIndex: number                 // 0 = current month, 1 = next month, etc.
+  date: Date
+  dateStr: string                    // "MMM yy" e.g. "Aug 26"
+  
+  // Dual-series values (Baseline vs Simulated Scenario)
+  baselineLiquidCash: number         // In cents
+  simulatedLiquidCash: number        // In cents
+  
+  baselineNetWorth: number           // In cents
+  simulatedNetWorth: number          // In cents
+  
+  baselineMonthlyIncome: number      // In cents
+  simulatedMonthlyIncome: number     // In cents
+  
+  baselineMonthlyExpense: number     // In cents
+  simulatedMonthlyExpense: number    // In cents
+
+  baselineTotalDebt: number          // In cents
+  simulatedTotalDebt: number         // In cents
+
+  baselineGoalSavings: number        // In cents
+  simulatedGoalSavings: number       // In cents
+}
+
+export interface GoalMilestone {
+  goalId: string
+  goalName: string
+  targetAmount: number               // In cents
+  currentAmount: number              // In cents
+  baselineCompletionDateStr: string | null // e.g. "Nov 26" or "Beyond horizon"
+  simulatedCompletionDateStr: string | null
+  monthsSaved: number                // Baseline vs Simulated difference
+}
+
+export interface LoanMilestone {
+  loanId: string
+  loanName: string
+  originalBalance: number            // In cents
+  currentBalance: number             // In cents
+  baselinePayoffDateStr: string | null
+  simulatedPayoffDateStr: string | null
+  monthsSaved: number
+}
+
+export interface PlannerInsight {
+  id: string
+  type: "positive" | "warning" | "info"
+  title: string
+  description: string
+  metricImpact?: string
+}
+
+export interface ForecastResult {
+  targetCurrency: string
+  horizonMonths: number
+  currentNetWorth: number            // In cents
+  currentLiquidCash: number           // In cents
+  projectedBaseline12MNetWorth: number// In cents
+  projectedSimulated12MNetWorth: number// In cents
+  baselineDebtFreeDateStr: string | null
+  simulatedDebtFreeDateStr: string | null
+  emergencyReserveMonths: number     // Baseline liquid cash / monthly expense
+  points: ForecastPoint[]
+  goalMilestones: GoalMilestone[]
+  loanMilestones: LoanMilestone[]
+  insights: PlannerInsight[]
+}
+
+
+
 

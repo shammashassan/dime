@@ -42,7 +42,7 @@ import {
   AlertDialogMedia,
 } from "@/components/ui/alert-dialog"
 import {
-  Edit, Trash2, Plus, Wallet as WalletIcon, RefreshCw, CalendarSync, Loader2,
+  Edit, Trash2, Plus, Wallet as WalletIcon, RefreshCw, CalendarSync, Loader2, Repeat,
   TrendingUp, TrendingDown, Play, Pause, Ban, CreditCard, FileText, Search,
   PiggyBank, ArrowDownRight, AlertTriangle, CheckCircle2, Clock, CalendarDays, type LucideIcon
 } from "lucide-react"
@@ -68,11 +68,11 @@ interface MetricCardProps {
 
 function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: MetricCardProps) {
   return (
-    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]", className)} style={style}>
+    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-50", className)} style={style}>
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: `radial-gradient(120% 100% at 0% 0%, ${color}, transparent 60%)` }} />
       <CardContent className="relative p-4 flex items-center gap-3">
         <div className="size-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: color + "18", color }}>
-          <Icon className="size-[18px]" />
+          <Icon className="size-4.5" />
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 truncate">{label}</p>
@@ -154,7 +154,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
     }
     if (search.trim()) {
       const lowerSearch = search.toLowerCase();
-      filtered = filtered.filter(r => 
+      filtered = filtered.filter(r =>
         r.description.toLowerCase().includes(lowerSearch)
       );
     }
@@ -223,7 +223,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
 
     return (
       <Card key={rule._id.toString()} onClick={() => router.push(`/recurring/${rule._id.toString()}`)} className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", !rule.isActive && "opacity-70")}>
-        <div className="h-[3px] w-full shrink-0" style={{ backgroundColor: accent }} />
+        <div className="h-0.75 w-full shrink-0" style={{ backgroundColor: accent }} />
         <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="size-9 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: iconColor + "18", color: iconColor }}>
@@ -334,7 +334,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
 
     return (
       <Card key={bill._id.toString()} onClick={() => router.push(`/recurring/${bill.ruleId}`)} className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", (isPaid || isSkipped) && "opacity-70")}>
-        <div className={cn("h-[3px] w-full shrink-0", isPaid ? "bg-emerald-500" : isSkipped ? "bg-muted" : isOverdue ? "bg-rose-500" : "bg-amber-500")} />
+        <div className={cn("h-0.75 w-full shrink-0", isPaid ? "bg-emerald-500" : isSkipped ? "bg-muted" : isOverdue ? "bg-rose-500" : "bg-amber-500")} />
         <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className={cn("size-9 rounded-xl flex items-center justify-center shrink-0", isPaid ? "bg-emerald-500/10 text-emerald-500" : isSkipped ? "bg-muted text-muted-foreground" : isOverdue ? "bg-rose-500/10 text-rose-500" : "bg-amber-500/10 text-amber-500")}>
@@ -407,11 +407,15 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
   return (
     <div className="flex flex-col gap-7 w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0"><RefreshCw className="size-6" /></div>
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <Repeat className="size-6" />
+          </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Recurring</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Manage recurring transactions, subscriptions, and bills.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Recurring & Subscriptions</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Manage recurring bills, active subscriptions, and automated payment schedules.
+            </p>
           </div>
         </div>
         <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">

@@ -442,17 +442,17 @@ export function LoanDetails({
         </div>
       </div>
 
-      {/* ── Metric Cards (wide, dense — two mini-stats fill each card) ── */}
+      {/* ── Metric Cards ── */}
       <div className="flex flex-wrap gap-4">
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={isLent ? ArrowUpRight : ArrowDownLeft}
           color={accent}
           label="Outstanding Balance"
           value={formatCurrency(loan.remainingAmount, loan.currency)}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={CheckCircle2}
           color="#10b981"
           label="Repaid"
@@ -460,14 +460,14 @@ export function LoanDetails({
           valueClassName="text-emerald-600 dark:text-emerald-400"
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={WalletIcon}
           color="#3b82f6"
           label="Principal"
           value={formatCurrency(loan.amount, loan.currency)}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Calendar}
           color={isOverdue ? "#f43f5e" : "#f59e0b"}
           label="Due Date"
@@ -645,7 +645,7 @@ export function LoanDetails({
 
         {/* ── Right column: Timeline + Reminder Message ───────────── */}
         <div className="lg:col-span-2 flex flex-col gap-4 lg:h-0 lg:min-h-full">
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 flex-1 min-h-0 overflow-hidden">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 max-h-[480px] lg:max-h-none flex-1 min-h-0 overflow-hidden">
             <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Clock className="size-3.5 text-muted-foreground" />

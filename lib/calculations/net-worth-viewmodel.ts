@@ -1,4 +1,4 @@
-import { Wallet, Transaction, Loan, LoanRepayment, Asset, AssetValuation, NetWorthOverviewViewModel, NetWorthHolding, NetWorthActivityEvent, NetWorthInsight, HistoricalNetWorthPoint } from "@/types"
+import { Wallet, Transaction, Loan, LoanRepayment, Asset, AssetValuation, NetWorthOverviewViewModel, NetWorthHolding, NetWorthActivityEvent, NetWorthInsight, HistoricalNetWorthPoint, InvestmentHolding } from "@/types"
 import { calculateCurrentNetWorth } from "./net-worth"
 
 export function generateNetWorthOverviewViewModel(params: {
@@ -8,14 +8,15 @@ export function generateNetWorthOverviewViewModel(params: {
   valuations: AssetValuation[]
   repayments: LoanRepayment[]
   transactions: Transaction[]
+  investmentHoldings?: InvestmentHolding[]
   convert: (amount: number, from: string) => number
   baseCurrency: string
   history: HistoricalNetWorthPoint[]
 }): NetWorthOverviewViewModel {
-  const { wallets, loans, assets, valuations, repayments, transactions, convert, baseCurrency, history } = params
+  const { wallets, loans, assets, valuations, repayments, transactions, investmentHoldings, convert, baseCurrency, history } = params
 
   // 1. Core breakdown
-  const current = calculateCurrentNetWorth({ wallets, loans, assets, convert })
+  const current = calculateCurrentNetWorth({ wallets, loans, assets, investmentHoldings, convert })
 
   // 2. Map holdings (Top Assets and Top Liabilities)
   const holdings: NetWorthHolding[] = []
@@ -23,7 +24,13 @@ export function generateNetWorthOverviewViewModel(params: {
   // Add wallets
   for (const w of wallets) {
     if (w.isArchived) continue
-    const val = w.balance
+    
+    let val = w.balance
+    if (w.type === "investment" && investmentHoldings) {
+      const wHoldings = investmentHoldings.filter(h => h.walletId === w._id.toString() && h.status === "active")
+      val = wHoldings.reduce((sum, h) => sum + (h.quantity * h.currentPrice), 0)
+    }
+    
     const isAsset = w.type !== "credit_card"
     holdings.push({
       id: w._id.toString(),

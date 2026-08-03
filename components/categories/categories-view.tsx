@@ -38,6 +38,7 @@ import {
   Folder,
   Loader2,
   FolderOpen,
+  Tag,
 } from "lucide-react"
 import { CategoryIcon } from "./category-icon"
 import { useRouter } from "next/navigation"
@@ -87,13 +88,15 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
 
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0">
-            <Folder className="size-6" />
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <Tag className="size-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Categories</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Organize your spending with custom labels.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Categories</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Organize your transactions with custom income, expense, and transfer categories.
+            </p>
           </div>
         </div>
         <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">
@@ -269,15 +272,15 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
 
       {/* ── Dialogs ── */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
-          <DialogHeader><DialogTitle className="text-xl font-extrabold">Create Category</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto min-w-0">
+          <DialogHeader><DialogTitle>Create Category</DialogTitle></DialogHeader>
           <div className="py-2"><CategoryForm onSuccess={() => setIsCreateOpen(false)} /></div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
-          <DialogHeader><DialogTitle className="text-xl font-extrabold">Edit Category</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto min-w-0">
+          <DialogHeader><DialogTitle>Edit Category</DialogTitle></DialogHeader>
           <div className="py-2">
             {editingCategory && <CategoryForm initialCategory={editingCategory} onSuccess={() => setEditingCategory(null)} />}
           </div>
@@ -285,8 +288,8 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
       </Dialog>
 
       <Dialog open={!!mergingCategory} onOpenChange={(open) => !open && setMergingCategory(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
-          <DialogHeader><DialogTitle className="text-xl font-extrabold">Merge Category</DialogTitle></DialogHeader>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto min-w-0">
+          <DialogHeader><DialogTitle>Merge Category</DialogTitle></DialogHeader>
           <div className="py-2">
             {mergingCategory && (
               <MergeDialog sourceCategory={mergingCategory} categories={categories} onSuccess={() => setMergingCategory(null)} />

@@ -169,7 +169,7 @@ export function LandingWorkflow() {
               key={idx}
               className="workflow-card group relative p-8 rounded-3xl border border-border/40 bg-card/45
                 backdrop-blur-sm flex flex-col justify-between min-h-[250px]
-                transition-all hover:bg-card/75 hover:border-border/80 hover:-translate-y-1"
+                transition-[background-color,border-color,transform] duration-300 hover:bg-card/75 hover:border-border/80 hover:-translate-y-1"
             >
               {/* Subtle hover gradient */}
               <div className="absolute inset-0 rounded-3xl bg-linear-to-br from-primary/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -190,8 +190,8 @@ export function LandingWorkflow() {
                 <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
 
-              {/* Bottom accent line that grows on hover */}
-              <div className="mt-6 h-px w-0 bg-primary/30 group-hover:w-full transition-all duration-500 ease-out" />
+              {/* Bottom accent line that grows on hover via hardware-accelerated transform */}
+              <div className="mt-6 h-px w-full bg-primary/30 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out" />
             </div>
           ))}
         </div>

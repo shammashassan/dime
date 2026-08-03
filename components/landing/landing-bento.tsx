@@ -38,7 +38,7 @@ function FeatureCard({ icon, title, description, className = "", badge, children
   return (
     <Card
       className={`bento-card group relative overflow-hidden border-border/40 bg-card/45 shadow-xs
-        hover:shadow-md transition-all hover:bg-card/75 hover:-translate-y-1
+        hover:shadow-md transition-[background-color,border-color,box-shadow,transform] duration-300 hover:bg-card/75 hover:-translate-y-1
         flex flex-col justify-between ${className}`}
     >
       <div className="absolute inset-0 bg-linear-to-tr from-primary/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -49,7 +49,7 @@ function FeatureCard({ icon, title, description, className = "", badge, children
             {icon}
           </div>
           {badge && (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2 py-0.5 rounded-full bg-primary/10">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/30">
               {badge}
             </span>
           )}
@@ -61,7 +61,7 @@ function FeatureCard({ icon, title, description, className = "", badge, children
         <CardDescription className="text-sm text-muted-foreground leading-relaxed">{description}</CardDescription>
         {children && (
           <div className="relative mt-4 overflow-hidden rounded-2xl border border-border/20 bg-muted/20 p-4
-            transition-all group-hover:bg-muted/40 flex-1 min-h-[120px] flex flex-col justify-center">
+            transition-colors duration-300 group-hover:bg-muted/40 flex-1 min-h-30 flex flex-col justify-center">
             {children}
           </div>
         )}
@@ -139,156 +139,186 @@ export function LandingBento() {
     })
 
     // ── Micro-animations (fire once on scroll) ──────────────────
+    const hasEl = (selector: string) => Boolean(containerRef.current?.querySelector(selector))
 
     // Currency pills
-    gsap.fromTo(
-      ".bento-currency-pill",
-      { autoAlpha: 0, scale: 0.75, y: 8 },
-      {
-        autoAlpha: 1, scale: 1, y: 0,
-        duration: 0.55, stagger: 0.1, ease: "back.out(1.5)",
-        scrollTrigger: { trigger: ".bento-currency-pill", start: "top 90%", toggleActions: "play none none none" },
-      }
-    )
+    if (hasEl(".bento-currency-pill")) {
+      gsap.fromTo(
+        ".bento-currency-pill",
+        { autoAlpha: 0, scale: 0.75, y: 8 },
+        {
+          autoAlpha: 1, scale: 1, y: 0,
+          duration: 0.55, stagger: 0.1, ease: "back.out(1.5)",
+          scrollTrigger: { trigger: ".bento-currency-pill", start: "top 90%", toggleActions: "play none none none" },
+        }
+      )
+    }
 
     // Goal progress bar
-    gsap.fromTo(
-      ".bento-goal-progress",
-      { width: "0%" },
-      {
-        width: "75%",
-        duration: 1.3, ease: "power2.out",
-        scrollTrigger: { trigger: ".bento-goal-progress", start: "top 90%", toggleActions: "play none none none" },
-      }
-    )
+    if (hasEl(".bento-goal-progress")) {
+      gsap.fromTo(
+        ".bento-goal-progress",
+        { width: "0%" },
+        {
+          width: "75%",
+          duration: 1.3, ease: "power2.out",
+          scrollTrigger: { trigger: ".bento-goal-progress", start: "top 90%", toggleActions: "play none none none" },
+        }
+      )
+    }
 
     // Scanner sweep (infinite)
-    gsap.fromTo(
-      ".bento-scanner-line",
-      { y: 0 },
-      { y: 65, duration: 2.2, repeat: -1, yoyo: true, ease: "sine.inOut" }
-    )
+    if (hasEl(".bento-scanner-line")) {
+      gsap.fromTo(
+        ".bento-scanner-line",
+        { y: 0 },
+        { y: 65, duration: 2.2, repeat: -1, yoyo: true, ease: "sine.inOut" }
+      )
+    }
 
     // Scanner text reveal
-    gsap.fromTo(
-      ".bento-scanner-text",
-      { autoAlpha: 0.15, filter: "blur(1.5px)" },
-      {
-        autoAlpha: 1, filter: "blur(0px)",
-        duration: 0.75, stagger: 0.2,
-        scrollTrigger: { trigger: ".bento-scanner-text", start: "top 90%", toggleActions: "play none none none" },
-      }
-    )
+    if (hasEl(".bento-scanner-text")) {
+      gsap.fromTo(
+        ".bento-scanner-text",
+        { autoAlpha: 0.15, filter: "blur(1.5px)" },
+        {
+          autoAlpha: 1, filter: "blur(0px)",
+          duration: 0.75, stagger: 0.2,
+          scrollTrigger: { trigger: ".bento-scanner-text", start: "top 90%", toggleActions: "play none none none" },
+        }
+      )
+    }
 
     // Shared-account avatars
-    gsap.fromTo(
-      ".bento-avatar",
-      { autoAlpha: 0, scale: 0.4, x: -8 },
-      {
-        autoAlpha: 1, scale: 1, x: 0,
-        duration: 0.6, stagger: 0.15, ease: "back.out(1.7)",
-        scrollTrigger: { trigger: ".bento-avatar", start: "top 90%", toggleActions: "play none none none" },
-      }
-    )
+    if (hasEl(".bento-avatar")) {
+      gsap.fromTo(
+        ".bento-avatar",
+        { autoAlpha: 0, scale: 0.4, x: -8 },
+        {
+          autoAlpha: 1, scale: 1, x: 0,
+          duration: 0.6, stagger: 0.15, ease: "back.out(1.7)",
+          scrollTrigger: { trigger: ".bento-avatar", start: "top 90%", toggleActions: "play none none none" },
+        }
+      )
+    }
 
     // CSV importer rows
-    gsap.fromTo(
-      ".bento-importer-row",
-      { autoAlpha: 0, x: -14 },
-      {
-        autoAlpha: 1, x: 0,
-        duration: 0.5, stagger: 0.12, ease: "power2.out",
-        scrollTrigger: { trigger: ".bento-importer-row", start: "top 90%", toggleActions: "play none none none" },
-      }
-    )
+    if (hasEl(".bento-importer-row")) {
+      gsap.fromTo(
+        ".bento-importer-row",
+        { autoAlpha: 0, x: -14 },
+        {
+          autoAlpha: 1, x: 0,
+          duration: 0.5, stagger: 0.12, ease: "power2.out",
+          scrollTrigger: { trigger: ".bento-importer-row", start: "top 90%", toggleActions: "play none none none" },
+        }
+      )
+    }
 
-    // Chart bars — scale up from bottom
-    gsap.fromTo(
-      ".bento-chart-bar",
-      { scaleY: 0 },
-      {
-        scaleY: 1,
-        duration: 0.85, stagger: 0.08, ease: "expo.out",
-        scrollTrigger: { trigger: ".bento-chart-bar", start: "top 90%", toggleActions: "play none none none" },
-      }
-    )
+    // Chart bars
+    if (hasEl(".bento-chart-bar")) {
+      gsap.fromTo(
+        ".bento-chart-bar",
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          duration: 0.85, stagger: 0.08, ease: "expo.out",
+          scrollTrigger: { trigger: ".bento-chart-bar", start: "top 90%", toggleActions: "play none none none" },
+        }
+      )
+    }
 
     // Rules Engine Trigger
-    gsap.fromTo(
-      ".bento-rule-trigger",
-      { autoAlpha: 0, y: -5 },
-      {
-        autoAlpha: 1, y: 0,
-        duration: 0.5,
-        scrollTrigger: { trigger: ".bento-rule-trigger", start: "top 90%", toggleActions: "play none none none" }
-      }
-    )
+    if (hasEl(".bento-rule-trigger")) {
+      gsap.fromTo(
+        ".bento-rule-trigger",
+        { autoAlpha: 0, y: -5 },
+        {
+          autoAlpha: 1, y: 0,
+          duration: 0.5,
+          scrollTrigger: { trigger: ".bento-rule-trigger", start: "top 90%", toggleActions: "play none none none" }
+        }
+      )
+    }
+
     // Rules Engine Actions
-    gsap.fromTo(
-      ".bento-rule-action",
-      { autoAlpha: 0, scale: 0.9 },
-      {
-        autoAlpha: 1, scale: 1,
-        duration: 0.6, stagger: 0.15, ease: "back.out(1.4)",
-        scrollTrigger: { trigger: ".bento-rule-action", start: "top 90%", toggleActions: "play none none none" }
-      }
-    )
+    if (hasEl(".bento-rule-action")) {
+      gsap.fromTo(
+        ".bento-rule-action",
+        { autoAlpha: 0, scale: 0.9 },
+        {
+          autoAlpha: 1, scale: 1,
+          duration: 0.6, stagger: 0.15, ease: "back.out(1.4)",
+          scrollTrigger: { trigger: ".bento-rule-action", start: "top 90%", toggleActions: "play none none none" }
+        }
+      )
+    }
 
     // Net Worth Chart Line & Area
-    gsap.fromTo(
-      ".bento-networth-line",
-      { strokeDashoffset: 400 },
-      {
-        strokeDashoffset: 0,
-        duration: 1.5,
-        ease: "power2.inOut",
-        scrollTrigger: { trigger: ".bento-networth-line", start: "top 90%", toggleActions: "play none none none" }
-      }
-    )
-    gsap.fromTo(
-      ".bento-networth-area",
-      { autoAlpha: 0 },
-      {
-        autoAlpha: 1,
-        duration: 0.8,
-        delay: 0.6,
-        ease: "power2.out",
-        scrollTrigger: { trigger: ".bento-networth-area", start: "top 90%", toggleActions: "play none none none" }
-      }
-    )
+    if (hasEl(".bento-networth-line")) {
+      gsap.fromTo(
+        ".bento-networth-line",
+        { strokeDashoffset: 400 },
+        {
+          strokeDashoffset: 0,
+          duration: 1.5,
+          ease: "power2.inOut",
+          scrollTrigger: { trigger: ".bento-networth-line", start: "top 90%", toggleActions: "play none none none" }
+        }
+      )
+    }
+    if (hasEl(".bento-networth-area")) {
+      gsap.fromTo(
+        ".bento-networth-area",
+        { autoAlpha: 0 },
+        {
+          autoAlpha: 1,
+          duration: 0.8,
+          delay: 0.6,
+          ease: "power2.out",
+          scrollTrigger: { trigger: ".bento-networth-area", start: "top 90%", toggleActions: "play none none none" }
+        }
+      )
+    }
 
     // Loan Progress Bar
-    gsap.fromTo(
-      ".bento-loan-progress",
-      { width: "0%" },
-      {
-        width: "33.3%",
-        duration: 1.2, ease: "power2.out",
-        scrollTrigger: { trigger: ".bento-loan-progress", start: "top 90%", toggleActions: "play none none none" }
-      }
-    )
+    if (hasEl(".bento-loan-progress")) {
+      gsap.fromTo(
+        ".bento-loan-progress",
+        { width: "0%" },
+        {
+          width: "33.3%",
+          duration: 1.2, ease: "power2.out",
+          scrollTrigger: { trigger: ".bento-loan-progress", start: "top 90%", toggleActions: "play none none none" }
+        }
+      )
+    }
 
     // Recurring Items
-    gsap.fromTo(
-      ".bento-recurring-item",
-      { autoAlpha: 0, y: 8 },
-      {
-        autoAlpha: 1, y: 0,
-        duration: 0.6, stagger: 0.12, ease: "power2.out",
-        scrollTrigger: { trigger: ".bento-recurring-item", start: "top 90%", toggleActions: "play none none none" }
-      }
-    )
+    if (hasEl(".bento-recurring-item")) {
+      gsap.fromTo(
+        ".bento-recurring-item",
+        { autoAlpha: 0, y: 8 },
+        {
+          autoAlpha: 1, y: 0,
+          duration: 0.6, stagger: 0.12, ease: "power2.out",
+          scrollTrigger: { trigger: ".bento-recurring-item", start: "top 90%", toggleActions: "play none none none" }
+        }
+      )
+    }
 
     // Split Items
-    gsap.fromTo(
-      ".bento-split-item",
-      { autoAlpha: 0, x: -10 },
-      {
-        autoAlpha: 1, x: 0,
-        duration: 0.5, stagger: 0.15, ease: "power2.out",
-        scrollTrigger: { trigger: ".bento-split-item", start: "top 90%", toggleActions: "play none none none" }
-      }
-    )
+    if (hasEl(".bento-split-item")) {
+      gsap.fromTo(
+        ".bento-split-item",
+        { autoAlpha: 0, x: -10 },
+        {
+          autoAlpha: 1, x: 0,
+          duration: 0.5, stagger: 0.15, ease: "power2.out",
+          scrollTrigger: { trigger: ".bento-split-item", start: "top 90%", toggleActions: "play none none none" }
+        }
+      )
+    }
 
   }, { scope: containerRef })
 

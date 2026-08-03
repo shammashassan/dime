@@ -50,7 +50,7 @@ export function Preloader({ onExitStart, onComplete }: PreloaderProps) {
     gsap.fromTo(
       brandRef.current,
       { autoAlpha: 0, scale: 0.88, y: 10 },
-      { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.15 }
+      { autoAlpha: 1, scale: 1, y: 0, duration: 0.5, ease: "power3.out" }
     )
 
     // ── Master progress timeline ─────────────────────────────────────
@@ -58,10 +58,10 @@ export function Preloader({ onExitStart, onComplete }: PreloaderProps) {
 
     const tl = gsap.timeline({ defaults: { ease: "none" } })
 
-    // Run all three progress indicators in sync for 2.5 s
+    // Run progress indicators in sync for 1.2 s
     tl.to(counterObj, {
       n: 100,
-      duration: 2.5,
+      duration: 1.2,
       ease: "power1.inOut",
       onUpdate() {
         if (counterRef.current) {
@@ -72,34 +72,33 @@ export function Preloader({ onExitStart, onComplete }: PreloaderProps) {
 
     tl.to(
       progressFillRef.current,
-      { scaleX: 1, duration: 2.5, ease: "power1.inOut" },
-      "<"  // start simultaneously
+      { scaleX: 1, duration: 1.2, ease: "power1.inOut" },
+      "<"
     )
 
     tl.to(
       ringRef.current,
-      { strokeDashoffset: 0, duration: 2.5, ease: "power1.inOut" },
+      { strokeDashoffset: 0, duration: 1.2, ease: "power1.inOut" },
       "<"
     )
 
-    // Brief hold at 100 %
-    tl.to({}, { duration: 0.35 })
+    // Brief 0.15s hold at 100%
+    tl.to({}, { duration: 0.15 })
+
+    // Signal hero entrance as curtain starts wiping upward
+    tl.add(() => onExitStart())
 
     // ── Exit sequence ────────────────────────────────────────────────
-    // 1. Curtain wipes upward first — page content must be fully hidden beneath it
     tl.to(curtainRef.current, {
       yPercent: -100,
-      duration: 1.05,
+      duration: 0.65,
       ease: "expo.inOut",
     })
 
-    // 2. Only AFTER curtain is fully gone: signal hero to start its animations
-    tl.add(() => onExitStart())
-
-    // 3. Fade the now-transparent wrapper shell
+    // Fade the wrapper shell
     tl.to(containerRef.current, { autoAlpha: 0, duration: 0.15 })
 
-    // 4. Signal parent to unmount
+    // Signal parent to unmount
     tl.add(() => {
       sessionStorage.setItem("dime_preloader_shown", "true")
       document.body.style.overflow = ""

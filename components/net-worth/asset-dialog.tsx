@@ -15,7 +15,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { CalendarIcon, Loader2, Plus, Pencil, Percent, Layers } from "lucide-react"
+import { CalendarIcon, Loader2, Plus, Pencil, Percent, Layers, TrendingUp, TrendingDown } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -186,9 +186,9 @@ export function AssetDialog({
           )}
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 shadow-xl p-6">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2">
             <Layers className="size-5 text-primary" />
             {isEditing ? "Edit Item" : "Add Asset or Liability"}
           </DialogTitle>
@@ -215,27 +215,31 @@ export function AssetDialog({
                 name="kind"
                 control={control}
                 render={({ field }) => (
-                  <ToggleGroup
-                    type="single"
-                    value={field.value}
-                    onValueChange={(val) => {
-                      if (val) field.onChange(val)
-                    }}
-                    className="w-full flex justify-start gap-1"
-                  >
-                    <ToggleGroupItem
-                      value="asset"
-                      className="flex-1 rounded-xl text-center py-2 border font-medium data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                    >
-                      Asset
-                    </ToggleGroupItem>
-                    <ToggleGroupItem
-                      value="liability"
-                      className="flex-1 rounded-xl text-center py-2 border font-medium data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                    >
-                      Liability
-                    </ToggleGroupItem>
-                  </ToggleGroup>
+                  <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                  {[
+                    { value: "asset", label: "Asset", icon: TrendingUp },
+                    { value: "liability", label: "Liability", icon: TrendingDown },
+                  ].map((k) => {
+                    const Icon = k.icon
+                    const isSelected = field.value === k.value
+                    return (
+                      <button
+                        key={k.value}
+                        type="button"
+                        onClick={() => field.onChange(k.value)}
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 py-2 px-3 rounded-md transition-all text-center cursor-pointer",
+                          isSelected
+                            ? "bg-background text-foreground shadow-xs font-bold"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="size-3.5 shrink-0" />
+                        {k.label}
+                      </button>
+                    )
+                  })}
+                </div>
                 )}
               />
               {errors.kind && <FieldError>{(errors.kind as any).message}</FieldError>}

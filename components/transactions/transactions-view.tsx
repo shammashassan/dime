@@ -129,12 +129,12 @@ export function TransactionsView({
     <div className="flex flex-col gap-6 w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3.5 bg-primary/10 text-primary rounded-2xl shadow-xs shrink-0">
-            <ArrowLeftRight className="h-7 w-7" />
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <ArrowLeftRight className="size-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Transactions</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Transactions</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Track and manage your income, expenses, and wallet transfers.
             </p>
@@ -204,9 +204,9 @@ export function TransactionsView({
 
       {/* Edit Dialog */}
       <Dialog open={!!editingTransaction} onOpenChange={(open) => !open && setEditingTransaction(null)}>
-        <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-background border border-border/40 rounded-2xl shadow-xl">
+        <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] min-w-0">
           <DialogHeader>
-            <DialogTitle className="text-xl font-extrabold tracking-tight">Edit Transaction</DialogTitle>
+            <DialogTitle>Edit Transaction</DialogTitle>
           </DialogHeader>
           <div className="py-2">
             {editingTransaction && (

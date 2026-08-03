@@ -1,100 +1,188 @@
 "use client"
 
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { RadialBarChart, RadialBar, PolarRadiusAxis, Label } from "recharts"
+import * as React from "react"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { Cell, Pie, PieChart } from "recharts"
 import { formatCurrency, cn } from "@/lib/utils"
 import { NetWorthOverviewViewModel, NetWorthBreakdown } from "@/types"
 import { Globe } from "lucide-react"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-export function CurrencyAllocationCard({ viewModel, currencyBreakdown }: { viewModel: NetWorthOverviewViewModel; currencyBreakdown: NetWorthBreakdown["currencyBreakdown"] }) {
+const RADIAL_COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+]
+
+export function CurrencyAllocationCard({
+  viewModel,
+  currencyBreakdown,
+}: {
+  viewModel: NetWorthOverviewViewModel
+  currencyBreakdown: NetWorthBreakdown["currencyBreakdown"]
+}) {
   const { netWorth, currency } = viewModel
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>(undefined)
 
-  const currencyEntries = Object.entries(currencyBreakdown || {})
-  const radialColors = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"]
-  const currencyChartConfig = currencyEntries.reduce((acc, [curr], idx) => {
-    acc[curr] = { label: curr, color: radialColors[idx % radialColors.length] }
-    return acc
-  }, {} as Record<string, { label: string; color: string }>)
+  const currencyEntries = React.useMemo(() => {
+    return Object.entries(currencyBreakdown || {}).sort(
+      (a, b) => Math.abs(b[1].netWorth) - Math.abs(a[1].netWorth)
+    )
+  }, [currencyBreakdown])
 
-  const radialData = currencyEntries.length > 0
-    ? [
-      currencyEntries.reduce((acc, [curr, breakd]) => {
-        acc[curr] = Math.abs(breakd.netWorth) / 100
-        return acc
-      }, {} as Record<string, number>),
-    ]
-    : []
-  const totalCurrencyMagnitude = currencyEntries.reduce((sum, [, breakd]) => sum + Math.abs(breakd.netWorth), 0)
+  const totalCurrencyMagnitude = React.useMemo(() => {
+    return currencyEntries.reduce((sum, [, breakd]) => sum + Math.abs(breakd.netWorth), 0)
+  }, [currencyEntries])
 
-  const getPct = (val: number, total: number) => {
-    if (total === 0) return 0
-    return Math.round((val / total) * 100)
-  }
+  const activeData = React.useMemo(() => {
+    return currencyEntries.map(([curr, breakd], idx) => {
+      const val = Math.abs(breakd.netWorth) / 100
+      const pct = totalCurrencyMagnitude > 0 ? (Math.abs(breakd.netWorth) / totalCurrencyMagnitude) * 100 : 0
+      const color = RADIAL_COLORS[idx % RADIAL_COLORS.length]
+
+      return {
+        category: curr,
+        value: val,
+        rawNetWorth: breakd.netWorth,
+        percentage: pct,
+        color,
+      }
+    })
+  }, [currencyEntries, totalCurrencyMagnitude])
+
+  const chartConfig = React.useMemo(() => {
+    return activeData.reduce((acc, item) => {
+      acc[item.category] = { label: item.category, color: item.color }
+      return acc
+    }, {} as ChartConfig)
+  }, [activeData])
 
   return (
     <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-full flex flex-col bg-card">
-      <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
-        <Globe className="size-3.5 text-muted-foreground" />
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Currency Exposure</span>
+      {/* Compact Header */}
+      <div className="px-4 py-2.5 border-b border-border/30 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Globe className="size-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Currency Exposure</span>
+        </div>
+        <span className="text-[10px] font-semibold text-muted-foreground">
+          {activeData.length} {activeData.length === 1 ? "currency" : "currencies"}
+        </span>
       </div>
 
-      <div className="flex flex-1 items-center justify-center p-3">
-        {radialData.length > 0 ? (
-          <ChartContainer config={currencyChartConfig} className="mx-auto aspect-square w-full max-w-[150px] h-[150px]">
-            <RadialBarChart data={radialData} endAngle={180} innerRadius={42} outerRadius={76}>
-              <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-              {currencyEntries.map(([curr]) => (
-                <RadialBar
-                  key={curr}
-                  dataKey={curr}
-                  fill={`var(--color-${curr})`}
-                  stackId="a"
-                  cornerRadius={5}
-                  className="stroke-transparent stroke-2"
-                />
-              ))}
-              <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                <Label
-                  content={({ viewBox }) => {
-                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+      {/* Main Larger Center Gauge - Dead Space Removed */}
+      <div className="px-3 pt-2 pb-1 flex-1 flex flex-col items-center justify-center min-h-[120px]">
+        {activeData.length > 0 ? (
+          <ChartContainer
+            config={chartConfig}
+            className="w-full max-w-[280px] h-[125px] mx-auto overflow-visible"
+          >
+            <PieChart>
+              <Pie
+                data={activeData}
+                dataKey="value"
+                nameKey="category"
+                cx="50%"
+                cy="92%"
+                startAngle={180}
+                endAngle={0}
+                innerRadius={62}
+                outerRadius={94}
+                cornerRadius={5}
+                paddingAngle={4}
+                minAngle={12}
+                stroke="var(--card)"
+                strokeWidth={2}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(undefined)}
+              >
+                {activeData.map((entry, index) => (
+                  <Cell
+                    key={entry.category}
+                    fill={entry.color}
+                    style={{
+                      opacity: activeIndex === undefined || activeIndex === index ? 1 : 0.35,
+                      transition: "opacity 0.2s ease-in-out",
+                      outline: "none",
+                    }}
+                  />
+                ))}
+              </Pie>
+              <text x="50%" y="92%" textAnchor="middle" className="pointer-events-none">
+                <tspan
+                  x="50%"
+                  dy="-8"
+                  className="fill-foreground text-base sm:text-lg font-extrabold tabular-nums tracking-tight"
+                >
+                  {formatCurrency(netWorth / 100, currency)}
+                </tspan>
+                <tspan
+                  x="50%"
+                  dy="15"
+                  className="fill-muted-foreground text-[8px] font-bold uppercase tracking-wider"
+                >
+                  Net Worth
+                </tspan>
+              </text>
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    hideLabel
+                    formatter={(value, name, item) => {
+                      const categoryName = String(name)
+                      const color = item.payload?.color || item.color || item.payload?.fill
+                      const rawNetWorth = item.payload?.rawNetWorth ?? (Number(value) * 100)
                       return (
-                        <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
-                          <tspan x={viewBox.cx} y={(viewBox.cy || 0) - 8} className="fill-foreground text-xs font-bold">
-                            {formatCurrency(netWorth / 100, currency)}
-                          </tspan>
-                          <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 8} className="fill-muted-foreground text-[9px]">
-                            Net Worth
-                          </tspan>
-                        </text>
+                        <>
+                          <div
+                            className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                            style={{ backgroundColor: color }}
+                          />
+                          <div className="flex flex-1 justify-between items-center leading-none gap-2">
+                            <span className="text-muted-foreground font-medium">{categoryName}:</span>
+                            <span className="font-mono font-bold text-foreground">
+                              {formatCurrency(rawNetWorth / 100, categoryName)}
+                            </span>
+                          </div>
+                        </>
                       )
-                    }
-                  }}
-                />
-              </PolarRadiusAxis>
-            </RadialBarChart>
+                    }}
+                  />
+                }
+              />
+            </PieChart>
           </ChartContainer>
         ) : (
-          <div className="text-xs text-muted-foreground py-14">No currency data.</div>
+          <div className="text-xs text-muted-foreground py-6 text-center">No currency data.</div>
         )}
       </div>
 
-      {currencyEntries.length > 0 && (
-        <div className="flex flex-col border-t border-border/30 text-xs">
-          {currencyEntries.map(([curr, breakd]) => (
-            <div key={curr} className="flex w-full items-center justify-between gap-2 px-4 py-1.5 not-last:border-b border-border/20">
-              <span className="flex items-center gap-2 font-medium">
-                <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: currencyChartConfig[curr]?.color as string }} />
-                {curr}
-                <span className="text-[10px] font-normal text-muted-foreground">
-                  {getPct(Math.abs(breakd.netWorth), totalCurrencyMagnitude)}%
+      {/* shadcn ScrollArea for Legend Row */}
+      {activeData.length > 0 && (
+        <ScrollArea className="max-h-[56px] w-full border-t border-border/30 bg-muted/5 px-3 py-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
+            {activeData.map((entry, index) => (
+              <div
+                key={entry.category}
+                className={cn(
+                  "flex items-center gap-1.5 text-xs transition-opacity cursor-default",
+                  activeIndex !== undefined && activeIndex !== index ? "opacity-30" : "opacity-100"
+                )}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(undefined)}
+              >
+                <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                <span className="font-bold text-foreground">{entry.category}</span>
+                <span className="text-[10px] font-extrabold text-muted-foreground/80 bg-muted/40 px-1.5 py-0.5 rounded-full border border-border/30">
+                  {entry.percentage.toFixed(1)}%
                 </span>
-              </span>
-              <span className={cn("font-bold tabular-nums shrink-0 text-[11px]", breakd.netWorth >= 0 ? "text-emerald-500" : "text-rose-500")}>
-                {formatCurrency(breakd.netWorth / 100, curr)}
-              </span>
-            </div>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       )}
     </div>
   )

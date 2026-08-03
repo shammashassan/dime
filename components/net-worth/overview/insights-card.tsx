@@ -37,8 +37,8 @@ export function InsightsCard({ viewModel }: { viewModel: NetWorthOverviewViewMod
 
       <div className="flex-1">
         {insights.length > 0 ? (
-          <ScrollArea className="h-[215px] px-1">
-            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0">
+          <ScrollArea className="h-53.75 px-2">
+            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0 py-2">
               {insights.map((insight) => {
                 const Icon = iconsMap[insight.type] || Info
                 const iconColor = colorMap[insight.type]
@@ -46,10 +46,10 @@ export function InsightsCard({ viewModel }: { viewModel: NetWorthOverviewViewMod
                   <Item
                     key={insight.id}
                     asChild
-                    className="items-start px-2 cursor-pointer"
+                    className="items-start px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl cursor-pointer"
                   >
                     <Link href={insight.href || "#"} className="w-full flex items-start gap-2.5">
-                      <ItemMedia className={cn("size-7 rounded-lg border", iconColor)}>
+                      <ItemMedia className={cn("size-7 rounded-lg border shrink-0 mt-0.5", iconColor)}>
                         <Icon className="size-3.5" />
                       </ItemMedia>
                       <ItemContent className="min-w-0">
@@ -67,7 +67,7 @@ export function InsightsCard({ viewModel }: { viewModel: NetWorthOverviewViewMod
             </ItemGroup>
           </ScrollArea>
         ) : (
-          <div className="text-xs text-muted-foreground py-14 text-center h-[280px] flex items-center justify-center">
+          <div className="text-xs text-muted-foreground py-10 text-center h-53.75 flex items-center justify-center">
             No insights calculated at this time.
           </div>
         )}

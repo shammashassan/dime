@@ -1,16 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { NetWorthOverviewViewModel, Asset, HistoricalNetWorthPoint } from "@/types"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 import { AssetsListTab } from "./assets-list-tab"
-import { Landmark, RefreshCw } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Landmark } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Modular Dashboard sub-cards
@@ -61,15 +58,7 @@ const DEFAULT_BENTO_LAYOUT: DashboardCardConfig[] = [
 ]
 
 export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOverviewProps) {
-  const router = useRouter()
   const [activeTab, setActiveTab] = React.useState<"overview" | "assets-list">("overview")
-  const [isRefreshing, setIsRefreshing] = React.useState(false)
-
-  const handleRefresh = () => {
-    setIsRefreshing(true)
-    router.refresh()
-    setTimeout(() => setIsRefreshing(false), 600)
-  }
 
   const renderCard = (card: DashboardCardConfig) => {
     switch (card.type) {
@@ -111,7 +100,7 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
       case "recent_activity":
         return <RecentActivityCard key={card.id} viewModel={viewModel} />
       case "quick_actions":
-        return <QuickActionsCard key={card.id} assets={assets} onRefresh={handleRefresh} />
+        return <QuickActionsCard key={card.id} assets={assets} />
       case "insights":
         return <InsightsCard key={card.id} viewModel={viewModel} />
       default:
@@ -121,22 +110,22 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
 
   return (
     <div className="flex flex-col gap-5 w-full">
-      {/* ── Header (matches Loan Detail page pattern: icon box + title + meta) ── */}
+      {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
-          <div className="flex items-center justify-center size-11 shrink-0 rounded-2xl bg-primary/10 text-primary border border-primary/20 mt-0.5">
-            <Landmark className="size-5" />
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <Landmark className="size-6" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-extrabold tracking-tight">Net Worth</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Net Worth</h1>
               <HoverCard openDelay={150}>
                 <HoverCardTrigger asChild>
                   <Badge variant="outline" className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default">
                     {viewModel.currency}
                   </Badge>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start">
+                <HoverCardContent className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                   All figures are converted to your base currency ({viewModel.currency}) using the latest exchange rates available at calculation time.
                 </HoverCardContent>
               </HoverCard>
@@ -147,22 +136,7 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-10 rounded-xl"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-              >
-                <RefreshCw className={cn("size-4", isRefreshing && "animate-spin")} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">Refresh data</TooltipContent>
-          </Tooltip>
-        </div>
+
       </div>
 
       {/* ── Summary Row ── */}

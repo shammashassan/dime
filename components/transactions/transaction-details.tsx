@@ -79,12 +79,12 @@ export function TransactionDetails({
   return (
     <div className="w-full flex flex-col gap-4 text-sm">
       {/* Hero — horizontal so the icon can stay full-size and space is used, not centered into empty margins */}
-      <div className="flex items-center gap-4 pb-4 border-b border-border/20">
-        <div className={`p-4 rounded-2xl ${iconBg} shrink-0`}>
-          <Icon className="size-8" />
+      <div className="flex items-start gap-3 sm:gap-4 pb-4 border-b border-border/20 min-w-0">
+        <div className={`p-3.5 sm:p-4 rounded-2xl ${iconBg} shrink-0`}>
+          <Icon className="size-7 sm:size-8" />
         </div>
         <div className="flex flex-col min-w-0 flex-1 gap-1.5">
-          <h2 className="text-xl font-extrabold tracking-tight text-foreground truncate">
+          <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-foreground break-words [overflow-wrap:anywhere] leading-snug">
             {transaction.description}
           </h2>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -108,7 +108,7 @@ export function TransactionDetails({
             )}
           </div>
         </div>
-        <div className={`text-2xl font-black tracking-tight shrink-0 ${amountColor}`}>
+        <div className={`text-xl sm:text-2xl font-black tracking-tight shrink-0 ${amountColor} text-right`}>
           {prefix} {formatCurrency(transaction.amount, transaction.currency)}
         </div>
       </div>

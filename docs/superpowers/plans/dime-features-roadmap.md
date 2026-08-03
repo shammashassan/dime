@@ -19,6 +19,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 ## Collaboration
 
 * ✅ Couples & Shared Budgeting (Spaces)
+* ✅ Shared Expense Settlement & Group Debt Simplification
 
 ## Automation
 
@@ -31,11 +32,17 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ Recurring Platform (Recurring Transactions)
 * ✅ Subscription Manager
 * ✅ Bill Manager
+* ✅ Investment Tracker & Portfolio Management
 
 ## Analytics
 
 * ✅ Reports & Analytics
 * ✅ Net Worth Dashboard
+* ✅ Financial Planner (Forecasting & Scenarios)
+
+## People
+
+* ✅ Contacts
 
 ---
 
@@ -79,7 +86,6 @@ Features:
 * ✅ Manual renewal logging
 * ✅ Integration with recurring engine
 * ✅ Shared recurring infrastructure
-* ✅ Active / Cancelled lifecycle management
 
 Integrations:
 
@@ -224,131 +230,76 @@ Status:
 
 ---
 
-# 4. Investment Tracker (Highest Priority)
+# 4. Investment Tracker ✅ COMPLETED
 
 Track investments manually initially.
 
+> **Status**: Completed. Transaction-ledger portfolio engine, holdings calculation, brokerage account organization, market price snapshots, asset allocation half-donut gauges, and Net Worth integration are fully built and live.
+
 Support:
 
-* Stocks
-* ETFs
-* Mutual Funds
-* Crypto
-* Gold
-* Bonds
-* EPF
-* PPF
-* NPS
-* Fixed Deposits
+* ✅ Stocks
+* ✅ ETFs
+* ✅ Mutual Funds
+* ✅ Crypto
+* ✅ Gold
+* ✅ Bonds
+* ✅ EPF
+* ✅ PPF
+* ✅ NPS
+* ✅ Fixed Deposits
 
 Features:
 
-* Holdings
-* Quantity
-* Average Buy Price
-* Current Value
-* Unrealized Gain/Loss
-* Allocation Charts
-* Portfolio Breakdown
-* Investment Notes
+* ✅ Holdings calculation (derived from transaction ledger)
+* ✅ Quantity & Weighted Average Buy Price (Cost Basis)
+* ✅ Current Market Value
+* ✅ Unrealized & Realized Gain/Loss tracking
+* ✅ Asset Class Allocation 180° radial gauges & pie charts
+* ✅ Portfolio Position Summary & Top Holdings cards
+* ✅ Investment Notes & transaction metadata
 
-### Additional Planned Features
+### Additional Completed Features
 
-* Buy / Sell transactions
-* Cost basis calculation
-* Realized gains/losses
-* Dividend tracking
-* Portfolio performance
-* Benchmark comparison
-* Investment goals
-* Sector allocation
-* Country allocation
-* Brokerage accounts
-* Investment watchlists
-* Historical portfolio value
-* Portfolio timeline
-* Performance attribution
-* Investment insights
-* Investment reports
+* ✅ Transaction-Ledger single source of truth (Buys, Sells, Dividends, Fees)
+* ✅ Brokerage Accounts (Wallets with type = investment)
+* ✅ Manual market price snapshot logger (`recordPriceSnapshot`)
+* ✅ Recent Investment Activity feed with `<HoverCard>` popups
+* ✅ Integration into Net Worth overview calculations
+* ✅ Holdings and Account detail views (`/investments/[accountId]`, `/investments/[accountId]/[symbol]`)
+* ✅ Controlled shadcn `Popover` + `Calendar` transaction date pickers
+* ✅ Multi-currency cents unit scaling
 
-Future:
+Future Enhancements:
 
-* Live price integrations
-* Dividend tracking
-* Portfolio performance
-* Brokerage synchronization
-* Automatic market data
-* Tax lot tracking
-* Corporate actions
-* Multi-currency portfolios
-* Portfolio forecasting
-* Integration into Net Worth
+* Live price API integrations
+* Brokerage account sync (Plaid / Yodlee)
+* Investment watchlists UI
+* Multi-currency exchange rate forecasting
 ---
 
-# 5. Shared Expense Settlement
+# 5. Shared Expense Settlement ✅ COMPLETED
 
-Extend Shared Spaces with expense splitting and reimbursements.
+Extend Shared Spaces and Contacts with expense splitting, dynamic pairwise balance calculation, and debt simplification graph algorithms.
 
-Examples:
-
-Dinner
-
-₹2,400
-
-Paid by Alice
-
-Participants:
-
-* Alice
-* Bob
-* Charlie
-
-Result:
-
-Bob owes ₹800
-
-Charlie owes ₹800
+Status:
+**Completed.** Dedicated domain architecture implemented in `lib/shared-expenses/` (`splits.ts`, `balances.ts`, `simplification.ts`, `view-models.ts`) with canonical database persistence (`shared_expenses`, `shared_settlements`), thin server actions, `/shared-expenses` dashboard route, interactive Settle-Up modal, optional wallet linking, inbox notification triggers, and Contacts page integration.
 
 Features:
-
-* Equal split
-* Percentage split
-* Custom split
-* Itemized split
-* Settlement tracking
-* Partial settlements
-* Automatic reimbursement suggestions
-* Outstanding balances
-* Space-level settlements
-
-### Additional Planned Features
-
-* Expense approval workflow
-* Settlement reminders
-* Payment status tracking
-* One-click settle balances
-* QR payment integration
-* Settlement history
-* Multi-currency settlements
-* Automatic balance simplification
-* Group expense analytics
-* Member balance dashboard
-* Settlement timeline
-* Export settlement history
-
-Integrations:
-
-* Shared Spaces
-* Contacts
-* Loans
-* Notifications
-* Reports
-* Financial Timeline
-* Dashboard Widgets
+* ✅ Equal split mode
+* ✅ Percentage split mode
+* ✅ Custom split mode
+* ✅ Dynamic pairwise balance calculations (computed on-the-fly)
+* ✅ Derived debt simplification graph algorithm (minimizes total group transfers)
+* ✅ 1-Click Settle Up modal with payment method logging & optional wallet linking
+* ✅ Shared Expenses feed & Settlement history log
+* ✅ Integration with Contacts (`/shared-expenses?contactId=...`)
+* ✅ Notification Center inbox notifications for shared expenses
+* ✅ Dedicated domain architecture (`lib/shared-expenses/`) matching Net Worth & Investments
 
 ---
 
-# 6. Contacts
+# 6. Contacts ✅ COMPLETED
 
 Introduce reusable contacts across Dime.
 
@@ -376,16 +327,25 @@ Benefits:
 * Better search
 * Reduced duplicate data
 
-### Additional Planned Features
+### Additional Completed Features
+
+* ✅ Full contact CRUD (create, edit, delete)
+* ✅ Contact detail pages with linked loans
+* ✅ Contact activity timeline (loan history)
+* ✅ Money lent/borrowed summary per contact
+* ✅ Contacts list view with search & filters
+* ✅ Contact dialog (create/edit)
+* ✅ Integration with Loans module
+* ✅ Contact notes support
+* ✅ MongoDB collection + indexes
+
+### Additional Planned Features (Future)
 
 * Contact groups
 * Favorite contacts
 * Contact statistics
-* Money lent summary
-* Money borrowed summary
 * Shared Spaces participation
 * Payment preferences
-* Contact activity timeline
 * Contact notes history
 * Duplicate detection
 * Contact search improvements
@@ -400,7 +360,7 @@ Future Integrations:
 
 ---
 
-# 7. Financial Planner (Forecasting)
+# 7. Financial Planner (Forecasting) ✅ COMPLETED
 
 Transform forecasting into an interactive financial planning tool.
 
@@ -1108,7 +1068,7 @@ Integrations
 
 ---
 
-# 19. Financial Inbox & Notifications Center (New)
+# 19. Financial Inbox & Notifications Center ✅ COMPLETED
 
 Centralize every financial notification into a unified inbox.
 
@@ -1132,17 +1092,27 @@ Notification Types
 * Financial Planner alerts
 * AI recommendations
 
-Features
+### Additional Completed Features
 
-* Read / unread
+* ✅ Notifications inbox page (`/notifications`)
+* ✅ Notification bell with unread count in header
+* ✅ Read / unread state management
+* ✅ Archive support
+* ✅ Mark all as read
+* ✅ Bulk dismiss
+* ✅ Notification type system
+* ✅ Deep link support (`link` field)
+* ✅ MongoDB collection + indexes
+* ✅ Server actions for notification management
+* ✅ Real-time badge count in sidebar
+
+### Planned Enhancements
+
 * Snooze
 * Pin
-* Archive
 * Filter by type
-* Search
-* Mark all as read
-* Bulk actions
-* Notification preferences
+* Search within inbox
+* Notification preferences per type
 
 Integrations
 

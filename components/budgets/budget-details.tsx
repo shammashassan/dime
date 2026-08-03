@@ -237,28 +237,28 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
             {/* ── Metric Cards ── */}
             <div className="flex flex-wrap gap-4">
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={PiggyBank}
                     color={budget.categoryColor}
                     label="Spent"
                     value={formatCurrency(budget.spent, budget.currency)}
                 />
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={TrendingUp}
                     color={remaining > 0 ? "#10b981" : "#f43f5e"}
                     label="Remaining"
                     value={formatCurrency(remaining, budget.currency)}
                 />
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={WalletIcon}
                     color="#3b82f6"
                     label="Limit"
                     value={formatCurrency(budget.amount, budget.currency)}
                 />
                 <MetricCard
-                    style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+                    style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
                     icon={Clock}
                     color={isOverBudget ? "#f43f5e" : percent >= 70 ? "#f59e0b" : "#10b981"}
                     label="Usage"
@@ -390,7 +390,7 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
 
                 {/* ── Right column: Transaction History ── */}
                 <div className="lg:col-span-2 flex flex-col gap-4 lg:h-0 lg:min-h-full">
-                    <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 flex-1 min-h-0 overflow-hidden">
+                    <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 max-h-[480px] lg:max-h-none flex-1 min-h-0 overflow-hidden">
                         <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
                                 <Receipt className="size-3.5 text-muted-foreground" />

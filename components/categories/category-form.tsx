@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Loader2, Check } from "lucide-react"
+import { Loader2, Check, ArrowDownRight, ArrowUpRight, ArrowLeftRight } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { CATEGORY_ICON_MAP, CUSTOM_ICON_OPTIONS } from "./category-icon"
@@ -155,31 +155,48 @@ export function CategoryForm({ initialCategory, onSuccess }: CategoryFormProps) 
           {errors.name && <FieldError>{errors.name.message}</FieldError>}
         </Field>
 
-        {/* Type ToggleGroup */}
+        {/* Type Selector */}
         <Field data-invalid={!!errors.type}>
           <FieldLabel>Category Type</FieldLabel>
           <Controller
             control={control}
             name="type"
             render={({ field }) => (
-              <ToggleGroup
-                type="multiple"
-                value={field.value}
-                onValueChange={(val) => field.onChange(val)}
-                variant="outline"
-                spacing={0}
-                className="w-full flex border border-border/30 rounded-3xl overflow-hidden"
-              >
-                <ToggleGroupItem value="expense" className="flex-1 rounded-none rounded-l-3xl py-2 text-xs font-semibold">
-                  Expense
-                </ToggleGroupItem>
-                <ToggleGroupItem value="income" className="flex-1 rounded-none py-2 text-xs font-semibold">
-                  Income
-                </ToggleGroupItem>
-                <ToggleGroupItem value="transfer" className="flex-1 rounded-none rounded-r-3xl py-2 text-xs font-semibold">
-                  Transfer
-                </ToggleGroupItem>
-              </ToggleGroup>
+              <div className="grid grid-cols-3 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                {[
+                  { value: "expense" as const, label: "Expense", icon: ArrowDownRight },
+                  { value: "income" as const, label: "Income", icon: ArrowUpRight },
+                  { value: "transfer" as const, label: "Transfer", icon: ArrowLeftRight },
+                ].map((t) => {
+                  const Icon = t.icon
+                  const isSelected = field.value?.includes(t.value as any)
+                  return (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => {
+                        const current = (field.value || []) as ("expense" | "income" | "transfer")[]
+                        if (isSelected) {
+                          if (current.length > 1) {
+                            field.onChange(current.filter((x) => x !== t.value))
+                          }
+                        } else {
+                          field.onChange([...current, t.value])
+                        }
+                      }}
+                      className={cn(
+                        "flex items-center justify-center gap-1.5 py-2 px-3 rounded-md transition-all text-center cursor-pointer",
+                        isSelected
+                          ? "bg-background text-foreground shadow-xs font-bold"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="size-3.5 shrink-0" />
+                      {t.label}
+                    </button>
+                  )
+                })}
+              </div>
             )}
           />
           {errors.type && <FieldError>{errors.type.message}</FieldError>}

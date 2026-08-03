@@ -45,14 +45,14 @@ function ReportsSkeleton() {
       {/* MetricCards Skeleton */}
       <div className="flex flex-wrap gap-4">
         {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
+          <Skeleton key={i} className="h-22.5 flex-1 min-w-50 rounded-2xl" />
         ))}
       </div>
 
       {/* Charts Grid Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-[380px] w-full rounded-2xl" />
+          <Skeleton key={i} className="h-95 w-full rounded-2xl" />
         ))}
       </div>
     </div>
@@ -130,17 +130,17 @@ async function ReportsContent({
   const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-7 w-full">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="p-3.5 bg-primary/10 text-primary rounded-2xl shadow-xs shrink-0">
-            <BarChart3 className="h-7 w-7" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <BarChart3 className="size-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Analytics & Reports</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Gain deeper insights into your spending habits, net worth progression, and budgets.
+              Analyze spending trends, category breakdowns, and monthly financial summaries.
             </p>
           </div>
         </div>

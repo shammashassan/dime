@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation"
 import { Contact } from "@/types"
 import { createContact, updateContact } from "@/lib/actions/loans"
 import { Button } from "@/components/ui/button"
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
+import { InputGroup, InputGroupInput, InputGroupTextarea } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Loader2, UserPlus, UserMinus, UserCheck, Pencil } from "lucide-react"
+import { Loader2, UserPlus, Pencil, Users } from "lucide-react"
 import { toast } from "sonner"
 
 const contactSchema = z.object({
@@ -51,7 +51,6 @@ export function ContactDialog({
   const {
     register,
     handleSubmit,
-    setValue,
     reset,
     formState: { errors },
   } = useForm<any>({
@@ -59,7 +58,6 @@ export function ContactDialog({
     defaultValues,
   })
 
-  // Reload defaults when opened
   useEffect(() => {
     if (open) {
       reset(defaultValues)
@@ -71,7 +69,6 @@ export function ContactDialog({
     setLoading(true)
     setError(null)
 
-    // Clean empty values
     const cleanedData = {
       ...data,
       email: data.email || undefined,
@@ -130,9 +127,12 @@ export function ContactDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[420px] max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 p-6 shadow-xl">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto min-w-0 rounded-2xl">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Contact" : "Add Contact"}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Users className="size-5 text-primary" />
+            {isEditing ? "Edit Contact" : "Add Contact"}
+          </DialogTitle>
           <DialogDescription>
             {isEditing
               ? "Update this contact's details."
@@ -140,72 +140,80 @@ export function ContactDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {error && (
-          <div className="p-3 text-xs bg-rose-500/10 border border-rose-500/20 text-rose-500 rounded-xl font-semibold">
-            {error}
-          </div>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-2">
+          {error && (
+            <div className="p-3 text-xs bg-destructive/10 border border-destructive/20 text-destructive rounded-xl font-semibold">
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
-          <FieldGroup className="space-y-3">
+          <FieldGroup className="gap-4">
             {/* Contact Name */}
             <Field data-invalid={!!errors.name}>
-              <FieldLabel>Contact Name</FieldLabel>
+              <FieldLabel htmlFor="contact-name">Contact Name</FieldLabel>
               <InputGroup>
                 <InputGroupInput
+                  id="contact-name"
                   placeholder="e.g. John Doe"
-                  className="rounded-xl"
+                  className="h-10 rounded-xl"
                   {...register("name")}
                 />
               </InputGroup>
               {errors.name && <FieldError>{(errors.name as any).message}</FieldError>}
             </Field>
 
-            {/* Email Address */}
-            <Field data-invalid={!!errors.email}>
-              <FieldLabel>Email Address (Optional)</FieldLabel>
-              <InputGroup>
-                <InputGroupInput
-                  type="email"
-                  placeholder="e.g. john@example.com"
-                  className="rounded-xl"
-                  {...register("email")}
-                />
-              </InputGroup>
-              {errors.email && <FieldError>{(errors.email as any).message}</FieldError>}
-            </Field>
+            {/* Email Address & Phone Number */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field data-invalid={!!errors.email}>
+                <FieldLabel htmlFor="contact-email">Email (Optional)</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    id="contact-email"
+                    type="email"
+                    placeholder="john@example.com"
+                    className="h-10 rounded-xl"
+                    {...register("email")}
+                  />
+                </InputGroup>
+                {errors.email && <FieldError>{(errors.email as any).message}</FieldError>}
+              </Field>
 
-            {/* Phone Number */}
-            <Field data-invalid={!!errors.phone}>
-              <FieldLabel>Phone Number (Optional)</FieldLabel>
-              <InputGroup>
-                <InputGroupInput
-                  placeholder="e.g. +91 98765 43210"
-                  className="rounded-xl"
-                  {...register("phone")}
-                />
-              </InputGroup>
-              {errors.phone && <FieldError>{(errors.phone as any).message}</FieldError>}
-            </Field>
+              <Field data-invalid={!!errors.phone}>
+                <FieldLabel htmlFor="contact-phone">Phone (Optional)</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    id="contact-phone"
+                    placeholder="+91 98765 43210"
+                    className="h-10 rounded-xl"
+                    {...register("phone")}
+                  />
+                </InputGroup>
+                {errors.phone && <FieldError>{(errors.phone as any).message}</FieldError>}
+              </Field>
+            </div>
 
             {/* Notes */}
             <Field data-invalid={!!errors.notes}>
-              <FieldLabel>Notes (Optional)</FieldLabel>
-              <textarea
-                placeholder="Relationship notes, bank transfer details, etc..."
-                className="flex min-h-[70px] w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                {...register("notes")}
-              />
+              <FieldLabel htmlFor="contact-notes">Notes (Optional)</FieldLabel>
+              <InputGroup>
+                <InputGroupTextarea
+                  id="contact-notes"
+                  placeholder="Relationship notes, bank transfer details, etc..."
+                  className="rounded-xl"
+                  rows={3}
+                  {...register("notes")}
+                />
+              </InputGroup>
               {errors.notes && <FieldError>{(errors.notes as any).message}</FieldError>}
             </Field>
           </FieldGroup>
 
           {/* Submit buttons */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/20">
             <Button
               type="button"
               variant="outline"
-              className="flex-1 rounded-xl"
+              className="rounded-xl font-semibold"
               disabled={loading}
               onClick={() => setOpen(false)}
             >
@@ -213,7 +221,7 @@ export function ContactDialog({
             </Button>
             <Button
               type="submit"
-              className="flex-1 rounded-xl font-semibold"
+              className="rounded-xl font-bold px-6"
               disabled={loading}
             >
               {loading ? (

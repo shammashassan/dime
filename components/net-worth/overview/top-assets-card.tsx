@@ -27,7 +27,7 @@ export function TopAssetsCard({ viewModel }: { viewModel: NetWorthOverviewViewMo
   const { topAssets, currency } = viewModel
 
   return (
-    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-full flex flex-col bg-card">
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto lg:h-full flex flex-col bg-card">
       <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
         <Layers className="size-3.5 text-muted-foreground" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Top Assets</span>
@@ -35,14 +35,14 @@ export function TopAssetsCard({ viewModel }: { viewModel: NetWorthOverviewViewMo
 
       <div className="flex-1">
         {topAssets.length > 0 ? (
-          <ScrollArea className="h-[280px] px-1">
-            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0">
+          <ScrollArea className="max-h-[215px] px-2">
+            <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0 py-2">
               {topAssets.map((asset) => {
                 const Icon = iconsMap[asset.icon] || Layers
                 return (
                   <HoverCard key={asset.id} openDelay={200}>
                     <HoverCardTrigger asChild>
-                      <Item asChild className="cursor-pointer px-2">
+                      <Item asChild className="cursor-pointer px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl">
                         <Link href={asset.href || "#"}>
                           <ItemMedia className="size-8 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-500">
                             <Icon className="size-3.5" />
@@ -66,7 +66,7 @@ export function TopAssetsCard({ viewModel }: { viewModel: NetWorthOverviewViewMo
                         </Link>
                       </Item>
                     </HoverCardTrigger>
-                    <HoverCardContent className="w-56 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="left">
+                    <HoverCardContent className="w-56 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                       <div className="flex items-center gap-2 mb-1.5">
                         <div className="size-6 rounded-lg border bg-emerald-500/10 border-emerald-500/20 text-emerald-500 flex items-center justify-center">
                           <Icon className="size-3" />

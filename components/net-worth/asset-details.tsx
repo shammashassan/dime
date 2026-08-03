@@ -135,7 +135,7 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
     // Function to construct a daily time-series filled forward
     const getDailyFilledData = (startDate: Date, endDate: Date) => {
       const result = []
-      
+
       const getValuationForDate = (date: Date) => {
         let lastVal = sortedValuations[0]
         for (const val of sortedValuations) {
@@ -154,7 +154,7 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
       let stepDays = 1
       const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      
+
       if (diffDays > 365) {
         stepDays = 7 // Weekly steps for > 1 year
       }
@@ -374,17 +374,17 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
         </div>
       </div>
 
-      {/* ── Metric Cards (wide, dense) ── */}
+      {/* ── Metric Cards ── */}
       <div className="flex flex-wrap gap-4">
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Icon}
           color={accent}
           label="Current Value"
           value={formatCurrency(asset.currentValue / 100, asset.currency)}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={HandCoins}
           color={isAsset ? "#10b981" : "#f43f5e"}
           label="Net Value Owned"
@@ -392,7 +392,7 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
           valueClassName={isAsset ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={TrendingUp}
           color="#3b82f6"
           label="Value Change"
@@ -400,7 +400,7 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
           valueClassName={valueChange ? (valueChange.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400") : ""}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Calendar}
           color="#f59e0b"
           label="Acquisition Date"
@@ -496,7 +496,7 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
               {chartData.length > 0 && (
                 <Select value={timeRange} onValueChange={setTimeRange}>
                   <SelectTrigger
-                    className="h-7 w-[120px] rounded-lg text-[10px] bg-transparent border-border/40"
+                    className="h-7 w-30 rounded-lg text-[10px] bg-transparent border-border/40"
                     size="sm"
                     aria-label="Select timeframe"
                   >
@@ -521,17 +521,17 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
             </div>
             <div className="p-4">
               {chartData.length === 0 ? (
-                <div className="flex items-center justify-center h-[200px] text-muted-foreground text-xs">
+                <div className="flex items-center justify-center h-50 text-muted-foreground text-xs">
                   No historical valuations logged.
                 </div>
               ) : filteredData.length === 0 ? (
-                <div className="flex items-center justify-center h-[200px] text-muted-foreground text-xs">
+                <div className="flex items-center justify-center h-50 text-muted-foreground text-xs">
                   No valuations in selected timeframe.
                 </div>
               ) : (
                 <ChartContainer
                   config={chartConfig}
-                  className="h-[200px] w-full"
+                  className="h-50 w-full"
                 >
                   <AreaChart data={filteredData} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
                     <defs>
@@ -572,7 +572,7 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
                           formatter={(value) => (
                             <>
                               <div
-                                className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                                className="h-2.5 w-2.5 shrink-0 rounded-xs"
                                 style={{
                                   backgroundColor: isAsset ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)",
                                 }}
@@ -593,7 +593,6 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
                       type="monotone"
                       fill="url(#fillValue)"
                       stroke="var(--color-value)"
-                      strokeWidth={2.5}
                       isAnimationActive={true}
                     />
                   </AreaChart>

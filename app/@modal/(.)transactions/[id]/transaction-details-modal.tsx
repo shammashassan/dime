@@ -28,11 +28,11 @@ export function TransactionDetailsModal({
         router.back()
       }
     }}>
-      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-background border border-border/40 rounded-2xl shadow-xl p-0">
-        <DialogHeader className="px-6 pt-6 pb-0">
-          <DialogTitle className="text-xl font-extrabold tracking-tight">Transaction Details</DialogTitle>
+      <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] bg-background border border-border/40 rounded-2xl shadow-xl p-0 min-w-0">
+        <DialogHeader className="px-6 pt-6 pb-0 min-w-0">
+          <DialogTitle className="text-xl font-extrabold tracking-tight truncate">Transaction Details</DialogTitle>
         </DialogHeader>
-        <div className="px-6 pb-6 pt-2">
+        <div className="px-6 pb-6 pt-2 min-w-0">
           <TransactionDetails
             transaction={transaction}
             category={category}

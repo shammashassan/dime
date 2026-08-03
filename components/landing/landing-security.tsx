@@ -173,7 +173,7 @@ export function LandingSecurity() {
                 </div>
 
                 <div className="relative z-10 text-center max-w-sm">
-                  <h4 className="text-xl font-bold">Ready to take control?</h4>
+                  <h3 className="text-xl font-bold">Ready to take control?</h3>
                   <p className="text-sm text-muted-foreground mt-2">
                     Register a new account or sign in with your active credentials to access your dashboards.
                   </p>

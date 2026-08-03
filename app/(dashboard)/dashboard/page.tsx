@@ -43,15 +43,17 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Title section */}
-      <div className="flex items-center gap-3.5">
-        <div className="p-3.5 bg-primary/10 text-primary rounded-2xl shadow-sm shrink-0">
-          <LayoutDashboard className="h-7 w-7" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Overview</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Welcome back, {session.user.name}. Here is a summary of your financial status.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+            <LayoutDashboard className="size-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Overview</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Welcome back, {session.user.name}. Here is a summary of your financial status.
+            </p>
+          </div>
         </div>
       </div>
 
