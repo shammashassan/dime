@@ -27,20 +27,25 @@ async function updateWalletBalance(scope: FinancialScope, walletId: string, amou
 }
 
 export async function createTransaction(input: TransactionInput) {
-  await requireApprovedUser()
-  const validated = transactionSchema.parse(input)
-
-  const scope = await getFinancialScope()
-  if (scope.isOrganization) {
-    const member = await db.collection("member").findOne({
-      userId: scope.userId,
-      organizationId: scope.organizationId,
-    })
-    const role = (member?.role as Role) || "member"
-    if (!canCreateTransactions(role)) {
-      return { success: false, error: "Unauthorized" }
+  try {
+    await requireApprovedUser()
+    const validationResult = transactionSchema.safeParse(input)
+    if (!validationResult.success) {
+      return { success: false, error: validationResult.error.issues[0].message }
     }
-  }
+    const validated = validationResult.data
+
+    const scope = await getFinancialScope()
+    if (scope.isOrganization) {
+      const member = await db.collection("member").findOne({
+        userId: scope.userId,
+        organizationId: scope.organizationId,
+      })
+      const role = (member?.role as Role) || "member"
+      if (!canCreateTransactions(role)) {
+        return { success: false, error: "Unauthorized" }
+      }
+    }
 
   const walletsColl = await getCollection<Wallet>("wallets")
   const transactionsColl = await getCollection<Transaction>("transactions")
@@ -245,6 +250,9 @@ export async function createTransaction(input: TransactionInput) {
     revalidatePath("/", "layout")
     return { success: true, id: debitOid.toString() }
   }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to create transaction." }
+  }
 }
 
 export async function deleteTransaction(id: string) {
@@ -351,20 +359,25 @@ export async function deleteTransaction(id: string) {
 }
 
 export async function updateTransaction(id: string, input: TransactionInput) {
-  await requireApprovedUser()
-  const validated = transactionSchema.parse(input)
-
-  const scope = await getFinancialScope()
-  if (scope.isOrganization) {
-    const member = await db.collection("member").findOne({
-      userId: scope.userId,
-      organizationId: scope.organizationId,
-    })
-    const role = (member?.role as Role) || "member"
-    if (!canEditTransactions(role)) {
-      return { success: false, error: "Unauthorized" }
+  try {
+    await requireApprovedUser()
+    const validationResult = transactionSchema.safeParse(input)
+    if (!validationResult.success) {
+      return { success: false, error: validationResult.error.issues[0].message }
     }
-  }
+    const validated = validationResult.data
+
+    const scope = await getFinancialScope()
+    if (scope.isOrganization) {
+      const member = await db.collection("member").findOne({
+        userId: scope.userId,
+        organizationId: scope.organizationId,
+      })
+      const role = (member?.role as Role) || "member"
+      if (!canEditTransactions(role)) {
+        return { success: false, error: "Unauthorized" }
+      }
+    }
 
   const walletsColl = await getCollection<Wallet>("wallets")
   const transactionsColl = await getCollection<Transaction>("transactions")
@@ -547,6 +560,9 @@ export async function updateTransaction(id: string, input: TransactionInput) {
   revalidatePath("/", "layout")
 
   return { success: true }
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to update transaction." }
+  }
 }
 
 export async function getTransactionWalletId(id: string): Promise<string | null> {
