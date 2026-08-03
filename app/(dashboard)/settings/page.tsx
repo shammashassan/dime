@@ -29,11 +29,15 @@ async function SettingsContent() {
       getBudgets(userId),
       activeOrgId ? getOrganizationSettings(activeOrgId) : null,
     ])
-    preferences = prefData
-    wallets = walletsData
-    categories = categoriesData
-    budgets = budgetsData
-    orgSettings = orgSettingsData
+    preferences = prefData || {
+      userId,
+      defaultCurrency: "USD",
+      dateFormat: "DD/MM/YYYY",
+    }
+    wallets = Array.isArray(walletsData) ? walletsData : []
+    categories = Array.isArray(categoriesData) ? categoriesData : []
+    budgets = Array.isArray(budgetsData) ? budgetsData : []
+    orgSettings = orgSettingsData || null
   } catch (error) {
     unstable_rethrow(error)
     console.error("Failed to load settings data:", error)

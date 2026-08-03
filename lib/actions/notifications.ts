@@ -3,8 +3,7 @@
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { notificationsCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
-import { revalidatePath } from "next/cache"
-import { updateTag } from "next/cache"
+import { revalidatePath, updateTag } from "next/cache"
 import { Notification } from "@/types"
 
 export async function getNotificationsAction() {

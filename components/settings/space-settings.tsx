@@ -34,7 +34,11 @@ import { toast } from "sonner"
 import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, Search, User, ChevronDown } from "lucide-react"
 
 interface SpaceSettingsProps {
-  initialSettings: OrganizationSettings | null
+  initialSettings?: OrganizationSettings | null
+  orgSettings?: OrganizationSettings | null
+  activeOrgId?: string | null
+  wallets?: any[]
+  categories?: any[]
 }
 
 interface WorkspaceMember {
@@ -93,16 +97,17 @@ const CURRENCIES = [
   { value: "CAD", label: "CAD ($)" },
 ]
 
-export function SpaceSettings({ initialSettings }: SpaceSettingsProps) {
+export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsProps) {
+  const settings = orgSettings || initialSettings || null
   const { data: sessionData } = useSession()
   const { data: activeOrg, refetch: refetchActiveOrg } = authClient.useActiveOrganization()
 
   const [orgName, setOrgName] = React.useState<string | undefined>(undefined)
 
   // Settings states
-  const [spaceType, setSpaceType] = React.useState<SpaceType>(initialSettings?.spaceType || "couple")
-  const [baseCurrency, setBaseCurrency] = React.useState(initialSettings?.baseCurrency || "USD")
-  const [fiscalYearStart, setFiscalYearStart] = React.useState(initialSettings?.fiscalYearStartMonth || 1)
+  const [spaceType, setSpaceType] = React.useState<SpaceType>(settings?.spaceType || "couple")
+  const [baseCurrency, setBaseCurrency] = React.useState(settings?.baseCurrency || "USD")
+  const [fiscalYearStart, setFiscalYearStart] = React.useState(settings?.fiscalYearStartMonth || 1)
   const [isUpdatingSettings, setIsUpdatingSettings] = React.useState(false)
 
   // Members & Invite states

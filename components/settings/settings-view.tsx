@@ -586,16 +586,22 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
   // ----------------------------------------------------
   // PREFERENCES TAB STATE & ACTIONS
   // ----------------------------------------------------
-  const [prefCurrency, setPrefCurrency] = useState(initialPreferences.defaultCurrency)
-  const [prefWallet, setPrefWallet] = useState(initialPreferences.defaultWalletId || "none")
-  const [prefDateFormat, setPrefDateFormat] = useState(initialPreferences.dateFormat)
+  const safePreferences = initialPreferences || {
+    userId: "",
+    defaultCurrency: "USD",
+    defaultWalletId: undefined,
+    dateFormat: "DD/MM/YYYY",
+  }
+  const [prefCurrency, setPrefCurrency] = useState(safePreferences.defaultCurrency || "USD")
+  const [prefWallet, setPrefWallet] = useState(safePreferences.defaultWalletId || "none")
+  const [prefDateFormat, setPrefDateFormat] = useState(safePreferences.dateFormat || "DD/MM/YYYY")
   const [prefMessage, setPrefMessage] = useState<string | null>(null)
 
   // Track dirty state for preferences
   const isPreferencesDirty =
-    prefCurrency !== initialPreferences.defaultCurrency ||
-    prefWallet !== (initialPreferences.defaultWalletId || "none") ||
-    prefDateFormat !== initialPreferences.dateFormat
+    prefCurrency !== (safePreferences.defaultCurrency || "USD") ||
+    prefWallet !== (safePreferences.defaultWalletId || "none") ||
+    prefDateFormat !== (safePreferences.dateFormat || "DD/MM/YYYY")
 
   const handleUpdatePreferences = async (e: React.FormEvent) => {
     e.preventDefault()

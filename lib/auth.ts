@@ -187,7 +187,12 @@ export const auth = betterAuth({
     ipAddress: { ipAddressHeaders: ["x-forwarded-for", "x-real-ip"], disableIpTracking: false },
   },
 
-  trustedOrigins: [process.env.BETTER_AUTH_URL ?? "http://localhost:3000"],
+  trustedOrigins: [
+    "https://dime-tracker.vercel.app",
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    "http://localhost:3000",
+  ].filter(Boolean) as string[],
 })
 
 export type Session = typeof auth.$Infer.Session
