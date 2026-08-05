@@ -314,7 +314,7 @@ export function LoanDialog({
                         <Users className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-full p-0 max-h-60 overflow-y-auto border border-border/40 shadow-lg" align="start">
+                    <PopoverContent className="w-full p-0 border border-border/40 shadow-lg" align="start">
                       <Command>
                         <CommandInput
                           placeholder="Search or type a new name..."
@@ -326,7 +326,7 @@ export function LoanDialog({
                             setValue("contactId", "") // Custom name is not linked to existing ID
                           }}
                         />
-                        <CommandList>
+                        <CommandList className="max-h-48 overflow-y-auto">
                           <CommandEmpty className="p-2">
                             <Button
                               type="button"
