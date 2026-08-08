@@ -6,6 +6,7 @@ import { Loan, LoanRepayment, Wallet, Contact } from "@/types"
 import { deleteLoan, deleteRepayment } from "@/lib/actions/loans"
 import { LoanDialog } from "./loan-dialog"
 import { RepaymentDialog } from "./repayment-dialog"
+import { ContactDialog } from "@/components/contacts/contact-dialog"
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -628,17 +629,29 @@ export function LoanDetails({
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     No email or phone number saved for this contact.
                   </p>
-                  <LoanDialog
-                    wallets={wallets}
-                    contacts={contacts}
-                    initialLoan={loan}
-                    trigger={
-                      <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs font-semibold w-fit">
-                        <Edit className="size-3.5 mr-1.5" />
-                        Edit Loan Contact
-                      </Button>
-                    }
-                  />
+                  {matchedContact ? (
+                    <ContactDialog
+                      initialContact={matchedContact}
+                      trigger={
+                        <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs font-semibold w-fit">
+                          <Edit className="size-3.5 mr-1.5" />
+                          Edit Contact
+                        </Button>
+                      }
+                    />
+                  ) : (
+                    <LoanDialog
+                      wallets={wallets}
+                      contacts={contacts}
+                      initialLoan={loan}
+                      trigger={
+                        <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs font-semibold w-fit">
+                          <Edit className="size-3.5 mr-1.5" />
+                          Edit Contact
+                        </Button>
+                      }
+                    />
+                  )}
                 </div>
               )}
             </div>
