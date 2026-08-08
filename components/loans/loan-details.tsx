@@ -644,22 +644,43 @@ export function LoanDetails({
             </div>
           </Card>
 
-          {/* Reminder Schedule — uses loan.reminderSchedule already stored */}
-          {loan.dueDate && activeReminders.length > 0 && (
-            <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
-              <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
-                <BellRing className="size-3.5 text-muted-foreground" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Reminder Schedule</span>
-              </div>
-              <div className="p-4 flex flex-wrap gap-1.5">
-                {activeReminders.map((d) => (
-                  <Badge key={d} variant="outline" className="rounded-full px-2.5 py-1 text-[10px] font-semibold border-primary/20 bg-primary/5 text-primary">
-                    {reminderLabels[d] || `${d} days before`}
-                  </Badge>
-                ))}
-              </div>
-            </Card>
-          )}
+          {/* Reminder Schedule — always displayed */}
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+              <BellRing className="size-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Reminder Schedule</span>
+            </div>
+            <div className="p-4">
+              {loan.dueDate && activeReminders.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {activeReminders.map((d) => (
+                    <Badge key={d} variant="outline" className="rounded-full px-2.5 py-1 text-[10px] font-semibold border-primary/20 bg-primary/5 text-primary">
+                      {reminderLabels[d] || `${d} days before`}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {!loan.dueDate
+                      ? "No due date set for this loan."
+                      : "No automated reminders scheduled."}
+                  </p>
+                  <LoanDialog
+                    wallets={wallets}
+                    contacts={contacts}
+                    initialLoan={loan}
+                    trigger={
+                      <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs font-semibold w-fit">
+                        <CalendarClock className="size-3.5 mr-1.5" />
+                        {!loan.dueDate ? "Set Due Date & Reminders" : "Add Reminders"}
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          </Card>
         </div>
 
         {/* ── Right column: Timeline + Reminder Message ───────────── */}
