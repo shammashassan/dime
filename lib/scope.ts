@@ -25,3 +25,28 @@ export function getScopeFilter(scope: FinancialScope) {
   };
 }
 
+export function buildScopedQuery(scopeFilter: Record<string, any>, customQuery: Record<string, any> = {}): Record<string, any> {
+  const { $or: scopeOr, ...scopeRest } = scopeFilter
+  const { $or: customOr, ...customRest } = customQuery
+
+  const base = { ...scopeRest, ...customRest }
+
+  if (scopeOr && customOr) {
+    return {
+      ...base,
+      $and: [{ $or: scopeOr }, { $or: customOr }],
+    }
+  }
+
+  if (scopeOr) {
+    return { ...base, $or: scopeOr }
+  }
+
+  if (customOr) {
+    return { ...base, $or: customOr }
+  }
+
+  return base
+}
+
+

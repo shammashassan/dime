@@ -2,7 +2,7 @@ import { cache } from "react"
 import { ObjectId } from "mongodb"
 import { getCollection } from "@/lib/db/collections"
 import { Loan, LoanRepayment, Contact, SharedExpense, SharedSettlement } from "@/types"
-import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { getFinancialScope, getScopeFilter, buildScopedQuery } from "@/lib/scope"
 import { getOrganizationSettings } from "@/lib/queries/organization"
 import { getPreferences } from "@/lib/queries/preferences"
 import { convertCurrency } from "@/lib/currency"
@@ -255,33 +255,39 @@ export const getContactById = cache(async (id: string): Promise<Contact | null> 
 
 export const getLoansByContact = cache(async (contactId: string, contactName: string): Promise<Loan[]> => {
   const scope = await getFinancialScope()
+  const scopeFilter = getScopeFilter(scope)
   const loansColl = await getCollection<Loan>("loans")
-  return loansColl.find({
-    $or: [
-      { contactId },
-      { personName: { $regex: new RegExp(`^${contactName}$`, "i") } }
-    ],
-    ...getScopeFilter(scope)
-  }).sort({ date: -1 }).toArray()
+
+  const contactFilter: any[] = [{ contactId }]
+  if (contactName && contactName.trim()) {
+    const escaped = contactName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    contactFilter.push({ personName: { $regex: new RegExp(`^${escaped}$`, "i") } })
+  }
+
+  const query = buildScopedQuery(scopeFilter, { $or: contactFilter })
+  return loansColl.find(query).sort({ date: -1 }).toArray()
 })
 
 export const getContactBalanceDailyHistory = cache(async (contactId: string, contactName: string, daysCount: number = 90) => {
   const scope = await getFinancialScope()
-  const filter = getScopeFilter(scope)
+  const scopeFilter = getScopeFilter(scope)
 
   const contactsColl = await getCollection<Contact>("contacts")
-  const contact = await contactsColl.findOne({ _id: new ObjectId(contactId), ...filter })
+  const contact = await contactsColl.findOne(buildScopedQuery(scopeFilter, { _id: new ObjectId(contactId) }))
   if (!contact) return []
 
   const loansColl = await getCollection<Loan>("loans")
-  const loans = await loansColl.find({
-    $or: [
-      { contactId },
-      { personName: { $regex: new RegExp(`^${contactName}$`, "i") } }
-    ],
-    status: { $ne: "cancelled" },
-    ...filter
-  }).toArray()
+  const contactFilter: any[] = [{ contactId }]
+  if (contactName && contactName.trim()) {
+    const escaped = contactName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    contactFilter.push({ personName: { $regex: new RegExp(`^${escaped}$`, "i") } })
+  }
+
+  const loansQuery = buildScopedQuery(scopeFilter, {
+    $or: contactFilter,
+    status: { $ne: "cancelled" }
+  })
+  const loans = await loansColl.find(loansQuery).toArray()
 
   const repaymentsColl = await getCollection<any>("loan_repayments")
   const loanIds = loans.map(l => l._id.toString())
@@ -290,16 +296,14 @@ export const getContactBalanceDailyHistory = cache(async (contactId: string, con
     : []
 
   const sharedExpensesColl = await getCollection<SharedExpense>("shared_expenses")
-  const sharedExpenses = await sharedExpensesColl.find({
-    ...filter,
-    "participants.participantId": contactId,
-  }).toArray()
+  const expensesQuery = buildScopedQuery(scopeFilter, { "participants.participantId": contactId })
+  const sharedExpenses = await sharedExpensesColl.find(expensesQuery).toArray()
 
   const sharedSettlementsColl = await getCollection<SharedSettlement>("shared_settlements")
-  const sharedSettlements = await sharedSettlementsColl.find({
-    ...filter,
-    $or: [{ fromParticipantId: contactId }, { toParticipantId: contactId }],
-  }).toArray()
+  const settlementsQuery = buildScopedQuery(scopeFilter, {
+    $or: [{ fromParticipantId: contactId }, { toParticipantId: contactId }]
+  })
+  const sharedSettlements = await sharedSettlementsColl.find(settlementsQuery).toArray()
 
   let currentBalance = 0
 

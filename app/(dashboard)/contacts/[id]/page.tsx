@@ -1,8 +1,9 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
-import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { sharedExpensesCollection, sharedSettlementsCollection } from "@/lib/db/collections"
+import { getFinancialScope, getScopeFilter, buildScopedQuery } from "@/lib/scope"
+import { getCollection } from "@/lib/db/collections"
+import { SharedExpense, SharedSettlement } from "@/types"
 import { getContactById, getLoansByContact, getActiveBaseCurrency, getContactBalanceDailyHistory, getLoanRepayments } from "@/lib/queries/loans"
 import { ContactDetails } from "@/components/contacts/contact-details"
 import { unstable_rethrow } from "next/navigation"
@@ -71,22 +72,19 @@ async function ContactDetailContent({ id }: { id: string }) {
     if (!contact) {
       notFound()
     }
+    const sharedExpensesColl = await getCollection<SharedExpense>("shared_expenses")
+    const sharedSettlementsColl = await getCollection<SharedSettlement>("shared_settlements")
+
     // Fetch in parallel
     const [fetchedLoans, fetchedBaseCurrency, fetchedHistory, fetchedExpenses, fetchedSettlements] = await Promise.all([
       getLoansByContact(id, contact.name),
       getActiveBaseCurrency(),
       getContactBalanceDailyHistory(id, contact.name, 90),
-      sharedExpensesCollection
-        .find({
-          ...scopeFilter,
-          "participants.participantId": id,
-        })
+      sharedExpensesColl
+        .find(buildScopedQuery(scopeFilter, { "participants.participantId": id }))
         .toArray(),
-      sharedSettlementsCollection
-        .find({
-          ...scopeFilter,
-          $or: [{ fromParticipantId: id }, { toParticipantId: id }],
-        })
+      sharedSettlementsColl
+        .find(buildScopedQuery(scopeFilter, { $or: [{ fromParticipantId: id }, { toParticipantId: id }] }))
         .toArray(),
     ])
 
