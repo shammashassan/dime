@@ -601,29 +601,48 @@ export function LoanDetails({
             </div>
           </Card>
 
-          {/* Contact Details — uses matched contact from contacts list */}
-          {matchedContact && (matchedContact.email || matchedContact.phone) && (
-            <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
-              <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+          {/* Contact Details — always displayed */}
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <User className="size-3.5 text-muted-foreground" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Contact Details</span>
               </div>
-              <div className="p-4 flex flex-col gap-2.5 text-xs">
-                {matchedContact.email && (
-                  <div className="flex items-center gap-2.5 rounded-lg border border-border/30 bg-muted/20 px-3 py-2.5">
-                    <MailIcon className="size-3.5 text-muted-foreground shrink-0" />
-                    <span className="font-medium truncate">{matchedContact.email}</span>
-                  </div>
-                )}
-                {matchedContact.phone && (
-                  <div className="flex items-center gap-2.5 rounded-lg border border-border/30 bg-muted/20 px-3 py-2.5">
-                    <Phone className="size-3.5 text-muted-foreground shrink-0" />
-                    <span className="font-medium truncate">{matchedContact.phone}</span>
-                  </div>
-                )}
-              </div>
-            </Card>
-          )}
+              <span className="text-xs font-semibold text-foreground truncate max-w-[120px]">{loan.personName}</span>
+            </div>
+            <div className="p-4 flex flex-col gap-2.5 text-xs">
+              {matchedContact?.email && (
+                <div className="flex items-center gap-2.5 rounded-lg border border-border/30 bg-muted/20 px-3 py-2.5">
+                  <MailIcon className="size-3.5 text-muted-foreground shrink-0" />
+                  <span className="font-medium truncate">{matchedContact.email}</span>
+                </div>
+              )}
+              {matchedContact?.phone && (
+                <div className="flex items-center gap-2.5 rounded-lg border border-border/30 bg-muted/20 px-3 py-2.5">
+                  <Phone className="size-3.5 text-muted-foreground shrink-0" />
+                  <span className="font-medium truncate">{matchedContact.phone}</span>
+                </div>
+              )}
+              {(!matchedContact?.email && !matchedContact?.phone) && (
+                <div className="flex flex-col gap-2.5">
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    No email or phone number saved for this contact.
+                  </p>
+                  <LoanDialog
+                    wallets={wallets}
+                    contacts={contacts}
+                    initialLoan={loan}
+                    trigger={
+                      <Button variant="outline" size="sm" className="h-8 rounded-xl text-xs font-semibold w-fit">
+                        <Edit className="size-3.5 mr-1.5" />
+                        Edit Loan Contact
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          </Card>
 
           {/* Reminder Schedule — uses loan.reminderSchedule already stored */}
           {loan.dueDate && activeReminders.length > 0 && (
