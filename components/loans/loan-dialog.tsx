@@ -314,7 +314,11 @@ export function LoanDialog({
                         <Users className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0 border border-border/40 shadow-lg" align="start">
+                    <PopoverContent
+                      className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0 border border-border/40 shadow-lg"
+                      align="start"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
                       <Command className="w-full">
                         <CommandInput
                           placeholder="Search or type a new name..."
@@ -326,7 +330,7 @@ export function LoanDialog({
                             setValue("contactId", "") // Custom name is not linked to existing ID
                           }}
                         />
-                        <CommandList className="max-h-56 overflow-y-auto p-1">
+                        <CommandList className="max-h-48 overflow-y-auto touch-pan-y" onWheel={(e) => e.stopPropagation()}>
                           <CommandEmpty className="p-2">
                             <Button
                               type="button"
