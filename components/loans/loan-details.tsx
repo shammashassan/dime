@@ -644,8 +644,8 @@ export function LoanDetails({
         </div>
 
         {/* ── Right column: Timeline + Reminder Message ───────────── */}
-        <div className="lg:col-span-2 flex flex-col gap-4 lg:h-0 lg:min-h-full">
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 max-h-[480px] lg:max-h-none flex-1 min-h-0 overflow-hidden">
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 min-h-[380px] flex-1 flex flex-col overflow-hidden">
             <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Clock className="size-3.5 text-muted-foreground" />
