@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useEffect, useRef } from "react"
 import { signUp, authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,27 @@ export function SignUpForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
+
+  // Handle OAuth error callbacks
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    const error = params.get("error")
+    if (error) {
+      if (error === "PENDING_APPROVAL" || error === "unable_to_create_session") {
+        window.location.href = "/pending-approval"
+        return
+      }
+      if (error === "account_not_linked") {
+        toast.error("This email is already registered. Please sign in instead.")
+      } else if (error === "access_denied") {
+        toast.error("Google sign-up was cancelled.")
+      } else {
+        toast.error(`Authentication error: ${error.replace(/_/g, " ")}`)
+      }
+      window.history.replaceState({}, "", window.location.pathname)
+    }
+  }, [])
 
   // GSAP Entrance Animation
   useGSAP(
@@ -96,6 +117,7 @@ export function SignUpForm() {
       await authClient.signIn.social({
         provider: "google",
         callbackURL: `${window.location.origin}/pending-approval`,
+        errorCallbackURL: "/sign-up",
       })
     })()
 

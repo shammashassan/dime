@@ -12,6 +12,7 @@ import { db } from "@/lib/db/client"
 import { sendEmail } from "@/lib/email"
 import { initDatabase } from "@/lib/db/indexes"
 import { APIError } from "better-auth/api"
+import { ObjectId } from "mongodb"
 
 
 // Database indexing is handled lazily in getDb()
@@ -151,7 +152,10 @@ export const auth = betterAuth({
     session: {
       create: {
         before: async (session) => {
-          const user = await db.collection("user").findOne({ id: session.userId })
+          const query = ObjectId.isValid(session.userId)
+            ? { $or: [{ _id: new ObjectId(session.userId) }, { id: session.userId }] }
+            : { id: session.userId }
+          const user = await db.collection("user").findOne(query)
           if (user && !user.approved) {
             throw new APIError("UNAUTHORIZED", {
               message: "PENDING_APPROVAL",
@@ -168,7 +172,14 @@ export const auth = betterAuth({
     cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
 
-  account: { accountLinking: { enabled: true }, encryptOAuthTokens: true },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+      requireLocalEmailVerified: false,
+    },
+    encryptOAuthTokens: true,
+  },
 
   rateLimit: {
     enabled: true,

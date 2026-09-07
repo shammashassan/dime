@@ -39,6 +39,27 @@ export function SignInForm() {
     }
   }, [])
 
+  // Handle OAuth error callbacks
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    const error = params.get("error")
+    if (error) {
+      if (error === "PENDING_APPROVAL" || error === "unable_to_create_session") {
+        window.location.href = "/pending-approval"
+        return
+      }
+      if (error === "account_not_linked") {
+        toast.error("This email is already associated with another login method. Please sign in with your email & password.")
+      } else if (error === "access_denied") {
+        toast.error("Google sign-in was cancelled.")
+      } else {
+        toast.error(`Authentication error: ${error.replace(/_/g, " ")}`)
+      }
+      window.history.replaceState({}, "", window.location.pathname)
+    }
+  }, [])
+
   // GSAP Entrance Animation
   useGSAP(
     () => {
@@ -191,7 +212,8 @@ export function SignInForm() {
     const googlePromise = (async () => {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: `${window.location.origin}/`,
+        callbackURL: "/dashboard",
+        errorCallbackURL: "/sign-in",
       })
     })()
 
