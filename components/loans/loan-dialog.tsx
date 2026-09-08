@@ -318,6 +318,8 @@ export function LoanDialog({
                       className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0 border border-border/40 shadow-lg"
                       align="start"
                       onWheel={(e) => e.stopPropagation()}
+                      onTouchStart={(e) => e.stopPropagation()}
+                      onTouchMove={(e) => e.stopPropagation()}
                     >
                       <Command className="w-full">
                         <CommandInput
@@ -330,7 +332,12 @@ export function LoanDialog({
                             setValue("contactId", "") // Custom name is not linked to existing ID
                           }}
                         />
-                        <CommandList className="max-h-48 overflow-y-auto touch-pan-y" onWheel={(e) => e.stopPropagation()}>
+                        <CommandList
+                          className="max-h-48 overflow-y-auto overscroll-contain touch-auto"
+                          onWheel={(e) => e.stopPropagation()}
+                          onTouchStart={(e) => e.stopPropagation()}
+                          onTouchMove={(e) => e.stopPropagation()}
+                        >
                           <CommandEmpty className="p-2">
                             <Button
                               type="button"
