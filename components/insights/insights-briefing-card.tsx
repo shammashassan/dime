@@ -1,5 +1,3 @@
-"use client"
-
 import React from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -23,7 +21,7 @@ export function InsightsBriefingCard({ briefing }: InsightsBriefingCardProps) {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <div className="size-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Sparkles className="size-4 animate-pulse" />
+              <Sparkles className="size-4 animate-pulse" aria-hidden="true" />
             </div>
             <h2 className="text-base font-bold text-foreground">Executive AI Briefing</h2>
           </div>
@@ -32,7 +30,7 @@ export function InsightsBriefingCard({ briefing }: InsightsBriefingCardProps) {
             variant="outline"
             className="rounded-lg font-semibold text-[11px] h-6 px-2.5 gap-1.5 border-primary/30 text-primary bg-primary/5"
           >
-            {briefing.isAiGenerated ? <Bot className="size-3" /> : <Sparkles className="size-3" />}
+            {briefing.isAiGenerated ? <Bot className="size-3" aria-hidden="true" /> : <Sparkles className="size-3" aria-hidden="true" />}
             {briefing.isAiGenerated ? "Gemini 1.5 Analysis" : "Diagnostic Summary"}
           </Badge>
         </div>
@@ -42,7 +40,7 @@ export function InsightsBriefingCard({ briefing }: InsightsBriefingCardProps) {
         </p>
 
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 flex items-start gap-2.5">
-          <AlertCircle className="size-4 text-primary shrink-0 mt-0.5" />
+          <AlertCircle className="size-4 text-primary shrink-0 mt-0.5" aria-hidden="true" />
           <div className="text-xs text-muted-foreground leading-normal">
             <span className="font-bold text-foreground mr-1">Focal Recommendation:</span>
             {briefing.focalAdvice}

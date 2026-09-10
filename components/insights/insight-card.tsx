@@ -2,10 +2,11 @@
 
 import React from "react"
 import type { SpendingInsight, InsightCategory, InsightSeverity } from "@/types"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -45,28 +46,31 @@ export function InsightCard({ insight, onDismiss, onToggleBookmark }: InsightCar
   const Icon = CATEGORY_ICONS[insight.category] || Info
 
   return (
-    <Card className="rounded-2xl border border-border/40 bg-card hover:border-border/80 transition-all p-5 flex flex-col justify-between gap-4 shadow-xs">
-      <div className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge
-              variant="outline"
-              className={`rounded-md font-semibold text-[10px] h-5 capitalize ${SEVERITY_STYLES[insight.severity]}`}
-            >
-              {insight.severity}
-            </Badge>
-
-            {insight.metricLabel && (
+    <Card className="rounded-2xl border border-border/40 bg-card hover:border-border/80 transition-all shadow-xs">
+      <CardContent className="p-5 flex flex-col justify-between gap-4 h-full">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge
                 variant="outline"
-                className="rounded-md font-semibold text-[10px] h-5 border-border/60 bg-muted/40 text-foreground"
+                className={cn(
+                  "rounded-md font-semibold text-[10px] h-5 capitalize",
+                  SEVERITY_STYLES[insight.severity]
+                )}
               >
-                {insight.metricLabel}
+                {insight.severity}
               </Badge>
-            )}
-          </div>
 
-          <TooltipProvider>
+              {insight.metricLabel && (
+                <Badge
+                  variant="outline"
+                  className="rounded-md font-semibold text-[10px] h-5 border-border/60 bg-muted/40 text-foreground"
+                >
+                  {insight.metricLabel}
+                </Badge>
+              )}
+            </div>
+
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -74,10 +78,15 @@ export function InsightCard({ insight, onDismiss, onToggleBookmark }: InsightCar
                     variant="ghost"
                     size="icon"
                     onClick={() => onToggleBookmark(insight.id, !!insight.isBookmarked)}
+                    aria-label={insight.isBookmarked ? "Remove bookmark" : "Bookmark insight"}
                     className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
                   >
                     <Star
-                      className={`size-3.5 ${insight.isBookmarked ? "fill-amber-500 text-amber-500" : ""}`}
+                      className={cn(
+                        "size-3.5",
+                        insight.isBookmarked && "fill-amber-500 text-amber-500"
+                      )}
+                      aria-hidden="true"
                     />
                   </Button>
                 </TooltipTrigger>
@@ -92,43 +101,44 @@ export function InsightCard({ insight, onDismiss, onToggleBookmark }: InsightCar
                     variant="ghost"
                     size="icon"
                     onClick={() => onDismiss(insight.id)}
-                    className="size-7 rounded-lg text-muted-foreground hover:text-red-500"
+                    aria-label="Dismiss insight"
+                    className="size-7 rounded-lg text-muted-foreground hover:text-destructive"
                   >
-                    <X className="size-3.5" />
+                    <X className="size-3.5" aria-hidden="true" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="top">Dismiss</TooltipContent>
               </Tooltip>
             </div>
-          </TooltipProvider>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="size-9 rounded-xl bg-muted/50 border border-border/40 flex items-center justify-center shrink-0 text-foreground mt-0.5">
+              <Icon className="size-4.5" aria-hidden="true" />
+            </div>
+            <div className="flex flex-col gap-1 min-w-0">
+              <h3 className="text-sm font-bold text-foreground leading-snug">{insight.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">{insight.description}</p>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-start gap-3">
-          <div className="size-9 rounded-xl bg-muted/50 border border-border/40 flex items-center justify-center shrink-0 text-foreground mt-0.5">
-            <Icon className="size-4.5" />
+        {insight.actionUrl && insight.actionLabel && (
+          <div className="pt-2 border-t border-border/30 flex justify-end">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="rounded-xl font-bold gap-1.5 text-xs h-8 border-border/40 hover:bg-muted/40"
+            >
+              <Link href={insight.actionUrl}>
+                {insight.actionLabel}
+                <ArrowUpRight className="size-3" aria-hidden="true" />
+              </Link>
+            </Button>
           </div>
-          <div className="flex flex-col gap-1 min-w-0">
-            <h3 className="text-sm font-bold text-foreground leading-snug">{insight.title}</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">{insight.description}</p>
-          </div>
-        </div>
-      </div>
-
-      {insight.actionUrl && insight.actionLabel && (
-        <div className="pt-2 border-t border-border/30 flex justify-end">
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="rounded-xl font-bold gap-1.5 text-xs h-8 border-border/40 hover:bg-muted/40"
-          >
-            <Link href={insight.actionUrl}>
-              {insight.actionLabel}
-              <ArrowUpRight className="size-3" />
-            </Link>
-          </Button>
-        </div>
-      )}
+        )}
+      </CardContent>
     </Card>
   )
 }

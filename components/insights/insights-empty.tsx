@@ -14,7 +14,7 @@ export function InsightsEmpty({
   return (
     <Empty className="rounded-2xl border border-dashed border-border/60 p-8 flex flex-col items-center justify-center text-center">
       <EmptyMedia variant="icon" className="size-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3">
-        <Sparkles className="size-5" />
+        <Sparkles className="size-5" aria-hidden="true" />
       </EmptyMedia>
       <EmptyHeader>
         <EmptyTitle className="text-base font-bold text-foreground">{title}</EmptyTitle>
