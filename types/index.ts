@@ -901,3 +901,60 @@ export interface FinancialHealthData {
   recommendations: HealthRecommendation[]
   historicalTrend: MonthlyHealthTrend[]
 }
+
+// ── AI Spending Insights Domain Types ──
+
+export type InsightSeverity = "critical" | "warning" | "opportunity" | "info"
+
+export type InsightCategory =
+  | "spikes"
+  | "outliers"
+  | "subscriptions"
+  | "savings"
+  | "cashflow"
+  | "income"
+
+export interface SpendingInsight {
+  id: string                     // Stable deterministic fingerprint (e.g. "spike_dining_out_2026_09")
+  category: InsightCategory
+  severity: InsightSeverity
+  title: string
+  description: string
+  metricImpact?: number          // Amount in cents/paise (positive or negative)
+  metricLabel?: string           // e.g. "+38% vs baseline" or "$142.00 surge"
+  actionLabel?: string           // e.g. "Review Transactions", "Adjust Budget", "Manage Recurring"
+  actionUrl?: string             // e.g. "/transactions?categoryId=...", "/recurring"
+  tags?: string[]
+  score: number                  // 0 to 100 for deterministic ranking & priority
+  detectedAt: Date
+  isBookmarked?: boolean
+}
+
+export interface UserInsightState {
+  _id: ObjectId
+  userId: string
+  organizationId?: string | null
+  insightKey: string             // Matches SpendingInsight.id
+  status: "active" | "dismissed" | "bookmarked"
+  dismissedAt?: Date
+  bookmarkedAt?: Date
+  updatedAt: Date
+}
+
+export interface SpendingInsightsData {
+  executiveBriefing: {
+    summary: string
+    focalAdvice: string
+    isAiGenerated: boolean
+  }
+  insights: SpendingInsight[]
+  bookmarkedInsights: SpendingInsight[]
+  dismissedCount: number
+  metrics: {
+    activeCount: number
+    anomalyCount: number
+    potentialSavingsMonthlyCents: number
+    discretionarySurgeCents: number
+  }
+  currency: string
+}

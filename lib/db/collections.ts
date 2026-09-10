@@ -22,7 +22,8 @@ import {
   WatchlistItem,
   SharedExpense,
   SharedSettlement,
-  PlannerScenario
+  PlannerScenario,
+  UserInsightState
 } from "@/types"
 
 export const walletsCollection = db.collection<Wallet>("wallets")
@@ -48,6 +49,7 @@ export const watchlistItemsCollection = db.collection<WatchlistItem>("watchlist_
 export const sharedExpensesCollection = db.collection<SharedExpense>("shared_expenses")
 export const sharedSettlementsCollection = db.collection<SharedSettlement>("shared_settlements")
 export const plannerScenariosCollection = db.collection<PlannerScenario>("planner_scenarios")
+export const userInsightStatesCollection = db.collection<UserInsightState>("user_insight_states")
 
 export async function getCollection<T extends object>(name: string) {
   return db.collection<T>(name)
