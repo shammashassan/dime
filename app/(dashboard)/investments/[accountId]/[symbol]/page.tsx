@@ -91,28 +91,28 @@ export default async function HoldingDetail({
       {/* ── Metric Summary Cards ── */}
       <div className="flex flex-wrap gap-4">
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Tag}
           color="#8b5cf6"
           label="Quantity Owned"
           value={holding.quantity.toLocaleString(undefined, { maximumFractionDigits: 4 })}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Coins}
           color="#3b82f6"
           label="Current Price"
           value={formatCurrency(holding.currentPrice, currency)}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Coins}
           color="#6366f1"
           label="Total Holding Value"
           value={formatCurrency(totalValue, currency)}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={isPositive ? ArrowUpRight : ArrowDownRight}
           color={isPositive ? "#10b981" : "#f43f5e"}
           label="Unrealized P&L"

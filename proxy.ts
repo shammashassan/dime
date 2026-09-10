@@ -4,7 +4,7 @@ import { getCookieCache, getSessionCookie } from "better-auth/cookies"
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Safety fallback check matching the clean static bypass rules from the volt app
+  // Fast bypass for static files, Next.js internals, APIs, and generated OG/icon metadata
   const isStaticAsset =
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -12,9 +12,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/apple-icon") ||
     pathname.startsWith("/opengraph-image") ||
     pathname.startsWith("/twitter-image") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/manifest.webmanifest" ||
-    pathname.includes(".") // Catches all files with extensions (.ico, .xml, .png, etc.)
+    pathname.includes(".") // Automatically bypasses all files with extensions (.ico, .txt, .xml, .webmanifest, .png, etc.)
 
   if (isStaticAsset) {
     return NextResponse.next()
@@ -81,8 +79,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Ultra-clean lookahead regex pattern optimization to match the volt app
   matcher: [
-    "/((?!api(?:/|$)|_next/static|_next/image|icon(?:/|$)|apple-icon(?:/|$)|opengraph-image(?:/|$)|twitter-image(?:/|$)|favicon\\.ico$|manifest\\.webmanifest$|.*\\..*).*)",
+    // Exclude Next.js internals, API routes, generated dynamic OG/icons, and all files with extensions (e.g. .ico, .txt, .xml, .webmanifest)
+    "/((?!api(?:/|$)|_next/static|_next/image|icon(?:/|$)|apple-icon(?:/|$)|opengraph-image(?:/|$)|twitter-image(?:/|$)|.*\\..*).*)",
   ],
 }

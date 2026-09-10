@@ -10,24 +10,7 @@ import { AdminUsersTabs } from "@/components/admin/admin-users-tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
 
-function StatsSkeleton() {
-  return (
-    <div className="flex flex-wrap gap-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
-      ))}
-    </div>
-  )
-}
-
-function TableSkeleton() {
-  return (
-    <div className="flex flex-col gap-4 mt-4">
-      <Skeleton className="h-10 w-full max-w-sm rounded-lg" />
-      <Skeleton className="h-64 w-full rounded-xl" />
-    </div>
-  )
-}
+import { StatsSkeleton, TableSkeleton } from "./loading"
 
 export default async function AdminUsersPage({
   searchParams,

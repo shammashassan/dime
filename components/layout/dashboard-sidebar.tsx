@@ -23,6 +23,7 @@ import {
   LineChart,
   Users2,
   Calculator,
+  Activity,
 } from "lucide-react"
 import { LogoMark } from "@/components/brand/logo-mark"
 import { SpaceSwitcher } from "@/components/layout/space-switcher"
@@ -72,6 +73,7 @@ const NAV_ITEMS = [
   { title: "Investments", href: "/investments", icon: LineChart },
   { title: "Net Worth", href: "/net-worth", icon: TrendingUp },
   { title: "Planner", href: "/planner", icon: Calculator },
+  { title: "Health", href: "/health", icon: Activity },
   { title: "Budgets", href: "/budgets", icon: PiggyBank },
   { title: "Goals", href: "/goals", icon: Target },
   { title: "Loans", href: "/loans", icon: HandCoins },

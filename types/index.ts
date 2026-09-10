@@ -850,6 +850,54 @@ export interface ForecastResult {
   insights: PlannerInsight[]
 }
 
+// ── Financial Health Score Domain Types ──
 
+export type HealthTier = "excellent" | "good" | "fair" | "needs_attention"
+export type PillarId = "liquidity" | "savings" | "debt" | "budget" | "growth"
 
+export interface PillarMetric {
+  label: string
+  value: string
+  target: string
+  status: "positive" | "neutral" | "negative"
+}
 
+export interface PillarScore {
+  id: PillarId
+  title: string
+  score: number           // 0 to 20
+  maxScore: 20
+  weight: number          // 20%
+  tier: HealthTier
+  summary: string
+  metrics: PillarMetric[]
+}
+
+export interface HealthRecommendation {
+  id: string
+  pillarId: PillarId
+  title: string
+  description: string
+  potentialPoints: number // e.g. +5 pts
+  priority: "high" | "medium" | "low"
+  actionUrl?: string
+  actionLabel?: string
+}
+
+export interface MonthlyHealthTrend {
+  month: string           // "YYYY-MM"
+  label: string           // "MMM" e.g. "Aug"
+  overallScore: number
+  tier: HealthTier
+}
+
+export interface FinancialHealthData {
+  overallScore: number    // 0 to 100
+  tier: HealthTier
+  previousMonthScore: number
+  scoreDelta: number      // e.g. +3 or -2
+  currency: string
+  pillars: Record<PillarId, PillarScore>
+  recommendations: HealthRecommendation[]
+  historicalTrend: MonthlyHealthTrend[]
+}

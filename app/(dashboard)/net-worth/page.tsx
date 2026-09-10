@@ -15,31 +15,7 @@ import { NetWorthOverview } from "@/components/net-worth/net-worth-overview"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Wallet, Loan, LoanRepayment, Asset } from "@/types"
 
-function NetWorthSkeleton() {
-  return (
-    <div className="flex flex-col gap-7 w-full animate-pulse p-1">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-12 w-12 rounded-2xl" />
-          <div className="space-y-2">
-            <Skeleton className="h-7 w-48" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-4 mt-2">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
-        ))}
-      </div>
-      <Skeleton className="h-9 w-64 rounded-xl" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Skeleton className="h-[320px] w-full rounded-2xl md:col-span-2" />
-        <Skeleton className="h-[320px] w-full rounded-2xl" />
-      </div>
-    </div>
-  )
-}
+import { NetWorthSkeleton } from "./loading"
 
 async function NetWorthContent() {
   const session = await requireApprovedUser()

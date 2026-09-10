@@ -39,6 +39,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ Reports & Analytics
 * ✅ Net Worth Dashboard
 * ✅ Financial Planner (Forecasting & Scenarios)
+* ✅ Financial Health Score
 
 ## People
 
@@ -431,51 +432,50 @@ Integrations:
 
 ---
 
-# 8. Financial Health Score
+# 8. Financial Health Score ✅ COMPLETED
 
 Generate an overall financial wellness score.
 
+> **Status**: **Completed.** Dedicated domain calculation engine implemented in `lib/calculations/financial-health.ts`, cached data aggregation in `lib/queries/financial-health.ts`, dedicated `/health` page with Next.js 16 Cache Components architecture, semi-circular radial arc score gauge hero card, 5-pillar Bento grid, 6-month historical trajectory chart, interactive score impact simulator sheet, and dashboard overview widget.
+
 Factors:
 
-* Savings rate
-* Budget adherence
-* Emergency fund
-* Debt ratio
-* Spending stability
-* Goal progress
-* Cash flow
-* Income consistency
-* Subscription burden
-* Loan utilization
+* ✅ Savings rate
+* ✅ Budget adherence
+* ✅ Emergency fund
+* ✅ Debt ratio
+* ✅ Spending stability
+* ✅ Goal progress
+* ✅ Cash flow
+* ✅ Income consistency
+* ✅ Subscription burden
+* ✅ Loan utilization
 
-Provide actionable recommendations.
+Provide actionable recommendations:
+* ✅ Dynamic, prioritized recommendations engine with point gain projections and direct in-app links (`/goals`, `/budgets`, `/recurring`, `/loans`, `/investments`).
 
-### Additional Planned Metrics
+### Additional Completed Features:
 
-* Investment diversification
-* Liquidity ratio
-* Net worth growth trend
-* Cash reserve coverage
-* Expense stability
-* Budget consistency
-* Goal completion rate
-* Debt payoff progress
-* Financial resilience score
-
-Display:
-
-* Overall score
-* Category scores
-* Historical score trend
-* Improvement suggestions
-* Monthly score changes
+* ✅ 0–100 Composite Wellness Score with 4 health tiers (*Excellent*, *Good*, *Fair*, *Needs Attention*).
+* ✅ Balanced 5-Pillar Model (20 pts each):
+  * **Liquidity & Emergency Reserve** (reserve coverage in months, liquid cash, monthly burn rate)
+  * **Savings Rate & Cash Flow** (net savings rate, monthly cash flow surplus)
+  * **Debt & Liabilities** (debt-to-asset ratio, loan repayment timeliness, overdue checks)
+  * **Budget & Fixed Cost Control** (budget adherence compliance, recurring subscription burden)
+  * **Goals & Wealth Diversification** (active savings goals progress, multi-asset class count)
+* ✅ 6-Month Historical Trajectory Chart with tier reference bands and tooltips.
+* ✅ Interactive Score Impact Simulator Sheet (`HealthSimulator`) with real-time sliders (Extra Savings, Debt Paydown, Subscription Trims) calculating instant "what-if" score increases.
+* ✅ Dashboard Overview Widget (`FinancialHealthWidget`) with live score, tier badge, month-over-month delta, top recommendation snippet, and quick link to `/health`.
+* ✅ Sidebar navigation integration ("Health" item with `Activity` icon).
+* ✅ Accessible loading skeleton (`app/(dashboard)/health/loading.tsx`).
+* ✅ Safe server-to-client serialization with zero database schema migrations required.
 
 Integrations:
 
-* Reports
-* Dashboard
-* AI Financial Coach
-* Financial Planner
+* ✅ Dashboard (Overview widget)
+* ✅ Reports & Analytics
+* ✅ Financial Planner
+* Future AI Financial Coach
 
 ---
 

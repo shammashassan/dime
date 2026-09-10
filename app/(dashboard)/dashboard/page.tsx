@@ -11,21 +11,11 @@ import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/
 import { getPreferences } from "@/lib/queries/preferences"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AIInsights } from "@/components/dashboard/ai-insights"
+import { FinancialHealthWidget } from "@/components/dashboard/financial-health-widget"
 
 
-function MetricsRowSkeleton() {
-  return (
-    <div className="flex flex-wrap gap-4">
-      {[...Array(5)].map((_, i) => (
-        <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
-      ))}
-    </div>
-  )
-}
+import { MetricsRowSkeleton, ChartSkeleton } from "./loading"
 
-function ChartSkeleton() {
-  return <Skeleton className="h-[380px] w-full rounded-xl" />
-}
 
 export default async function DashboardPage() {
   const session = await requireApprovedUser()
@@ -88,6 +78,9 @@ export default async function DashboardPage() {
       {/* Lists row: Budgets and Recent Transactions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 flex flex-col gap-6">
+          <Suspense fallback={<Skeleton className="h-44 w-full rounded-2xl" />}>
+            <FinancialHealthWidget userId={userId} />
+          </Suspense>
           <Suspense fallback={<ChartSkeleton />}>
             <BudgetProgressList userId={userId} />
           </Suspense>

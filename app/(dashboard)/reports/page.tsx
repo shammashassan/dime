@@ -23,41 +23,7 @@ import { MetricCard } from "@/components/ui/metric-card"
 import { unstable_rethrow } from "next/navigation"
 import { BarChart3, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownRight } from "lucide-react"
 
-// Loading skeleton for reports content
-function ReportsSkeleton() {
-  return (
-    <div className="flex flex-col gap-6 w-full animate-pulse">
-      {/* Header Skeleton */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-14 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-44 rounded-xl" />
-          <Skeleton className="h-10 w-32 rounded-xl" />
-        </div>
-      </div>
-
-      {/* MetricCards Skeleton */}
-      <div className="flex flex-wrap gap-4">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-22.5 flex-1 min-w-50 rounded-2xl" />
-        ))}
-      </div>
-
-      {/* Charts Grid Skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-95 w-full rounded-2xl" />
-        ))}
-      </div>
-    </div>
-  )
-}
+import { ReportsSkeleton } from "./loading"
 
 async function ReportsContent({
   searchParams,

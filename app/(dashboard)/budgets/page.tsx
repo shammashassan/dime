@@ -10,29 +10,7 @@ import { serializeData } from "@/lib/utils"
 
 
 
-function BudgetsSkeleton() {
-  return (
-    <div className="flex flex-col gap-6 w-full animate-pulse">
-      <div className="flex justify-between items-center">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64" />
-        </div>
-        <Skeleton className="h-10 w-32 rounded-xl" />
-      </div>
-      <div className="flex flex-wrap gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
-        ))}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Skeleton className="h-56 w-full rounded-2xl" />
-        <Skeleton className="h-56 w-full rounded-2xl" />
-        <Skeleton className="h-56 w-full rounded-2xl" />
-      </div>
-    </div>
-  )
-}
+import { BudgetsSkeleton } from "./loading"
 
 async function BudgetsContent() {
   const session = await requireApprovedUser()

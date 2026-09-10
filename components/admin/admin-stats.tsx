@@ -21,28 +21,28 @@ export async function AdminStats() {
 
       <div className="flex flex-wrap gap-4">
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={UserCheck}
           color="#10b981"
           label="Approved Users"
           value={stats.totalApproved}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={Users}
           color="#f59e0b"
           label="Pending Approval"
           value={stats.pendingApproval}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={UserMinus}
           color="#f43f5e"
           label="Banned Users"
           value={stats.banned}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 1rem))" }}
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           icon={ShieldAlert}
           color="#8b5cf6"
           label="Administrators"
