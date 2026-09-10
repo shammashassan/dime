@@ -24,8 +24,8 @@ import {
   Users2,
   Calculator,
   Activity,
+  Sparkles,
 } from "lucide-react"
-import { LogoMark } from "@/components/brand/logo-mark"
 import { SpaceSwitcher } from "@/components/layout/space-switcher"
 import {
   Sidebar,
@@ -74,6 +74,7 @@ const NAV_ITEMS = [
   { title: "Net Worth", href: "/net-worth", icon: TrendingUp },
   { title: "Planner", href: "/planner", icon: Calculator },
   { title: "Health", href: "/health", icon: Activity },
+  { title: "Insights", href: "/insights", icon: Sparkles },
   { title: "Budgets", href: "/budgets", icon: PiggyBank },
   { title: "Goals", href: "/goals", icon: Target },
   { title: "Loans", href: "/loans", icon: HandCoins },

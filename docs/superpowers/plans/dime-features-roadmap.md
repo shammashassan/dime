@@ -40,6 +40,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ Net Worth Dashboard
 * ✅ Financial Planner (Forecasting & Scenarios)
 * ✅ Financial Health Score
+* ✅ AI Spending Insights
 
 ## People
 
@@ -479,42 +480,29 @@ Integrations:
 
 ---
 
-# 9. AI Spending Insights
+# 9. AI Spending Insights ✅ COMPLETED
 
-Automatically generate personalized financial insights.
+Automatically generate personalized financial insights and anomaly detection.
 
-Examples:
+> **Status**: **Completed.** Pure deterministic calculation engine implemented in `lib/calculations/insights.ts`, hybrid Gemini 1.5 Flash natural language executive narrative synthesis with zero-latency deterministic template fallback, cached data aggregation in `lib/queries/insights.ts`, multi-device persistent dismissal/bookmarking in `user_insight_states` MongoDB collection via Server Actions in `lib/actions/insights.ts`, dedicated `/insights` hub with category tabs, optimistic dismiss and undo toasts, upgraded dashboard card, and sidebar navigation.
 
-* You spent 18% less on groceries.
-* Restaurant spending increased by ₹2,400.
-* Entertainment exceeded budget.
-* Subscriptions increased this quarter.
-* Travel spending is above average.
+Features:
 
-Highlight anomalies and trends automatically.
-
-### Additional Planned Insights
-
-* Net worth changes
-* Savings opportunities
-* Budget optimization
-* Subscription recommendations
-* Goal progress analysis
-* Cash flow risks
-* Loan payoff recommendations
-* Investment allocation suggestions
-* Spending anomalies
-* Seasonal spending patterns
-* Category trend analysis
-* Financial habit analysis
-
-Future AI Features
-
-* Weekly summaries
-* Monthly financial reviews
-* Personalized coaching
-* Predictive insights
-* Natural language financial summaries
+* ✅ 6 Statistical Detector Families:
+  * **Category Spending Spikes** (3 completed 30-day baseline periods, safeguards for min spend and tx count)
+  * **Transaction Outliers** (Z-score standard deviation detection on categories with ≥5 txs)
+  * **Subscription Creep & Billing Anomalies** (duplicate charge detection within 5 days, recurring rule price hikes)
+  * **Income Irregularities** (detects sudden drops/missing income vs 3-month baseline)
+  * **Savings Opportunities** (budget surpluses and micro-spending frequency leakage)
+  * **Cash Flow Velocity** (run-rate extrapolation vs incoming cash flow)
+* ✅ Natural-Language Executive Briefing (Google Gemini 1.5 Flash with deterministic fallback when offline or unconfigured)
+* ✅ Multi-device persistent dismissal, undo dismissals, and star bookmarking with compound MongoDB indexing
+* ✅ Dedicated `/insights` Bento Hub (`app/(dashboard)/insights/page.tsx`) with 6 filter tabs (`All`, `Anomalies`, `Subscriptions`, `Income & Cashflow`, `Savings`, `Bookmarked`)
+* ✅ Interactive 1-click action links directing users to relevant filtered views (`/transactions?categories=...`, `/recurring`, `/budgets`)
+* ✅ Dashboard Overview Widget (`components/dashboard/ai-insights.tsx`) showing executive pulse and top 3 prioritized signals
+* ✅ Sidebar navigation integration ("Insights" item with `Sparkles` icon)
+* ✅ Accessible loading skeletons and co-located error boundaries (`loading.tsx`, `error.tsx`)
+* ✅ 30 comprehensive unit tests covering all detector thresholds, currency conversions, edge cases, and Gemini fallbacks
 
 ---
 
