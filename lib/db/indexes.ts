@@ -121,6 +121,11 @@ export async function initDatabase() {
     const users = db.collection("user")
     await users.createIndex({ approved: 1, role: 1 })
 
+    // 6. Create indexes for AI spending insight user states
+    const userInsightStates = db.collection("user_insight_states")
+    await userInsightStates.createIndex({ userId: 1, insightKey: 1 }, { unique: true })
+    await userInsightStates.createIndex({ userId: 1, status: 1 })
+
     console.log("Database indexes verified/created.")
 
     // 5. Seed default categories if none exist
