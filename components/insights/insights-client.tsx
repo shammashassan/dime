@@ -24,35 +24,83 @@ interface InsightsClientProps {
   data: SpendingInsightsData
 }
 
+function InsightGrid({
+  items,
+  emptyTitle,
+  emptyDescription,
+  onDismiss,
+  onToggleBookmark,
+}: {
+  items: SpendingInsight[]
+  emptyTitle?: string
+  emptyDescription?: string
+  onDismiss: (id: string) => void
+  onToggleBookmark: (id: string, current: boolean) => void
+}) {
+  if (items.length === 0) {
+    return <InsightsEmpty title={emptyTitle} description={emptyDescription} />
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {items.map((ins) => (
+        <InsightCard
+          key={ins.id}
+          insight={ins}
+          onDismiss={onDismiss}
+          onToggleBookmark={onToggleBookmark}
+        />
+      ))}
+    </div>
+  )
+}
+
 export function InsightsClient({ data }: InsightsClientProps) {
   const router = useRouter()
+  const [prevData, setPrevData] = useState(data)
   const [insights, setInsights] = useState<SpendingInsight[]>(data.insights)
   const [dismissedCount, setDismissedCount] = useState(data.dismissedCount)
   const [isPending, startTransition] = useTransition()
 
+  if (prevData !== data) {
+    setPrevData(data)
+    setInsights(data.insights)
+    setDismissedCount(data.dismissedCount)
+  }
+
   const handleDismiss = (id: string) => {
     const target = insights.find((i) => i.id === id)
+    if (!target) return
+
     setInsights((prev) => prev.filter((i) => i.id !== id))
     setDismissedCount((prev) => prev + 1)
 
     toast("Insight dismissed", {
-      description: target?.title,
+      description: target.title,
       action: {
         label: "Undo",
         onClick: () => {
-          if (target) {
-            setInsights((prev) => [target, ...prev])
-            setDismissedCount((prev) => Math.max(0, prev - 1))
-            startTransition(async () => {
-              await undoDismissInsightAction(id)
-            })
-          }
+          setInsights((prev) => [...prev, target].sort((a, b) => b.score - a.score))
+          setDismissedCount((prev) => Math.max(0, prev - 1))
+          startTransition(async () => {
+            const res = await undoDismissInsightAction(id)
+            if (!res?.success) {
+              setInsights((prev) => prev.filter((i) => i.id !== id))
+              setDismissedCount((prev) => prev + 1)
+              toast.error(res?.error || "Failed to undo dismissal")
+            }
+          })
         },
       },
     })
 
     startTransition(async () => {
-      await dismissInsightAction(id)
+      const res = await dismissInsightAction(id)
+      if (!res?.success) {
+        setInsights((prev) => [...prev, target].sort((a, b) => b.score - a.score))
+        setDismissedCount((prev) => Math.max(0, prev - 1))
+        toast.error(res?.error || "Failed to dismiss insight")
+      }
     })
   }
 
@@ -64,18 +112,25 @@ export function InsightsClient({ data }: InsightsClientProps) {
     toast(current ? "Bookmark removed" : "Insight bookmarked")
 
     startTransition(async () => {
-      await toggleBookmarkInsightAction(id, current)
+      const res = await toggleBookmarkInsightAction(id, current)
+      if (!res?.success) {
+        setInsights((prev) =>
+          prev.map((i) => (i.id === id ? { ...i, isBookmarked: current } : i))
+        )
+        toast.error(res?.error || "Failed to update bookmark")
+      }
     })
   }
 
   const handleRestoreAll = () => {
     startTransition(async () => {
       const res = await restoreAllDismissedInsightsAction()
-      if (res.success) {
+      if (res?.success) {
+        setDismissedCount(0)
         toast.success("Restored all previously dismissed insights")
         router.refresh()
       } else {
-        toast.error(res.error || "Failed to restore insights")
+        toast.error(res?.error || "Failed to restore insights")
       }
     })
   }
@@ -107,7 +162,8 @@ export function InsightsClient({ data }: InsightsClientProps) {
                 <HoverCardTrigger asChild>
                   <Badge
                     variant="outline"
-                    className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default"
+                    tabIndex={0}
+                    className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     {data.currency}
                   </Badge>
@@ -173,108 +229,57 @@ export function InsightsClient({ data }: InsightsClientProps) {
         </div>
 
         <TabsContent value="all" className="m-0">
-          {insights.length === 0 ? (
-            <InsightsEmpty />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {insights.map((ins) => (
-                <InsightCard
-                  key={ins.id}
-                  insight={ins}
-                  onDismiss={handleDismiss}
-                  onToggleBookmark={handleToggleBookmark}
-                />
-              ))}
-            </div>
-          )}
+          <InsightGrid
+            items={insights}
+            onDismiss={handleDismiss}
+            onToggleBookmark={handleToggleBookmark}
+          />
         </TabsContent>
 
         <TabsContent value="anomalies" className="m-0">
-          {anomalies.length === 0 ? (
-            <InsightsEmpty title="No Anomalies Flagged" />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {anomalies.map((ins) => (
-                <InsightCard
-                  key={ins.id}
-                  insight={ins}
-                  onDismiss={handleDismiss}
-                  onToggleBookmark={handleToggleBookmark}
-                />
-              ))}
-            </div>
-          )}
+          <InsightGrid
+            items={anomalies}
+            emptyTitle="No Anomalies Flagged"
+            onDismiss={handleDismiss}
+            onToggleBookmark={handleToggleBookmark}
+          />
         </TabsContent>
 
         <TabsContent value="subscriptions" className="m-0">
-          {subscriptions.length === 0 ? (
-            <InsightsEmpty title="No Subscription Alerts" />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {subscriptions.map((ins) => (
-                <InsightCard
-                  key={ins.id}
-                  insight={ins}
-                  onDismiss={handleDismiss}
-                  onToggleBookmark={handleToggleBookmark}
-                />
-              ))}
-            </div>
-          )}
+          <InsightGrid
+            items={subscriptions}
+            emptyTitle="No Subscription Alerts"
+            onDismiss={handleDismiss}
+            onToggleBookmark={handleToggleBookmark}
+          />
         </TabsContent>
 
         <TabsContent value="cashflow" className="m-0">
-          {incomeAndCashflow.length === 0 ? (
-            <InsightsEmpty title="Cashflow is Stable" />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {incomeAndCashflow.map((ins) => (
-                <InsightCard
-                  key={ins.id}
-                  insight={ins}
-                  onDismiss={handleDismiss}
-                  onToggleBookmark={handleToggleBookmark}
-                />
-              ))}
-            </div>
-          )}
+          <InsightGrid
+            items={incomeAndCashflow}
+            emptyTitle="Cashflow is Stable"
+            onDismiss={handleDismiss}
+            onToggleBookmark={handleToggleBookmark}
+          />
         </TabsContent>
 
         <TabsContent value="savings" className="m-0">
-          {savings.length === 0 ? (
-            <InsightsEmpty title="No Immediate Savings Gaps" />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {savings.map((ins) => (
-                <InsightCard
-                  key={ins.id}
-                  insight={ins}
-                  onDismiss={handleDismiss}
-                  onToggleBookmark={handleToggleBookmark}
-                />
-              ))}
-            </div>
-          )}
+          <InsightGrid
+            items={savings}
+            emptyTitle="No Immediate Savings Gaps"
+            onDismiss={handleDismiss}
+            onToggleBookmark={handleToggleBookmark}
+          />
         </TabsContent>
 
         <TabsContent value="bookmarked" className="m-0">
-          {bookmarked.length === 0 ? (
-            <InsightsEmpty
-              title="No Bookmarked Insights"
-              description="Star important insights to reference them anytime."
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {bookmarked.map((ins) => (
-                <InsightCard
-                  key={ins.id}
-                  insight={ins}
-                  onDismiss={handleDismiss}
-                  onToggleBookmark={handleToggleBookmark}
-                />
-              ))}
-            </div>
-          )}
+          <InsightGrid
+            items={bookmarked}
+            emptyTitle="No Bookmarked Insights"
+            emptyDescription="Star important insights to reference them anytime."
+            onDismiss={handleDismiss}
+            onToggleBookmark={handleToggleBookmark}
+          />
         </TabsContent>
       </Tabs>
     </div>
