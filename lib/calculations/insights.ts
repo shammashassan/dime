@@ -615,3 +615,87 @@ export function calculateSpendingInsights(inputs: InsightEngineInputs): Spending
     currency: inputs.targetCurrency,
   }
 }
+
+// ── 7. Executive Narrative Synthesis (Gemini AI with Fallback) ──
+export async function generateExecutiveBriefing(
+  insights: SpendingInsight[],
+  metrics: SpendingInsightsData["metrics"],
+  currency: string
+): Promise<{ summary: string; focalAdvice: string; isAiGenerated: boolean }> {
+  const topSpike = insights.find((i) => i.category === "spikes")
+  const topSavings = insights.find((i) => i.category === "savings")
+
+  const defaultSummary = topSpike
+    ? `${topSpike.title}: ${topSpike.description}`
+    : insights.length === 0
+      ? "No unusual spending spikes or billing anomalies detected. Your budget is running smoothly."
+      : `Your financial pulse is stable with ${insights.length} active spending signals detected.`
+
+  const defaultAdvice = topSavings
+    ? `Actionable win: ${topSavings.description}`
+    : "Keep monitoring your weekly discretionary spending to stay ahead of upcoming renewals."
+
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey || insights.length === 0) {
+    return {
+      summary: defaultSummary,
+      focalAdvice: defaultAdvice,
+      isAiGenerated: false,
+    }
+  }
+
+  try {
+    const payload = {
+      contents: [
+        {
+          parts: [
+            {
+              text: `You are Dime's Chief Financial Analyst. Given these pre-calculated financial facts:
+- Active signals: ${metrics.activeCount}
+- Anomalies: ${metrics.anomalyCount}
+- Potential monthly savings: ${(metrics.potentialSavingsMonthlyCents / 100).toFixed(2)} ${currency}
+- Discretionary surge: ${(metrics.discretionarySurgeCents / 100).toFixed(2)} ${currency}
+- Top insights: ${insights.slice(0, 3).map((i) => `[${i.title}]: ${i.description}`).join(" | ")}
+
+Write a concise 2-sentence executive briefing summarizing the current situation, followed by 1 actionable focal advice sentence.
+Do not invent numbers. Output ONLY a valid JSON object with keys "summary" and "focalAdvice".`,
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2,
+      },
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(4000), // 4-second hard timeout
+      }
+    )
+
+    if (!response.ok) throw new Error(`Gemini API error: ${response.statusText}`)
+
+    const data = await response.json()
+    const contentText = data?.candidates?.[0]?.content?.parts?.[0]?.text
+    if (!contentText) throw new Error("Empty response from Gemini")
+
+    const parsed = JSON.parse(contentText)
+    return {
+      summary: parsed.summary || defaultSummary,
+      focalAdvice: parsed.focalAdvice || defaultAdvice,
+      isAiGenerated: true,
+    }
+  } catch {
+    return {
+      summary: defaultSummary,
+      focalAdvice: defaultAdvice,
+      isAiGenerated: false,
+    }
+  }
+}

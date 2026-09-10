@@ -7,6 +7,8 @@ import type {
   Budget,
   RecurringRule,
   UserInsightState,
+  SpendingInsight,
+  SpendingInsightsData,
 } from "@/types"
 import {
   normalizeDescription,
@@ -18,6 +20,7 @@ import {
   detectSavingsOpportunities,
   detectCashFlowVelocity,
   calculateSpendingInsights,
+  generateExecutiveBriefing,
   // @ts-expect-error -- Node 22 ESM test runner requires .ts extension
 } from "../insights.ts"
 
@@ -739,6 +742,273 @@ describe("AI Spending Insights Calculation Engine", () => {
         )
       }
       assert.ok(result.insights[0].score >= 90)
+    })
+  })
+
+  describe("10. generateExecutiveBriefing (Narrative Synthesis)", () => {
+    const mockMetrics: SpendingInsightsData["metrics"] = {
+      activeCount: 3,
+      anomalyCount: 1,
+      potentialSavingsMonthlyCents: 4500,
+      discretionarySurgeCents: 6000,
+    }
+
+    const mockInsights: SpendingInsight[] = [
+      {
+        id: "spike_1",
+        category: "spikes",
+        severity: "critical",
+        title: "Dining Out Surge",
+        description: "Your spending in Dining Out reached $350.00, which is 60% higher than baseline.",
+        score: 85,
+        detectedAt: MOCK_DATE,
+      },
+      {
+        id: "savings_1",
+        category: "savings",
+        severity: "opportunity",
+        title: "Micro-Purchase Leakage",
+        description: "Trimming small frequent purchases could save ~$45.00/mo.",
+        score: 60,
+        detectedAt: MOCK_DATE,
+      },
+      {
+        id: "outlier_1",
+        category: "outliers",
+        severity: "warning",
+        title: "Unusual Expense: Tech Gadget",
+        description: "A charge of $200.00 is 3.5x larger than typical.",
+        score: 70,
+        detectedAt: MOCK_DATE,
+      },
+    ]
+
+    it("falls back to deterministic template when GEMINI_API_KEY is not set or empty", async () => {
+      const originalKey = process.env.GEMINI_API_KEY
+      try {
+        delete process.env.GEMINI_API_KEY
+        const briefing = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefing.isAiGenerated, false)
+        assert.equal(
+          briefing.summary,
+          "Dining Out Surge: Your spending in Dining Out reached $350.00, which is 60% higher than baseline."
+        )
+        assert.equal(
+          briefing.focalAdvice,
+          "Actionable win: Trimming small frequent purchases could save ~$45.00/mo."
+        )
+
+        process.env.GEMINI_API_KEY = ""
+        const briefingEmptyKey = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefingEmptyKey.isAiGenerated, false)
+      } finally {
+        if (originalKey !== undefined) {
+          process.env.GEMINI_API_KEY = originalKey
+        } else {
+          delete process.env.GEMINI_API_KEY
+        }
+      }
+    })
+
+    it("falls back when insights array is empty even if GEMINI_API_KEY is present", async () => {
+      const originalKey = process.env.GEMINI_API_KEY
+      try {
+        process.env.GEMINI_API_KEY = "dummy-api-key"
+        const emptyMetrics: SpendingInsightsData["metrics"] = {
+          activeCount: 0,
+          anomalyCount: 0,
+          potentialSavingsMonthlyCents: 0,
+          discretionarySurgeCents: 0,
+        }
+        const briefing = await generateExecutiveBriefing([], emptyMetrics, "USD")
+        assert.equal(briefing.isAiGenerated, false)
+        assert.equal(
+          briefing.summary,
+          "No unusual spending spikes or billing anomalies detected. Your budget is running smoothly."
+        )
+        assert.equal(
+          briefing.focalAdvice,
+          "Keep monitoring your weekly discretionary spending to stay ahead of upcoming renewals."
+        )
+      } finally {
+        if (originalKey !== undefined) {
+          process.env.GEMINI_API_KEY = originalKey
+        } else {
+          delete process.env.GEMINI_API_KEY
+        }
+      }
+    })
+
+    it("generates topSpike summary and topSavings advice on fallback when items exist", async () => {
+      const originalKey = process.env.GEMINI_API_KEY
+      try {
+        delete process.env.GEMINI_API_KEY
+        const briefing = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefing.isAiGenerated, false)
+        assert.match(briefing.summary, /^Dining Out Surge:/)
+        assert.match(briefing.focalAdvice, /^Actionable win:/)
+
+        // Test without topSpike and without topSavings
+        const insightsWithoutSpikeOrSavings: SpendingInsight[] = [
+          {
+            id: "outlier_1",
+            category: "outliers",
+            severity: "warning",
+            title: "Large Expense",
+            description: "Single purchase deviation.",
+            score: 70,
+            detectedAt: MOCK_DATE,
+          },
+        ]
+        const fallbackBriefing = await generateExecutiveBriefing(
+          insightsWithoutSpikeOrSavings,
+          mockMetrics,
+          "USD"
+        )
+        assert.equal(fallbackBriefing.isAiGenerated, false)
+        assert.equal(
+          fallbackBriefing.summary,
+          "Your financial pulse is stable with 1 active spending signals detected."
+        )
+        assert.equal(
+          fallbackBriefing.focalAdvice,
+          "Keep monitoring your weekly discretionary spending to stay ahead of upcoming renewals."
+        )
+      } finally {
+        if (originalKey !== undefined) {
+          process.env.GEMINI_API_KEY = originalKey
+        } else {
+          delete process.env.GEMINI_API_KEY
+        }
+      }
+    })
+
+    it("handles API failure / network error gracefully by falling back with isAiGenerated: false", async () => {
+      const originalKey = process.env.GEMINI_API_KEY
+      const originalFetch = globalThis.fetch
+      try {
+        process.env.GEMINI_API_KEY = "valid-test-key"
+        // Mock fetch throwing error
+        globalThis.fetch = async () => {
+          throw new Error("Network connection timeout")
+        }
+
+        const briefing = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefing.isAiGenerated, false)
+        assert.match(briefing.summary, /^Dining Out Surge:/)
+        assert.match(briefing.focalAdvice, /^Actionable win:/)
+
+        // Mock fetch returning non-ok response
+        globalThis.fetch = (async () =>
+          ({
+            ok: false,
+            statusText: "Bad Request",
+            json: async () => ({ error: "Invalid request" }),
+          }) as unknown as Response) as typeof fetch
+
+        const briefingHttpError = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefingHttpError.isAiGenerated, false)
+      } finally {
+        if (originalKey !== undefined) {
+          process.env.GEMINI_API_KEY = originalKey
+        } else {
+          delete process.env.GEMINI_API_KEY
+        }
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it("handles malformed or empty Gemini API response by falling back with isAiGenerated: false", async () => {
+      const originalKey = process.env.GEMINI_API_KEY
+      const originalFetch = globalThis.fetch
+      try {
+        process.env.GEMINI_API_KEY = "valid-test-key"
+
+        // Empty candidates
+        globalThis.fetch = (async () =>
+          ({
+            ok: true,
+            json: async () => ({ candidates: [] }),
+          }) as unknown as Response) as typeof fetch
+
+        const briefingEmpty = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefingEmpty.isAiGenerated, false)
+
+        // Malformed JSON text in candidate part
+        globalThis.fetch = (async () =>
+          ({
+            ok: true,
+            json: async () => ({
+              candidates: [
+                {
+                  content: {
+                    parts: [{ text: "not-json-content" }],
+                  },
+                },
+              ],
+            }),
+          }) as unknown as Response) as typeof fetch
+
+        const briefingMalformed = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefingMalformed.isAiGenerated, false)
+      } finally {
+        if (originalKey !== undefined) {
+          process.env.GEMINI_API_KEY = originalKey
+        } else {
+          delete process.env.GEMINI_API_KEY
+        }
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it("successfully parses and returns AI-generated narrative briefing when API succeeds", async () => {
+      const originalKey = process.env.GEMINI_API_KEY
+      const originalFetch = globalThis.fetch
+      try {
+        process.env.GEMINI_API_KEY = "valid-test-key"
+        const expectedAiResponse = {
+          summary:
+            "Dining spend spiked 60% this month while anomalous tech purchases increased overall volatility. Cash flow remains protected by active savings.",
+          focalAdvice:
+            "Trim micro-purchases and cap dining out over the next 14 days to recover $45 in monthly savings.",
+        }
+
+        let requestedUrl = ""
+        let requestedBody = ""
+
+        globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+          requestedUrl = url.toString()
+          requestedBody = (init?.body as string) || ""
+          return {
+            ok: true,
+            json: async () => ({
+              candidates: [
+                {
+                  content: {
+                    parts: [{ text: JSON.stringify(expectedAiResponse) }],
+                  },
+                },
+              ],
+            }),
+          } as unknown as Response
+        }) as typeof fetch
+
+        const briefing = await generateExecutiveBriefing(mockInsights, mockMetrics, "USD")
+        assert.equal(briefing.isAiGenerated, true)
+        assert.equal(briefing.summary, expectedAiResponse.summary)
+        assert.equal(briefing.focalAdvice, expectedAiResponse.focalAdvice)
+
+        assert.ok(requestedUrl.includes("gemini-1.5-flash:generateContent"))
+        assert.ok(requestedUrl.includes("key=valid-test-key"))
+        assert.ok(requestedBody.includes("You are Dime's Chief Financial Analyst"))
+      } finally {
+        if (originalKey !== undefined) {
+          process.env.GEMINI_API_KEY = originalKey
+        } else {
+          delete process.env.GEMINI_API_KEY
+        }
+        globalThis.fetch = originalFetch
+      }
     })
   })
 })
