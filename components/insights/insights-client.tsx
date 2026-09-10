@@ -4,15 +4,33 @@ import React, { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import type { SpendingInsightsData, SpendingInsight } from "@/types"
 import { InsightsBriefingCard } from "./insights-briefing-card"
+import { InsightsRadarCard } from "./insights-radar-card"
 import { InsightsMetricsRow } from "./insights-metrics-row"
 import { InsightCard } from "./insight-card"
 import { InsightsEmpty } from "./insights-empty"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
-import { Sparkles, RotateCcw } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Sparkles,
+  RotateCcw,
+  AlertTriangle,
+  Repeat,
+  TrendingDown,
+  PiggyBank,
+  Star,
+  Layers,
+} from "lucide-react"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 import {
   dismissInsightAction,
   undoDismissInsightAction,
@@ -42,7 +60,7 @@ function InsightGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
       {items.map((ins) => (
         <InsightCard
           key={ins.id}
@@ -60,6 +78,7 @@ export function InsightsClient({ data }: InsightsClientProps) {
   const [prevData, setPrevData] = useState(data)
   const [insights, setInsights] = useState<SpendingInsight[]>(data.insights)
   const [dismissedCount, setDismissedCount] = useState(data.dismissedCount)
+  const [activeTab, setActiveTab] = useState<string>("all")
   const [isPending, startTransition] = useTransition()
 
   if (prevData !== data) {
@@ -145,9 +164,18 @@ export function InsightsClient({ data }: InsightsClientProps) {
   const savings = insights.filter((i) => i.category === "savings")
   const bookmarked = insights.filter((i) => i.isBookmarked)
 
+  const TABS = [
+    { id: "all", label: "All", count: insights.length, icon: Layers },
+    { id: "anomalies", label: "Anomalies", count: anomalies.length, icon: AlertTriangle },
+    { id: "subscriptions", label: "Subscriptions", count: subscriptions.length, icon: Repeat },
+    { id: "cashflow", label: "Income & Cashflow", count: incomeAndCashflow.length, icon: TrendingDown },
+    { id: "savings", label: "Savings", count: savings.length, icon: PiggyBank },
+    { id: "bookmarked", label: "Bookmarked", count: bookmarked.length, icon: Star },
+  ]
+
   return (
-    <div className="flex flex-col gap-5 w-full">
-      {/* ── Page Header ── */}
+    <div className="flex flex-col gap-6 w-full">
+      {/* ── 1. Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
           <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
@@ -197,82 +225,138 @@ export function InsightsClient({ data }: InsightsClientProps) {
         )}
       </div>
 
-      {/* ── Briefing Hero ── */}
-      <InsightsBriefingCard briefing={data.executiveBriefing} />
-
-      {/* ── Metrics Row ── */}
+      {/* ── 2. Top Metrics Row (Matches /health & /net-worth) ── */}
       <InsightsMetricsRow metrics={data.metrics} currency={data.currency} />
 
-      {/* ── Category Tabs & Feed ── */}
-      <Tabs defaultValue="all" className="flex flex-col gap-4">
-        <div className="overflow-x-auto pb-1">
-          <TabsList className="rounded-xl bg-muted/50 p-1 border border-border/40 h-10 inline-flex">
-            <TabsTrigger value="all" className="rounded-lg text-xs font-semibold px-3">
-              All ({insights.length})
-            </TabsTrigger>
-            <TabsTrigger value="anomalies" className="rounded-lg text-xs font-semibold px-3">
-              Anomalies ({anomalies.length})
-            </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="rounded-lg text-xs font-semibold px-3">
-              Subscriptions ({subscriptions.length})
-            </TabsTrigger>
-            <TabsTrigger value="cashflow" className="rounded-lg text-xs font-semibold px-3">
-              Income & Cashflow ({incomeAndCashflow.length})
-            </TabsTrigger>
-            <TabsTrigger value="savings" className="rounded-lg text-xs font-semibold px-3">
-              Savings ({savings.length})
-            </TabsTrigger>
-            <TabsTrigger value="bookmarked" className="rounded-lg text-xs font-semibold px-3">
-              Bookmarked ({bookmarked.length})
-            </TabsTrigger>
-          </TabsList>
+      {/* ── 3. Bento Hero Section: Executive AI Briefing (2 cols) + Signal Radar (1 col) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
+        <div className="lg:col-span-2">
+          <InsightsBriefingCard briefing={data.executiveBriefing} />
+        </div>
+        <div className="lg:col-span-1">
+          <InsightsRadarCard insights={insights} />
+        </div>
+      </div>
+
+      {/* ── 4. Unified Desktop/Mobile Tab Switcher (Matches Net Worth, Investments, Planner) ── */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+        {/* Desktop Tab Selector */}
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start flex-wrap gap-1">
+          {TABS.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+                  isActive
+                    ? "bg-background text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className="size-3.5" aria-hidden="true" />
+                <span>{tab.label}</span>
+                <span
+                  className={cn(
+                    "text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
-        <TabsContent value="all" className="m-0">
+        {/* Mobile Tab Selector */}
+        <div className="sm:hidden w-full">
+          <Select value={activeTab} onValueChange={setActiveTab}>
+            <SelectTrigger className="w-full border-border/40 bg-card h-10 rounded-xl text-xs font-semibold">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border/40 rounded-xl">
+              <SelectGroup>
+                {TABS.map((tab) => (
+                  <SelectItem key={tab.id} value={tab.id} className="rounded-lg text-xs font-semibold">
+                    {tab.label} ({tab.count})
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <span className="text-xs text-muted-foreground font-mono font-semibold hidden md:inline-block">
+          {activeTab === "all"
+            ? `${insights.length} total signals`
+            : activeTab === "anomalies"
+            ? `${anomalies.length} anomalies`
+            : activeTab === "subscriptions"
+            ? `${subscriptions.length} subscriptions`
+            : activeTab === "cashflow"
+            ? `${incomeAndCashflow.length} cashflow signals`
+            : activeTab === "savings"
+            ? `${savings.length} savings wins`
+            : `${bookmarked.length} bookmarked`}
+        </span>
+      </div>
+
+      {/* ── 5. Active Tab Bento Feed ── */}
+      <div>
+        {activeTab === "all" && (
           <InsightGrid
             items={insights}
             onDismiss={handleDismiss}
             onToggleBookmark={handleToggleBookmark}
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="anomalies" className="m-0">
+        {activeTab === "anomalies" && (
           <InsightGrid
             items={anomalies}
             emptyTitle="No Anomalies Flagged"
+            emptyDescription="All categories and transactions are in normal standard deviations."
             onDismiss={handleDismiss}
             onToggleBookmark={handleToggleBookmark}
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="subscriptions" className="m-0">
+        {activeTab === "subscriptions" && (
           <InsightGrid
             items={subscriptions}
             emptyTitle="No Subscription Alerts"
+            emptyDescription="No duplicate charges or unexpected price hikes detected."
             onDismiss={handleDismiss}
             onToggleBookmark={handleToggleBookmark}
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="cashflow" className="m-0">
+        {activeTab === "cashflow" && (
           <InsightGrid
             items={incomeAndCashflow}
             emptyTitle="Cashflow is Stable"
+            emptyDescription="Income patterns and weekly burn velocity are healthy."
             onDismiss={handleDismiss}
             onToggleBookmark={handleToggleBookmark}
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="savings" className="m-0">
+        {activeTab === "savings" && (
           <InsightGrid
             items={savings}
             emptyTitle="No Immediate Savings Gaps"
+            emptyDescription="Your budget utilization and discretionary spending frequency are on target."
             onDismiss={handleDismiss}
             onToggleBookmark={handleToggleBookmark}
           />
-        </TabsContent>
+        )}
 
-        <TabsContent value="bookmarked" className="m-0">
+        {activeTab === "bookmarked" && (
           <InsightGrid
             items={bookmarked}
             emptyTitle="No Bookmarked Insights"
@@ -280,8 +364,8 @@ export function InsightsClient({ data }: InsightsClientProps) {
             onDismiss={handleDismiss}
             onToggleBookmark={handleToggleBookmark}
           />
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   )
 }
