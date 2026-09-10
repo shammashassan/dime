@@ -6,8 +6,6 @@ import type {
   UserInsightState,
   SpendingInsight,
   SpendingInsightsData,
-  InsightCategory,
-  InsightSeverity,
 } from "@/types"
 
 export interface InsightEngineInputs {
@@ -129,7 +127,7 @@ export function detectCategorySpikes(inputs: {
         metricImpact: Math.round(delta),
         metricLabel: `+${pctIncrease}% vs baseline`,
         actionLabel: "Review Category Transactions",
-        actionUrl: `/transactions?categoryId=${catId}`,
+        actionUrl: `/transactions?categories=${catId}`,
         tags: [catName, "surge"],
         score: Math.min(100, Math.round(50 + (ratio - 1) * 25)),
         detectedAt: referenceDate,
@@ -223,48 +221,69 @@ export function detectSubscriptionCreep(inputs: {
   const d30 = d0 - 30 * 86400000
 
   // 1. Detect duplicate charges within 5 days
-  const recentExpenses = transactions.filter(
-    (t) => t.type === "expense" && new Date(t.date).getTime() >= d30 && new Date(t.date).getTime() <= d0
-  )
+  const recentExpenses = transactions
+    .filter(
+      (t) => t.type === "expense" && new Date(t.date).getTime() >= d30 && new Date(t.date).getTime() <= d0
+    )
+    .map((t) => ({
+      tx: t,
+      normDesc: normalizeDescription(t.description),
+      timestamp: new Date(t.date).getTime(),
+    }))
+    .filter((item) => item.normDesc.length >= 4)
 
-  for (let i = 0; i < recentExpenses.length; i++) {
-    for (let j = i + 1; j < recentExpenses.length; j++) {
-      const a = recentExpenses[i]
-      const b = recentExpenses[j]
-      const descA = normalizeDescription(a.description)
-      const descB = normalizeDescription(b.description)
+  // Group by normDesc and amount
+  const expenseGroups = new Map<string, typeof recentExpenses>()
+  for (const item of recentExpenses) {
+    const key = `${item.normDesc}_${item.tx.amount}`
+    const existing = expenseGroups.get(key)
+    if (existing) {
+      existing.push(item)
+    } else {
+      expenseGroups.set(key, [item])
+    }
+  }
 
-      if (descA.length >= 4 && descA === descB && a.amount === b.amount) {
-        const dayDiff = Math.abs(
-          (new Date(a.date).getTime() - new Date(b.date).getTime()) / 86400000
-        )
-        if (dayDiff <= 5) {
-          const amt = convertAmount(a.amount, a.currency, targetCurrency, exchangeRates)
-          const pairKey = [a._id.toString(), b._id.toString()].sort().join("_")
-          insights.push({
-            id: `duplicate_${pairKey}`,
-            category: "subscriptions",
-            severity: "critical",
-            title: "Potential Duplicate Charge Detected",
-            description: `We detected two identical charges of ${formatCurrency(amt, targetCurrency)} for "${a.description}" within ${Math.round(dayDiff)} days. Verify with your provider.`,
-            metricImpact: amt,
-            metricLabel: "Possible double billing",
-            actionLabel: "Review Transactions",
-            actionUrl: `/transactions`,
-            tags: ["duplicate", "billing"],
-            score: 85,
-            detectedAt: referenceDate,
-          })
-        }
+  const seenDuplicatePairs = new Set<string>()
+  for (const group of expenseGroups.values()) {
+    if (group.length < 2) continue
+    group.sort((a, b) => a.timestamp - b.timestamp)
+    for (let i = 0; i < group.length - 1; i++) {
+      const a = group[i]
+      const b = group[i + 1]
+      const dayDiff = (b.timestamp - a.timestamp) / 86400000
+      if (dayDiff <= 5) {
+        const pairKey = [a.tx._id.toString(), b.tx._id.toString()].sort().join("_")
+        if (seenDuplicatePairs.has(pairKey)) continue
+        seenDuplicatePairs.add(pairKey)
+
+        const amt = convertAmount(a.tx.amount, a.tx.currency, targetCurrency, exchangeRates)
+        insights.push({
+          id: `duplicate_${pairKey}`,
+          category: "subscriptions",
+          severity: "critical",
+          title: "Potential Duplicate Charge Detected",
+          description: `We detected two identical charges of ${formatCurrency(amt, targetCurrency)} for "${a.tx.description}" within ${Math.max(1, Math.round(dayDiff))} days. Verify with your provider.`,
+          metricImpact: amt,
+          metricLabel: "Possible double billing",
+          actionLabel: "Review Transactions",
+          actionUrl: `/transactions`,
+          tags: ["duplicate", "billing"],
+          score: 85,
+          detectedAt: referenceDate,
+        })
       }
     }
   }
 
   // 2. Price hike on active recurring rules
+  const yearMonth = `${referenceDate.getFullYear()}_${referenceDate.getMonth() + 1}`
   for (const rule of recurringRules) {
     if (!rule.isActive || rule.type !== "expense") continue
     const baseRuleAmount = convertAmount(rule.amount, rule.currency, targetCurrency, exchangeRates)
-    const ruleName = (rule as any).name || rule.description || "Subscription"
+    if (baseRuleAmount <= 0) continue
+
+    const ruleName = rule.description || rule.providerName || "Subscription"
 
     const ruleTxs = transactions.filter((t) => {
       if (t.type !== "expense") return false
@@ -291,7 +310,7 @@ export function detectSubscriptionCreep(inputs: {
         const hike = latestAmt - baseRuleAmount
         const pct = Math.round((hike / baseRuleAmount) * 100)
         insights.push({
-          id: `price_hike_${rule._id.toString()}_${referenceDate.getMonth()}`,
+          id: `price_hike_${rule._id.toString()}_${yearMonth}`,
           category: "subscriptions",
           severity: "warning",
           title: `Subscription Price Hike: ${ruleName}`,
@@ -387,29 +406,35 @@ export function detectSavingsOpportunities(inputs: {
 
   const d0 = referenceDate.getTime()
   const d30 = d0 - 30 * 86400000
+  const yearMonth = `${referenceDate.getFullYear()}_${referenceDate.getMonth() + 1}`
+
+  // Pre-aggregate 30d expenses by category and collect micro-expenses in a single pass
+  const spentByCat = new Map<string, number>()
+  const microTxs: Transaction[] = []
+  for (const t of transactions) {
+    if (t.type !== "expense") continue
+    const time = new Date(t.date).getTime()
+    if (time < d30 || time > d0) continue
+    const amt = convertAmount(t.amount, t.currency, targetCurrency, exchangeRates)
+    if (t.categoryId) {
+      spentByCat.set(t.categoryId, (spentByCat.get(t.categoryId) || 0) + amt)
+    }
+    if (amt <= 1500) {
+      microTxs.push(t)
+    }
+  }
 
   // 1. Budget surplus reallocation
   for (const b of budgets) {
     if (!b.isActive) continue
     const budgetLimit = convertAmount(b.amount, b.currency, targetCurrency, exchangeRates)
-    const spent = transactions
-      .filter(
-        (t) =>
-          t.type === "expense" &&
-          t.categoryId === b.categoryId &&
-          new Date(t.date).getTime() >= d30 &&
-          new Date(t.date).getTime() <= d0
-      )
-      .reduce(
-        (sum, t) => sum + convertAmount(t.amount, t.currency, targetCurrency, exchangeRates),
-        0
-      )
+    const spent = spentByCat.get(b.categoryId) || 0
 
     if (budgetLimit >= 10000 && spent < budgetLimit * 0.7) {
       const surplus = budgetLimit - spent
       const catName = catMap.get(b.categoryId) || b.name
       insights.push({
-        id: `savings_surplus_${b._id.toString()}_${referenceDate.getMonth()}`,
+        id: `savings_surplus_${b._id.toString()}_${yearMonth}`,
         category: "savings",
         severity: "opportunity",
         title: `Unspent Budget Surplus: ${catName}`,
@@ -426,14 +451,6 @@ export function detectSavingsOpportunities(inputs: {
   }
 
   // 2. High-frequency micro-spending leakage (<= $15, >= 12 times in 30d)
-  const microTxs = transactions.filter(
-    (t) =>
-      t.type === "expense" &&
-      new Date(t.date).getTime() >= d30 &&
-      new Date(t.date).getTime() <= d0 &&
-      convertAmount(t.amount, t.currency, targetCurrency, exchangeRates) <= 1500
-  )
-
   if (microTxs.length >= 12) {
     const totalMicroSpend = microTxs.reduce(
       (sum, t) => sum + convertAmount(t.amount, t.currency, targetCurrency, exchangeRates),
@@ -441,7 +458,7 @@ export function detectSavingsOpportunities(inputs: {
     )
     const potentialMonthlySavings = Math.round(totalMicroSpend * 0.3)
     insights.push({
-      id: `savings_micro_leakage_${referenceDate.getMonth()}`,
+      id: `savings_micro_leakage_${yearMonth}`,
       category: "savings",
       severity: "opportunity",
       title: "Micro-Purchase Frequency Leakage",
@@ -449,7 +466,7 @@ export function detectSavingsOpportunities(inputs: {
       metricImpact: potentialMonthlySavings,
       metricLabel: `~${formatCurrency(potentialMonthlySavings, targetCurrency)}/mo savings`,
       actionLabel: "Review Micro-expenses",
-      actionUrl: `/transactions?amountMax=15`,
+      actionUrl: `/transactions?maxAmount=15`,
       tags: ["savings", "habits"],
       score: 60,
       detectedAt: referenceDate,
@@ -530,8 +547,18 @@ export function calculateSpendingInsights(inputs: InsightEngineInputs): Spending
     ...detectCashFlowVelocity({ ...inputs, referenceDate }),
   ]
 
+  // Deduplicate insights by ID
+  const uniqueInsights: SpendingInsight[] = []
+  const seenIds = new Set<string>()
+  for (const ins of rawInsights) {
+    if (!seenIds.has(ins.id)) {
+      seenIds.add(ins.id)
+      uniqueInsights.push(ins)
+    }
+  }
+
   // Attach bookmark flag and sort descending by score
-  const allRanked = rawInsights
+  const allRanked = uniqueInsights
     .map((i) => ({
       ...i,
       isBookmarked: bookmarkedKeys.has(i.id),
