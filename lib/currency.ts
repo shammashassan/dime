@@ -265,16 +265,4 @@ export async function getCurrencyConverter(targetCurrency: string, sourceCurrenc
   }
 }
 
-export const SUPPORTED_CURRENCIES = [
-  "USD",
-  "INR",
-  "EUR",
-  "GBP",
-  "CAD",
-  "AUD",
-  "JPY",
-  "SGD",
-  "CHF",
-] as const
-
-export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number]
+export { SUPPORTED_CURRENCIES, type SupportedCurrency } from "./currencies"
