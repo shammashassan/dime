@@ -156,13 +156,15 @@ export function TransactionForm({
       setValue("categoryId", matchedCategory._id.toString(), { shouldDirty: true })
     }
 
+    setValue("currency", scanned.currency, { shouldDirty: true })
+
     // Select first wallet with matching currency if available
     const matchedWallet = wallets.find(
       (w) => w.currency.toUpperCase() === scanned.currency.toUpperCase() && !w.isArchived
     )
     if (matchedWallet) {
       setValue("walletId", matchedWallet._id.toString(), { shouldDirty: true })
-      setValue("currency", matchedWallet.currency)
+      setValue("currency", matchedWallet.currency, { shouldDirty: true })
     }
 
     toast.success("Autofilled form from receipt!")

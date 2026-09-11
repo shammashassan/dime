@@ -24,6 +24,12 @@ import {
 } from "@/components/ui/alert-dialog"
 import { AssetDialog } from "./asset-dialog"
 import { ValuationDialog } from "./valuation-dialog"
+import { AssetValuationInsightsCard } from "./asset-valuation-insights-card"
+import {
+  calculateAssetValuationMetrics,
+  type AssetValuationMetrics,
+  type AssetValuationBriefing,
+} from "@/lib/calculations/asset-valuation"
 import { deleteAsset, deleteAssetValuation } from "@/lib/actions/assets"
 import { toast } from "sonner"
 import { AreaChart, Area, CartesianGrid, XAxis, YAxis } from "recharts"
@@ -48,7 +54,6 @@ import {
   Edit,
   Info,
   Layers,
-  Sparkles,
   Link2,
   Plus,
   Clock,
@@ -88,12 +93,29 @@ const categoryLabels: Record<string, string> = {
 interface AssetDetailsProps {
   asset: Asset
   valuations: AssetValuation[]
+  valuationMetrics?: AssetValuationMetrics
+  valuationBriefing?: AssetValuationBriefing
 }
 
-export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
+export function AssetDetails({
+  asset,
+  valuations,
+  valuationMetrics,
+  valuationBriefing,
+}: AssetDetailsProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
+
+  const metrics = useMemo(() => {
+    return valuationMetrics || calculateAssetValuationMetrics(asset, valuations)
+  }, [valuationMetrics, asset, valuations])
+
+  const briefing = valuationBriefing || {
+    summary: `${asset.name} is recorded at ${formatCurrency(asset.currentValue / 100, asset.currency)}. Log periodic valuations to build its performance timeline.`,
+    focalAdvice: "Track periodic valuations to ensure accurate net worth records.",
+    isAiGenerated: false,
+  }
 
   const isAsset = asset.kind === "asset"
   const accent = isAsset ? "#10b981" : "#ef4444"
@@ -473,15 +495,11 @@ export function AssetDetails({ asset, valuations }: AssetDetailsProps) {
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75">
-            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
-              <Sparkles className="size-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">AI Valuation Insights</span>
-            </div>
-            <div className="p-4 text-[11px] text-muted-foreground leading-relaxed">
-              Predictive evaluations, depreciation calculations, and health insights. (Coming soon)
-            </div>
-          </Card>
+          <AssetValuationInsightsCard
+            metrics={metrics}
+            briefing={briefing}
+            currency={asset.currency}
+          />
         </div>
 
         {/* ── Right column: Chart + Timeline ───────────── */}

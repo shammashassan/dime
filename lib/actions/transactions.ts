@@ -13,6 +13,7 @@ import { FinancialScope } from "@/types/scope"
 import { db } from "@/lib/db/client"
 import { canCreateTransactions, canEditTransactions, canDeleteTransactions, Role } from "@/lib/permissions"
 import { generateSplitId } from "@/lib/split-utils"
+import { getPreferences } from "@/lib/queries/preferences"
 
 // Helper to update a wallet's balance
 async function updateWalletBalance(scope: FinancialScope, walletId: string, amountChange: number) {
@@ -632,8 +633,10 @@ async function applyRulesToScannedData(data: {
 }
 
 export async function scanReceiptAction(base64Image: string, filename: string) {
-  await requireApprovedUser()
+  const session = await requireApprovedUser()
   const scope = await getFinancialScope()
+  const prefs = await getPreferences(session.user.id)
+  const defaultCurrency = (prefs?.defaultCurrency || "USD").toUpperCase()
 
   // Delay helper to simulate network/processing time
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -657,7 +660,7 @@ export async function scanReceiptAction(base64Image: string, filename: string) {
               {
                 parts: [
                   {
-                    text: "Analyze this receipt image and return a JSON object. The JSON must contain these exact fields: merchant (string), amount (integer in cents, e.g. 10.50 is 1050), date (ISO date string YYYY-MM-DD), categoryName (string matching one of: Food & Dining, Transport, Housing, Utilities, Healthcare, Entertainment, Shopping, Education, Travel, Personal Care, Subscriptions, Other), currency (3-letter ISO code e.g. USD, EUR, INR), and description (string). Return ONLY raw JSON, do not wrap in markdown code blocks.",
+                    text: `Analyze this receipt image and return a JSON object. The JSON must contain these exact fields: merchant (string), amount (integer in cents, e.g. 10.50 is 1050), date (ISO date string YYYY-MM-DD), categoryName (string matching one of: Food & Dining, Transport, Housing, Utilities, Healthcare, Entertainment, Shopping, Education, Travel, Personal Care, Subscriptions, Other), currency (3-letter ISO code e.g. USD, EUR, INR), and description (string). The user's preferred default currency is ${defaultCurrency}. If currency cannot be determined from the receipt, use ${defaultCurrency}. Return ONLY raw JSON, do not wrap in markdown code blocks.`,
                   },
                   {
                     inlineData: {
@@ -688,7 +691,7 @@ export async function scanReceiptAction(base64Image: string, filename: string) {
           amount: typeof parsed.amount === "number" ? parsed.amount : 0,
           date: parsed.date ? new Date(parsed.date) : new Date(),
           categoryName: parsed.categoryName || "Other",
-          currency: parsed.currency || "USD",
+          currency: (parsed.currency || defaultCurrency).toUpperCase(),
           description: parsed.description || "AI Scanned Receipt",
         }
       }
@@ -704,48 +707,50 @@ export async function scanReceiptAction(base64Image: string, filename: string) {
     if (lowerName.includes("coffee") || lowerName.includes("starbucks")) {
       rawData = {
         merchant: "Starbucks Coffee",
-        amount: 1450, // $14.50
+        amount: defaultCurrency === "INR" ? 35000 : 1450,
         date: new Date(),
         categoryName: "Food & Dining",
-        currency: "USD",
+        currency: defaultCurrency,
         description: "Caramel Macchiato & Croissant",
       }
     } else if (lowerName.includes("grocery") || lowerName.includes("walmart") || lowerName.includes("food")) {
       rawData = {
-        merchant: "Walmart Supercenter",
-        amount: 8420, // $84.20
+        merchant: defaultCurrency === "INR" ? "Reliance Fresh" : "Walmart Supercenter",
+        amount: defaultCurrency === "INR" ? 245000 : 8420,
         date: new Date(),
         categoryName: "Food & Dining",
-        currency: "USD",
+        currency: defaultCurrency,
         description: "Weekly Household Groceries",
       }
     } else if (lowerName.includes("flight") || lowerName.includes("delta") || lowerName.includes("travel")) {
       rawData = {
-        merchant: "Delta Air Lines",
-        amount: 35000, // $350.00
+        merchant: defaultCurrency === "INR" ? "Air India" : "Delta Air Lines",
+        amount: defaultCurrency === "INR" ? 850000 : 35000,
         date: new Date(),
         categoryName: "Travel",
-        currency: "USD",
-        description: "Flight Ticket NYC to LAX",
+        currency: defaultCurrency,
+        description: defaultCurrency === "INR" ? "Flight Ticket DEL to BOM" : "Flight Ticket NYC to LAX",
       }
     } else if (lowerName.includes("netflix") || lowerName.includes("subscription")) {
       rawData = {
         merchant: "Netflix Inc.",
-        amount: 1549, // $15.49
+        amount: defaultCurrency === "INR" ? 64900 : 1549,
         date: new Date(),
         categoryName: "Subscriptions",
-        currency: "USD",
+        currency: defaultCurrency,
         description: "Premium Streaming Subscription",
       }
     } else {
       // Random generic fallback
-      const randomAmount = Math.round((Math.random() * 45 + 5) * 100)
+      const randomAmount = defaultCurrency === "INR"
+        ? Math.round((Math.random() * 800 + 150)) * 100
+        : Math.round((Math.random() * 45 + 5) * 100)
       rawData = {
         merchant: "Local Retailer Store",
         amount: randomAmount,
         date: new Date(),
         categoryName: "Shopping",
-        currency: "USD",
+        currency: defaultCurrency,
         description: "Miscellaneous retail purchase",
       }
     }

@@ -11,19 +11,30 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Sparkles, Upload, FileText, Image as ImageIcon, CheckCircle, RefreshCw } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { SUPPORTED_CURRENCIES } from "@/lib/currency"
+import { Sparkles, Upload, FileText, CheckCircle, RefreshCw } from "lucide-react"
+
+export interface ScannedReceiptData {
+  merchant: string
+  amount: number
+  date: Date | string
+  categoryName: string
+  currency: string
+  description: string
+}
 
 interface ReceiptScannerModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onScanComplete: (data: {
-    merchant: string
-    amount: number
-    date: Date
-    categoryName: string
-    currency: string
-    description: string
-  }) => void
+  onScanComplete: (data: ScannedReceiptData & { date: Date }) => void
 }
 
 export function ReceiptScannerModal({
@@ -34,7 +45,7 @@ export function ReceiptScannerModal({
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isScanning, setIsScanning] = useState(false)
-  const [scannedData, setScannedData] = useState<any | null>(null)
+  const [scannedData, setScannedData] = useState<ScannedReceiptData | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +85,7 @@ export function ReceiptScannerModal({
       try {
         const base64Image = reader.result as string
         const res = await scanReceiptAction(base64Image, file.name)
-        if (res.success) {
+        if (res.success && res.data) {
           setScannedData(res.data)
           toast.success("Receipt scanned successfully!")
         } else {
@@ -218,11 +229,38 @@ export function ReceiptScannerModal({
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Merchant</p>
                   <p className="font-bold text-foreground mt-0.5">{scannedData.merchant}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Amount</p>
-                  <p className="font-extrabold text-foreground mt-0.5 text-base">
-                    {(scannedData.amount / 100).toFixed(2)} {scannedData.currency}
-                  </p>
+                <div className="flex flex-col items-end">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Amount &amp; Currency</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={(scannedData.amount / 100).toString()}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0
+                        setScannedData({ ...scannedData, amount: Math.round(val * 100) })
+                      }}
+                      className="h-7 w-20 px-2 text-right font-extrabold text-foreground text-sm rounded-lg border border-border/40 bg-background focus:outline-hidden focus:ring-1 focus:ring-primary"
+                    />
+                    <Select
+                      value={scannedData.currency}
+                      onValueChange={(val) => setScannedData({ ...scannedData, currency: val })}
+                    >
+                      <SelectTrigger className="h-7 w-19 px-2 py-0 text-xs font-bold rounded-lg border-border/50 bg-background cursor-pointer">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border border-border/40 bg-popover">
+                        <SelectGroup>
+                          {SUPPORTED_CURRENCIES.map((curr) => (
+                            <SelectItem key={curr} value={curr} className="text-xs font-semibold cursor-pointer">
+                              {curr}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Category</p>
