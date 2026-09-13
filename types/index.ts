@@ -958,3 +958,92 @@ export interface SpendingInsightsData {
   }
   currency: string
 }
+
+// ── Cash Flow Calendar Domain Types ──
+
+export type CalendarEventType =
+  | "transaction"
+  | "recurring"
+  | "bill"
+  | "subscription"
+  | "loan"
+  | "plan"
+
+export type CalendarEventStatus = "settled" | "upcoming" | "overdue" | "planned"
+
+export interface CalendarEventItem {
+  id: string
+  date: string                   // YYYY-MM-DD
+  title: string
+  amount: number                 // Original currency cents (always positive)
+  currency: string
+  convertedAmount: number        // Target currency cents
+  type: CalendarEventType
+  flow: "inflow" | "outflow"
+  status: CalendarEventStatus
+  category?: {
+    id: string
+    name: string
+    icon?: string
+    color?: string
+  }
+  walletId?: string
+  walletName?: string
+  sourceId?: string
+  notes?: string
+}
+
+export interface CalendarDaySummary {
+  date: string                   // YYYY-MM-DD
+  dayOfMonth: number
+  isCurrentMonth: boolean
+  isToday: boolean
+  isPast: boolean
+  closingBalance: number         // Target currency cents
+  totalInflow: number            // Target currency cents
+  totalOutflow: number           // Target currency cents
+  netChange: number              // totalInflow - totalOutflow
+  events: CalendarEventItem[]
+  isDeficit: boolean             // closingBalance < 0
+  isLowBuffer: boolean           // closingBalance < safetyBuffer
+}
+
+export interface CashFlowMonthOverview {
+  month: string                  // YYYY-MM
+  targetCurrency: string
+  startingBalance: number        // Opening balance on day 1 of month
+  projectedEndingBalance: number // Closing balance on last day of month
+  totalInflow: number            // Sum of month inflows
+  totalOutflow: number           // Sum of month outflows
+  netCashFlow: number            // totalInflow - totalOutflow
+  lowestBalance: number          // Minimum projected balance in month
+  lowestBalanceDate: string      // Date of minimum balance
+  deficitDaysCount: number       // Days with closingBalance < 0
+  days: CalendarDaySummary[]     // Complete calendar cells (35 or 42)
+}
+
+export interface CalendarPlanEvent {
+  _id: ObjectId
+  userId: string
+  organizationId?: string | null
+  ownerUserId?: string
+  title: string
+  amount: number                 // in cents
+  currency: string
+  date: Date                     // Scheduled execution date
+  flow: "inflow" | "outflow"
+  walletId?: string
+  categoryId?: string
+  notes?: string
+  isCompleted: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface SerializedCalendarPlanEvent extends Omit<CalendarPlanEvent, "_id" | "date" | "createdAt" | "updatedAt"> {
+  _id: string
+  date: string
+  createdAt: string
+  updatedAt: string
+}
+
