@@ -23,6 +23,7 @@ import {
   LineChart,
   Users2,
   Calculator,
+  CalendarDays,
   Activity,
   Sparkles,
 } from "lucide-react"
@@ -73,6 +74,7 @@ const NAV_ITEMS = [
   { title: "Investments", href: "/investments", icon: LineChart },
   { title: "Net Worth", href: "/net-worth", icon: TrendingUp },
   { title: "Planner", href: "/planner", icon: Calculator },
+  { title: "Calendar", href: "/calendar", icon: CalendarDays },
   { title: "Health", href: "/health", icon: Activity },
   { title: "Insights", href: "/insights", icon: Sparkles },
   { title: "Budgets", href: "/budgets", icon: PiggyBank },
@@ -94,7 +96,7 @@ type SidebarUser = {
 
 export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
-  const { isMobile } = useSidebar()
+  const { isMobile, setOpenMobile } = useSidebar()
   const { data: session } = authClient.useSession()
   const mounted = React.useSyncExternalStore(
     React.useCallback(() => () => {}, []),
@@ -103,6 +105,12 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
   )
   const [showLogoutDialog, setShowLogoutDialog] = React.useState(false)
   const [isSigningOut, setIsSigningOut] = React.useState(false)
+
+  const handleLinkClick = React.useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }, [isMobile, setOpenMobile])
 
   const user = session?.user as SidebarUser | undefined
   const isAdmin = user?.role === "admin"
@@ -155,7 +163,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                       : pathname.startsWith(item.href)
                   }
                 >
-                  <Link href={item.href}>
+                  <Link href={item.href} onClick={handleLinkClick}>
                     <item.icon />
                     <span>{item.title}</span>
                   </Link>
@@ -176,7 +184,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   tooltip="User Management"
                   isActive={pathname.startsWith("/admin")}
                 >
-                  <Link href="/admin/users">
+                  <Link href="/admin/users" onClick={handleLinkClick}>
                     <Shield />
                     <span>User Management</span>
                   </Link>
@@ -252,7 +260,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
-                      <Link href="/settings">
+                      <Link href="/settings" onClick={handleLinkClick}>
                         <Cog className="mr-2 h-4 w-4" />
                         Settings
                       </Link>
