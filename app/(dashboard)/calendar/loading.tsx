@@ -13,10 +13,7 @@ export default function CalendarLoading() {
             <Skeleton className="h-4 w-72 rounded-md" />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-9 w-32 rounded-xl" />
-          <Skeleton className="h-9 w-24 rounded-xl" />
-        </div>
+        <Skeleton className="h-9 w-32 rounded-xl" />
       </div>
 
       {/* Metrics Row Skeleton */}
@@ -25,6 +22,18 @@ export default function CalendarLoading() {
         <Skeleton className="h-20 flex-1 min-w-[200px] rounded-2xl" />
         <Skeleton className="h-20 flex-1 min-w-[200px] rounded-2xl" />
         <Skeleton className="h-20 flex-1 min-w-[200px] rounded-2xl" />
+      </div>
+
+      {/* Toolbar Skeleton */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-9 w-44 rounded-2xl" />
+          <Skeleton className="h-9 w-16 rounded-xl" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-9 w-48 rounded-2xl" />
+          <Skeleton className="h-9 w-20 rounded-2xl" />
+        </div>
       </div>
 
       {/* Month Grid Skeleton */}

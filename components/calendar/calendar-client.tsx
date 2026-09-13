@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { CashFlowMonthOverview, CalendarDaySummary } from "@/types"
 import { CalendarHeader } from "./calendar-header"
 import { CalendarMetricsRow } from "./calendar-metrics-row"
+import { CalendarToolbar } from "./calendar-toolbar"
 import { CalendarMonthGrid } from "./calendar-month-grid"
 import { CalendarAgendaList } from "./calendar-agenda-list"
 import { CalendarDaySheet } from "./calendar-day-sheet"
@@ -56,14 +57,8 @@ export function CalendarClient({ data, initialMode = "liquid" }: CalendarClientP
 
   return (
     <div className="flex flex-col gap-5 w-full">
-      {/* 1. Header & Navigator */}
+      {/* 1. Header with Title and Primary Action */}
       <CalendarHeader
-        currentMonth={data.month}
-        onMonthChange={handleMonthChange}
-        walletMode={walletMode}
-        onWalletModeChange={handleWalletModeChange}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
         onOpenAddPlan={() => {
           setAddPlanDefaultDate(undefined)
           setIsAddPlanOpen(true)
@@ -74,7 +69,17 @@ export function CalendarClient({ data, initialMode = "liquid" }: CalendarClientP
       {/* 2. Top Bento Metrics Row */}
       <CalendarMetricsRow overview={data} />
 
-      {/* 3. Main Calendar Body: Month Grid or Agenda List */}
+      {/* 3. Control Toolbar: Month Navigator, Liquid/All, Grid/Agenda (Positioned below Metrics) */}
+      <CalendarToolbar
+        currentMonth={data.month}
+        onMonthChange={handleMonthChange}
+        walletMode={walletMode}
+        onWalletModeChange={handleWalletModeChange}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+      />
+
+      {/* 4. Main Calendar Body: Month Grid or Agenda List */}
       {viewMode === "grid" ? (
         <CalendarMonthGrid
           days={data.days}
@@ -89,7 +94,7 @@ export function CalendarClient({ data, initialMode = "liquid" }: CalendarClientP
         />
       )}
 
-      {/* 4. Day Details Sheet */}
+      {/* 5. Day Details Sheet */}
       <CalendarDaySheet
         day={currentSelectedDay}
         open={isSheetOpen}
@@ -98,7 +103,7 @@ export function CalendarClient({ data, initialMode = "liquid" }: CalendarClientP
         onAddPlanForDate={handleAddPlanForDate}
       />
 
-      {/* 5. Add Planned Event Dialog */}
+      {/* 6. Add Planned Event Dialog */}
       <PlanEventDialog
         open={isAddPlanOpen}
         onOpenChange={setIsAddPlanOpen}
