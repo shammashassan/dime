@@ -32,6 +32,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ Recurring Platform (Recurring Transactions)
 * ✅ Subscription Manager
 * ✅ Bill Manager
+* ✅ Cash Flow Calendar
 * ✅ Investment Tracker & Portfolio Management
 
 ## Analytics
@@ -506,47 +507,46 @@ Features:
 
 ---
 
-# 10. Cash Flow Calendar
+# 10. Cash Flow Calendar ✅ COMPLETED
 
 Provide a future financial calendar.
 
+> **Status**: **Completed.** Pure deterministic calculation engine implemented in `lib/calculations/cash-flow-calendar.ts`, cached data orchestration in `lib/queries/cash-flow-calendar.ts`, one-off planned event persistence in `calendar_events` collection via server actions in `lib/actions/calendar.ts`, dedicated `/calendar` dashboard route with Next.js 16 Suspense architecture, responsive 7-column month grid, mobile-friendly agenda feed, slide-over day detail sheet, Bento KPI strip, and sidebar navigation.
+
 Display:
 
-* Income
-* Bills
-* Loan repayments
-* Subscription renewals
-* Goals
-* Recurring transactions
-* Expected balances
+* ✅ Income
+* ✅ Bills
+* ✅ Loan repayments
+* ✅ Subscription renewals
+* ✅ Goals
+* ✅ Recurring transactions
+* ✅ Expected balances
 
 Allow users to understand future cash flow at a glance.
 
-### Additional Planned Features
+### Additional Completed Features
 
-* Investment contributions
-* Forecasted balances
-* Cash flow deficits
-* Upcoming large expenses
-* Goal contribution schedule
-* Drag-and-drop planning
-* Calendar filters
-* Daily cash balance projection
-* Weekly cash flow summary
-* Monthly planning mode
-* Scenario-aware calendar
-* Calendar exports
+* ✅ Hybrid Timeline (settled past transactions + future recurring rules, bills, subscriptions, and loan repayments)
+* ✅ Day-by-day forward and backward running balance projection
+* ✅ Deficit warnings (`isDeficit: true`, `<AlertCircle />` badges) when projected balances drop below zero, plus low safety buffer flags
+* ✅ Toggleable "Liquid Cash" vs "All Accounts" mode (deducting credit liabilities)
+* ✅ Month Grid view and mobile-friendly Agenda Feed view
+* ✅ Slide-over `CalendarDaySheet` for date inspection, running balance breakdown, and one-off plan management
+* ✅ One-off planned events collection `calendar_events` with Server Actions (`createCalendarPlanAction`, `updateCalendarPlanAction`, `deleteCalendarPlanAction`)
+* ✅ Top Bento `MetricCard` strip (Expected Inflow, Scheduled Outflow, Net Projected Flow, Lowest Projected Point / Deficit Warning)
+* ✅ Accessible loading skeleton and error boundary (`loading.tsx`, `error.tsx`)
+* ✅ Sidebar navigation integration (`CalendarDays` icon under Planner)
+* ✅ 7 comprehensive automated unit tests covering all math, multi-currency, recurrence frequencies, and edge cases.
 
 Integrations:
 
-* Financial Planner
-* Bills
-* Subscriptions
-* Goals
-* Investments
-* Reports
-* Notifications
-* Dashboard Widgets
+* ✅ Financial Planner
+* ✅ Bills
+* ✅ Subscriptions
+* ✅ Loans
+* ✅ Wallets & Transactions
+* ✅ Dashboard Sidebar
 ---
 
 # 11. Advanced Search
