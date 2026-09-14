@@ -126,6 +126,17 @@ export async function initDatabase() {
     await userInsightStates.createIndex({ userId: 1, insightKey: 1 }, { unique: true })
     await userInsightStates.createIndex({ userId: 1, status: 1 })
 
+    // 7. Create indexes for notifications
+    const notifications = db.collection("notifications")
+    await notifications.createIndex({ userId: 1, createdAt: -1 })
+    await notifications.createIndex({ userId: 1, readAt: 1 })
+    // TTL index: Purge read notifications 30 days after being read.
+    // MongoDB's TTL thread automatically ignores documents where readAt is null or undefined (unread notifications are preserved).
+    await notifications.createIndex(
+      { readAt: 1 },
+      { expireAfterSeconds: 30 * 24 * 60 * 60 }
+    )
+
     console.log("Database indexes verified/created.")
 
     // 5. Seed default categories if none exist

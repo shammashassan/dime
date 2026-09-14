@@ -1,7 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { Bell as BellIcon, RefreshCcw as RefreshCcwIcon } from "lucide-react";
+import {
+  Bell as BellIcon,
+  BellDot,
+  RefreshCcw as RefreshCcwIcon,
+  AlertTriangle,
+  Calendar,
+  Target,
+  Trophy,
+  Users,
+  Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -20,11 +29,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Notification } from "@/types";
-import {
-  getNotificationsAction,
-  markNotificationReadAction,
-} from "@/lib/actions/notifications";
+import { useNotifications } from "./notifications-provider";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -39,9 +44,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 function NotificationIcon({
   image,
   title,
+  type,
 }: {
   image?: string;
   title: string;
+  type?: string;
 }) {
   if (image) {
     return (
@@ -51,23 +58,42 @@ function NotificationIcon({
       </ItemMedia>
     );
   }
+
+  let Icon = BellIcon;
+  let bgClass = "bg-primary/10";
+  let colorClass = "!text-primary";
+
+  if (type === "budget_alert" || type?.includes("overdue")) {
+    Icon = AlertTriangle;
+    bgClass = "bg-destructive/10";
+    colorClass = "!text-destructive";
+  } else if (type?.startsWith("loan")) {
+    Icon = Clock;
+    bgClass = "bg-amber-500/10";
+    colorClass = "!text-amber-500";
+  } else if (type?.startsWith("subscription") || type?.startsWith("bill")) {
+    Icon = Calendar;
+    bgClass = "bg-blue-500/10";
+    colorClass = "!text-blue-500";
+  } else if (type?.startsWith("goal")) {
+    Icon = type === "goal_achieved" ? Trophy : Target;
+    bgClass = "bg-emerald-500/10";
+    colorClass = "!text-emerald-500";
+  } else if (type === "workspace" || type?.startsWith("shared")) {
+    Icon = Users;
+    bgClass = "bg-indigo-500/10";
+    colorClass = "!text-indigo-500";
+  }
+
   return (
-    <ItemMedia className="text-primary mt-0.5">
-      <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-        <BellIcon className="size-3.5" />
+    <ItemMedia className="mt-0.5">
+      <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg", bgClass)}>
+        <Icon className={cn("size-3.5", colorClass)} />
       </div>
     </ItemMedia>
   );
 }
 
-function Dot() {
-  return (
-    <span
-      aria-hidden="true"
-      className="size-1.5 rounded-full bg-primary block"
-    />
-  );
-}
 
 export function EmptyMuted({ onRefresh }: { onRefresh?: () => void }) {
   return (
@@ -94,38 +120,15 @@ export function EmptyMuted({ onRefresh }: { onRefresh?: () => void }) {
 }
 
 export function NotificationMenu() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const router = useRouter();
-  const unreadCount = notifications.filter((n) => !n.readAt).length;
-  const hasNotifications = notifications.length > 0;
-
-  const fetchNotifications = useCallback(async () => {
-    const res = await getNotificationsAction();
-    if (res.success && res.data) {
-      setNotifications(res.data as unknown as Notification[]);
-    }
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    const timer = setTimeout(() => {
-      if (active) {
-        fetchNotifications();
-      }
-    }, 0);
-
-    const interval = setInterval(() => {
-      if (active) {
-        fetchNotifications();
-      }
-    }, 60000);
-
-    return () => {
-      active = false;
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
-  }, [fetchNotifications]);
+  const {
+    notifications,
+    unreadCount,
+    hasNotifications,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
 
   const handleOpenChange = (open: boolean) => {
     if (open) {
@@ -134,27 +137,11 @@ export function NotificationMenu() {
   };
 
   const handleMarkAllAsRead = async () => {
-    const unread = notifications.filter((n) => !n.readAt);
-    if (unread.length === 0) return;
-    await Promise.all(
-      unread.map((n) => markNotificationReadAction(n._id.toString()))
-    );
-    setNotifications(
-      notifications.map((n) => ({ ...n, readAt: n.readAt || new Date() }))
-    );
+    await markAllAsRead();
   };
 
   const handleNotificationClick = async (id: string) => {
-    const notification = notifications.find((n) => n._id.toString() === id);
-    if (!notification || notification.readAt) return;
-
-    setNotifications(
-      notifications.map((n) =>
-        n._id.toString() === id ? { ...n, readAt: new Date() } : n
-      )
-    );
-    await markNotificationReadAction(id);
-    router.refresh();
+    await markAsRead(id);
   };
 
   const getRelativeTime = (date: Date | string) => {
@@ -175,17 +162,15 @@ export function NotificationMenu() {
     <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label="Open notifications"
+          aria-label={unreadCount > 0 ? `Open notifications (${unreadCount} unread)` : "Open notifications"}
           size="icon"
           variant="ghost"
-          className="relative rounded-full"
+          className="rounded-full"
         >
-          <BellIcon aria-hidden="true" />
-          {unreadCount > 0 && (
-            <span
-              aria-hidden="true"
-              className="absolute top-2 right-2 size-2 rounded-full bg-primary"
-            />
+          {unreadCount > 0 ? (
+            <BellDot className="size-4.5 text-foreground" aria-hidden="true" />
+          ) : (
+            <BellIcon className="size-4.5 text-muted-foreground" aria-hidden="true" />
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -212,7 +197,7 @@ export function NotificationMenu() {
           <EmptyMuted onRefresh={fetchNotifications} />
         ) : (
           <ScrollArea className="h-[300px]">
-            <DropdownMenuGroup className="py-1 pr-3">
+            <DropdownMenuGroup className="p-1 flex flex-col gap-1">
               {notifications.slice(0, 5).map((notification) => {
                 const hasLink = !!notification.link;
                 const idStr = notification._id.toString();
@@ -222,6 +207,10 @@ export function NotificationMenu() {
                     <DropdownMenuItem
                       key={idStr}
                       asChild
+                      className={cn(
+                        "cursor-pointer rounded-xl transition-colors",
+                        !notification.readAt ? "bg-muted/80 hover:bg-muted" : "hover:bg-muted/50"
+                      )}
                     >
                       <Link
                         href={notification.link!}
@@ -234,10 +223,11 @@ export function NotificationMenu() {
                           }
                         }}
                       >
-                        <Item size="xs" className="w-full p-2 relative">
+                        <Item size="xs" className="w-full">
                           <NotificationIcon
                             image={notification.image}
                             title={notification.title}
+                            type={notification.type}
                           />
 
                           <ItemContent className="gap-0.5">
@@ -265,13 +255,6 @@ export function NotificationMenu() {
                               {getRelativeTime(notification.createdAt)}
                             </span>
                           </ItemContent>
-
-                          {!notification.readAt && (
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                              <span className="sr-only">Unread</span>
-                              <Dot />
-                            </div>
-                          )}
                         </Item>
                       </Link>
                     </DropdownMenuItem>
@@ -282,12 +265,17 @@ export function NotificationMenu() {
                 return (
                   <DropdownMenuItem
                     key={idStr}
+                    className={cn(
+                      "cursor-pointer rounded-xl transition-colors",
+                      !notification.readAt ? "bg-muted/80 hover:bg-muted" : "hover:bg-muted/50"
+                    )}
                     onClick={() => handleNotificationClick(idStr)}
                   >
-                    <Item size="xs" className="w-full p-2 relative">
+                    <Item size="xs" className="w-full">
                       <NotificationIcon
                         image={notification.image}
                         title={notification.title}
+                        type={notification.type}
                       />
 
                       <ItemContent className="gap-0.5">
@@ -315,13 +303,6 @@ export function NotificationMenu() {
                           {getRelativeTime(notification.createdAt)}
                         </span>
                       </ItemContent>
-
-                      {!notification.readAt && (
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                          <span className="sr-only">Unread</span>
-                          <Dot />
-                        </div>
-                      )}
                     </Item>
                   </DropdownMenuItem>
                 );

@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth-guard"
 import { auth } from "@/lib/auth"
 import { headers } from "next/headers"
 import { revalidatePath } from "next/cache"
+import { createNotification } from "@/lib/actions/notifications"
 
 export async function approveUser(userId: string) {
   await requireAdmin()
@@ -17,6 +18,17 @@ export async function approveUser(userId: string) {
       },
     },
     headers: headersList,
+  })
+
+  // Notify the user that their account was approved
+  await createNotification({
+    userId,
+    title: "Account Approved! 🎉",
+    message: "Your Dime account has been approved by an administrator. You now have full access to your workspace.",
+    type: "system",
+    link: "/dashboard",
+  }).catch((err) => {
+    console.error("Failed to notify approved user:", err)
   })
 
   revalidatePath("/admin/users")
@@ -43,8 +55,8 @@ export async function bulkApproveUsers(userIds: string[]) {
   const headersList = await headers()
 
   await Promise.all(
-    userIds.map((userId) =>
-      auth.api.adminUpdateUser({
+    userIds.map(async (userId) => {
+      await auth.api.adminUpdateUser({
         body: {
           userId,
           data: {
@@ -53,7 +65,17 @@ export async function bulkApproveUsers(userIds: string[]) {
         },
         headers: headersList,
       })
-    )
+
+      await createNotification({
+        userId,
+        title: "Account Approved! 🎉",
+        message: "Your Dime account has been approved by an administrator. You now have full access to your workspace.",
+        type: "system",
+        link: "/dashboard",
+      }).catch((err) => {
+        console.error("Failed to notify approved user:", err)
+      })
+    })
   )
 
   revalidatePath("/admin/users")

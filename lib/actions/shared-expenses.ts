@@ -18,7 +18,7 @@ import {
   RecordSettlementInput,
 } from "@/lib/validations/shared-expenses"
 import { validateExpenseSplits, buildSharedExpensesOverviewViewModel } from "@/lib/calculations/shared-expenses"
-import { SharedExpense, SharedSettlement, Transaction, Category } from "@/types"
+import { SharedExpense, SharedSettlement, Transaction, Category, Notification } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
 
@@ -224,6 +224,21 @@ export async function recordSettlementAction(rawInput: RecordSettlementInput) {
   }
 
   await sharedSettlementsCollection.insertOne(newSettlement)
+
+  // Notify receiving participant if they are a registered user
+  if (parsed.toParticipantType === "user" && parsed.toParticipantId !== session.user.id) {
+    const formattedAmount = (parsed.amount / 100).toFixed(2)
+    await notificationsCollection.insertOne({
+      _id: new ObjectId(),
+      userId: parsed.toParticipantId,
+      title: "Settlement Received! 💳",
+      message: `${session.user.name || "A partner"} recorded a settlement payment of ${formattedAmount} ${parsed.currency} with you.`,
+      type: "shared_expense",
+      link: "/shared-expenses",
+      createdAt: now,
+      updatedAt: now,
+    } as unknown as Notification).catch((err) => console.error("Failed to notify settlement recipient:", err))
+  }
 
   // Update specific expense status if expenseId was supplied
   if (parsed.expenseId && ObjectId.isValid(parsed.expenseId)) {

@@ -130,21 +130,21 @@ const budgets = await getActiveBudgets(userId)
 
 ---
 
-## 7. PPR (Partial Pre-Rendering)
+## 7. Cache Components & PPR (Partial Pre-Rendering)
 
 Enabled project-wide in `next.config.ts`:
 
 ```ts
-experimental: { ppr: "incremental" }
+cacheComponents: true
 ```
 
-Pages that use it opt in with:
+In Next.js 16+, `cacheComponents: true` unifies PPR, `use cache`, and `dynamicIO` into a single, stable configuration. Segment configs like `dynamic = 'force-dynamic'`, `revalidate = ...`, `fetchCache`, and `experimental_ppr` are obsolete.
 
-```ts
-export const experimental_ppr = true
-```
-
-Wrap every user-specific / data-dependent section in `<Suspense fallback={<Skeleton />}>`. Static shell (sidebar, header, breadcrumb) renders instantly from the CDN; data sections stream in.
+- **Streaming uncached data**: Wrap every user-specific / dynamic data-dependent section in `<Suspense fallback={<Skeleton />}>`. The static shell (sidebar, header, breadcrumbs) is prerendered and served instantly, while dynamic sections stream in (`◐ Partial Prerender`).
+- **Granular caching**: Use the `'use cache'` directive with `cacheLife(...)` (`seconds`, `minutes`, `hours`, `days`, `weeks`, `max`) and `cacheTag(...)` for component- or function-level caching.
+- **Mutations & Invalidation**: Use `updateTag(tag)` inside Server Actions for instant read-your-own-writes updates.
+- **Instant Client Navigations**: Export `unstable_instant = { prefetch: 'static' }` from routes to validate instant static shell availability at build time and dev time.
+- **UI State Preservation**: Navigations preserve page state (inputs, scroll positions) using React `<Activity mode="hidden">` (up to 3 routes). Reset transient menus via `useLayoutEffect` cleanup or `Link`'s `onNavigate`.
 
 ---
 
@@ -204,7 +204,7 @@ Close intercepting route modals with `router.back()` — **never** `router.push(
 - [ ] `useSearchParams` / `usePathname` components wrapped in `<Suspense>`
 - [ ] `Promise.all` for all parallel RSC fetches
 - [ ] `React.cache()` on all query functions
-- [ ] `experimental_ppr = true` on dashboard and reports pages
+- [ ] `cacheComponents: true` enabled in `next.config.ts`; `<Suspense>` used for streaming dynamic content
 - [ ] `@modal/default.tsx` returns `null`
 - [ ] Modals closed with `router.back()`
 - [ ] `error.tsx` + `loading.tsx` for every data-fetching route segment

@@ -9,6 +9,7 @@ import { revalidatePath, updateTag } from "next/cache"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { db } from "@/lib/db/client"
 import { canManageBudgets, Role } from "@/lib/permissions"
+import { createNotification } from "@/lib/actions/notifications"
 
 async function updateWalletBalance(scope: any, walletId: string, amountChange: number) {
   const walletsColl = await getCollection<Wallet>("wallets")
@@ -238,6 +239,37 @@ export async function contributeToGoal(id: string, amount: number, walletId: str
       $set: { updatedAt: new Date(), updatedBy: scope.userId }
     }
   )
+
+  // 4. Milestone & Goal Completion Celebration
+  const newAmount = (goal.currentAmount || 0) + amount
+  const oldPct = Math.floor(((goal.currentAmount || 0) / goal.targetAmount) * 100)
+  const newPct = Math.floor((newAmount / goal.targetAmount) * 100)
+
+  if (newPct >= 100 && oldPct < 100) {
+    await createNotification({
+      userId: scope.userId,
+      title: "Goal Achieved! 🎉",
+      message: `Congratulations! You've reached 100% of your savings goal for "${goal.name}".`,
+      type: "goal_achieved",
+      link: "/goals",
+    }).catch((err) => console.error("Failed to trigger goal achievement notification:", err))
+  } else if (newPct >= 75 && oldPct < 75) {
+    await createNotification({
+      userId: scope.userId,
+      title: "Goal Milestone (75%) 🎯",
+      message: `You're almost there! You've reached 75% of your savings goal for "${goal.name}".`,
+      type: "goal_milestone",
+      link: "/goals",
+    }).catch((err) => console.error("Failed to trigger goal milestone notification:", err))
+  } else if (newPct >= 50 && oldPct < 50) {
+    await createNotification({
+      userId: scope.userId,
+      title: "Goal Milestone (50%) 🎯",
+      message: `Halfway there! You've reached 50% of your savings goal for "${goal.name}".`,
+      type: "goal_milestone",
+      link: "/goals",
+    }).catch((err) => console.error("Failed to trigger goal milestone notification:", err))
+  }
 
   updateTag("goals")
   updateTag("transactions")

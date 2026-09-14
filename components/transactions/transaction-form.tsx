@@ -23,6 +23,7 @@ import { toast } from "sonner"
 import { ReceiptScannerModal } from "@/components/transactions/receipt-scanner-modal"
 import { generateSplitId, validateSplits } from "@/lib/split-utils"
 import { cn } from "@/lib/utils"
+import { refreshNotifications } from "@/components/notifications/notifications-provider"
 
 const clientSchema = z
   .object({
@@ -432,6 +433,7 @@ export function TransactionForm({
         }
 
         router.refresh()
+        refreshNotifications()
         if (onSuccess) onSuccess()
         resolve(true)
       } catch (err) {

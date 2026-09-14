@@ -331,6 +331,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
 
   const handleRemoveMember = async (memberId: string) => {
     try {
+      const targetMember = members.find((m) => m.id === memberId)
       const { error } = await authClient.organization.removeMember({
         memberIdOrEmail: memberId,
       })
@@ -338,6 +339,15 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         toast.error(error.message || "Failed to remove member")
       } else {
         toast.success("Member removed successfully")
+        if (targetMember?.userId) {
+          await createNotification({
+            userId: targetMember.userId,
+            title: "Workspace Access Revoked",
+            message: `You have been removed from the workspace "${activeOrg?.name || 'Shared Space'}".`,
+            type: "workspace",
+            link: "/dashboard",
+          }).catch((nErr) => console.error("Failed to notify removed member:", nErr))
+        }
         await fetchMembersAndInvitations()
       }
     } catch (err: unknown) {
@@ -348,6 +358,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
 
   const handleChangeMemberRole = async (memberId: string, role: Role) => {
     try {
+      const targetMember = members.find((m) => m.id === memberId)
       const { error } = await authClient.organization.updateMemberRole({
         memberId,
         role: role as "admin" | "member" | "owner",
@@ -356,6 +367,15 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         toast.error(error.message || "Failed to update member role")
       } else {
         toast.success(`Role updated to ${role}`)
+        if (targetMember?.userId) {
+          await createNotification({
+            userId: targetMember.userId,
+            title: "Workspace Role Updated",
+            message: `Your role in "${activeOrg?.name || 'Shared Space'}" has been updated to ${role}.`,
+            type: "workspace",
+            link: "/settings?tab=space",
+          }).catch((nErr) => console.error("Failed to notify role update:", nErr))
+        }
         await fetchMembersAndInvitations()
       }
     } catch (err: unknown) {

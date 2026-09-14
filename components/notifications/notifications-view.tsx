@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { Notification } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,15 +13,22 @@ import {
 } from "@/components/ui/item";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Bell, ChevronRight } from "lucide-react";
 import {
-  markNotificationReadAction,
-  getNotificationsAction,
-} from "@/lib/actions/notifications";
+  Bell,
+  ChevronRight,
+  AlertTriangle,
+  Calendar,
+  Target,
+  Trophy,
+  Users,
+  Clock,
+} from "lucide-react";
+import { useNotifications } from "./notifications-provider";
 import { EmptyMuted } from "@/components/notifications/notification-menu";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface NotificationsContentProps {
   initialNotifications: Notification[];
@@ -31,9 +37,11 @@ interface NotificationsContentProps {
 function NotificationIcon({
   image,
   title,
+  type,
 }: {
   image?: string;
   title: string;
+  type?: string;
 }) {
   if (image) {
     return (
@@ -43,10 +51,37 @@ function NotificationIcon({
       </ItemMedia>
     );
   }
+
+  let Icon = Bell;
+  let bgClass = "bg-primary/10";
+  let colorClass = "!text-primary";
+
+  if (type === "budget_alert" || type?.includes("overdue")) {
+    Icon = AlertTriangle;
+    bgClass = "bg-destructive/10";
+    colorClass = "!text-destructive";
+  } else if (type?.startsWith("loan")) {
+    Icon = Clock;
+    bgClass = "bg-amber-500/10";
+    colorClass = "!text-amber-500";
+  } else if (type?.startsWith("subscription") || type?.startsWith("bill")) {
+    Icon = Calendar;
+    bgClass = "bg-blue-500/10";
+    colorClass = "!text-blue-500";
+  } else if (type?.startsWith("goal")) {
+    Icon = type === "goal_achieved" ? Trophy : Target;
+    bgClass = "bg-emerald-500/10";
+    colorClass = "!text-emerald-500";
+  } else if (type === "workspace" || type?.startsWith("shared")) {
+    Icon = Users;
+    bgClass = "bg-indigo-500/10";
+    colorClass = "!text-indigo-500";
+  }
+
   return (
-    <ItemMedia className="text-primary mt-0.5">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-        <Bell className="size-4" />
+    <ItemMedia className="mt-0.5">
+      <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", bgClass)}>
+        <Icon className={cn("size-4", colorClass)} />
       </div>
     </ItemMedia>
   );
@@ -54,54 +89,26 @@ function NotificationIcon({
 
 export function NotificationsContent({ initialNotifications }: NotificationsContentProps) {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
-  const [prevInitialNotifications, setPrevInitialNotifications] = useState<Notification[]>(initialNotifications);
+  const {
+    notifications: contextNotifications,
+    fetchNotifications,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
 
-  if (initialNotifications !== prevInitialNotifications) {
-    setNotifications(initialNotifications);
-    setPrevInitialNotifications(initialNotifications);
-  }
-
-  const fetchNotifications = useCallback(async () => {
-    const res = await getNotificationsAction();
-    if (res.success && res.data) {
-      setNotifications(res.data as unknown as Notification[]);
-    }
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    const interval = setInterval(() => {
-      if (active) {
-        fetchNotifications();
-      }
-    }, 60000);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [fetchNotifications]);
-
+  // Fall back to initialNotifications if context has not populated yet
+  const notifications = contextNotifications.length > 0 ? contextNotifications : initialNotifications;
   const unread = notifications.filter((n) => !n.readAt);
 
   const handleNotificationClick = async (id: string) => {
-    const notification = notifications.find((n) => n._id.toString() === id);
-    if (!notification || notification.readAt) return;
-
-    setNotifications((prev) =>
-      prev.map((n) => (n._id.toString() === id ? { ...n, readAt: new Date() } : n))
-    );
-    await markNotificationReadAction(id);
-    router.refresh();
+    await markAsRead(id);
   };
 
   const handleMarkAllAsRead = async () => {
     const unreadList = notifications.filter((n) => !n.readAt);
     if (unreadList.length === 0) return;
-    await Promise.all(unreadList.map((n) => markNotificationReadAction(n._id.toString())));
-    setNotifications((prev) => prev.map((n) => ({ ...n, readAt: n.readAt || new Date() })));
+    await markAllAsRead();
     toast.success("All notifications marked as read");
-    router.refresh();
   };
 
   const groupNotifications = (list: Notification[]) => {
@@ -156,7 +163,7 @@ export function NotificationsContent({ initialNotifications }: NotificationsCont
                       }
                     }}
                   >
-                    <NotificationIcon image={n.image} title={n.title} />
+                    <NotificationIcon image={n.image} title={n.title} type={n.type} />
 
                     <ItemContent className="min-w-0 ml-3">
                       <div className="flex flex-wrap items-center gap-2">
@@ -187,7 +194,7 @@ export function NotificationsContent({ initialNotifications }: NotificationsCont
                     onKeyDown={(e) => e.key === "Enter" && handleNotificationClick(idStr)}
                     onClick={() => handleNotificationClick(idStr)}
                   >
-                    <NotificationIcon image={n.image} title={n.title} />
+                    <NotificationIcon image={n.image} title={n.title} type={n.type} />
 
                     <ItemContent className="min-w-0 ml-3">
                       <div className="flex flex-wrap items-center gap-2">

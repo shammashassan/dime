@@ -5,6 +5,7 @@ import { DashboardHeader } from "@/components/layout/dashboard-header"
 import { ImpersonationBanner } from "@/components/layout/impersonation-banner"
 import { SiteFooter } from "@/components/layout/site-footer"
 import { WorkspaceLoader } from "@/components/layout/workspace-loader"
+import { NotificationsProvider } from "@/components/notifications/notifications-provider"
 
 export default async function DashboardLayout({
   children,
@@ -14,21 +15,23 @@ export default async function DashboardLayout({
   await requireApprovedUser()
 
   return (
-    <div className="[--header-height:calc(--spacing(14))] flex min-h-screen w-full">
-      <SidebarProvider className="flex flex-col">
-        <DashboardHeader />
-        <div className="flex flex-1">
-          <DashboardSidebar />
-          <SidebarInset className="bg-background overflow-hidden relative">
-            <WorkspaceLoader />
-            <ImpersonationBanner />
-            <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 overflow-y-auto h-full scrollbar-hide">
-              {children}
-            </div>
-          </SidebarInset>
-        </div>
-        <SiteFooter />
-      </SidebarProvider>
-    </div>
+    <NotificationsProvider>
+      <div className="[--header-height:calc(--spacing(14))] flex min-h-screen w-full">
+        <SidebarProvider className="flex flex-col">
+          <DashboardHeader />
+          <div className="flex flex-1">
+            <DashboardSidebar />
+            <SidebarInset className="bg-background overflow-hidden relative">
+              <WorkspaceLoader />
+              <ImpersonationBanner />
+              <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 overflow-y-auto h-full scrollbar-hide">
+                {children}
+              </div>
+            </SidebarInset>
+          </div>
+          <SiteFooter />
+        </SidebarProvider>
+      </div>
+    </NotificationsProvider>
   )
 }

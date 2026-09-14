@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { Loader2, Building, Mail, AlertTriangle, LogOut, Check, X } from "lucide-react"
+import { createNotification } from "@/lib/actions/notifications"
 
 interface AcceptInvitationPageProps {
   params: Promise<{ id: string }>
@@ -111,6 +112,16 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
         toast.error(error.message || "Failed to accept invitation")
       } else {
         toast.success(`Joined ${invitation.organizationName} successfully!`)
+        // Notify inviter
+        if (invitation.inviterId) {
+          await createNotification({
+            userId: invitation.inviterId,
+            title: "Workspace Invitation Accepted! 🎉",
+            message: `${sessionData?.user?.name || sessionData?.user?.email || "A new member"} accepted your invitation to join ${invitation.organizationName}.`,
+            type: "workspace",
+            link: "/settings?tab=space",
+          }).catch((nErr) => console.error("Failed to notify inviter of accept:", nErr))
+        }
         // Auto-activate the accepted organization space
         window.dispatchEvent(new Event("workspace-switch-start"))
         await authClient.organization.setActive({
@@ -137,6 +148,16 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
         toast.error(error.message || "Failed to decline invitation")
       } else {
         toast.info("Invitation declined")
+        // Notify inviter
+        if (invitation.inviterId) {
+          await createNotification({
+            userId: invitation.inviterId,
+            title: "Workspace Invitation Declined",
+            message: `${sessionData?.user?.name || sessionData?.user?.email || "The invitee"} declined your invitation to join ${invitation.organizationName}.`,
+            type: "workspace",
+            link: "/settings?tab=space",
+          }).catch((nErr) => console.error("Failed to notify inviter of decline:", nErr))
+        }
         router.push("/dashboard")
       }
     } catch (err: unknown) {

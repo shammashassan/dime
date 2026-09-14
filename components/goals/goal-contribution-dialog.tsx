@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { Goal, Wallet } from "@/types"
 import { formatCurrency } from "@/lib/utils"
 import { contributeToGoal } from "@/lib/actions/goals"
+import { refreshNotifications } from "@/components/notifications/notifications-provider"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -84,6 +85,7 @@ export function GoalContributionDialog({
         setAmount("")
         setSelectedWalletId("")
         onOpenChange(false)
+        refreshNotifications()
       } else {
         toast.error("Failed to make contribution")
       }

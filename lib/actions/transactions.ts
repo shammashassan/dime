@@ -14,6 +14,7 @@ import { db } from "@/lib/db/client"
 import { canCreateTransactions, canEditTransactions, canDeleteTransactions, Role } from "@/lib/permissions"
 import { generateSplitId } from "@/lib/split-utils"
 import { getPreferences } from "@/lib/queries/preferences"
+import { syncUserAlerts } from "@/lib/notification-sync"
 
 // Helper to update a wallet's balance
 async function updateWalletBalance(scope: FinancialScope, walletId: string, amountChange: number) {
@@ -170,6 +171,11 @@ export async function createTransaction(input: TransactionInput) {
     revalidatePath("/transactions")
     revalidatePath(`/wallets/${finalWalletId}`)
     revalidatePath("/", "layout")
+
+    if (tx.type === "expense") {
+      await syncUserAlerts(scope.userId).catch((err) => console.error("Failed to run budget alert check:", err))
+    }
+
     return { success: true, id: result.insertedId.toString() }
   } else {
     // Transfer Transaction
@@ -559,6 +565,10 @@ export async function updateTransaction(id: string, input: TransactionInput) {
     revalidatePath(`/wallets/${validated.walletId}`)
   }
   revalidatePath("/", "layout")
+
+  if (validated.type === "expense" || tx.type === "expense") {
+    await syncUserAlerts(scope.userId).catch((err) => console.error("Failed to run budget alert check:", err))
+  }
 
   return { success: true }
   } catch (error: any) {
