@@ -30,7 +30,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
 
 const chartConfig = {
   financial: {
@@ -46,9 +46,10 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-interface SpendingTrendChartProps {
+export interface SpendingTrendChartProps {
   initialData?: Array<{ date: string; income: number; expense: number }>
   currency?: string
+  className?: string
 }
 
 const formatMonthDay = (dateStr: string | Date) => {
@@ -63,7 +64,11 @@ const formatMonthDay = (dateStr: string | Date) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
 }
 
-export function SpendingTrendChart({ initialData = [], currency = "USD" }: SpendingTrendChartProps) {
+export function SpendingTrendChart({
+  initialData = [],
+  currency = "USD",
+  className,
+}: SpendingTrendChartProps) {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("90d")
   const [prevIsMobile, setPrevIsMobile] = React.useState(isMobile)
@@ -71,7 +76,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
   if (isMobile !== prevIsMobile) {
     setPrevIsMobile(isMobile)
     if (isMobile) {
-      setTimeRange("7d")
+      setTimeRange("30d")
     }
   }
 
@@ -79,35 +84,49 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
   const filteredData = React.useMemo(() => {
     if (initialData.length === 0) return []
 
-    const sortedData = [...initialData].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    const sortedData = [...initialData].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    )
     const referenceDate = new Date(sortedData[sortedData.length - 1]?.date || new Date())
 
-    let daysToSubtract = 30
-    if (timeRange === "90d") {
+    let daysToSubtract = 90
+    if (timeRange === "30d") {
+      daysToSubtract = 30
+    } else if (timeRange === "60d") {
+      daysToSubtract = 60
+    } else if (timeRange === "90d") {
       daysToSubtract = 90
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7
     }
 
     const startDate = new Date(referenceDate)
     startDate.setDate(startDate.getDate() - daysToSubtract)
 
-    return sortedData.filter(item => {
+    return sortedData.filter((item) => {
       const date = new Date(item.date)
       return date >= startDate
     })
   }, [initialData, timeRange])
 
   return (
-    <Card className="@container/card h-full flex flex-col">
-      <CardHeader>
-        <CardTitle>Cash Flow Trend</CardTitle>
-        <CardDescription>
-          <span className="hidden @[540px]/card:block">
-            Income vs Expenses over the chosen timeframe
+    <Card
+      className={cn(
+        "@container/card bento-tile flex h-full flex-col border-border/50 bg-card/60 shadow-xs backdrop-blur-xs",
+        className
+      )}
+    >
+      <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-2">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+            cash flow trend
           </span>
-          <span className="@[540px]/card:hidden">Income vs Expenses</span>
-        </CardDescription>
+          <CardTitle className="text-base font-bold tracking-tight">Cash Flow Trend</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            <span className="hidden @[540px]/card:block">
+              Income vs Expenses over the chosen timeframe
+            </span>
+            <span className="@[540px]/card:hidden">Income vs Expenses</span>
+          </CardDescription>
+        </div>
         <CardAction>
           <ToggleGroup
             type="single"
@@ -115,41 +134,41 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
             onValueChange={(v) => v && setTimeRange(v)}
             variant="outline"
             spacing={0}
-            className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
+            className="hidden *:data-[slot=toggle-group-item]:px-3! @[767px]/card:flex"
           >
-            <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
-            <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
-            <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
+            <ToggleGroupItem value="30d">30D</ToggleGroupItem>
+            <ToggleGroupItem value="60d">60D</ToggleGroupItem>
+            <ToggleGroupItem value="90d">90D</ToggleGroupItem>
           </ToggleGroup>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
-              className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
+              className="flex w-32 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"
               aria-label="Select timeframe"
             >
-              <SelectValue placeholder="Last 30 days" />
+              <SelectValue placeholder="Last 90 days" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
-              <SelectItem value="90d" className="rounded-lg">
-                Last 3 months
-              </SelectItem>
               <SelectItem value="30d" className="rounded-lg">
                 Last 30 days
               </SelectItem>
-              <SelectItem value="7d" className="rounded-lg">
-                Last 7 days
+              <SelectItem value="60d" className="rounded-lg">
+                Last 60 days
+              </SelectItem>
+              <SelectItem value="90d" className="rounded-lg">
+                Last 90 days
               </SelectItem>
             </SelectContent>
           </Select>
         </CardAction>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6 flex-1">
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6 flex-1 min-w-0">
         {filteredData.length > 0 ? (
           <ChartContainer
             config={chartConfig}
             className="aspect-auto h-62.5 w-full"
           >
-            <AreaChart data={filteredData}>
+            <AreaChart data={filteredData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="fillIncome" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -160,7 +179,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                   <stop
                     offset="95%"
                     stopColor="var(--color-income)"
-                    stopOpacity={0.1}
+                    stopOpacity={0.05}
                   />
                 </linearGradient>
                 <linearGradient id="fillExpense" x1="0" y1="0" x2="0" y2="1">
@@ -172,11 +191,11 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                   <stop
                     offset="95%"
                     stopColor="var(--color-expense)"
-                    stopOpacity={0.1}
+                    stopOpacity={0.05}
                   />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} />
+              <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/40" />
               <XAxis
                 dataKey="date"
                 tickLine={false}
@@ -189,7 +208,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
               />
 
               <ChartTooltip
-                cursor={false}
+                cursor={{ stroke: "var(--border)", strokeWidth: 1, strokeDasharray: "3 3" }}
                 defaultIndex={isMobile ? -1 : 10}
                 content={
                   <ChartTooltipContent
@@ -198,7 +217,8 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                     }}
                     indicator="dot"
                     formatter={(value, name, item) => {
-                      const isIncome = name === "income" || name === "Income" || item.dataKey === "income"
+                      const isIncome =
+                        name === "income" || name === "Income" || item.dataKey === "income"
                       const colorVar = isIncome ? "var(--chart-1)" : "var(--chart-2)"
                       return (
                         <>
@@ -208,7 +228,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                               backgroundColor: colorVar,
                             }}
                           />
-                          <div className="flex flex-1 justify-between items-center leading-none">
+                          <div className="flex flex-1 justify-between items-center gap-4 leading-none">
                             <span className="text-muted-foreground capitalize">
                               {name}
                             </span>
@@ -227,6 +247,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                 type="monotone"
                 fill="url(#fillExpense)"
                 stroke="var(--color-expense)"
+                strokeWidth={2}
                 isAnimationActive={true}
               />
               <Area
@@ -234,6 +255,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                 type="monotone"
                 fill="url(#fillIncome)"
                 stroke="var(--color-income)"
+                strokeWidth={2}
                 isAnimationActive={true}
               />
               <ChartLegend content={<ChartLegendContent />} />
