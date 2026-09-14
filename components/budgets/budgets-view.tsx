@@ -116,16 +116,16 @@ function BudgetCard({
             <PiggyBank className="size-4" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 min-w-0 pr-18">
-              <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">
+            <div className="flex flex-wrap items-center gap-1.5 min-w-0 pr-16">
+              <p className="text-sm font-bold text-foreground truncate max-w-full leading-tight group-hover:text-primary transition-colors">
                 {b.name}
               </p>
               <Badge variant="secondary" className="rounded-full px-1.5 py-0 text-[8px] font-extrabold uppercase tracking-wider h-3.5 shrink-0 bg-muted/80 text-muted-foreground border border-border/50">
                 {b.period}
               </Badge>
             </div>
-            <div className="flex flex-nowrap items-center gap-1 mt-1.5 min-h-[16px] overflow-hidden w-full pr-2">
-              <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4 max-w-[100px] truncate shrink-0"
+            <div className="flex flex-wrap items-center gap-1 mt-1.5 w-full pr-2">
+              <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4 max-w-[120px] truncate shrink-0"
                 style={{ backgroundColor: b.categoryColor + "15", color: b.categoryColor, borderColor: b.categoryColor + "30" }}>
                 {b.categoryName}
               </Badge>
@@ -330,9 +330,9 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={ShieldAlert} color="#f59e0b" label="Over Budget" value={metrics.overBudgetCount} valueClassName={metrics.overBudgetCount > 0 ? "text-amber-500" : ""} />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab("all")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
@@ -385,7 +385,7 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
           </Select>
         </div>
 
-        <div className="flex w-full sm:w-auto items-center gap-3 min-w-0">
+        <div className="flex w-full sm:w-auto items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
           <InputGroup className="w-full sm:w-60 min-w-0">
             <InputGroupInput
               placeholder="Search by name..."

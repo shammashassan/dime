@@ -869,15 +869,15 @@ export function LoanDetails({
               <div className="p-4 flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <Tabs value={msgChannel} onValueChange={(v) => setMsgChannel(v as any)} className="flex-1 min-w-[240px]">
-                    <TabsList className="w-full h-8 grid grid-cols-3">
-                      <TabsTrigger value="whatsapp" className="text-[10px] gap-1">
-                        <MessageCircle className="size-3" /> WhatsApp
+                    <TabsList className="w-full h-9 rounded-xl bg-muted/80 p-1 grid grid-cols-3">
+                      <TabsTrigger value="whatsapp" className="rounded-lg text-xs font-semibold gap-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs">
+                        <MessageCircle className="size-3.5" /> WhatsApp
                       </TabsTrigger>
-                      <TabsTrigger value="sms" className="text-[10px] gap-1">
-                        <MessageSquare className="size-3" /> SMS
+                      <TabsTrigger value="sms" className="rounded-lg text-xs font-semibold gap-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs">
+                        <MessageSquare className="size-3.5" /> SMS
                       </TabsTrigger>
-                      <TabsTrigger value="email" className="text-[10px] gap-1">
-                        <MailIcon className="size-3" /> Email
+                      <TabsTrigger value="email" className="rounded-lg text-xs font-semibold gap-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs">
+                        <MailIcon className="size-3.5" /> Email
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>

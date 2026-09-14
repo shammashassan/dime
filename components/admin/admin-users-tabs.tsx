@@ -39,11 +39,31 @@ export function AdminUsersTabs({
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <div className="flex flex-col gap-4">
         {/* Desktop TabsList (visible on sm and larger screens) */}
-        <TabsList className="hidden sm:flex w-full border-b border-border/40 overflow-x-auto overflow-y-hidden scrollbar-hide">
-          <TabsTrigger value="all">All Users</TabsTrigger>
-          <TabsTrigger value="pending">Pending Approval</TabsTrigger>
-          <TabsTrigger value="banned">Banned Users</TabsTrigger>
-          <TabsTrigger value="admins">Administrators</TabsTrigger>
+        <TabsList className="hidden sm:inline-flex rounded-xl bg-muted/80 p-1 self-start items-center gap-1 max-w-full overflow-x-auto scrollbar-hide h-auto border-0">
+          <TabsTrigger
+            value="all"
+            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+          >
+            All Users
+          </TabsTrigger>
+          <TabsTrigger
+            value="pending"
+            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+          >
+            Pending Approval
+          </TabsTrigger>
+          <TabsTrigger
+            value="banned"
+            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+          >
+            Banned Users
+          </TabsTrigger>
+          <TabsTrigger
+            value="admins"
+            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+          >
+            Administrators
+          </TabsTrigger>
         </TabsList>
 
         {/* Mobile Select (visible on smaller screens) */}

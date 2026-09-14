@@ -1,6 +1,7 @@
+"use client"
+
 import React from "react"
 import type { SpendingInsight, InsightSeverity } from "@/types"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ShieldAlert, CheckCircle2, Flame, ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -49,16 +50,16 @@ export function InsightsRadarCard({ insights }: InsightsRadarCardProps) {
     info: insights.filter((i) => i.severity === "info").length,
   }
 
-  const topSignal = insights[0] // Since insights are already sorted by score descending
+  const topSignal = insights[0] // Sorted by score descending
 
   return (
-    <Card className="rounded-2xl border border-border/40 bg-card shadow-xs overflow-hidden flex flex-col justify-between h-full">
-      {/* Card Header Strip */}
-      <div className="px-5 py-3 border-b border-border/30 bg-muted/20 flex items-center justify-between gap-2">
+    <div className="rounded-2xl border border-border/40 bg-card shadow-sm overflow-hidden flex flex-col justify-between h-full">
+      {/* ── Header Strip ── */}
+      <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <ShieldAlert className="size-4 text-muted-foreground shrink-0" aria-hidden="true" />
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground truncate">
-            Signal Radar
+          <ShieldAlert className="size-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+            Signal Severity Radar
           </span>
         </div>
         <Badge
@@ -69,16 +70,17 @@ export function InsightsRadarCard({ insights }: InsightsRadarCardProps) {
         </Badge>
       </div>
 
-      <CardContent className="p-5 flex flex-col gap-4 flex-1 justify-between">
+      {/* ── Content ── */}
+      <div className="p-3.5 sm:p-4 flex flex-col gap-2.5 sm:gap-3 flex-1 justify-between">
         {/* Severity Distribution Meters */}
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2">
           {(["critical", "warning", "opportunity", "info"] as InsightSeverity[]).map((sev) => {
             const conf = SEVERITY_CONFIG[sev]
             const count = counts[sev]
             const pct = total > 0 ? Math.round((count / total) * 100) : 0
 
             return (
-              <div key={sev} className="flex flex-col gap-1">
+              <div key={sev} className="flex flex-col gap-0.5">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5">
                     <span className={cn("size-2 rounded-full", conf.dotColor)} />
@@ -99,11 +101,32 @@ export function InsightsRadarCard({ insights }: InsightsRadarCardProps) {
           })}
         </div>
 
+        {/* Dynamic Health Summary Strip to fill empty space with valuable context */}
+        <div className="rounded-lg bg-muted/40 border border-border/30 px-2.5 py-1.5 flex items-center justify-between text-[11px]">
+          <span className="text-muted-foreground">Health Status</span>
+          {counts.critical > 0 ? (
+            <span className="font-bold text-red-500 flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-red-500 animate-pulse" />
+              {counts.critical} Critical Action Needed
+            </span>
+          ) : counts.warning > 0 ? (
+            <span className="font-bold text-amber-500 flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-amber-500" />
+              {counts.warning} Flagged Warning{counts.warning > 1 ? "s" : ""}
+            </span>
+          ) : (
+            <span className="font-bold text-emerald-500 flex items-center gap-1.5">
+              <span className="size-1.5 rounded-full bg-emerald-500" />
+              Optimal Range
+            </span>
+          )}
+        </div>
+
         {/* Priority Spotlight Callout */}
         {topSignal ? (
-          <div className="rounded-xl border border-border/40 bg-muted/30 p-3 flex flex-col gap-1.5 mt-1">
+          <div className="rounded-xl border border-border/40 bg-muted/30 p-2.5 flex flex-col gap-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                 <Flame className="size-3 text-primary" aria-hidden="true" />
                 Top Priority Focus
               </span>
@@ -118,7 +141,7 @@ export function InsightsRadarCard({ insights }: InsightsRadarCardProps) {
             {topSignal.actionUrl && topSignal.actionLabel && (
               <Link
                 href={topSignal.actionUrl}
-                className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1 self-start mt-0.5"
+                className="text-[11px] font-semibold text-primary hover:underline flex items-center gap-1 self-start"
               >
                 {topSignal.actionLabel}
                 <ArrowUpRight className="size-3" aria-hidden="true" />
@@ -126,12 +149,22 @@ export function InsightsRadarCard({ insights }: InsightsRadarCardProps) {
             )}
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-border/60 p-3 flex items-center gap-2.5 text-muted-foreground text-xs justify-center">
+          <div className="rounded-xl border border-dashed border-border/60 p-3 flex items-center gap-2 text-muted-foreground text-xs justify-center">
             <CheckCircle2 className="size-4 text-emerald-500 shrink-0" aria-hidden="true" />
             <span>Radar is all clear</span>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* ── Footer Strip (Matches Briefing Card on desktop at lg+) ── */}
+      <div className="hidden lg:flex px-4 py-2 border-t border-border/30 bg-muted/10 items-center justify-between text-[11px] text-muted-foreground">
+        <span>Active anomaly monitoring</span>
+        <span className="font-semibold text-foreground">
+          {counts.critical + counts.warning > 0
+            ? `${counts.critical + counts.warning} action items`
+            : "All clear"}
+        </span>
+      </div>
+    </div>
   )
 }

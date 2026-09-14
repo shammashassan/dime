@@ -98,7 +98,6 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
 
   const [editingAsset, setEditingAsset] = useState<Asset | null>(null)
   const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null)
-  const [addOpen, setAddOpen] = useState(false)
 
   const [search, setSearch] = useState("")
   const [kindFilter, setKindFilter] = useState<"all" | "asset" | "liability">("all")
@@ -168,10 +167,10 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
 
   return (
     <div className="flex flex-col gap-5 w-full">
-      {/* Filter & Control Row — matches Loans list page pattern */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="flex flex-1 flex-col sm:flex-row gap-3 w-full">
-          <InputGroup className="w-full sm:w-64">
+      {/* Filter & Control Row — fully responsive across mobile and all small screen resolutions */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
+        <div className="flex-1 min-w-[200px] w-full">
+          <InputGroup className="w-full">
             <InputGroupInput
               placeholder="Search assets or liabilities..."
               value={search}
@@ -180,9 +179,11 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           </InputGroup>
+        </div>
 
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <Select value={kindFilter} onValueChange={(val: any) => setKindFilter(val)}>
-            <SelectTrigger className="w-full sm:w-[140px] rounded-xl border-border/40 bg-card h-10">
+            <SelectTrigger className="flex-1 sm:w-[130px] rounded-xl border-border/40 bg-card h-10">
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent className="bg-popover border border-border/40 rounded-xl">
@@ -193,7 +194,7 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
           </Select>
 
           <Select value={statusFilter} onValueChange={(val: any) => setStatusFilter(val)}>
-            <SelectTrigger className="w-full sm:w-[150px] rounded-xl border-border/40 bg-card h-10">
+            <SelectTrigger className="flex-1 sm:w-[150px] rounded-xl border-border/40 bg-card h-10">
               <SelectValue placeholder={tabNames[statusFilter]} />
             </SelectTrigger>
             <SelectContent className="bg-popover border border-border/40 rounded-xl">
@@ -203,25 +204,6 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
             </SelectContent>
           </Select>
         </div>
-
-        <AssetDialog
-          open={addOpen}
-          onOpenChange={setAddOpen}
-          trigger={
-            <Button
-              type="button"
-              className="w-full sm:w-auto rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform shrink-0"
-              onClick={() => setAddOpen(true)}
-            >
-              <Plus className="size-4" />
-              Add Manual Item
-            </Button>
-          }
-          onSuccess={() => {
-            setAddOpen(false)
-            router.refresh()
-          }}
-        />
       </div>
 
       {/* Grid List — card layout mirrors the Loans card 1:1 (accent bar, header, two-stat row,
@@ -239,10 +221,15 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
               </EmptyDescription>
             </EmptyHeader>
             <div className="mt-4">
-              <Button type="button" className="rounded-xl font-bold gap-2" onClick={() => setAddOpen(true)}>
-                <Plus className="size-4" />
-                Add your first item
-              </Button>
+              <AssetDialog
+                trigger={
+                  <Button type="button" className="rounded-xl font-bold gap-2">
+                    <Plus className="size-4" />
+                    Add your first item
+                  </Button>
+                }
+                onSuccess={() => router.refresh()}
+              />
             </div>
           </Empty>
         </Card>

@@ -342,9 +342,9 @@ export function WalletsView({ wallets }: WalletsViewProps) {
         <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Archive} color="#f59e0b" label="Archived Wallets" value={metrics.archivedCount} />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab("all")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
@@ -394,8 +394,8 @@ export function WalletsView({ wallets }: WalletsViewProps) {
           </Select>
         </div>
 
-        <div className="flex w-full sm:w-auto items-center gap-3">
-          <InputGroup className="w-full sm:w-60">
+        <div className="flex w-full sm:w-auto items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
+          <InputGroup className="w-full sm:w-60 min-w-0">
             <InputGroupInput
               placeholder="Search by name..."
               value={search}

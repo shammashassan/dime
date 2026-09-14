@@ -215,7 +215,7 @@ export function SharedExpenseDetails({
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto pb-10">
+    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto">
       {/* ── Header Bar matching Loan/Goal/Budget Details ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
@@ -413,19 +413,25 @@ export function SharedExpenseDetails({
             )}
 
             <div className="col-span-2 pt-2.5 border-t border-border/30 grid grid-cols-3 gap-2">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Settlements</span>
-                <span className="font-semibold text-foreground">{linkedSettlements.length}</span>
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider truncate">Settlements</span>
+                <span className="font-semibold text-foreground text-xs truncate">{linkedSettlements.length}</span>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Status</span>
-                <span className={cn("font-semibold capitalize", expense.status === "settled" ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider truncate">Status</span>
+                <span
+                  className={cn("font-semibold capitalize text-xs truncate", expense.status === "settled" ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}
+                  title={expense.status.replace("_", " ")}
+                >
                   {expense.status.replace("_", " ")}
                 </span>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Last Update</span>
-                <span className="font-semibold text-foreground">
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider truncate">Last Update</span>
+                <span
+                  className="font-semibold text-foreground text-xs truncate"
+                  title={linkedSettlements[0] ? formatDate(linkedSettlements[0].settledAt) : "—"}
+                >
                   {linkedSettlements[0] ? formatDate(linkedSettlements[0].settledAt) : "—"}
                 </span>
               </div>

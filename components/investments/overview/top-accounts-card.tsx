@@ -26,7 +26,7 @@ export function TopAccountsCard({
   const totalValue = accounts.reduce((sum, a) => sum + Math.max(0, a.totalValue), 0)
 
   return (
-    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto lg:h-full flex flex-col bg-card">
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto md:h-full flex flex-col bg-card">
       <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Landmark className="size-3.5 text-muted-foreground" />

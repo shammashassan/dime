@@ -135,64 +135,72 @@ export function RecentActivityCard({ viewModel }: RecentActivityCardProps) {
                     )}
                   >
                     {activity.href ? (
-                      <Link href={activity.href} className="w-full flex items-center gap-2.5">
-                        <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
+                      <Link href={activity.href} className="w-full flex items-center gap-2.5 min-w-0">
+                        <ItemMedia className={cn("size-8 rounded-xl border shrink-0", iconColor)}>
                           <DotIcon className="size-3.5" />
                         </ItemMedia>
 
-                        <ItemContent className="min-w-0">
-                          <ItemHeader>
-                            <ItemTitle className="text-xs font-bold text-foreground">
+                        <ItemContent className="min-w-0 flex-1">
+                          {/* Row 1: Title & Amount */}
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <ItemTitle className="text-xs font-bold text-foreground truncate min-w-0 flex-1">
                               {activity.title}
                             </ItemTitle>
+                            {activity.amount !== undefined && (
+                              <span className={cn(
+                                "text-xs font-bold tabular-nums shrink-0 text-right",
+                                activity.title === "High Expense" ? "text-rose-500" : activity.title === "High Income" ? "text-emerald-500" : "text-foreground"
+                              )}>
+                                {activity.title === "High Expense" ? "-" : ""}
+                                {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Row 2: Description & Date */}
+                          <div className="flex items-center justify-between gap-2 min-w-0 mt-0.5">
+                            <ItemDescription className="text-[11px] leading-relaxed truncate min-w-0 flex-1">
+                              {activity.description}
+                            </ItemDescription>
                             <span className="text-[10px] font-normal text-muted-foreground shrink-0">
                               {format(new Date(activity.date), "PP")}
                             </span>
-                          </ItemHeader>
-                          <ItemDescription className="text-[11px] leading-relaxed truncate mt-0.5">
-                            {activity.description}
-                          </ItemDescription>
+                          </div>
                         </ItemContent>
-
-                        {activity.amount !== undefined && (
-                          <ItemActions className="shrink-0">
-                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-19 text-right">
-                              {activity.title === "High Expense" ? "-" : ""}
-                              {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
-                            </span>
-                            <div className="size-6 shrink-0" />
-                          </ItemActions>
-                        )}
                       </Link>
                     ) : (
-                      <div className="w-full flex items-center gap-2.5">
-                        <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
+                      <div className="w-full flex items-center gap-2.5 min-w-0">
+                        <ItemMedia className={cn("size-8 rounded-xl border shrink-0", iconColor)}>
                           <DotIcon className="size-3.5" />
                         </ItemMedia>
 
-                        <ItemContent className="min-w-0">
-                          <ItemHeader>
-                            <ItemTitle className="text-xs font-bold text-foreground">
+                        <ItemContent className="min-w-0 flex-1">
+                          {/* Row 1: Title & Amount */}
+                          <div className="flex items-center justify-between gap-2 min-w-0">
+                            <ItemTitle className="text-xs font-bold text-foreground truncate min-w-0 flex-1">
                               {activity.title}
                             </ItemTitle>
+                            {activity.amount !== undefined && (
+                              <span className={cn(
+                                "text-xs font-bold tabular-nums shrink-0 text-right",
+                                activity.title === "High Expense" ? "text-rose-500" : activity.title === "High Income" ? "text-emerald-500" : "text-foreground"
+                              )}>
+                                {activity.title === "High Expense" ? "-" : ""}
+                                {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Row 2: Description & Date */}
+                          <div className="flex items-center justify-between gap-2 min-w-0 mt-0.5">
+                            <ItemDescription className="text-[11px] leading-relaxed truncate min-w-0 flex-1">
+                              {activity.description}
+                            </ItemDescription>
                             <span className="text-[10px] font-normal text-muted-foreground shrink-0">
                               {format(new Date(activity.date), "PP")}
                             </span>
-                          </ItemHeader>
-                          <ItemDescription className="text-[11px] leading-relaxed truncate mt-0.5">
-                            {activity.description}
-                          </ItemDescription>
+                          </div>
                         </ItemContent>
-
-                        {activity.amount !== undefined && (
-                          <ItemActions className="shrink-0">
-                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-19 text-right">
-                              {activity.title === "High Expense" ? "-" : ""}
-                              {formatCurrency(activity.amount / 100, activity.currency || viewModel.currency)}
-                            </span>
-                            <div className="size-6 shrink-0" />
-                          </ItemActions>
-                        )}
                       </div>
                     )}
                   </Item>

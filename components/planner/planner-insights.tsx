@@ -56,8 +56,8 @@ export function PlannerInsights({ insights }: PlannerInsightsProps) {
                         <Icon className="size-3.5" />
                       </ItemMedia>
                       <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-[11px] font-bold leading-tight text-foreground min-w-0 wrap-break-word">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                          <p className="text-[11px] font-bold leading-tight text-foreground min-w-0 break-words flex-1 basis-44">
                             {insight.title}
                           </p>
                           {insight.metricImpact && (
@@ -69,7 +69,7 @@ export function PlannerInsights({ insights }: PlannerInsightsProps) {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground leading-relaxed wrap-break-word">
+                        <p className="text-[10px] text-muted-foreground leading-relaxed break-words">
                           {insight.description}
                         </p>
                       </div>

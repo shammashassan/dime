@@ -18,17 +18,26 @@ export function InsightsMetricsRow({ metrics, currency }: InsightsMetricsRowProp
     <div className="flex flex-wrap gap-4 w-full">
       <MetricCard
         style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
+        icon={BellRing}
+        color="#8b5cf6"
+        label="Active Signals"
+        value={metrics.activeCount.toString()}
+      />
+      <MetricCard
+        style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
         icon={AlertTriangle}
         color="#f59e0b"
         label="Anomalies Flagged"
         value={metrics.anomalyCount.toString()}
+        valueClassName={metrics.anomalyCount > 0 ? "text-amber-500" : undefined}
       />
       <MetricCard
         style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
         icon={PiggyBank}
-        color="#8b5cf6"
+        color="#10b981"
         label="Monthly Savings Potential"
         value={formatCurrency(metrics.potentialSavingsMonthlyCents, currency)}
+        valueClassName="text-emerald-500"
       />
       <MetricCard
         style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
@@ -36,13 +45,7 @@ export function InsightsMetricsRow({ metrics, currency }: InsightsMetricsRowProp
         color="#ef4444"
         label="Discretionary Surge"
         value={formatCurrency(metrics.discretionarySurgeCents, currency)}
-      />
-      <MetricCard
-        style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
-        icon={BellRing}
-        color="#0ea5e9"
-        label="Active Signals"
-        value={metrics.activeCount.toString()}
+        valueClassName={metrics.discretionarySurgeCents > 0 ? "text-rose-500" : undefined}
       />
     </div>
   )

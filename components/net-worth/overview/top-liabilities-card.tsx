@@ -26,7 +26,7 @@ export function TopLiabilitiesCard({ viewModel }: { viewModel: NetWorthOverviewV
   const { topLiabilities, currency } = viewModel
 
   return (
-    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto lg:h-full flex flex-col bg-card">
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto md:h-full flex flex-col bg-card">
       <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
         <HandCoins className="size-3.5 text-muted-foreground" />
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Top Liabilities</span>

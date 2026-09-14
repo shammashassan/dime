@@ -184,9 +184,9 @@ export function PlannerClient({ baseline, savedScenarios }: PlannerClientProps) 
 
       {/* ── Forecast Visualizations & View Tabs ── */}
       <div className="flex flex-col gap-4 w-full">
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
           {/* Desktop Tab Selector (matches Net Worth / Contacts / Goals / Loans) */}
-          <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
+          <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
             <button
               onClick={() => setActiveTab("dashboard")}
               className={cn(
@@ -239,7 +239,7 @@ export function PlannerClient({ baseline, savedScenarios }: PlannerClientProps) 
             </Select>
           </div>
 
-          <span className="text-xs text-muted-foreground font-mono font-semibold">
+          <span className="text-xs text-muted-foreground font-mono font-semibold shrink-0">
             {forecast.points.length} Month Forecast
           </span>
         </div>

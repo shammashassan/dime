@@ -4,7 +4,6 @@ import * as React from "react"
 import Link from "next/link"
 import { HealthRecommendation, PillarId } from "@/types"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Item,
@@ -12,7 +11,6 @@ import {
   ItemContent,
   ItemDescription,
   ItemGroup,
-  ItemActions,
 } from "@/components/ui/item"
 import {
   Empty,
@@ -23,7 +21,6 @@ import {
 import { cn } from "@/lib/utils"
 import {
   Sparkles,
-  ArrowRight,
   CheckCircle2,
   Droplet,
   PiggyBank,
@@ -79,16 +76,17 @@ export function HealthRecommendations({ recommendations }: HealthRecommendations
                 return (
                   <Item
                     key={rec.id}
-                    className="flex-col xl:flex-row items-start xl:items-center justify-between gap-2.5 px-2.5 py-3 hover:bg-muted/40 transition-colors rounded-xl border-transparent"
+                    asChild
+                    className="p-2.5 hover:bg-muted/40 transition-colors rounded-xl border-transparent group cursor-pointer"
                   >
-                    <div className="flex items-start gap-3 min-w-0 flex-1 w-full">
+                    <Link href={rec.actionUrl || "/health"} className="flex items-start gap-3 min-w-0 w-full">
                       <ItemMedia className={cn("size-8 rounded-lg border shrink-0 mt-0.5", iconColor)}>
                         <Icon className="size-4" />
                       </ItemMedia>
                       <ItemContent className="min-w-0 flex-1 flex flex-col gap-1">
-                        {/* Line 1: Title and Potential Points Badge */}
+                        {/* Title and Potential Points Badge */}
                         <div className="flex items-center justify-between gap-2 flex-wrap">
-                          <span className="text-xs font-semibold text-foreground leading-snug">
+                          <span className="text-xs font-semibold text-foreground leading-snug group-hover:text-primary transition-colors">
                             {rec.title}
                           </span>
                           <Badge
@@ -99,29 +97,12 @@ export function HealthRecommendations({ recommendations }: HealthRecommendations
                           </Badge>
                         </div>
 
-                        {/* Line 2: Full-width Description on its own line */}
+                        {/* Full-width Description */}
                         <ItemDescription className="text-xs text-muted-foreground leading-relaxed">
                           {rec.description}
                         </ItemDescription>
                       </ItemContent>
-                    </div>
-
-                    {/* Line 3: Action Button on its own line on middle/small screens, inline on xl */}
-                    {rec.actionUrl && (
-                      <ItemActions className="shrink-0 w-full xl:w-auto pl-11 xl:pl-0 flex justify-start sm:justify-end xl:justify-start">
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          asChild
-                          className="w-full sm:w-auto rounded-lg font-medium text-[11px] h-7 px-3 hover:bg-primary/5 hover:text-primary transition-colors cursor-pointer"
-                        >
-                          <Link href={rec.actionUrl}>
-                            {rec.actionLabel || "Take Action"}
-                            <ArrowRight data-icon="inline-end" className="size-3 ml-1" />
-                          </Link>
-                        </Button>
-                      </ItemActions>
-                    )}
+                    </Link>
                   </Item>
                 )
               })}

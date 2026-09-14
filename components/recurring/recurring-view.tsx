@@ -42,9 +42,16 @@ import {
   AlertDialogMedia,
 } from "@/components/ui/alert-dialog"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import {
   Edit, Trash2, Plus, Wallet as WalletIcon, RefreshCw, CalendarSync, Loader2, Repeat,
   TrendingUp, TrendingDown, Play, Pause, Ban, CreditCard, FileText, Search,
-  PiggyBank, ArrowDownRight, AlertTriangle, CheckCircle2, Clock, CalendarDays, type LucideIcon
+  PiggyBank, ArrowDownRight, AlertTriangle, CheckCircle2, Clock, CalendarDays, MoreVertical, type LucideIcon
 } from "lucide-react"
 import { toast } from "sonner"
 import { CategoryIcon } from "../categories/category-icon"
@@ -222,7 +229,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
     const iconColor = isIncome ? "#10b981" : accent
 
     return (
-      <Card key={rule._id.toString()} onClick={() => router.push(`/recurring/${rule._id.toString()}`)} className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", !rule.isActive && "opacity-70")}>
+      <Card key={rule._id.toString()} onClick={() => router.push(`/recurring/${rule._id.toString()}`)} className={cn("group @container relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", !rule.isActive && "opacity-70")}>
         <div className="h-0.75 w-full shrink-0" style={{ backgroundColor: accent }} />
         <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -230,7 +237,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
               <TypeIcon className="size-4" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors">{rule.description}</p>
+              <p className="text-sm font-bold text-foreground truncate leading-tight group-hover:text-primary transition-colors" title={rule.description}>{rule.description}</p>
               <div className="flex flex-wrap gap-1 mt-1">
                 <Badge variant="outline" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4" style={{ backgroundColor: accent + "15", color: accent, borderColor: accent + "30" }}>{ruleKind}</Badge>
                 <Badge variant="secondary" className="rounded-full px-2 py-0 text-[9px] font-bold uppercase tracking-wider h-4">{rule.frequency}</Badge>
@@ -240,7 +247,9 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
+
+          {/* Action Buttons: Available directly when card has >= 300px space (mobile single column, desktop cards, zoomed out) */}
+          <div className="hidden @[300px]:flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
             {rule.cancellationUrl && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -270,6 +279,40 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
               <TooltipContent side="top" className="rounded-xl font-medium">Delete rule</TooltipContent>
             </Tooltip>
           </div>
+
+          {/* Compact Dropdown Menu: Only appears when card is narrow (< 300px in constrained columns) */}
+          <div className="flex @[300px]:hidden items-center shrink-0 pt-0.5" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44 rounded-xl border border-border/50">
+                <DropdownMenuItem onClick={() => handleToggleActive(rule._id.toString())}>
+                  {rule.isActive ? <Pause className="size-3.5 mr-2 text-amber-500" /> : <Play className="size-3.5 mr-2 text-emerald-500" />}
+                  {rule.isActive ? "Pause rule" : "Resume rule"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setEditingRule(rule)}>
+                  <Edit className="size-3.5 mr-2" />
+                  Edit rule
+                </DropdownMenuItem>
+                {rule.cancellationUrl && (
+                  <DropdownMenuItem asChild>
+                    <a href={rule.cancellationUrl} target="_blank" rel="noopener noreferrer">
+                      <Ban className="size-3.5 mr-2" />
+                      Cancel link
+                    </a>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setDeletingRuleId(rule._id.toString())} className="text-rose-500 focus:text-rose-500">
+                  <Trash2 className="size-3.5 mr-2" />
+                  Delete rule
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardHeader>
         <CardContent className="px-4 pb-3 flex flex-col gap-3">
           <div className="flex items-end justify-between">
@@ -286,19 +329,62 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-muted/30 border border-border/30 rounded-xl px-3 py-2">
-            <div className="flex items-center gap-1.5 min-w-0 flex-1">
-              <div className="size-6 rounded-lg bg-card border border-border/50 flex items-center justify-center shrink-0"><WalletIcon className="size-3 text-muted-foreground" /></div>
-              <span className="text-[10px] font-bold text-foreground truncate">{wallet?.name ?? "Wallet"}</span>
+
+          {/* Flow Bar: Side-by-side on sm+, 2 clean rows on small screens to prevent truncation */}
+          <div className="bg-muted/30 border border-border/30 rounded-xl px-3 py-2">
+            {/* Desktop & Tablet (sm+): side-by-side with animated flow */}
+            <div className="hidden sm:flex items-center gap-2">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <div className="size-6 rounded-lg bg-card border border-border/50 flex items-center justify-center shrink-0">
+                  <WalletIcon className="size-3 text-muted-foreground" />
+                </div>
+                <span className="text-[10px] font-bold text-foreground truncate" title={wallet?.name}>
+                  {wallet?.name ?? "Wallet"}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <div className="w-4 h-px bg-border/60 relative overflow-hidden">
+                  {rule.isActive && <div className="absolute top-1/2 -translate-y-1/2 size-1 rounded-full bg-primary" style={{ animation: "flowDot 1.8s ease-in-out infinite" }} />}
+                </div>
+                <RefreshCw className={cn("size-2.5 text-primary/40", rule.isActive && "animate-spin")} style={{ animationDuration: "10s" }} />
+                <div className="w-4 h-px bg-border/60 relative overflow-hidden">
+                  {rule.isActive && <div className="absolute top-1/2 -translate-y-1/2 size-1 rounded-full bg-primary" style={{ animation: "flowDot 1.8s ease-in-out infinite", animationDelay: "0.9s" }} />}
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
+                <span className="text-[10px] font-bold truncate" style={{ color: accent }} title={category?.name}>
+                  {category?.name ?? "Category"}
+                </span>
+                <div className="size-6 rounded-lg border flex items-center justify-center shrink-0" style={{ backgroundColor: accent + "15", borderColor: accent + "25", color: accent }}>
+                  <CategoryIcon name={category?.icon ?? ""} className="size-3" />
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <div className="w-5 h-px bg-border/60 relative overflow-hidden">{rule.isActive && <div className="absolute top-1/2 -translate-y-1/2 size-1 rounded-full bg-primary" style={{ animation: "flowDot 1.8s ease-in-out infinite" }} />}</div>
-              <RefreshCw className={cn("size-2.5 text-primary/40", rule.isActive && "animate-spin")} style={{ animationDuration: "10s" }} />
-              <div className="w-5 h-px bg-border/60 relative overflow-hidden">{rule.isActive && <div className="absolute top-1/2 -translate-y-1/2 size-1 rounded-full bg-primary" style={{ animation: "flowDot 1.8s ease-in-out infinite", animationDelay: "0.9s" }} />}</div>
-            </div>
-            <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
-              <span className="text-[10px] font-bold truncate" style={{ color: accent }}>{category?.name ?? "Category"}</span>
-              <div className="size-6 rounded-lg border flex items-center justify-center shrink-0" style={{ backgroundColor: accent + "15", borderColor: accent + "25", color: accent }}><CategoryIcon name={category?.icon ?? ""} className="size-3" /></div>
+
+            {/* Small screens (< sm): 2 clean rows with full width so names are never cut off */}
+            <div className="flex sm:hidden flex-col gap-1.5">
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <div className="size-5 rounded-md bg-card border border-border/50 flex items-center justify-center shrink-0">
+                    <WalletIcon className="size-2.5 text-muted-foreground" />
+                  </div>
+                  <span className="text-[10px] font-bold text-foreground truncate" title={wallet?.name}>
+                    {wallet?.name ?? "Wallet"}
+                  </span>
+                </div>
+                <span className="text-[8px] uppercase font-bold tracking-wider text-muted-foreground/50 shrink-0">Wallet</span>
+              </div>
+              <div className="flex items-center justify-between gap-2 min-w-0 pt-1 border-t border-border/20">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <div className="size-5 rounded-md border flex items-center justify-center shrink-0" style={{ backgroundColor: accent + "15", borderColor: accent + "25", color: accent }}>
+                    <CategoryIcon name={category?.icon ?? ""} className="size-2.5" />
+                  </div>
+                  <span className="text-[10px] font-bold truncate" style={{ color: accent }} title={category?.name}>
+                    {category?.name ?? "Category"}
+                  </span>
+                </div>
+                <span className="text-[8px] uppercase font-bold tracking-wider text-muted-foreground/50 shrink-0">Category</span>
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-muted/20 border border-border/20 rounded-xl px-3 py-2.5">
@@ -446,9 +532,9 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab("all")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
@@ -510,8 +596,8 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
           </Select>
         </div>
 
-        <div className="flex w-full sm:w-auto items-center gap-3">
-          <InputGroup className="w-full sm:w-60">
+        <div className="flex w-full sm:w-auto items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
+          <InputGroup className="w-full sm:w-60 min-w-0">
             <InputGroupInput
               placeholder="Search by description..."
               value={search}

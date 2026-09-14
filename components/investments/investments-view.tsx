@@ -116,9 +116,9 @@ export function InvestmentsView({
       <PortfolioSummary data={portfolioData} currency={currency} />
 
       {/* ── Tab Selector & Search ── */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Tabs */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab("overview")}
             className={cn(
@@ -170,7 +170,7 @@ export function InvestmentsView({
 
         {/* Search */}
         {activeTab !== "overview" && (
-          <div className="w-full sm:w-72">
+          <div className="w-full sm:w-72 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
             <InputGroup className="rounded-xl border-border/40 bg-card">
               <Search className="size-4 text-muted-foreground ml-3" />
               <InputGroupInput
@@ -231,7 +231,7 @@ export function InvestmentsView({
           <div className="lg:col-span-1">
             <TopAccountsCard accounts={accountData} currency={currency} />
           </div>
-          <div className="lg:col-span-1">
+          <div className="md:col-span-2 lg:col-span-1">
             <RecentTransactionsCard transactions={transactions} currency={currency} />
           </div>
         </div>

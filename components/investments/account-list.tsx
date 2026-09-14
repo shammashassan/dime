@@ -41,7 +41,7 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
         return (
           <Card
             key={account.accountId}
-            className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full justify-between"
+            className="group @container relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full justify-between"
             onClick={() => router.push(`/investments/${account.accountId}`)}
           >
             {/* Top Accent Line (Matches AssetCard) */}
@@ -83,25 +83,25 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
 
             {/* Body — Two-Stat Metric Row (Current Value / Unrealized P&L) + Progress Bar (Matches AssetCard) */}
             <CardContent className="px-4 pb-3 flex flex-col gap-3">
-              <div className="flex items-end justify-between mt-2">
-                <div>
-                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5">
+              <div className="flex items-end justify-between gap-2 mt-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5 truncate">
                     Current Value
                   </p>
-                  <p className="text-[1.5rem] font-black tabular-nums text-foreground leading-none select-all">
+                  <p className="text-[clamp(0.95rem,5cqw,1.45rem)] font-black tabular-nums text-foreground leading-none select-all truncate">
                     {formatCurrency(account.totalValue, account.currency || currency)}
                   </p>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5">
+                <div className="min-w-0 flex-1 text-right">
+                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5 truncate">
                     Unrealized P&L
                   </p>
-                  <p className={cn("text-[1.1rem] font-black tabular-nums leading-none flex items-center justify-end gap-0.5", isPositive ? "text-emerald-500" : "text-rose-500")}>
+                  <p className={cn("text-[clamp(0.75rem,4.2cqw,1.1rem)] font-black tabular-nums leading-none flex items-center justify-end gap-0.5 truncate", isPositive ? "text-emerald-500" : "text-rose-500")}>
                     {isPositive ? <ArrowUpRight className="size-3.5 shrink-0" /> : <ArrowDownRight className="size-3.5 shrink-0" />}
-                    <span>{isPositive ? '+' : ''}{formatCurrency(account.unrealizedGain, currency)}</span>
+                    <span className="truncate">{isPositive ? '+' : ''}{formatCurrency(account.unrealizedGain, currency)}</span>
                   </p>
-                  <span className={cn("text-[10px] font-bold block mt-0.5", isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
+                  <span className={cn("text-[10px] font-bold block mt-0.5 truncate", isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
                     ({isPositive ? '+' : ''}{returnPercentage.toFixed(1)}%)
                   </span>
                 </div>

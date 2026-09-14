@@ -67,7 +67,7 @@ export function ExpensesList({ expenses, currentUserId }: ExpensesListProps) {
         return (
           <Card
             key={expense._id.toString()}
-            className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full justify-between"
+            className="group @container relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full justify-between"
             onClick={() => router.push(`/shared-expenses/${expense._id.toString()}`)}
           >
             {/* Top Accent Line matching Loan Card */}
@@ -137,23 +137,23 @@ export function ExpensesList({ expenses, currentUserId }: ExpensesListProps) {
 
             {/* Body matching Loan Card metric layout */}
             <CardContent className="px-4 pb-3 flex flex-col gap-3">
-              {/* Total & User Position */}
-              <div className="flex items-end justify-between mt-2">
-                <div>
-                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5">Total Expense</p>
-                  <p className="text-[1.5rem] font-black tabular-nums text-foreground leading-none select-all">
+              {/* Total & User Position — side-by-side with scalable typography */}
+              <div className="flex items-end justify-between gap-2.5 mt-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-1 truncate">Total Expense</p>
+                  <p className="text-[clamp(0.65rem,4.8cqw,1.35rem)] font-black tabular-nums text-foreground leading-none select-all truncate">
                     {formatCurrency(expense.totalAmount, expense.currency)}
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-0.5">Your Position</p>
+                <div className="min-w-0 flex-1 text-right">
+                  <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground mb-1 truncate">Your Position</p>
                   <p
                     className={cn(
-                      "text-[1.5rem] font-black tabular-nums leading-none",
+                      "text-[clamp(0.65rem,4.8cqw,1.35rem)] font-black tabular-nums leading-none select-all truncate",
                       userNetCents > 0 ? "text-emerald-500" : userNetCents < 0 ? "text-rose-500" : "text-muted-foreground"
                     )}
                   >
-                    {userNetCents > 0 ? `+${formatCurrency(userNetCents, expense.currency)}` : userNetCents < 0 ? `-${formatCurrency(Math.abs(userNetCents), expense.currency)}` : "$0.00"}
+                    {userNetCents > 0 ? `+${formatCurrency(userNetCents, expense.currency)}` : userNetCents < 0 ? `-${formatCurrency(Math.abs(userNetCents), expense.currency)}` : formatCurrency(0, expense.currency)}
                   </p>
                 </div>
               </div>

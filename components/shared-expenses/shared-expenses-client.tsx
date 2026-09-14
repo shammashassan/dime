@@ -12,6 +12,13 @@ import {
   EmptyTitle,
   EmptyMedia,
 } from "@/components/ui/empty"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { CreateExpenseDialog } from "./create-expense-dialog"
 import { SettleUpDialog } from "./settle-up-dialog"
 import { ExpensesList } from "./expenses-list"
@@ -212,8 +219,8 @@ export function SharedExpensesClient({
       </div>
 
       {/* ── Control & Filter Bar matching reference ── */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab("expenses")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "expenses"
@@ -234,8 +241,25 @@ export function SharedExpensesClient({
           </button>
         </div>
 
-        <div className="flex w-full sm:w-auto items-center gap-3">
-          <InputGroup className="w-full sm:w-60">
+        {/* Mobile Filter (visible on smaller screens) */}
+        <div className="sm:hidden w-full">
+          <Select value={activeTab} onValueChange={(v: string) => setActiveTab(v as any)}>
+            <SelectTrigger className="w-full border-border/40 bg-card h-10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover border border-border/40 rounded-xl">
+              <SelectItem value="expenses" className="rounded-lg">
+                Expenses ({viewModel.recentExpenses.length})
+              </SelectItem>
+              <SelectItem value="simplified" className="rounded-lg">
+                Group Balances ({viewModel.simplifiedTransfers.length})
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex w-full sm:w-auto items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
+          <InputGroup className="w-full sm:w-60 min-w-0">
             <InputGroupInput
               placeholder="Search by title or participant..."
               value={search}

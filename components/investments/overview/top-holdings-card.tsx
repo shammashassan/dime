@@ -34,7 +34,7 @@ export function TopHoldingsCard({
   const topHoldings = [...holdingsWithValue].sort((a, b) => b.currentValue - a.currentValue).slice(0, 5)
 
   return (
-    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto lg:h-full flex flex-col bg-card">
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto md:h-full flex flex-col bg-card">
       <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Layers className="size-3.5 text-muted-foreground" />

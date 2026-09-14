@@ -115,13 +115,13 @@ export function HealthScoreHero({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="px-4 pt-0 pb-2 sm:px-6 flex-1 flex flex-col items-center justify-center">
-        {/* Radial Semi-Circle Arc Gauge scaled to fill space naturally */}
+      <CardContent className="px-3 pt-0 pb-2 sm:px-4 flex-1 flex flex-col items-center justify-center">
+        {/* Radial Semi-Circle Arc Gauge scaled to fill space naturally without edge clipping */}
         <ChartContainer
           config={chartConfig}
-          className="w-full max-w-62.5 h-38.75 mx-auto overflow-visible"
+          className="w-full max-w-[240px] h-[145px] mx-auto overflow-visible [&_.recharts-surface]:overflow-visible"
         >
-          <PieChart margin={{ top: 6, bottom: 0, left: 8, right: 8 }}>
+          <PieChart margin={{ top: 6, bottom: 0, left: 2, right: 2 }}>
             <Pie
               data={chartData}
               dataKey="value"
@@ -130,10 +130,10 @@ export function HealthScoreHero({
               cy="82%"
               startAngle={180}
               endAngle={0}
-              innerRadius={68}
-              outerRadius={92}
-              cornerRadius={4}
-              paddingAngle={4}
+              innerRadius={60}
+              outerRadius={82}
+              cornerRadius={3}
+              paddingAngle={3}
               minAngle={6}
               stroke="var(--card)"
               strokeWidth={2}

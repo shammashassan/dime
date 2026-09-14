@@ -6,8 +6,11 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { AssetDialog } from "./asset-dialog"
 import { AssetsListTab } from "./assets-list-tab"
-import { Landmark } from "lucide-react"
+import { Landmark, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Modular Dashboard sub-cards
@@ -48,7 +51,7 @@ interface DashboardCardConfig {
 const DEFAULT_BENTO_LAYOUT: DashboardCardConfig[] = [
   { id: "timeline", type: "timeline", className: "lg:col-span-2" },
   { id: "health", type: "health", className: "lg:col-span-1" },
-  { id: "recent_activity", type: "recent_activity", className: "lg:col-span-2" },
+  { id: "recent_activity", type: "recent_activity", className: "md:col-span-2 lg:col-span-2" },
   { id: "quick_actions", type: "quick_actions", className: "lg:col-span-1" },
   { id: "insights", type: "insights", className: "lg:col-span-2" },
   { id: "asset_allocation", type: "asset_allocation", className: "lg:col-span-1" },
@@ -58,7 +61,9 @@ const DEFAULT_BENTO_LAYOUT: DashboardCardConfig[] = [
 ]
 
 export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOverviewProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = React.useState<"overview" | "assets-list">("overview")
+  const [addOpen, setAddOpen] = React.useState(false)
 
   const renderCard = (card: DashboardCardConfig) => {
     switch (card.type) {
@@ -136,7 +141,25 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
           </div>
         </div>
 
-
+        {/* Add Manual Item CTA alongside page heading (matching other pages) */}
+        <AssetDialog
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          trigger={
+            <Button
+              type="button"
+              className="w-full sm:w-auto rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform shrink-0"
+              onClick={() => setAddOpen(true)}
+            >
+              <Plus className="size-4" />
+              Add Manual Item
+            </Button>
+          }
+          onSuccess={() => {
+            setAddOpen(false)
+            router.refresh()
+          }}
+        />
       </div>
 
       {/* ── Summary Row ── */}

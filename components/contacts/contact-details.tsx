@@ -502,17 +502,21 @@ export function ContactDetails({
               )}
 
               <div className="pt-2.5 border-t border-border/30 grid grid-cols-3 gap-2">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Last Activity</span>
-                  <span className="font-semibold text-foreground">{lastActivity ? format(lastActivity.date, "MMM d, yyyy") : "—"}</span>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider truncate">Last Activity</span>
+                  <span className="font-semibold text-foreground text-xs truncate" title={lastActivity ? format(lastActivity.date, "MMM d, yyyy") : "—"}>
+                    {lastActivity ? format(lastActivity.date, "MMM d, yyyy") : "—"}
+                  </span>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Repayments</span>
-                  <span className="font-semibold text-foreground">{totalRepayments}</span>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider truncate">Repayments</span>
+                  <span className="font-semibold text-foreground text-xs truncate">{totalRepayments}</span>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">Avg. Repay</span>
-                  <span className="font-semibold text-foreground truncate">{avgRepayment > 0 ? formatCurrency(avgRepayment, baseCurrency) : "—"}</span>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider truncate">Avg. Repay</span>
+                  <span className="font-semibold text-foreground text-xs truncate" title={avgRepayment > 0 ? formatCurrency(avgRepayment, baseCurrency) : "—"}>
+                    {avgRepayment > 0 ? formatCurrency(avgRepayment, baseCurrency) : "—"}
+                  </span>
                 </div>
               </div>
             </div>

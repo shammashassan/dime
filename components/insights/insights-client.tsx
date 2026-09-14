@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useTransition } from "react"
+import React, { useState, useTransition, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import type { SpendingInsightsData, SpendingInsight } from "@/types"
 import { InsightsBriefingCard } from "./insights-briefing-card"
@@ -8,26 +8,19 @@ import { InsightsRadarCard } from "./insights-radar-card"
 import { InsightsMetricsRow } from "./insights-metrics-row"
 import { InsightCard } from "./insight-card"
 import { InsightsEmpty } from "./insights-empty"
+import { HighImpactSignalsCard } from "./overview/high-impact-signals-card"
+import { QuickActionsCard } from "./overview/quick-actions-card"
+import { CategorySpikesCard } from "./overview/category-spikes-card"
+import { RecurringRadarCard } from "./overview/recurring-radar-card"
+import { SavingsOpportunitiesCard } from "./overview/savings-opportunities-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   Sparkles,
   RotateCcw,
-  AlertTriangle,
-  Repeat,
-  TrendingDown,
-  PiggyBank,
-  Star,
-  Layers,
+  Search,
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -46,12 +39,14 @@ function InsightGrid({
   items,
   emptyTitle,
   emptyDescription,
+  currency,
   onDismiss,
   onToggleBookmark,
 }: {
   items: SpendingInsight[]
   emptyTitle?: string
   emptyDescription?: string
+  currency?: string
   onDismiss: (id: string) => void
   onToggleBookmark: (id: string, current: boolean) => void
 }) {
@@ -65,6 +60,7 @@ function InsightGrid({
         <InsightCard
           key={ins.id}
           insight={ins}
+          currency={currency}
           onDismiss={onDismiss}
           onToggleBookmark={onToggleBookmark}
         />
@@ -78,7 +74,9 @@ export function InsightsClient({ data }: InsightsClientProps) {
   const [prevData, setPrevData] = useState(data)
   const [insights, setInsights] = useState<SpendingInsight[]>(data.insights)
   const [dismissedCount, setDismissedCount] = useState(data.dismissedCount)
-  const [activeTab, setActiveTab] = useState<string>("all")
+  const [activeTab, setActiveTab] = useState<string>("overview")
+  const [search, setSearch] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState<string>("")
   const [isPending, startTransition] = useTransition()
 
   if (prevData !== data) {
@@ -154,27 +152,62 @@ export function InsightsClient({ data }: InsightsClientProps) {
     })
   }
 
-  const anomalies = insights.filter(
-    (i) => i.category === "spikes" || i.category === "outliers"
+  const anomalies = useMemo(
+    () => insights.filter((i) => i.category === "spikes" || i.category === "outliers"),
+    [insights]
   )
-  const subscriptions = insights.filter((i) => i.category === "subscriptions")
-  const incomeAndCashflow = insights.filter(
-    (i) => i.category === "income" || i.category === "cashflow"
+  const subscriptions = useMemo(
+    () => insights.filter((i) => i.category === "subscriptions"),
+    [insights]
   )
-  const savings = insights.filter((i) => i.category === "savings")
-  const bookmarked = insights.filter((i) => i.isBookmarked)
+  const savings = useMemo(
+    () => insights.filter((i) => i.category === "savings"),
+    [insights]
+  )
+  const bookmarked = useMemo(
+    () => insights.filter((i) => i.isBookmarked),
+    [insights]
+  )
 
-  const TABS = [
-    { id: "all", label: "All", count: insights.length, icon: Layers },
-    { id: "anomalies", label: "Anomalies", count: anomalies.length, icon: AlertTriangle },
-    { id: "subscriptions", label: "Subscriptions", count: subscriptions.length, icon: Repeat },
-    { id: "cashflow", label: "Income & Cashflow", count: incomeAndCashflow.length, icon: TrendingDown },
-    { id: "savings", label: "Savings", count: savings.length, icon: PiggyBank },
-    { id: "bookmarked", label: "Bookmarked", count: bookmarked.length, icon: Star },
-  ]
+  const categoriesWithSignals = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; count: number }>()
+    insights.forEach((ins) => {
+      const key = ins.category
+      const existing = map.get(key)
+      if (existing) {
+        existing.count += 1
+      } else {
+        map.set(key, {
+          id: key,
+          name: key.charAt(0).toUpperCase() + key.slice(1),
+          count: 1,
+        })
+      }
+    })
+    return Array.from(map.values())
+  }, [insights])
+
+  // Filter items for category feeds
+  const filterList = (list: SpendingInsight[]) => {
+    let result = list
+    if (categoryFilter) {
+      result = result.filter((i) => i.category === categoryFilter)
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter(
+        (i) =>
+          i.title.toLowerCase().includes(q) ||
+          i.description.toLowerCase().includes(q) ||
+          i.category.toLowerCase().includes(q) ||
+          (i.tags && i.tags.some((t) => t.toLowerCase().includes(q)))
+      )
+    }
+    return result
+  }
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-5 w-full">
       {/* ── 1. Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
@@ -201,7 +234,7 @@ export function InsightsClient({ data }: InsightsClientProps) {
                   align="start"
                   side="top"
                 >
-                  Anomalies and trends are analyzed against your 90-day baseline in {data.currency}.
+                  Anomalies and trends are analyzed against your 120-day baseline in {data.currency}.
                 </HoverCardContent>
               </HoverCard>
             </div>
@@ -225,147 +258,190 @@ export function InsightsClient({ data }: InsightsClientProps) {
         )}
       </div>
 
-      {/* ── 2. Top Metrics Row (Matches /health & /net-worth) ── */}
+      {/* ── 2. Top Metrics Row (Tightly Packed & Positioned at Top) ── */}
       <InsightsMetricsRow metrics={data.metrics} currency={data.currency} />
 
-      {/* ── 3. Bento Hero Section: Executive AI Briefing (2 cols) + Signal Radar (1 col) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
-        <div className="lg:col-span-2">
-          <InsightsBriefingCard briefing={data.executiveBriefing} />
+      {/* ── 3. Unified Tab Switcher (Horizontally scrollable on smaller screens, never overflows) ── */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-start sm:items-center justify-between w-full min-w-0">
+        {/* Scrollable Tab Bar */}
+        <div className="w-full sm:w-auto min-w-0 rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
+          <div className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0">
+            <button
+              onClick={() => {
+                setActiveTab("overview")
+                setCategoryFilter("")
+              }}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "overview"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab("all")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "all"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              All Signals ({insights.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("anomalies")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "anomalies"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Anomalies ({anomalies.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("subscriptions")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "subscriptions"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Subscriptions ({subscriptions.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("savings")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "savings"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Savings &amp; Wins ({savings.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("bookmarked")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "bookmarked"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Bookmarked ({bookmarked.length})
+            </button>
+          </div>
         </div>
-        <div className="lg:col-span-1">
-          <InsightsRadarCard insights={insights} />
-        </div>
+
+        {/* Search Bar for Signal Feeds */}
+        {activeTab !== "overview" && (
+          <div className="w-full sm:w-72 shrink-0">
+            <InputGroup className="rounded-xl border-border/40 bg-card">
+              <Search className="size-4 text-muted-foreground ml-3" />
+              <InputGroupInput
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search signals, categories..."
+                className="text-xs"
+              />
+            </InputGroup>
+          </div>
+        )}
       </div>
 
-      {/* ── 4. Unified Desktop/Mobile Tab Switcher (Matches Net Worth, Investments, Planner) ── */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
-        {/* Desktop Tab Selector */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start flex-wrap gap-1">
-          {TABS.map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-                  isActive
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon className="size-3.5" aria-hidden="true" />
-                <span>{tab.label}</span>
-                <span
-                  className={cn(
-                    "text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            )
-          })}
+      {/* ── 4. Main Tab Content: Master Bento Grid OR Signal Category Feeds ── */}
+      {activeTab === "overview" ? (
+        /* Bento Grid (Uniform 3-Column Layout Matching Investments and Net Worth) */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+          {/* Row 1: Executive AI Briefing (2 cols) + Signal Severity Radar (1 col) */}
+          <div className="lg:col-span-2">
+            <InsightsBriefingCard briefing={data.executiveBriefing} />
+          </div>
+          <div className="lg:col-span-1">
+            <InsightsRadarCard insights={insights} />
+          </div>
+
+          {/* Row 2: High-Impact Actionable Insights (2 cols) + Quick Actions (1 col) */}
+          <div className="lg:col-span-2">
+            <HighImpactSignalsCard
+              insights={insights}
+              currency={data.currency}
+              onDismiss={handleDismiss}
+              onToggleBookmark={handleToggleBookmark}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <QuickActionsCard
+              categoriesWithSignals={categoriesWithSignals}
+              onSelectCategoryFilter={(catId) => {
+                setActiveTab("all")
+                setCategoryFilter(catId)
+              }}
+            />
+          </div>
+
+          {/* Row 3: Category Surges (1 col) + Subscriptions Radar (1 col) + Savings Opportunities (1 col) */}
+          <div className="lg:col-span-1">
+            <CategorySpikesCard insights={insights} currency={data.currency} />
+          </div>
+          <div className="lg:col-span-1">
+            <RecurringRadarCard insights={insights} currency={data.currency} />
+          </div>
+          <div className="md:col-span-2 lg:col-span-1">
+            <SavingsOpportunitiesCard insights={insights} currency={data.currency} />
+          </div>
         </div>
-
-        {/* Mobile Tab Selector */}
-        <div className="sm:hidden w-full">
-          <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full border-border/40 bg-card h-10 rounded-xl text-xs font-semibold">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border/40 rounded-xl">
-              <SelectGroup>
-                {TABS.map((tab) => (
-                  <SelectItem key={tab.id} value={tab.id} className="rounded-lg text-xs font-semibold">
-                    {tab.label} ({tab.count})
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <span className="text-xs text-muted-foreground font-mono font-semibold hidden md:inline-block">
-          {activeTab === "all"
-            ? `${insights.length} total signals`
-            : activeTab === "anomalies"
-            ? `${anomalies.length} anomalies`
-            : activeTab === "subscriptions"
-            ? `${subscriptions.length} subscriptions`
-            : activeTab === "cashflow"
-            ? `${incomeAndCashflow.length} cashflow signals`
-            : activeTab === "savings"
-            ? `${savings.length} savings wins`
-            : `${bookmarked.length} bookmarked`}
-        </span>
-      </div>
-
-      {/* ── 5. Active Tab Bento Feed ── */}
-      <div>
-        {activeTab === "all" && (
-          <InsightGrid
-            items={insights}
-            onDismiss={handleDismiss}
-            onToggleBookmark={handleToggleBookmark}
-          />
-        )}
-
-        {activeTab === "anomalies" && (
-          <InsightGrid
-            items={anomalies}
-            emptyTitle="No Anomalies Flagged"
-            emptyDescription="All categories and transactions are in normal standard deviations."
-            onDismiss={handleDismiss}
-            onToggleBookmark={handleToggleBookmark}
-          />
-        )}
-
-        {activeTab === "subscriptions" && (
-          <InsightGrid
-            items={subscriptions}
-            emptyTitle="No Subscription Alerts"
-            emptyDescription="No duplicate charges or unexpected price hikes detected."
-            onDismiss={handleDismiss}
-            onToggleBookmark={handleToggleBookmark}
-          />
-        )}
-
-        {activeTab === "cashflow" && (
-          <InsightGrid
-            items={incomeAndCashflow}
-            emptyTitle="Cashflow is Stable"
-            emptyDescription="Income patterns and weekly burn velocity are healthy."
-            onDismiss={handleDismiss}
-            onToggleBookmark={handleToggleBookmark}
-          />
-        )}
-
-        {activeTab === "savings" && (
-          <InsightGrid
-            items={savings}
-            emptyTitle="No Immediate Savings Gaps"
-            emptyDescription="Your budget utilization and discretionary spending frequency are on target."
-            onDismiss={handleDismiss}
-            onToggleBookmark={handleToggleBookmark}
-          />
-        )}
-
-        {activeTab === "bookmarked" && (
-          <InsightGrid
-            items={bookmarked}
-            emptyTitle="No Bookmarked Insights"
-            emptyDescription="Star important insights to reference them anytime."
-            onDismiss={handleDismiss}
-            onToggleBookmark={handleToggleBookmark}
-          />
-        )}
-      </div>
+      ) : activeTab === "all" ? (
+        <InsightGrid
+          items={filterList(insights)}
+          currency={data.currency}
+          emptyTitle="No Active Signals"
+          emptyDescription={search ? "No signals match your search query." : "All spending metrics are within standard ranges."}
+          onDismiss={handleDismiss}
+          onToggleBookmark={handleToggleBookmark}
+        />
+      ) : activeTab === "anomalies" ? (
+        <InsightGrid
+          items={filterList(anomalies)}
+          currency={data.currency}
+          emptyTitle="No Anomalies Flagged"
+          emptyDescription={search ? "No anomalies match your search query." : "All categories and transactions are in normal standard deviations."}
+          onDismiss={handleDismiss}
+          onToggleBookmark={handleToggleBookmark}
+        />
+      ) : activeTab === "subscriptions" ? (
+        <InsightGrid
+          items={filterList(subscriptions)}
+          currency={data.currency}
+          emptyTitle="No Subscription Alerts"
+          emptyDescription={search ? "No subscriptions match your search query." : "No duplicate charges or unexpected price hikes detected."}
+          onDismiss={handleDismiss}
+          onToggleBookmark={handleToggleBookmark}
+        />
+      ) : activeTab === "savings" ? (
+        <InsightGrid
+          items={filterList(savings)}
+          currency={data.currency}
+          emptyTitle="No Immediate Savings Gaps"
+          emptyDescription={search ? "No savings opportunities match your search query." : "Your budget utilization and discretionary spending frequency are on target."}
+          onDismiss={handleDismiss}
+          onToggleBookmark={handleToggleBookmark}
+        />
+      ) : (
+        <InsightGrid
+          items={filterList(bookmarked)}
+          currency={data.currency}
+          emptyTitle="No Bookmarked Insights"
+          emptyDescription={search ? "No bookmarked items match your search query." : "Star important insights to reference them anytime."}
+          onDismiss={handleDismiss}
+          onToggleBookmark={handleToggleBookmark}
+        />
+      )}
     </div>
   )
 }
