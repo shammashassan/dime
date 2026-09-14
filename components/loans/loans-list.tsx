@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react"
 
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Wallet, Contact, Loan } from "@/types"
 import { OwedSummaries } from "@/lib/queries/loans"
 import { LoanDialog } from "./loan-dialog"
@@ -15,9 +15,11 @@ import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -85,9 +87,18 @@ export function LoansList({
   summaries,
 }: LoansListProps) {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const [loans, setLoans] = useState<Loan[]>(initialLoans)
   const [search, setSearch] = useState("")
-  const [activeTab, setActiveTab] = useState("all")
+
+  const tabParam = searchParams.get("tab")
+  const validTabs = ["active", "overdue", "repaid", "all"]
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    return tabParam && validTabs.includes(tabParam) ? tabParam : "active"
+  })
+
   const [isPending, startTransition] = useTransition()
   const [deletingLoanId, setDeletingLoanId] = useState<string | null>(null)
 
@@ -95,11 +106,37 @@ export function LoansList({
     setLoans(initialLoans)
   }, [initialLoans])
 
+  useEffect(() => {
+    if (tabParam && validTabs.includes(tabParam)) {
+      setActiveTab(tabParam)
+    } else if (!tabParam) {
+      setActiveTab("active")
+    }
+  }, [tabParam])
+
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab)
+    const params = new URLSearchParams(searchParams.toString())
+    if (newTab === "active") {
+      params.delete("tab")
+    } else {
+      params.set("tab", newTab)
+    }
+    const qs = params.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+  }
+
+  const openCount = loans.filter(
+    (loan) => loan.status === "active" || loan.status === "partially_repaid" || loan.status === "overdue"
+  ).length
+  const overdueCount = loans.filter((loan) => loan.status === "overdue").length
+  const repaidCount = loans.filter((loan) => loan.status === "fully_repaid").length
+
   const tabNames: Record<string, string> = {
+    active: `Active (${openCount})`,
+    overdue: `Overdue (${overdueCount})`,
+    repaid: `Repaid (${repaidCount})`,
     all: `All (${loans.length})`,
-    active: `Active (${loans.filter((loan) => loan.status === "active" || loan.status === "partially_repaid").length})`,
-    repaid: `Repaid (${loans.filter((loan) => loan.status === "fully_repaid").length})`,
-    overdue: `Overdue (${loans.filter((loan) => loan.status === "overdue").length})`,
   }
 
   // Filter loans based on search query and active tab
@@ -110,10 +147,12 @@ export function LoansList({
 
     if (!matchesSearch) return false
 
-    if (activeTab === "all") return true
-    if (activeTab === "active") return loan.status === "active" || loan.status === "partially_repaid"
-    if (activeTab === "repaid") return loan.status === "fully_repaid"
+    if (activeTab === "active") {
+      return loan.status === "active" || loan.status === "partially_repaid" || loan.status === "overdue"
+    }
     if (activeTab === "overdue") return loan.status === "overdue"
+    if (activeTab === "repaid") return loan.status === "fully_repaid"
+    if (activeTab === "all") return true
     return true
   })
 
@@ -265,72 +304,57 @@ export function LoansList({
       </div>
 
       {/* Main Filter & Control Area */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            All ({loans.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("active")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "active"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Active ({loans.filter((loan) => loan.status === "active" || loan.status === "partially_repaid").length})
-          </button>
-          <button
-            onClick={() => setActiveTab("repaid")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "repaid"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Repaid ({loans.filter((loan) => loan.status === "fully_repaid").length})
-          </button>
-          <button
-            onClick={() => setActiveTab("overdue")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "overdue"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Overdue ({loans.filter((loan) => loan.status === "overdue").length})
-          </button>
+        <div className="hidden sm:flex shrink-0">
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="h-9 p-1 rounded-xl bg-muted/80">
+              <TabsTrigger value="active" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg">
+                Active ({openCount})
+              </TabsTrigger>
+              <TabsTrigger value="overdue" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg gap-1.5">
+                Overdue ({overdueCount})
+                {overdueCount > 0 && (
+                  <span className="size-1.5 rounded-full bg-destructive" />
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="repaid" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg">
+                Repaid ({repaidCount})
+              </TabsTrigger>
+              <TabsTrigger value="all" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg">
+                All ({loans.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Mobile Filter (visible on smaller screens) */}
         <div className="sm:hidden w-full">
-          <Select value={activeTab} onValueChange={setActiveTab}>
+          <Select value={activeTab} onValueChange={handleTabChange}>
             <SelectTrigger className="w-full border-border/40 bg-card h-10">
               <SelectValue placeholder={tabNames[activeTab]} />
             </SelectTrigger>
             <SelectContent className="bg-popover border border-border/40 rounded-xl">
-              <SelectItem value="all" className="rounded-lg">
-                All ({loans.length})
-              </SelectItem>
-              <SelectItem value="active" className="rounded-lg">
-                Active ({loans.filter((loan) => loan.status === "active" || loan.status === "partially_repaid").length})
-              </SelectItem>
-              <SelectItem value="repaid" className="rounded-lg">
-                Repaid ({loans.filter((loan) => loan.status === "fully_repaid").length})
-              </SelectItem>
-              <SelectItem value="overdue" className="rounded-lg">
-                Overdue ({loans.filter((loan) => loan.status === "overdue").length})
-              </SelectItem>
+              <SelectGroup>
+                <SelectItem value="active" className="rounded-lg">
+                  Active ({openCount})
+                </SelectItem>
+                <SelectItem value="overdue" className="rounded-lg">
+                  Overdue ({overdueCount})
+                </SelectItem>
+                <SelectItem value="repaid" className="rounded-lg">
+                  Repaid ({repaidCount})
+                </SelectItem>
+                <SelectItem value="all" className="rounded-lg">
+                  All ({loans.length})
+                </SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-        <div className="flex w-full sm:w-auto items-center gap-3">
-          <InputGroup className="w-full sm:w-60">
+        <div className="flex w-full sm:w-auto items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
+          <InputGroup className="w-full sm:w-60 min-w-0">
             <InputGroupInput
               placeholder="Search by contact or notes..."
               value={search}
@@ -527,15 +551,77 @@ export function LoansList({
             )
           })}
         </div>
+      ) : !search && activeTab === "active" && openCount === 0 ? (
+        <Card className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full col-span-full">
+          <Empty>
+            <EmptyMedia className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-8" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No active loans</EmptyTitle>
+              <EmptyDescription>
+                You don't have any open loans right now. All your loans are fully settled!
+              </EmptyDescription>
+            </EmptyHeader>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              {repaidCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleTabChange("repaid")}
+                  className="rounded-xl font-semibold text-xs cursor-pointer"
+                >
+                  View Repaid Loans ({repaidCount})
+                </Button>
+              )}
+              <LoanDialog
+                wallets={wallets}
+                contacts={contacts}
+                trigger={
+                  <Button size="sm" className="rounded-xl font-semibold text-xs cursor-pointer gap-1.5">
+                    <Plus className="size-3.5" />
+                    Record New Loan
+                  </Button>
+                }
+              />
+            </div>
+          </Empty>
+        </Card>
+      ) : !search && activeTab === "overdue" && overdueCount === 0 ? (
+        <Card className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full col-span-full">
+          <Empty>
+            <EmptyMedia className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-8" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No overdue loans</EmptyTitle>
+              <EmptyDescription>Great news! None of your loans are overdue.</EmptyDescription>
+            </EmptyHeader>
+            {openCount > 0 && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleTabChange("active")}
+                  className="rounded-xl font-semibold text-xs cursor-pointer"
+                >
+                  Back to Active Loans ({openCount})
+                </Button>
+              </div>
+            )}
+          </Empty>
+        </Card>
       ) : (
         <Card className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full col-span-full">
           <Empty>
-            <EmptyMedia className="bg-primary/5 text-primary">
-              <HandCoins className="size-8" />
+            <EmptyMedia className="bg-muted text-muted-foreground">
+              <Search className="size-8" />
             </EmptyMedia>
             <EmptyHeader>
               <EmptyTitle>No loans found</EmptyTitle>
-              <EmptyDescription>Adjust your filters or search to find what you're looking for.</EmptyDescription>
+              <EmptyDescription>
+                {search ? "No loans match your search criteria." : "Adjust your filters or record a new loan."}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         </Card>
