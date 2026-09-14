@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
 import { format, parseISO } from "date-fns"
 import {
   Item,
@@ -93,27 +93,34 @@ export function CalendarDaySheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md flex flex-col gap-0 p-0 overflow-hidden">
         {/* Header */}
-        <SheetHeader className="p-5 border-b border-border/40 bg-muted/20">
-          <div className="flex items-center justify-between gap-2">
-            <SheetTitle className="text-base font-semibold">{formattedDate}</SheetTitle>
+        <SheetHeader className="p-4 sm:p-5 border-b border-border/40 bg-muted/20 text-left">
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <SheetTitle className="text-sm sm:text-base font-semibold truncate">{formattedDate}</SheetTitle>
             {day.isToday && (
-              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-medium">
+              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-medium shrink-0">
                 Today
               </Badge>
             )}
           </div>
-          <SheetDescription className="text-xs mt-1">
-            Projected End-of-Day Balance:{" "}
+          <SheetDescription className="sr-only">
+            Projected End-of-Day Balance details for {formattedDate}
+          </SheetDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mt-2 pt-2 border-t border-border/20 min-w-0">
+            <span className="text-[11px] sm:text-xs text-muted-foreground font-normal">
+              Projected End-of-Day Balance
+            </span>
             <span
-              className={
+              className={cn(
+                "text-xs sm:text-sm font-semibold tabular-nums px-2 py-0.5 rounded-lg w-fit inline-flex items-center gap-1 shrink-0",
                 day.isDeficit
-                  ? "font-semibold text-rose-500 tabular-nums"
-                  : "font-semibold text-foreground tabular-nums"
-              }
+                  ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                  : "bg-background/80 text-foreground border border-border/50"
+              )}
             >
+              {day.isDeficit && <AlertCircle className="size-3 text-rose-500 shrink-0" />}
               {formatCurrency(day.closingBalance, currency)}
             </span>
-          </SheetDescription>
+          </div>
         </SheetHeader>
 
         {/* Day Flow Banner */}

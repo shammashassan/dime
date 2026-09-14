@@ -99,8 +99,8 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
             className="flex flex-col p-4 py-4 rounded-2xl border border-border/50 bg-card hover:bg-muted/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-all cursor-pointer gap-3 shadow-xs"
           >
             {/* ── Day Header ── */}
-            <div className="flex items-center justify-between gap-3 border-b border-border/30 pb-3">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-border/30 pb-3 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <div
                   className={
                     day.isToday
@@ -111,11 +111,11 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                   <span>{day.dayOfMonth}</span>
                 </div>
 
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5 flex-wrap">
-                    {dateHeader}
+                    <span className="truncate">{dateHeader}</span>
                     {day.isToday && (
-                      <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
+                      <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium shrink-0">
                         Today
                       </span>
                     )}
@@ -126,18 +126,18 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="text-right">
-                  <div className="text-[10px] uppercase font-medium tracking-wider text-muted-foreground">
+              <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-1.5 sm:pt-0 border-t sm:border-t-0 border-border/20">
+                <div className="text-left sm:text-right">
+                  <div className="text-[9px] sm:text-[10px] uppercase font-medium tracking-wider text-muted-foreground">
                     Projected Balance
                   </div>
                   <div
                     className={cn(
-                      "text-xs sm:text-sm font-semibold tabular-nums flex items-center gap-1 justify-end",
+                      "text-xs sm:text-sm font-semibold tabular-nums flex items-center gap-1 sm:justify-end",
                       day.isDeficit ? "text-rose-500" : "text-foreground"
                     )}
                   >
-                    {day.isDeficit && <AlertCircle className="size-3 text-rose-500" />}
+                    {day.isDeficit && <AlertCircle className="size-3 text-rose-500 shrink-0" />}
                     {formatCurrency(day.closingBalance, currency)}
                   </div>
                 </div>

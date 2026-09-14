@@ -13,6 +13,34 @@ interface CalendarMonthGridProps {
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
+function formatGridBalance(amountInCents: number, currency: string = "USD") {
+  const abs = Math.abs(amountInCents) / 100
+  const isNegative = amountInCents < 0
+  const prefix = isNegative ? "-" : ""
+
+  if (abs >= 1_000_000) {
+    return `${prefix}${new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency.toUpperCase(),
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(abs)}`
+  }
+  if (abs >= 10_000) {
+    return `${prefix}${new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency.toUpperCase(),
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(abs)}`
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+    maximumFractionDigits: 0,
+  }).format(amountInCents / 100)
+}
+
 export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonthGridProps) {
   return (
     <div className="flex flex-col w-full rounded-2xl border border-border/50 bg-card shadow-xs overflow-hidden">
@@ -44,7 +72,7 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                 }
               }}
               className={cn(
-                "min-h-[68px] sm:min-h-[92px] md:min-h-[114px] p-1.5 sm:p-2.5 flex flex-col justify-between transition-all duration-150 cursor-pointer group relative text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring select-none",
+                "min-h-[68px] sm:min-h-[92px] md:min-h-[114px] p-1.5 sm:p-2.5 flex flex-col justify-between transition-all duration-150 cursor-pointer group relative text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring select-none overflow-hidden",
                 !day.isCurrentMonth
                   ? "bg-muted/15 dark:bg-muted/5 opacity-40 hover:opacity-75"
                   : "bg-card hover:bg-muted/30 dark:hover:bg-muted/20",
@@ -52,11 +80,11 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                 day.isDeficit && "bg-rose-500/[0.03]"
               )}
             >
-              {/* ── Day Header: Day Number & Balance Pill ── */}
-              <div className="flex items-center justify-between gap-1 w-full">
+              {/* ── Day Header: Day Number & Responsive Balance Pill ── */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 w-full min-w-0">
                 <span
                   className={cn(
-                    "text-xs size-6 flex items-center justify-center rounded-full transition-colors shrink-0",
+                    "text-xs size-5 sm:size-6 flex items-center justify-center rounded-full transition-colors shrink-0",
                     day.isToday
                       ? "bg-primary text-primary-foreground font-semibold shadow-xs"
                       : "text-foreground/80 font-medium group-hover:text-foreground group-hover:bg-muted/60"
@@ -65,27 +93,22 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                   {day.dayOfMonth}
                 </span>
 
-                {/* Desktop: Balance Display */}
+                {/* Responsive Balance Display: Stacks on mobile, side-by-side on sm+ */}
                 {day.isDeficit ? (
                   <span
-                    className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold tabular-nums text-rose-600 dark:text-rose-400 bg-rose-500/10 dark:bg-rose-500/20 px-1.5 py-0.5 rounded-md border border-rose-500/20 leading-none"
-                    title="Projected Deficit"
+                    className="inline-flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] font-semibold tabular-nums text-rose-600 dark:text-rose-400 bg-rose-500/10 dark:bg-rose-500/20 px-1 sm:px-1.5 py-0.5 rounded-md border border-rose-500/20 leading-none min-w-0 max-w-full truncate"
+                    title={`Projected Deficit: ${formatCurrency(day.closingBalance, currency)}`}
                   >
-                    <AlertCircle className="size-2.5 shrink-0 text-rose-500" />
-                    {formatCurrency(day.closingBalance, currency)}
+                    <AlertCircle className="size-2 sm:size-2.5 shrink-0 text-rose-500" />
+                    <span className="truncate">{formatGridBalance(day.closingBalance, currency)}</span>
                   </span>
                 ) : (
-                  <span className="hidden sm:inline-flex text-[10px] font-mono tabular-nums text-muted-foreground/70 group-hover:text-foreground transition-colors leading-none">
-                    {formatCurrency(day.closingBalance, currency)}
-                  </span>
-                )}
-
-                {/* Mobile: Micro Deficit Dot Indicator */}
-                {day.isDeficit && (
                   <span
-                    className="sm:hidden size-2 rounded-full bg-rose-500 ring-2 ring-rose-500/30 shrink-0"
-                    title="Projected deficit"
-                  />
+                    className="inline-flex text-[9px] sm:text-[10px] font-mono tabular-nums text-muted-foreground/70 group-hover:text-foreground transition-colors leading-none min-w-0 max-w-full truncate"
+                    title={`Projected Balance: ${formatCurrency(day.closingBalance, currency)}`}
+                  >
+                    <span className="truncate">{formatGridBalance(day.closingBalance, currency)}</span>
+                  </span>
                 )}
               </div>
 
