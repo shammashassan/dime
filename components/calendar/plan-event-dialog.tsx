@@ -21,6 +21,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Calendar as CalendarIcon } from "lucide-react"
+import { format, parseISO } from "date-fns"
 import { toast } from "sonner"
 import { createCalendarPlanAction } from "@/lib/actions/calendar"
 
@@ -39,17 +47,20 @@ export function PlanEventDialog({
 }: PlanEventDialogProps) {
   const [title, setTitle] = useState("")
   const [amount, setAmount] = useState("")
-  const [date, setDate] = useState(defaultDate || new Date().toISOString().split("T")[0])
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    defaultDate ? parseISO(defaultDate) : new Date()
+  )
   const [flow, setFlow] = useState<"inflow" | "outflow">("outflow")
   const [notes, setNotes] = useState("")
   const [loading, setLoading] = useState(false)
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false)
 
   useEffect(() => {
     if (open) {
       if (defaultDate) {
-        setDate(defaultDate)
+        setSelectedDate(parseISO(defaultDate))
       } else {
-        setDate(new Date().toISOString().split("T")[0])
+        setSelectedDate(new Date())
       }
     }
   }, [open, defaultDate])
@@ -67,13 +78,15 @@ export function PlanEventDialog({
       return
     }
 
+    const dateStr = selectedDate ? format(selectedDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")
+
     try {
       setLoading(true)
       await createCalendarPlanAction({
         title: title.trim(),
         amount: parsedAmount,
         currency,
-        date,
+        date: dateStr,
         flow,
         notes: notes.trim() || undefined,
       })
@@ -147,15 +160,34 @@ export function PlanEventDialog({
             </div>
 
             <Field>
-              <FieldLabel htmlFor="plan-date">Date</FieldLabel>
-              <Input
-                id="plan-date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="rounded-xl"
-                required
-              />
+              <FieldLabel>Date</FieldLabel>
+              <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="truncate flex-1 text-left">
+                      {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(newDate) => {
+                      if (newDate) {
+                        setSelectedDate(newDate)
+                        setDatePopoverOpen(false)
+                      }
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </Field>
 
             <Field>
