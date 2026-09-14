@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Loan Details",
+  description: "Detailed view of loan terms, repayment history, and outstanding balance.",
+}
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getLoanById, getLoanRepayments, getContacts } from "@/lib/queries/loans"

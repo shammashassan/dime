@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Contacts",
+  description: "Manage people you lend to, borrow from, or split expenses with.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getContactsWithSummaries } from "@/lib/queries/loans"
 import { ContactsView } from "@/components/contacts/contacts-view"

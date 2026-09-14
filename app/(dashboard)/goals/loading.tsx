@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function GoalsSkeleton() {
   return (
-    <div className="flex flex-col gap-7 w-full animate-pulse">
+    <div className="flex flex-col gap-7 w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">

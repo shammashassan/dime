@@ -7,7 +7,7 @@ import { serializeData } from "@/lib/utils"
 import InsightsLoading from "./loading"
 
 export const metadata: Metadata = {
-  title: "AI Spending Insights | Dime",
+  title: "AI Spending Insights",
   description: "Automated anomaly detection, subscription tracking, and intelligent spending optimization.",
 }
 

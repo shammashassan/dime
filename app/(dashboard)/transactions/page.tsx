@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Transactions",
+  description: "View, filter, and manage your income, expenses, and transfer transactions.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getWallets } from "@/lib/queries/wallets"
 import { getCategories } from "@/lib/queries/categories"

@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Recurring Rule Details",
+  description: "View recurring transaction schedule, past occurrences, and billing status.",
+}
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getRecurringRuleById } from "@/lib/queries/recurring"

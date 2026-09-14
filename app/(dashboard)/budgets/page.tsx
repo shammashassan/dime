@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Budgets",
+  description: "Set and track category budgets, monitor spending thresholds, and prevent overspending.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getBudgetsWithSpending } from "@/lib/queries/budgets"
 import { getCategories } from "@/lib/queries/categories"

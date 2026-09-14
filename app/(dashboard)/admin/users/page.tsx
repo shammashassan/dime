@@ -1,5 +1,11 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
 import { Users, Shield } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "User Management",
+  description: "Manage system users, approve registrations, update roles, and review account permissions.",
+}
 import { requireAdmin } from "@/lib/auth-guard"
 import { getAdminUsers } from "@/lib/queries/admin"
 import { AdminStats } from "@/components/admin/admin-stats"

@@ -4,7 +4,11 @@ export function StatsSkeleton() {
   return (
     <div className="flex flex-wrap gap-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-[90px] flex-1 min-w-[200px] rounded-2xl" />
+        <Skeleton
+          key={i}
+          className="h-[90px] flex-1 min-w-[200px] rounded-2xl"
+          style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
+        />
       ))}
     </div>
   )
@@ -12,7 +16,7 @@ export function StatsSkeleton() {
 
 export function TableSkeleton() {
   return (
-    <div className="flex flex-col gap-4 mt-4">
+    <div className="flex flex-col gap-4">
       <Skeleton className="h-10 w-full max-w-sm rounded-lg" />
       <Skeleton className="h-64 w-full rounded-xl" />
     </div>
@@ -21,7 +25,7 @@ export function TableSkeleton() {
 
 export default function AdminUsersLoading() {
   return (
-    <div className="flex flex-col gap-6 w-full animate-pulse">
+    <div className="flex flex-col gap-6 w-full">
       {/* Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
@@ -44,3 +48,4 @@ export default function AdminUsersLoading() {
     </div>
   )
 }
+

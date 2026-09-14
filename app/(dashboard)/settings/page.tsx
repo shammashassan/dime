@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Settings",
+  description: "Manage your account, preferences, categories, budgets, and organization settings.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { unstable_rethrow } from "next/navigation"
 import { getPreferences } from "@/lib/queries/preferences"

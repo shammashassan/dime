@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Loans & Debts",
+  description: "Track money lent to others and borrowed funds, with repayment schedules and interest.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getWallets } from "@/lib/queries/wallets"
 import { getLoans, getContacts, getOwedSummaries } from "@/lib/queries/loans"

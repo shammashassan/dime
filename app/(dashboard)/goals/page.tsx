@@ -1,5 +1,11 @@
+import type { Metadata } from "next"
 import React, { Suspense } from "react"
 import { Target } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Savings Goals",
+  description: "Create financial targets, monitor savings milestones, and track progress.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getGoals } from "@/lib/queries/goals"
 import { getWallets } from "@/lib/queries/wallets"

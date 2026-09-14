@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Recurring & Subscriptions",
+  description: "Manage recurring bills, subscriptions, and scheduled income transactions.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getRecurringRules } from "@/lib/queries/recurring"
 import { getCategories } from "@/lib/queries/categories"

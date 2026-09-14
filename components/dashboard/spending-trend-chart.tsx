@@ -194,7 +194,7 @@ export function SpendingTrendChart({ initialData = [], currency = "USD" }: Spend
                 content={
                   <ChartTooltipContent
                     labelFormatter={(value) => {
-                      return formatMonthDay(value)
+                      return formatMonthDay(String(value))
                     }}
                     indicator="dot"
                     formatter={(value, name, item) => {

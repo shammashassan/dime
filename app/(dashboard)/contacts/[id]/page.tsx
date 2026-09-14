@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Contact Profile",
+  description: "View outstanding balances, loan history, and shared expenses with this contact.",
+}
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getFinancialScope, getScopeFilter, buildScopedQuery } from "@/lib/scope"

@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Net Worth",
+  description: "Track your total assets, liabilities, and net worth growth over time.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getAllWalletsIncludingArchived } from "@/lib/queries/wallets"
 import { getLoans, getActiveBaseCurrency } from "@/lib/queries/loans"

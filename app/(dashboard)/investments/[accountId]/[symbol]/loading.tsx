@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function HoldingDetailLoading() {
   return (
-    <div className="flex flex-col gap-6 w-full animate-pulse">
+    <div className="flex flex-col gap-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">

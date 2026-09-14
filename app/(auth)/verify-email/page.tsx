@@ -1,7 +1,7 @@
 import { VerifyEmailView } from "@/components/auth/verify-email-view"
 
 export const metadata = {
-  title: "Verify Email - Dime",
+  title: "Verify Email",
   description: "Verify your Dime account email address.",
 }
 

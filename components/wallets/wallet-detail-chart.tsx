@@ -173,7 +173,7 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
                 content={
                   <ChartTooltipContent
                     indicator="dot"
-                    labelFormatter={(value) => formatMonthDay(value)}
+                    labelFormatter={(value) => formatMonthDay(String(value))}
                     formatter={(value) => (
                       <>
                         <div

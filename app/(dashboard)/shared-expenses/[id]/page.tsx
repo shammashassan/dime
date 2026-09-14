@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+
+export const metadata: Metadata = {
+  title: "Shared Expense Details",
+  description: "Detailed breakdown of participant shares, payments, and settlements.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { sharedExpensesCollection, sharedSettlementsCollection, contactsCollection, walletsCollection } from "@/lib/db/collections"

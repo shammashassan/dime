@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { requireApprovedUser } from "@/lib/auth-guard"
+
+export const metadata: Metadata = {
+  title: "Transaction Details",
+  description: "Detailed view of transaction info, category, and receipts.",
+}
 import { getTransactionById } from "@/lib/queries/transactions"
 import { getCategoryById, getCategories } from "@/lib/queries/categories"
 import { getWalletById } from "@/lib/queries/wallets"

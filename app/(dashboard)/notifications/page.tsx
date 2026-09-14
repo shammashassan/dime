@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Notifications - Dime",
+  title: "Notifications",
   description: "View and manage your activities and alerts.",
 };
 

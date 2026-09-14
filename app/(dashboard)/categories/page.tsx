@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Categories",
+  description: "Customize income and expense categories, subcategories, and color codes.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCategories } from "@/lib/queries/categories"
 import { CategoriesView } from "@/components/categories/categories-view"

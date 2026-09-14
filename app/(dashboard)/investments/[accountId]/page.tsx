@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Brokerage Account",
+  description: "View holdings, portfolio distribution, and trading activity for this account.",
+}
 import { notFound } from "next/navigation"
 import { ObjectId } from "mongodb"
 import { getPortfolioHoldings } from "@/lib/queries/investments"

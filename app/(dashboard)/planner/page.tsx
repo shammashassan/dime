@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Financial Planner",
+  description: "Simulate future scenarios, stress-test your finances, and plan major life decisions.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getPlannerBaselineData, getPlannerScenarios } from "@/lib/queries/planner"
 import { PlannerClient } from "@/components/planner/planner-client"

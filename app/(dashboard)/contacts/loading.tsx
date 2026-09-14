@@ -2,29 +2,42 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function ContactsSkeleton() {
   return (
-    <div className="flex flex-col gap-7 w-full animate-pulse p-1">
+    <div className="flex flex-col gap-7 w-full">
       {/* Header Skeleton */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-12 rounded-2xl" />
-          <div className="space-y-2">
-            <Skeleton className="h-7 w-48 rounded-lg" />
-            <Skeleton className="h-4 w-64 rounded-md" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <Skeleton className="size-12 rounded-2xl shrink-0 mt-0.5" />
+          <div className="flex flex-col gap-1.5">
+            <Skeleton className="h-8 w-56 rounded-lg" />
+            <Skeleton className="h-4 w-96 max-w-full rounded-md" />
           </div>
         </div>
-        <Skeleton className="h-10 w-32 rounded-xl" />
+        <Skeleton className="h-10 w-36 rounded-xl w-full md:w-auto" />
       </div>
 
       {/* Stats Cards Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+      <div className="flex flex-wrap gap-4">
         {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-28 w-full rounded-2xl" />
+          <Skeleton
+            key={i}
+            className="h-[90px] flex-1 min-w-[200px] rounded-2xl"
+            style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
+          />
         ))}
       </div>
 
       {/* Controls Row */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-        <Skeleton className="h-9 w-full sm:max-w-md rounded-xl" />
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between w-full">
+        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start gap-1">
+          <Skeleton className="h-7 w-16 rounded-lg" />
+          <Skeleton className="h-7 w-24 rounded-lg" />
+          <Skeleton className="h-7 w-24 rounded-lg" />
+          <Skeleton className="h-7 w-20 rounded-lg" />
+        </div>
+        <div className="sm:hidden w-full">
+          <Skeleton className="h-10 w-full rounded-xl" />
+        </div>
+        <Skeleton className="h-9 w-full sm:w-60 rounded-xl" />
       </div>
 
       {/* Cards Grid */}

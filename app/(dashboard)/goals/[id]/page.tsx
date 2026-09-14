@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Goal Details",
+  description: "View savings goal progress, contribution history, and projected completion.",
+}
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getGoalById, getGoalContributions } from "@/lib/queries/goals"

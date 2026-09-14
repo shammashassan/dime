@@ -1,7 +1,7 @@
 import { SignUpForm } from "@/components/auth/sign-up-form"
 
 export const metadata = {
-  title: "Sign Up - Dime",
+  title: "Sign Up",
   description: "Create a Dime account to track your income and expenses.",
 }
 

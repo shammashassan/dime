@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function HealthLoading() {
   return (
-    <div className="flex flex-col gap-5 w-full pb-10">
+    <div className="flex flex-col gap-5 w-full">
       {/* Header Skeleton */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
@@ -18,12 +18,12 @@ export default function HealthLoading() {
         <Skeleton className="h-9 w-44 rounded-xl shrink-0" />
       </div>
 
-      {/* Summary Metric Cards Row (2/2 on medium screens) */}
-      <div className="flex flex-wrap gap-4">
+      {/* Summary Metric Cards Row */}
+      <div className="flex flex-wrap gap-4 w-full">
         {[...Array(4)].map((_, i) => (
           <Skeleton
             key={i}
-            className="h-20 rounded-2xl flex-1 min-w-50"
+            className="h-[90px] rounded-2xl flex-1 min-w-[200px]"
             style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
           />
         ))}
@@ -53,3 +53,4 @@ export default function HealthLoading() {
     </div>
   )
 }
+

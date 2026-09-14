@@ -1,5 +1,11 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
 import { LayoutDashboard } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Overview of your finances, spending trends, and budget progress.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { DashboardMetrics } from "@/components/dashboard/dashboard-metrics"
 import { SpendingTrendChart } from "@/components/dashboard/spending-trend-chart"

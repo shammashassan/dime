@@ -1,7 +1,7 @@
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form"
 
 export const metadata = {
-  title: "Forgot Password - Dime",
+  title: "Forgot Password",
   description: "Request a password reset link for your Dime account.",
 }
 

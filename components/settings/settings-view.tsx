@@ -425,9 +425,10 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
           })
           if (error) {
             reject(error)
-          } else if (data) {
-            setTotpUri(data.totpURI)
-            setBackupCodes(data.backupCodes)
+          } else if (data && "totpURI" in data) {
+            const totpData = data as { totpURI: string; backupCodes: string[] }
+            setTotpUri(totpData.totpURI)
+            setBackupCodes(totpData.backupCodes || [])
             setShowTotpEnrollment(true)
             setTwoFactorPassword("")
             resolve(true)
@@ -1187,15 +1188,15 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                         type="single"
                         value={prefDateFormat}
                         onValueChange={(val) => val && setPrefDateFormat(val)}
-                        className="justify-start gap-2"
+                        className="flex-wrap w-full justify-start gap-2"
                       >
-                        <ToggleGroupItem value="DD/MM/YYYY" className="rounded-xl border border-border/40">
+                        <ToggleGroupItem value="DD/MM/YYYY" className="flex-1 sm:flex-initial min-w-[110px] justify-center rounded-xl border border-border/40">
                           DD/MM/YYYY
                         </ToggleGroupItem>
-                        <ToggleGroupItem value="MM/DD/YYYY" className="rounded-xl border border-border/40">
+                        <ToggleGroupItem value="MM/DD/YYYY" className="flex-1 sm:flex-initial min-w-[110px] justify-center rounded-xl border border-border/40">
                           MM/DD/YYYY
                         </ToggleGroupItem>
-                        <ToggleGroupItem value="YYYY-MM-DD" className="rounded-xl border border-border/40">
+                        <ToggleGroupItem value="YYYY-MM-DD" className="flex-1 sm:flex-initial min-w-[110px] justify-center rounded-xl border border-border/40">
                           YYYY-MM-DD
                         </ToggleGroupItem>
                       </ToggleGroup>

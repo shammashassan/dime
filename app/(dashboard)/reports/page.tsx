@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Reports & Analytics",
+  description: "Analyze your income, expenses, cash flow trends, and category breakdowns.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import {
   getIncomeExpenseTrend,

@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { formatDate } from "@/lib/utils"
 import { Search, ShieldAlert, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { UserDetailsModal } from "./user-details-modal"
 
 interface BannedTableProps {
   users: AdminUser[]
@@ -20,6 +21,7 @@ export function BannedTable({ users }: BannedTableProps) {
   const [search, setSearch] = useState("")
   const [isPending, startTransition] = useTransition()
   const [unbanningUserId, setUnbanningUserId] = useState<string | null>(null)
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
 
   const bannedUsers = users.filter((u) => u.banned)
 
@@ -96,15 +98,21 @@ export function BannedTable({ users }: BannedTableProps) {
                   return (
                     <TableRow key={u.id || u._id} className="border-border/40 hover:bg-muted/40 transition-colors">
                       <TableCell className="font-medium">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive font-semibold text-xs border border-destructive/20 shadow-xs">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUser(u)}
+                          className="flex items-center gap-2.5 text-left group cursor-pointer w-full focus:outline-none"
+                        >
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive font-semibold text-xs border border-destructive/20 shadow-xs group-hover:ring-2 group-hover:ring-destructive/20 transition-all">
                             <ShieldAlert className="size-4" />
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold truncate text-foreground">{u.name}</span>
+                            <span className="text-xs font-bold truncate text-foreground group-hover:text-primary group-hover:underline transition-colors">
+                              {u.name}
+                            </span>
                             <span className="text-[10px] text-muted-foreground truncate">{u.email}</span>
                           </div>
-                        </div>
+                        </button>
                       </TableCell>
                       <TableCell className="text-xs font-medium text-muted-foreground">
                         {u.username ? `@${u.username}` : "—"}
@@ -135,6 +143,17 @@ export function BannedTable({ users }: BannedTableProps) {
           </Table>
         </div>
       </div>
+
+      {/* User Details Modal on row click */}
+      <UserDetailsModal
+        user={selectedUser ? users.find((u) => (u.id || u._id) === (selectedUser.id || selectedUser._id)) || selectedUser : null}
+        open={!!selectedUser}
+        onOpenChange={(open) => {
+          if (!open) setSelectedUser(null)
+        }}
+        onUnban={() => selectedUser && handleUnban(selectedUser.id)}
+        isPending={isPending}
+      />
     </div>
   )
 }

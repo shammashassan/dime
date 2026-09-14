@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function BudgetsSkeleton() {
   return (
-    <div className="flex flex-col gap-7 w-full animate-pulse">
+    <div className="flex flex-col gap-7 w-full">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
@@ -33,9 +33,9 @@ export function BudgetsSkeleton() {
       </div>
 
       {/* Grid of Budget Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-56 w-full rounded-2xl" />
+          <Skeleton key={i} className="h-60 w-full rounded-2xl" />
         ))}
       </div>
     </div>
@@ -45,3 +45,4 @@ export function BudgetsSkeleton() {
 export default function BudgetsLoading() {
   return <BudgetsSkeleton />
 }
+

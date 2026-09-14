@@ -24,13 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { UserDetailsModal } from "./user-details-modal"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { MoreHorizontal, Shield, User, Ban, ShieldAlert, Key, Trash2, Eye } from "lucide-react"
@@ -305,59 +299,20 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Profile Detail Sheet */}
-      <Sheet open={showProfile} onOpenChange={setShowProfile}>
-        <SheetContent className="bg-background/95 border-l border-border/40 backdrop-blur-xl">
-          <SheetHeader>
-            <SheetTitle className="text-lg font-bold">User Profile</SheetTitle>
-            <SheetDescription className="text-xs">Detailed registration and status details</SheetDescription>
-          </SheetHeader>
-          <div className="mt-6 flex flex-col gap-5 px-6 pb-6">
-            <div className="flex items-center gap-4">
-              <div className="flex size-14 items-center justify-center rounded-full bg-accent text-accent-foreground font-bold text-xl border border-border/40 shadow-sm">
-                {user.name ? user.name[0].toUpperCase() : "U"}
-              </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-md font-bold truncate text-foreground">{user.name}</span>
-                <span className="text-xs text-muted-foreground truncate">{user.email}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 border-t border-border/40 pt-4 text-xs">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground">Username</span>
-                <span className="font-medium text-foreground">{user.username || "—"}</span>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground">Role</span>
-                <span className="font-semibold text-primary capitalize">{user.role}</span>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground">Approval Status</span>
-                <span className={`font-semibold ${user.approved ? "text-emerald-500" : "text-amber-500"}`}>
-                  {user.approved ? "Approved" : "Pending Review"}
-                </span>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground">Ban Status</span>
-                <span className={`font-semibold ${user.banned ? "text-rose-500" : "text-muted-foreground"}`}>
-                  {user.banned ? "Banned" : "Clear"}
-                </span>
-              </div>
-              <div className="flex flex-col gap-0.5 col-span-2">
-                <span className="text-[10px] uppercase font-semibold text-muted-foreground">Joined At</span>
-                <span className="font-medium text-foreground">{new Date(user.createdAt).toLocaleString()}</span>
-              </div>
-              {user.banned && (
-                <div className="flex flex-col gap-0.5 col-span-2 bg-destructive/10 border border-destructive/20 p-2.5 rounded-lg text-rose-600 dark:text-rose-400">
-                  <span className="text-[10px] uppercase font-bold">Ban Reason</span>
-                  <span className="font-medium">{user.banReason || "No reason provided"}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* Profile Detail Modal */}
+      <UserDetailsModal
+        user={user}
+        open={showProfile}
+        onOpenChange={setShowProfile}
+        currentUserId={currentUserId}
+        currentUserRole={currentUserRole}
+        onSetRole={handleSetRole}
+        onBanClick={() => setShowBanDialog(true)}
+        onUnban={handleUnban}
+        onRevokeSessions={handleRevokeSessions}
+        onDeleteClick={() => setShowDeleteDialog(true)}
+        isPending={isPending}
+      />
 
       {/* Ban User AlertDialog */}
       <AlertDialog open={showBanDialog} onOpenChange={setShowBanDialog}>

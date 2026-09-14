@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { getSharedExpensesOverviewAction } from "@/lib/actions/shared-expenses"
+
+export const metadata: Metadata = {
+  title: "Shared Expenses",
+  description: "Split bills and group expenses fairly, track who paid what, and settle balances easily.",
+}
 import { SharedExpensesClient } from "@/components/shared-expenses/shared-expenses-client"
 import { getCollection, walletsCollection } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"

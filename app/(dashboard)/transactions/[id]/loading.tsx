@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function TransactionDetailLoading() {
   return (
-    <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full animate-pulse">
+    <div className="flex flex-col gap-6 max-w-2xl mx-auto w-full">
       <div>
         <Skeleton className="h-4 w-36 mb-3 rounded-md" />
         <Skeleton className="h-9 w-64 rounded-lg" />

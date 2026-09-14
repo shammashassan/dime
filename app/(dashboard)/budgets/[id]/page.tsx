@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Budget Details",
+  description: "Track detailed budget performance, historical spending, and related transactions.",
+}
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getBudgetWithSpendingById, getBudgetTransactions } from "@/lib/queries/budgets"

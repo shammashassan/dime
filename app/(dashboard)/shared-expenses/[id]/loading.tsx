@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function SharedExpenseDetailLoading() {
   return (
-    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto pb-10 animate-pulse">
+    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto pb-10">
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5">
@@ -34,16 +34,34 @@ export default function SharedExpenseDetailLoading() {
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-6">
-          <Skeleton className="h-64 w-full rounded-2xl" />
-          <Skeleton className="h-48 w-full rounded-2xl" />
+      {/* Settlement Progress Card */}
+      <div className="rounded-2xl border border-border/40 p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-5 w-36 rounded-md" />
+          <Skeleton className="h-4 w-20 rounded-md" />
         </div>
-        <div className="lg:col-span-2 space-y-6">
-          <Skeleton className="h-96 w-full rounded-2xl" />
+        <Skeleton className="h-2.5 w-full rounded-full" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-14 rounded-xl" />
+          ))}
         </div>
+      </div>
+
+      {/* Row 1: Info · Allocation · Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Skeleton className="h-72 w-full rounded-2xl" />
+        <Skeleton className="h-72 w-full rounded-2xl" />
+        <Skeleton className="h-72 w-full rounded-2xl" />
+      </div>
+
+      {/* Row 2: Wallet · Paid vs Owed · Timeline */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Skeleton className="h-72 w-full rounded-2xl" />
+        <Skeleton className="h-72 w-full rounded-2xl" />
+        <Skeleton className="h-72 w-full rounded-2xl" />
       </div>
     </div>
   )
 }
+

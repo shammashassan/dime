@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { AdminUser } from "@/lib/queries/admin"
 import { UserActionsMenu } from "./user-actions-menu"
+import { UserDetailsModal } from "./user-details-modal"
 import { formatDate } from "@/lib/utils"
 import { Search } from "lucide-react"
 
@@ -17,6 +18,7 @@ interface UsersTableProps {
 
 export function UsersTable({ users, currentUserRole, currentUserId }: UsersTableProps) {
   const [search, setSearch] = useState("")
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
 
   const filteredUsers = users.filter((u) => {
     const s = search.toLowerCase()
@@ -65,15 +67,32 @@ export function UsersTable({ users, currentUserRole, currentUserId }: UsersTable
                   return (
                     <TableRow key={u.id || u._id} className="border-border/40 hover:bg-muted/40 transition-colors">
                       <TableCell className="font-medium">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground font-semibold text-xs border border-border/40 shadow-xs">
-                            {u.name ? u.name[0].toUpperCase() : "U"}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUser(u)}
+                          className="flex items-center gap-2.5 text-left group cursor-pointer w-full focus:outline-none"
+                        >
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground font-semibold text-xs border border-border/40 shadow-xs group-hover:ring-2 group-hover:ring-primary/20 transition-all">
+                            {u.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={u.image}
+                                alt={u.name}
+                                className="size-full rounded-full object-cover"
+                              />
+                            ) : u.name ? (
+                              u.name[0].toUpperCase()
+                            ) : (
+                              "U"
+                            )}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-bold truncate text-foreground">{u.name}</span>
+                            <span className="text-xs font-bold truncate text-foreground group-hover:text-primary group-hover:underline transition-colors">
+                              {u.name}
+                            </span>
                             <span className="text-[10px] text-muted-foreground truncate">{u.email}</span>
                           </div>
-                        </div>
+                        </button>
                       </TableCell>
                       <TableCell className="text-xs font-medium text-muted-foreground">
                         {u.username ? `@${u.username}` : "—"}
@@ -121,6 +140,17 @@ export function UsersTable({ users, currentUserRole, currentUserId }: UsersTable
           </Table>
         </div>
       </div>
+
+      {/* User Details Modal on row click */}
+      <UserDetailsModal
+        user={selectedUser ? users.find((u) => (u.id || u._id) === (selectedUser.id || selectedUser._id)) || selectedUser : null}
+        open={!!selectedUser}
+        onOpenChange={(open) => {
+          if (!open) setSelectedUser(null)
+        }}
+        currentUserId={currentUserId}
+        currentUserRole={currentUserRole}
+      />
     </div>
   )
 }

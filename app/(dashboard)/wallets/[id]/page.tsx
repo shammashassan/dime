@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Wallet Details",
+  description: "View account balance history, analytics, and associated transactions.",
+}
 import { notFound } from "next/navigation"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getWalletById, getSingleWalletBalanceDailyHistory } from "@/lib/queries/wallets"

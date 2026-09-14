@@ -1,4 +1,10 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
+
+export const metadata: Metadata = {
+  title: "Investments",
+  description: "Monitor investment portfolios, asset allocations, capital gains, and performance.",
+}
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getPortfolioHoldings, getRecentInvestmentTransactions } from "@/lib/queries/investments"
 import { getCollection } from "@/lib/db/collections"
