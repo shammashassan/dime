@@ -17,9 +17,9 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
   return (
     <div className="flex flex-col w-full rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
       {/* Weekday Headers */}
-      <div className="grid grid-cols-7 border-b border-border/40 bg-muted/40 text-center py-2.5">
+      <div className="grid grid-cols-7 border-b border-border/40 bg-muted/40 text-center py-2 sm:py-2.5">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+          <div key={w} className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
             {w}
           </div>
         ))}
@@ -30,6 +30,10 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
         {days.map((day) => {
           const visibleEvents: CalendarEventItem[] = day.events.slice(0, 3)
           const overflowCount = Math.max(0, day.events.length - 3)
+
+          const hasInflow = day.events.some((e) => e.flow === "inflow")
+          const hasOutflow = day.events.some((e) => e.flow === "outflow")
+          const hasOverdue = day.events.some((e) => e.status === "overdue")
 
           return (
             <div
@@ -44,17 +48,17 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                 }
               }}
               className={cn(
-                "min-h-[100px] p-2 flex flex-col justify-between transition-colors cursor-pointer group hover:bg-muted/30 relative text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
+                "min-h-[62px] sm:min-h-[85px] md:min-h-[105px] p-1 sm:p-2 flex flex-col justify-between transition-colors cursor-pointer group hover:bg-muted/30 relative text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                 !day.isCurrentMonth && "bg-muted/10 opacity-40",
                 day.isToday && "ring-2 ring-primary/40 bg-primary/[0.02]",
-                day.isDeficit && "bg-rose-500/[0.03]"
+                day.isDeficit && "bg-rose-500/[0.04]"
               )}
             >
-              {/* Day Header: Day Number & Projected Balance */}
-              <div className="flex items-center justify-between gap-1">
+              {/* Day Header: Day Number & Balance */}
+              <div className="flex items-center justify-between gap-1 w-full">
                 <span
                   className={cn(
-                    "text-xs font-bold size-6 flex items-center justify-center rounded-full transition-colors",
+                    "text-[11px] sm:text-xs font-bold size-5 sm:size-6 flex items-center justify-center rounded-full transition-colors",
                     day.isToday
                       ? "bg-primary text-primary-foreground font-black"
                       : "text-foreground group-hover:text-primary"
@@ -63,9 +67,10 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                   {day.dayOfMonth}
                 </span>
 
+                {/* Desktop: Full Currency String */}
                 <span
                   className={cn(
-                    "text-[10px] font-black tabular-nums truncate inline-flex items-center gap-0.5",
+                    "hidden sm:inline-flex text-[10px] font-black tabular-nums truncate items-center gap-0.5",
                     day.isDeficit
                       ? "text-rose-500"
                       : "text-muted-foreground group-hover:text-foreground"
@@ -74,10 +79,17 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                   {day.isDeficit && <AlertCircle className="size-2.5 shrink-0" />}
                   {formatCurrency(day.closingBalance, currency)}
                 </span>
+
+                {/* Mobile: Micro Deficit Indicator only */}
+                {day.isDeficit && (
+                  <span className="sm:hidden text-rose-500 inline-flex items-center" title="Projected deficit">
+                    <AlertCircle className="size-3 shrink-0" />
+                  </span>
+                )}
               </div>
 
-              {/* Event Badges Feed */}
-              <div className="flex flex-col gap-1 my-1.5 flex-1 justify-start">
+              {/* ── Desktop View: Full-Text Event Chips (>= md) ── */}
+              <div className="hidden md:flex flex-col gap-1 my-1 flex-1 justify-start">
                 {visibleEvents.map((evt) => {
                   const isInflow = evt.flow === "inflow"
 
@@ -102,6 +114,33 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                 {overflowCount > 0 && (
                   <span className="text-[9px] font-bold text-muted-foreground px-1">
                     +{overflowCount} more
+                  </span>
+                )}
+              </div>
+
+              {/* ── Mobile View: Compact Event Dots (< md) ── */}
+              <div className="flex md:hidden items-center justify-center gap-1 my-1 flex-wrap min-h-[12px]">
+                {day.events.slice(0, 4).map((evt, idx) => {
+                  const isInflow = evt.flow === "inflow"
+                  const isOverdue = evt.status === "overdue"
+
+                  return (
+                    <span
+                      key={evt.id || idx}
+                      className={cn(
+                        "size-1.5 rounded-full shrink-0",
+                        isOverdue
+                          ? "bg-amber-500 ring-1 ring-amber-500/50 animate-pulse"
+                          : isInflow
+                          ? "bg-emerald-500"
+                          : "bg-rose-500"
+                      )}
+                    />
+                  )
+                })}
+                {day.events.length > 4 && (
+                  <span className="text-[8px] font-black text-muted-foreground leading-none">
+                    +{day.events.length - 4}
                   </span>
                 )}
               </div>

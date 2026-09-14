@@ -31,6 +31,13 @@ export function CalendarClient({ data, initialMode = "liquid" }: CalendarClientP
     }
   }, [initialMode])
 
+  useEffect(() => {
+    // Auto-default to agenda feed on mobile (< 768px) for maximum readability
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setViewMode("agenda")
+    }
+  }, [])
+
   const handleMonthChange = (newMonth: string) => {
     router.push(`/calendar?month=${newMonth}&mode=${walletMode}`)
   }
