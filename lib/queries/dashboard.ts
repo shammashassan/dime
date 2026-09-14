@@ -1,6 +1,6 @@
 import { cache } from "react"
 import type { BillInstance, RecurringRule, Loan, DashboardFocusCounts } from "@/types"
-import { addDays, isBefore, endOfDay } from "date-fns"
+import { addDays, isBefore, endOfDay, startOfDay } from "date-fns"
 
 export function calculateFocusCounts({
   now,
@@ -17,6 +17,7 @@ export function calculateFocusCounts({
   unreadNotifications: number
   baseCurrency: string
 }): DashboardFocusCounts {
+  const startOfToday = startOfDay(now)
   const sevenDaysFromNow = endOfDay(addDays(now, 7))
 
   let overdueBillsCount = 0
@@ -27,7 +28,7 @@ export function calculateFocusCounts({
     if (b.status === "paid" || b.status === "cancelled" || b.status === "skipped") continue
     const due = new Date(b.dueDate)
     const amount = b.amount ?? b.expectedAmount ?? b.actualAmount ?? 0
-    if (isBefore(due, now)) {
+    if (isBefore(due, startOfToday)) {
       overdueBillsCount++
       overdueBillsAmount += amount
     } else if (due <= sevenDaysFromNow) {
@@ -48,8 +49,9 @@ export function calculateFocusCounts({
   let pendingLoansCount = 0
   for (const l of loans) {
     if (l.status === "fully_repaid" || l.status === "cancelled" || !l.dueDate) continue
+    if (l.remainingAmount !== undefined && l.remainingAmount <= 0) continue
     const due = new Date(l.dueDate)
-    if (isBefore(due, now) || due <= sevenDaysFromNow) {
+    if (isBefore(due, startOfToday) || due <= sevenDaysFromNow) {
       pendingLoansCount++
     }
   }
@@ -89,8 +91,9 @@ export const getDashboardFocusCounts = cache(async (userId: string): Promise<Das
     loansColl.find(filter).toArray(),
     notificationsCollection.countDocuments({
       userId,
-      read: false,
-    } as any),
+      readAt: { $exists: false },
+      deletedAt: { $exists: false },
+    }),
   ])
 
   return calculateFocusCounts({

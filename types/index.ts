@@ -212,6 +212,7 @@ export interface Notification {
   readAt?: Date;
   dismissedAt?: Date;
   archivedAt?: Date;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -227,6 +228,7 @@ export interface SerializedNotification {
   readAt?: string | null;
   dismissedAt?: string | null;
   archivedAt?: string | null;
+  deletedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }

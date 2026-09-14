@@ -43,3 +43,43 @@ test("calculateFocusCounts aggregates overdue bills, 7-day renewals, loan dues, 
   assert.equal(result.unreadNotificationsCount, 4)
   assert.equal(result.baseCurrency, "USD")
 })
+
+test("calculateFocusCounts treats bills due today as upcoming renewals and skips zero-balance loans", () => {
+  const now = new Date("2026-09-14T12:00:00Z")
+
+  const bills = [
+    // Due earlier today (e.g. 2 hours before `now`) - should NOT be overdue, should be upcoming renewal
+    { dueDate: new Date("2026-09-14T10:00:00Z"), status: "unpaid", amount: 1500 },
+    // Due 2 days ago - should be overdue
+    { dueDate: new Date("2026-09-12T12:00:00Z"), status: "unpaid", amount: 2500 },
+  ]
+
+  const recurring = [
+    { nextRun: new Date("2026-09-14T14:00:00Z"), status: "active" }, // today -> upcoming
+  ]
+
+  const loans = [
+    // Active loan with zero remaining amount should be skipped
+    { dueDate: new Date("2026-09-14T10:00:00Z"), status: "active", remainingAmount: 0 },
+    // Active loan with negative remaining amount should be skipped
+    { dueDate: new Date("2026-09-12T10:00:00Z"), status: "active", remainingAmount: -50 },
+    // Active loan with positive remaining amount due today should be pending
+    { dueDate: new Date("2026-09-14T15:00:00Z"), status: "active", remainingAmount: 4000 },
+  ]
+
+  const result = calculateFocusCounts({
+    now,
+    bills,
+    recurring,
+    loans,
+    unreadNotifications: 1,
+    baseCurrency: "EUR",
+  })
+
+  assert.equal(result.overdueBillsCount, 1) // Only past bill from Sep 12
+  assert.equal(result.overdueBillsAmount, 2500)
+  assert.equal(result.upcomingRenewalsCount, 2) // Today's bill + today's recurring
+  assert.equal(result.pendingLoansCount, 1) // Only active loan with positive remainingAmount
+  assert.equal(result.unreadNotificationsCount, 1)
+  assert.equal(result.baseCurrency, "EUR")
+})
