@@ -384,6 +384,16 @@ export interface LoanRepayment {
   createdAt: Date
 }
 
+export interface OwedSummaries {
+  totalLent: number
+  totalBorrowed: number
+  dueThisMonth: number
+  overdue: number
+  repaidThisMonth: number
+  baseCurrency: string
+}
+
+
 export interface BillInstance {
   _id: ObjectId
   userId: string

@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { ObjectId } from "mongodb"
 import { getCollection } from "@/lib/db/collections"
-import { Loan, LoanRepayment, Contact, SharedExpense, SharedSettlement } from "@/types"
+import { Loan, LoanRepayment, Contact, SharedExpense, SharedSettlement, OwedSummaries } from "@/types"
 import { getFinancialScope, getScopeFilter, buildScopedQuery } from "@/lib/scope"
 import { getOrganizationSettings } from "@/lib/queries/organization"
 import { getPreferences } from "@/lib/queries/preferences"
@@ -60,14 +60,7 @@ export const getContacts = cache(async (): Promise<Contact[]> => {
   return contactsColl.find(filter).sort({ name: 1 }).toArray()
 })
 
-export interface OwedSummaries {
-  totalLent: number
-  totalBorrowed: number
-  dueThisMonth: number
-  overdue: number
-  repaidThisMonth: number
-  baseCurrency: string
-}
+export type { OwedSummaries }
 
 export const getOwedSummaries = cache(async (): Promise<OwedSummaries> => {
   const scope = await getFinancialScope()

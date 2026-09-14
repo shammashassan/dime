@@ -235,6 +235,63 @@ export async function createLoan(input: LoanInput) {
   return { success: true, id: loanOid.toString() }
 }
 
+export interface CreateLoanActionInput {
+  type: "lent" | "borrowed"
+  contactId?: string
+  contactName: string
+  amount: number
+  currency: string
+  date?: string | Date
+}
+
+export async function createLoanAction(input: CreateLoanActionInput) {
+  try {
+    await requireApprovedUser()
+    const scope = await getFinancialScope()
+
+    const walletsColl = await getCollection<Wallet>("wallets")
+    let wallet = await walletsColl.findOne({
+      ...getScopeFilter(scope),
+      currency: input.currency,
+      isArchived: false,
+    })
+
+    if (!wallet) {
+      wallet = await walletsColl.findOne({
+        ...getScopeFilter(scope),
+        isArchived: false,
+      })
+    }
+
+    if (!wallet) {
+      return { success: false, error: "No active wallet found. Please create a wallet first." }
+    }
+
+    const loanDate = input.date ? new Date(input.date) : new Date()
+
+    const result = await createLoan({
+      type: input.type,
+      contactId: input.contactId || undefined,
+      personName: input.contactName,
+      amount: input.amount,
+      currency: input.currency,
+      walletId: wallet._id.toString(),
+      date: loanDate,
+      status: "active",
+      reminderSchedule: [7, 3, 1, 0],
+    })
+
+    revalidatePath("/dashboard")
+    return result
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to record loan",
+    }
+  }
+}
+
+
 export async function updateLoan(id: string, input: LoanInput) {
   await requireApprovedUser()
   const validated = loanSchema.parse(input)
