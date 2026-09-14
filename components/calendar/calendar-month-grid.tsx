@@ -109,7 +109,7 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                       key={evt.id}
                       title={`${evt.title}: ${isInflow ? "+" : "-"}${formatCurrency(evt.convertedAmount, currency)}`}
                       className={cn(
-                        "group/chip text-[10px] px-1.5 py-0.5 rounded-md truncate flex items-center justify-between gap-1.5 transition-all duration-100 shadow-2xs min-w-0",
+                        "group/chip text-[10px] pl-2 pr-1.5 py-0.5 rounded-md flex items-center justify-between gap-1.5 transition-all duration-100 shadow-2xs min-w-0 max-w-full overflow-hidden",
                         isPlan
                           ? "bg-violet-500/5 hover:bg-violet-500/10 border border-dashed border-violet-500/30 text-foreground"
                           : isInflow
@@ -117,27 +117,32 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                           : "bg-muted/40 hover:bg-muted/70 border border-border/60 text-foreground"
                       )}
                     >
-                      <div className="flex items-center gap-1.5 min-w-0 truncate">
-                        <span
-                          className={cn(
-                            "size-1.5 rounded-full shrink-0",
-                            isOverdue
-                              ? "bg-amber-500 ring-2 ring-amber-500/40 animate-pulse"
-                              : isPlan
-                              ? "bg-violet-500 ring-1 ring-violet-500/40"
-                              : isInflow
-                              ? "bg-emerald-500"
-                              : "bg-rose-500"
+                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                        <span className="relative flex size-2 items-center justify-center shrink-0">
+                          {isOverdue && (
+                            <span className="absolute size-2 rounded-full bg-amber-400/80 animate-ping" />
                           )}
-                        />
-                        <span className="truncate font-normal text-foreground/90">
+                          <span
+                            className={cn(
+                              "size-1.5 rounded-full shrink-0 relative",
+                              isOverdue
+                                ? "bg-amber-500"
+                                : isPlan
+                                ? "bg-violet-500 ring-1 ring-violet-500/40"
+                                : isInflow
+                                ? "bg-emerald-500"
+                                : "bg-rose-500"
+                            )}
+                          />
+                        </span>
+                        <span className="truncate font-normal text-foreground/90 min-w-0 flex-1">
                           {evt.title}
                         </span>
                       </div>
 
                       <span
                         className={cn(
-                          "font-medium tabular-nums shrink-0 text-[9px]",
+                          "font-medium tabular-nums shrink-0 text-[9px] pl-1",
                           isPlan
                             ? "text-violet-600 dark:text-violet-400"
                             : isInflow
@@ -175,7 +180,7 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                       key={evt.id}
                       title={`${evt.title}: ${isInflow ? "+" : "-"}${formatCurrency(evt.convertedAmount, currency)}`}
                       className={cn(
-                        "text-[8px] sm:text-[9px] px-1 py-0.5 rounded-md font-medium tabular-nums inline-flex items-center gap-1 truncate max-w-full leading-none transition-colors",
+                        "text-[8px] sm:text-[9px] pl-1.5 pr-1 py-0.5 rounded-md font-medium tabular-nums inline-flex items-center gap-1.5 max-w-full min-w-0 overflow-hidden leading-none transition-colors",
                         isPlan
                           ? "bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-dashed border-violet-500/30"
                           : isOverdue
@@ -185,19 +190,24 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                           : "bg-muted/50 text-foreground/80 border border-border/60"
                       )}
                     >
-                      <span
-                        className={cn(
-                          "size-1.5 rounded-full shrink-0",
-                          isOverdue
-                            ? "bg-amber-500 ring-2 ring-amber-500/40 animate-pulse"
-                            : isPlan
-                            ? "bg-violet-500 ring-1 ring-violet-500/40"
-                            : isInflow
-                            ? "bg-emerald-500"
-                            : "bg-rose-500"
+                      <span className="relative flex size-2 items-center justify-center shrink-0">
+                        {isOverdue && (
+                          <span className="absolute size-2 rounded-full bg-amber-400/80 animate-ping" />
                         )}
-                      />
-                      <span className="truncate">{denominated}</span>
+                        <span
+                          className={cn(
+                            "size-1.5 rounded-full shrink-0 relative",
+                            isOverdue
+                              ? "bg-amber-500"
+                              : isPlan
+                              ? "bg-violet-500 ring-1 ring-violet-500/40"
+                              : isInflow
+                              ? "bg-emerald-500"
+                              : "bg-rose-500"
+                          )}
+                        />
+                      </span>
+                      <span className="truncate min-w-0 flex-1">{denominated}</span>
                     </div>
                   )
                 })}
