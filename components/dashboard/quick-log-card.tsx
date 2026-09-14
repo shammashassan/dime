@@ -19,7 +19,7 @@ import {
 import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group"
 import { Wallet, Category } from "@/types"
 import { createTransaction } from "@/lib/actions/transactions"
-import { getCurrencySymbol } from "@/lib/currency"
+import { getCurrencySymbol } from "@/lib/denomination"
 import { cn } from "@/lib/utils"
 
 export interface QuickLogCardProps {

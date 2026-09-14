@@ -1,8 +1,5 @@
-"use client"
-
-import React, { useRef } from "react"
-import { useGSAP } from "@gsap/react"
-import { gsap } from "gsap"
+import React from "react"
+import { BentoEntrance } from "./bento-entrance"
 import { DashboardHeader } from "./dashboard-header"
 import { FinancialFocusStrip } from "./financial-focus-strip"
 import { CommandCenterCard } from "./command-center-card"
@@ -68,37 +65,8 @@ export function DashboardBento({
   targetCurrency,
   defaultWalletId,
 }: DashboardBentoProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useGSAP(
-    () => {
-      const tiles = gsap.utils.toArray<HTMLElement>(".bento-tile")
-      const mm = gsap.matchMedia()
-
-      gsap.set(tiles, { opacity: 0, y: 16 })
-
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.set(tiles, { opacity: 1, y: 0 })
-      })
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.to(tiles, {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.04,
-          ease: "power2.out",
-          clearProps: "transform",
-        })
-      })
-
-      return () => mm.revert()
-    },
-    { scope: containerRef }
-  )
-
   return (
-    <div ref={containerRef} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-8">
+    <BentoEntrance className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-8">
       {/* Header */}
       <DashboardHeader userName={userName} scopeName={scopeName} isOrganization={isOrganization} />
 
@@ -154,7 +122,7 @@ export function DashboardBento({
 
       {/* Row 5: AI Spending Insights & Active Goals */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 bento-tile">
           <AIInsights userId={userId} />
         </div>
         <div className="lg:col-span-1">
@@ -164,12 +132,18 @@ export function DashboardBento({
 
       {/* Row 6: Live Operations & Upcoming */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <UpcomingRecurring userId={userId} />
-        <BudgetProgressList userId={userId} />
+        <div className="bento-tile">
+          <UpcomingRecurring userId={userId} />
+        </div>
+        <div className="bento-tile">
+          <BudgetProgressList userId={userId} />
+        </div>
       </div>
 
       {/* Row 7: Recent Transactions Stream */}
-      <RecentTransactions userId={userId} />
-    </div>
+      <div className="bento-tile">
+        <RecentTransactions userId={userId} />
+      </div>
+    </BentoEntrance>
   )
 }

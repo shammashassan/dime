@@ -21,7 +21,7 @@ import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/in
 import { Contact, OwedSummaries } from "@/types"
 import { createLoanAction } from "@/lib/actions/loans"
 import { formatCurrency, cn } from "@/lib/utils"
-import { getCurrencySymbol } from "@/lib/currency"
+import { getCurrencySymbol } from "@/lib/denomination"
 
 export interface LoanActionCardProps {
   contacts: Contact[]

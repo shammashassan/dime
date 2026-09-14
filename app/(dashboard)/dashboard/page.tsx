@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getFinancialScope } from "@/lib/scope"
 import { getPreferences } from "@/lib/queries/preferences"
@@ -12,7 +11,6 @@ import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/
 import { getFinancialHealthScore } from "@/lib/queries/financial-health"
 import { getNetWorthSummary } from "@/lib/queries/net-worth"
 import { DashboardBento } from "@/components/dashboard/dashboard-bento"
-import DashboardLoading from "./loading"
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -85,29 +83,27 @@ export default async function DashboardPage() {
     : undefined
 
   return (
-    <Suspense fallback={<DashboardLoading />}>
-      <DashboardBento
-        userName={session.user.name || "User"}
-        scopeName={scope.isOrganization ? "Team" : "Personal"}
-        isOrganization={scope.isOrganization}
-        wallets={wallets}
-        categories={categories}
-        contacts={contacts}
-        goals={goals}
-        focusCounts={focusCounts}
-        owedSummary={owedSummary}
-        healthScore={healthScoreData.overallScore}
-        healthTier={healthScoreData.tier}
-        topRecommendation={topRecommendation}
-        netWorth={netWorthData.currentNetWorth}
-        monthlyInflow={monthlyInflow}
-        monthlyOutflow={monthlyOutflow}
-        trendData={trendData}
-        categoryBreakdown={categoryBreakdown}
-        userId={userId}
-        targetCurrency={targetCurrency}
-        defaultWalletId={prefs?.defaultWalletId}
-      />
-    </Suspense>
+    <DashboardBento
+      userName={session.user.name || "User"}
+      scopeName={scope.isOrganization ? "Team" : "Personal"}
+      isOrganization={scope.isOrganization}
+      wallets={wallets}
+      categories={categories}
+      contacts={contacts}
+      goals={goals}
+      focusCounts={focusCounts}
+      owedSummary={owedSummary}
+      healthScore={healthScoreData.overallScore}
+      healthTier={healthScoreData.tier}
+      topRecommendation={topRecommendation}
+      netWorth={netWorthData.currentNetWorth}
+      monthlyInflow={monthlyInflow}
+      monthlyOutflow={monthlyOutflow}
+      trendData={trendData}
+      categoryBreakdown={categoryBreakdown}
+      userId={userId}
+      targetCurrency={targetCurrency}
+      defaultWalletId={prefs?.defaultWalletId}
+    />
   )
 }
