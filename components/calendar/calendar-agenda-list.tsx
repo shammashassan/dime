@@ -13,6 +13,23 @@ import {
   CreditCard,
   CheckCircle2,
 } from "lucide-react"
+import { Card } from "@/components/ui/card"
+import {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+  ItemGroup,
+} from "@/components/ui/item"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 
 interface CalendarAgendaListProps {
   days: CalendarDaySummary[]
@@ -42,11 +59,21 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
 
   if (activeDays.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-border/50 bg-card">
-        <CheckCircle2 className="size-8 text-emerald-500 mb-2 opacity-70" />
-        <p className="text-sm font-semibold text-foreground">No events scheduled this month</p>
-        <p className="text-xs text-muted-foreground mt-1">Use &quot;+ Add Planned&quot; to pencil in future expenses.</p>
-      </div>
+      <Card size="sm" className="rounded-2xl border border-border/50 bg-card p-10 flex flex-col items-center justify-center shadow-xs">
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon" className="bg-emerald-500/10 text-emerald-500">
+              <CheckCircle2 className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle className="text-sm font-semibold text-foreground">
+              No events scheduled this month
+            </EmptyTitle>
+            <EmptyDescription className="text-xs text-muted-foreground mt-1">
+              Use &quot;+ Add Planned&quot; to pencil in future expenses or income.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </Card>
     )
   }
 
@@ -57,8 +84,9 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
         const dateHeader = format(dateObj, "EEEE, MMMM d")
 
         return (
-          <div
+          <Card
             key={day.date}
+            size="sm"
             role="button"
             tabIndex={0}
             onClick={() => onSelectDay(day)}
@@ -68,7 +96,7 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                 onSelectDay(day)
               }
             }}
-            className="flex flex-col p-4 rounded-2xl border border-border/50 bg-card hover:bg-muted/20 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-all cursor-pointer gap-3 shadow-xs"
+            className="flex flex-col p-4 py-4 rounded-2xl border border-border/50 bg-card hover:bg-muted/15 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-all cursor-pointer gap-3 shadow-xs"
           >
             {/* ── Day Header ── */}
             <div className="flex items-center justify-between gap-3 border-b border-border/30 pb-3">
@@ -123,50 +151,49 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                 No scheduled commitments on this day.
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
+              <ItemGroup className="flex flex-col gap-2 w-full">
                 {day.events.map((evt) => {
                   const Icon = getEventIcon(evt.type)
                   const isInflow = evt.flow === "inflow"
 
                   return (
-                    <div
+                    <Item
                       key={evt.id}
-                      className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors"
+                      variant="outline"
+                      className="rounded-xl border border-border/70 bg-muted/50 dark:bg-muted/20 hover:bg-muted/80 dark:hover:bg-muted/40 transition-colors p-2.5 sm:px-3 sm:py-2.5 flex-nowrap justify-between gap-3"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div
-                          className={cn(
-                            "size-8 rounded-lg flex items-center justify-center shrink-0",
-                            isInflow
-                              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                              : "bg-rose-500/15 text-rose-600 dark:text-rose-400"
+                      <ItemMedia
+                        className={cn(
+                          "size-8 rounded-lg flex items-center justify-center shrink-0",
+                          isInflow
+                            ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                            : "bg-rose-500/15 text-rose-600 dark:text-rose-400"
+                        )}
+                      >
+                        <Icon className="size-4" />
+                      </ItemMedia>
+
+                      <ItemContent className="min-w-0 flex-1">
+                        <ItemTitle className="text-xs font-bold text-foreground truncate block">
+                          {evt.title}
+                        </ItemTitle>
+                        <ItemDescription className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5 flex-wrap">
+                          <span className="capitalize font-semibold">{evt.type}</span>
+                          {evt.category?.name && (
+                            <span className="text-muted-foreground/80">• {evt.category.name}</span>
                           )}
-                        >
-                          <Icon className="size-4" />
-                        </div>
+                          {evt.walletName && (
+                            <span className="text-muted-foreground/80">• {evt.walletName}</span>
+                          )}
+                          {evt.status === "overdue" && (
+                            <span className="text-rose-500 font-bold inline-flex items-center gap-0.5">
+                              <AlertCircle className="size-2.5" /> Overdue
+                            </span>
+                          )}
+                        </ItemDescription>
+                      </ItemContent>
 
-                        <div className="min-w-0">
-                          <div className="text-xs font-bold text-foreground truncate">
-                            {evt.title}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5 flex-wrap">
-                            <span className="capitalize font-semibold">{evt.type}</span>
-                            {evt.category?.name && (
-                              <span className="text-muted-foreground/80">• {evt.category.name}</span>
-                            )}
-                            {evt.walletName && (
-                              <span className="text-muted-foreground/80">• {evt.walletName}</span>
-                            )}
-                            {evt.status === "overdue" && (
-                              <span className="text-rose-500 font-bold inline-flex items-center gap-0.5">
-                                <AlertCircle className="size-2.5" /> Overdue
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
+                      <ItemActions className="text-right shrink-0">
                         <span
                           className={cn(
                             "text-xs sm:text-sm font-black tabular-nums",
@@ -178,13 +205,13 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                           {isInflow ? "+" : "-"}
                           {formatCurrency(evt.convertedAmount, currency)}
                         </span>
-                      </div>
-                    </div>
+                      </ItemActions>
+                    </Item>
                   )
                 })}
-              </div>
+              </ItemGroup>
             )}
-          </div>
+          </Card>
         )
       })}
     </div>

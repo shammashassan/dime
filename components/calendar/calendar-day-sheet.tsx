@@ -13,6 +13,15 @@ import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
 import { format, parseISO } from "date-fns"
 import {
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+  ItemGroup,
+} from "@/components/ui/item"
+import {
   CalendarDaySummary,
   CalendarEventItem,
 } from "@/types"
@@ -136,18 +145,19 @@ export function CalendarDaySheet({
               <p className="text-[11px] mt-0.5">Your cash flow is steady on this day.</p>
             </div>
           ) : (
-            day.events.map((evt) => {
-              const Icon = getEventIcon(evt.type)
-              const isInflow = evt.flow === "inflow"
-              const isDeleting = deletingId === evt.sourceId
+            <ItemGroup className="flex flex-col gap-2.5 w-full">
+              {day.events.map((evt) => {
+                const Icon = getEventIcon(evt.type)
+                const isInflow = evt.flow === "inflow"
+                const isDeleting = deletingId === evt.sourceId
 
-              return (
-                <div
-                  key={evt.id}
-                  className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div
+                return (
+                  <Item
+                    key={evt.id}
+                    variant="outline"
+                    className="flex-nowrap items-center justify-between gap-3 p-3 rounded-xl border border-border/60 bg-card hover:bg-muted/30 transition-colors"
+                  >
+                    <ItemMedia
                       className={
                         isInflow
                           ? "size-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0"
@@ -155,12 +165,12 @@ export function CalendarDaySheet({
                       }
                     >
                       <Icon className="size-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold truncate text-foreground">
+                    </ItemMedia>
+                    <ItemContent className="min-w-0 flex-1">
+                      <ItemTitle className="text-xs font-bold truncate text-foreground block">
                         {evt.title}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
+                      </ItemTitle>
+                      <ItemDescription className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
                         <span className="capitalize">{evt.type}</span>
                         {evt.walletName && <span>• {evt.walletName}</span>}
                         {evt.status === "overdue" && (
@@ -168,42 +178,42 @@ export function CalendarDaySheet({
                             <AlertCircle className="size-2.5" /> Overdue
                           </span>
                         )}
-                      </div>
-                    </div>
-                  </div>
+                      </ItemDescription>
+                    </ItemContent>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={
-                        isInflow
-                          ? "text-xs font-black text-emerald-500"
-                          : "text-xs font-black text-rose-500"
-                      }
-                    >
-                      {isInflow ? "+" : "-"}
-                      {formatCurrency(evt.convertedAmount, currency)}
-                    </span>
-
-                    {evt.type === "plan" && evt.sourceId && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeletePlan(evt.sourceId!)}
-                        disabled={isDeleting}
-                        className="size-7 rounded-lg text-muted-foreground hover:text-rose-500 cursor-pointer"
-                        title="Delete planned event"
+                    <ItemActions className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={
+                          isInflow
+                            ? "text-xs font-black text-emerald-500 tabular-nums"
+                            : "text-xs font-black text-rose-500 tabular-nums"
+                        }
                       >
-                        {isDeleting ? (
-                          <Loader2 className="size-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="size-3.5" />
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )
-            })
+                        {isInflow ? "+" : "-"}
+                        {formatCurrency(evt.convertedAmount, currency)}
+                      </span>
+
+                      {evt.type === "plan" && evt.sourceId && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeletePlan(evt.sourceId!)}
+                          disabled={isDeleting}
+                          className="size-7 rounded-lg text-muted-foreground hover:text-rose-500 cursor-pointer"
+                          title="Delete planned event"
+                        >
+                          {isDeleting ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <Trash2 className="size-3.5" />
+                          )}
+                        </Button>
+                      )}
+                    </ItemActions>
+                  </Item>
+                )
+              })}
+            </ItemGroup>
           )}
         </div>
 
