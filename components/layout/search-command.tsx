@@ -87,7 +87,10 @@ export function SearchCommand() {
     try {
       const saved = localStorage.getItem("dime_recent_searches")
       if (saved) {
-        setRecentSearches(JSON.parse(saved).slice(0, 5))
+        const parsed = JSON.parse(saved).slice(0, 5)
+        queueMicrotask(() => {
+          setRecentSearches(parsed)
+        })
       }
     } catch {
       // Ignore localStorage errors
@@ -106,7 +109,7 @@ export function SearchCommand() {
     }
   }
 
-  // Keyboard shortcut: ⌘K or Ctrl+K
+  // Keyboard shortcut: ⌘K or Ctrl+K & custom global open event
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -114,20 +117,26 @@ export function SearchCommand() {
         setOpen((prev) => !prev)
       }
     }
+    const handleOpen = () => setOpen(true)
+
     document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
+    window.addEventListener("open-global-search", handleOpen)
+    return () => {
+      document.removeEventListener("keydown", down)
+      window.removeEventListener("open-global-search", handleOpen)
+    }
   }, [])
 
   // Live debounced search execution
   React.useEffect(() => {
     if (!open) return
     const trimmed = query.trim()
-    if (!trimmed) {
-      setResults([])
-      return
-    }
 
     const timeout = setTimeout(async () => {
+      if (!trimmed) {
+        setResults([])
+        return
+      }
       try {
         const res = await universalSearchAction(trimmed, 5)
         setResults(res.items)

@@ -11,6 +11,7 @@ import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/
 import { getFinancialHealthScore } from "@/lib/queries/financial-health"
 import { getNetWorthSummary } from "@/lib/queries/net-worth"
 import { DashboardBento } from "@/components/dashboard/dashboard-bento"
+import { serializeData } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -87,10 +88,10 @@ export default async function DashboardPage() {
       userName={session.user.name || "User"}
       scopeName={scope.isOrganization ? "Team" : "Personal"}
       isOrganization={scope.isOrganization}
-      wallets={wallets}
-      categories={categories}
-      contacts={contacts}
-      goals={goals}
+      wallets={serializeData(wallets)}
+      categories={serializeData(categories)}
+      contacts={serializeData(contacts)}
+      goals={serializeData(goals)}
       focusCounts={focusCounts}
       owedSummary={owedSummary}
       healthScore={healthScoreData.overallScore}
