@@ -208,6 +208,7 @@ export interface Notification {
   type: string;
   link?: string;
   image?: string;
+  read?: boolean;
   readAt?: Date;
   dismissedAt?: Date;
   archivedAt?: Date;
@@ -1049,4 +1050,15 @@ export interface SerializedCalendarPlanEvent extends Omit<CalendarPlanEvent, "_i
 
 // Re-export Search domain types
 export * from "@/lib/search/types"
+
+// ── Dashboard Focus Domain Types ──
+
+export interface DashboardFocusCounts {
+  overdueBillsCount: number
+  overdueBillsAmount: number
+  upcomingRenewalsCount: number
+  pendingLoansCount: number
+  unreadNotificationsCount: number
+  baseCurrency: string
+}
 
