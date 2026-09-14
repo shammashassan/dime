@@ -1,105 +1,113 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
-import { LayoutDashboard } from "lucide-react"
+import { requireApprovedUser } from "@/lib/auth-guard"
+import { getFinancialScope } from "@/lib/scope"
+import { getPreferences } from "@/lib/queries/preferences"
+import { getWallets } from "@/lib/queries/wallets"
+import { getCategories } from "@/lib/queries/categories"
+import { getContacts, getOwedSummaries } from "@/lib/queries/loans"
+import { getGoals } from "@/lib/queries/goals"
+import { getDashboardFocusCounts } from "@/lib/queries/dashboard"
+import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/reports"
+import { getFinancialHealthScore } from "@/lib/queries/financial-health"
+import { getNetWorthSummary } from "@/lib/queries/net-worth"
+import { DashboardBento } from "@/components/dashboard/dashboard-bento"
+import DashboardLoading from "./loading"
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Overview of your finances, spending trends, and budget progress.",
+  description: "High-density overview of your finances, cash flow, and financial health.",
 }
-import { requireApprovedUser } from "@/lib/auth-guard"
-import { DashboardMetrics } from "@/components/dashboard/dashboard-metrics"
-import { SpendingTrendChart } from "@/components/dashboard/spending-trend-chart"
-import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
-import { BudgetProgressList } from "@/components/dashboard/budget-progress-list"
-import { UpcomingRecurring } from "@/components/dashboard/upcoming-recurring"
-import { RecentTransactions } from "@/components/dashboard/recent-transactions"
-import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/reports"
-import { getPreferences } from "@/lib/queries/preferences"
-import { Skeleton } from "@/components/ui/skeleton"
-import { AIInsights } from "@/components/dashboard/ai-insights"
-import { FinancialHealthWidget } from "@/components/dashboard/financial-health-widget"
-
-
-import { MetricsRowSkeleton, ChartSkeleton } from "./loading"
-
 
 export default async function DashboardPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
+  const scope = await getFinancialScope()
 
-  // Parallel fetching for the client chart components (prefetch 90 days daily trend for client-side filtering)
-  const [trendData, breakdownData, prefs] = await Promise.all([
+  const [
+    prefs,
+    wallets,
+    categories,
+    contacts,
+    goals,
+    owedSummary,
+    focusCounts,
+    trendData,
+    categoryBreakdown,
+    healthScoreData,
+    netWorthData,
+  ] = await Promise.all([
+    getPreferences(userId),
+    getWallets(userId),
+    getCategories(userId),
+    getContacts(),
+    getGoals(userId),
+    getOwedSummaries(),
+    getDashboardFocusCounts(userId),
     getDailyIncomeExpenseTrend(userId),
     getCategoryBreakdown(userId),
-    getPreferences(userId),
+    getFinancialHealthScore(userId),
+    getNetWorthSummary(userId),
   ])
 
   const targetCurrency = prefs?.defaultCurrency || "USD"
 
+  // Calculate monthly inflow & outflow from trendData for current month (converted to cents)
+  const now = new Date()
+  const currentMonthPrefix = now.toISOString().slice(0, 7)
+  let monthlyInflow = 0
+  let monthlyOutflow = 0
+  for (const day of trendData) {
+    if (day.date.startsWith(currentMonthPrefix)) {
+      monthlyInflow += Math.round((day.income || 0) * 100)
+      monthlyOutflow += Math.round((day.expense || 0) * 100)
+    }
+  }
+
+  // Fallback to trailing 30 days if current month has zero activity
+  if (monthlyInflow === 0 && monthlyOutflow === 0) {
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    for (const day of trendData) {
+      if (day.date >= thirtyDaysAgo) {
+        monthlyInflow += Math.round((day.income || 0) * 100)
+        monthlyOutflow += Math.round((day.expense || 0) * 100)
+      }
+    }
+  }
+
+  const topRec = healthScoreData.recommendations?.[0]
+  const topRecommendation = topRec
+    ? {
+        title: topRec.title,
+        potentialPoints: topRec.potentialPoints,
+        actionPath: topRec.actionUrl || "/health",
+      }
+    : undefined
+
   return (
-    <div className="flex flex-col gap-6 w-full">
-      {/* Title section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
-          <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
-            <LayoutDashboard className="size-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Overview</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Welcome back, {session.user.name}. Here is a summary of your financial status.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Top row: Metrics */}
-      <div className="grid grid-cols-1 gap-6">
-        <Suspense fallback={<MetricsRowSkeleton />}>
-          <DashboardMetrics userId={userId} />
-        </Suspense>
-      </div>
-
-      {/* AI Insights and Category Breakdown Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Suspense fallback={<ChartSkeleton />}>
-            <AIInsights userId={userId} />
-          </Suspense>
-        </div>
-        <div className="lg:col-span-1">
-          <Suspense fallback={<ChartSkeleton />}>
-            <CategoryBreakdown data={breakdownData} currency={targetCurrency} />
-          </Suspense>
-        </div>
-      </div>
-
-      {/* Cash flow trend chart row */}
-      <div className="grid grid-cols-1 gap-6">
-        <Suspense fallback={<ChartSkeleton />}>
-          <SpendingTrendChart initialData={trendData} currency={targetCurrency} />
-        </Suspense>
-      </div>
-
-      {/* Lists row: Budgets and Recent Transactions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          <Suspense fallback={<Skeleton className="h-44 w-full rounded-2xl" />}>
-            <FinancialHealthWidget userId={userId} />
-          </Suspense>
-          <Suspense fallback={<ChartSkeleton />}>
-            <BudgetProgressList userId={userId} />
-          </Suspense>
-          <Suspense fallback={<ChartSkeleton />}>
-            <UpcomingRecurring userId={userId} />
-          </Suspense>
-        </div>
-        <div className="lg:col-span-2">
-          <Suspense fallback={<ChartSkeleton />}>
-            <RecentTransactions userId={userId} />
-          </Suspense>
-        </div>
-      </div>
-    </div>
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardBento
+        userName={session.user.name || "User"}
+        scopeName={scope.isOrganization ? "Team" : "Personal"}
+        isOrganization={scope.isOrganization}
+        wallets={wallets}
+        categories={categories}
+        contacts={contacts}
+        goals={goals}
+        focusCounts={focusCounts}
+        owedSummary={owedSummary}
+        healthScore={healthScoreData.overallScore}
+        healthTier={healthScoreData.tier}
+        topRecommendation={topRecommendation}
+        netWorth={netWorthData.currentNetWorth}
+        monthlyInflow={monthlyInflow}
+        monthlyOutflow={monthlyOutflow}
+        trendData={trendData}
+        categoryBreakdown={categoryBreakdown}
+        userId={userId}
+        targetCurrency={targetCurrency}
+        defaultWalletId={prefs?.defaultWalletId}
+      />
+    </Suspense>
   )
 }

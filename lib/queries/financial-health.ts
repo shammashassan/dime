@@ -76,3 +76,5 @@ export const getFinancialHealthData = cache(
     })
   }
 )
+
+export const getFinancialHealthScore = getFinancialHealthData
