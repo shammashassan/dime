@@ -1047,3 +1047,6 @@ export interface SerializedCalendarPlanEvent extends Omit<CalendarPlanEvent, "_i
   updatedAt: string
 }
 
+// Re-export Search domain types
+export * from "@/lib/search/types"
+

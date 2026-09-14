@@ -87,8 +87,8 @@ function NotificationIcon({
 
   return (
     <ItemMedia className="mt-0.5">
-      <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg", bgClass)}>
-        <Icon className={cn("size-3.5", colorClass)} />
+      <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg", bgClass, colorClass)}>
+        <Icon className={cn("size-3.5", colorClass, "[&_*]:!text-inherit [&_*]:!stroke-current")} />
       </div>
     </ItemMedia>
   );

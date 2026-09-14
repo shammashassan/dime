@@ -24,7 +24,9 @@ import {
   SharedSettlement,
   PlannerScenario,
   UserInsightState,
-  CalendarPlanEvent
+  CalendarPlanEvent,
+  Goal,
+  SavedSearch,
 } from "@/types"
 
 export const walletsCollection = db.collection<Wallet>("wallets")
@@ -52,6 +54,8 @@ export const sharedSettlementsCollection = db.collection<SharedSettlement>("shar
 export const plannerScenariosCollection = db.collection<PlannerScenario>("planner_scenarios")
 export const userInsightStatesCollection = db.collection<UserInsightState>("user_insight_states")
 export const calendarEventsCollection = db.collection<CalendarPlanEvent>("calendar_events")
+export const goalsCollection = db.collection<Goal>("goals")
+export const savedSearchesCollection = db.collection<SavedSearch>("saved_searches")
 
 export async function getCollection<T extends object>(name: string) {
   return db.collection<T>(name)

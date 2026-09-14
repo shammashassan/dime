@@ -28,6 +28,7 @@ const PAGE_LABELS: Record<string, string> = {
   "categories": "Categories",
   "planner": "Financial Planner",
   "settings": "Settings",
+  "search": "Advanced Search",
   "admin": "Admin",
   "users": "User Management",
 }

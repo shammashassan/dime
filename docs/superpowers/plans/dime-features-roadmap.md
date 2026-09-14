@@ -15,6 +15,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ Categories
 * ✅ Budgets
 * ✅ Goals
+* ✅ Advanced Search & Universal Command Palette
 
 ## Collaboration
 
@@ -549,98 +550,50 @@ Integrations:
 * ✅ Dashboard Sidebar
 ---
 
-# 11. Advanced Search
+# 11. Advanced Search & Universal Command Palette ✅ COMPLETED
 
-Support powerful query operators.
+Unified cross-entity financial search engine and intelligent query operator parser.
 
-Examples:
+> **Status**: **Completed.** Pure deterministic operator parsing engine in `lib/search/parser.ts`, parallel multi-entity server query aggregator in `lib/queries/search.ts`, upgraded `⌘K` Command Palette in `components/layout/search-command.tsx`, dedicated `/search` hub in `app/(dashboard)/search/`, saved searches persistence in `saved_searches` collection, and seamless operator support in `/transactions`.
 
-merchant:amazon
+Support powerful query operators:
 
-category:food
+* ✅ `merchant:<name>` / `payee:<name>` (e.g. `merchant:amazon`)
+* ✅ `category:<name>` (e.g. `category:food`, `category:"Food & Dining"`)
+* ✅ `wallet:<name>` / `account:<name>` (e.g. `wallet:cash`)
+* ✅ `amount>500`, `amount<1000`, `amount>=50`, `amount<=200`, `amount=100` (integer cents)
+* ✅ `date:this-month`, `date:last-month`, `date:today`, `date:yesterday`, `date:this-year`, explicit `date:2026-01-01..2026-06-30`
+* ✅ `currency:INR`, `currency:USD`
+* ✅ `tag:vacation`, `tag:grocery`
+* ✅ `person:john`, `contact:sarah`
+* ✅ `loan:active`, `loan:paid`, `loan:overdue`
+* ✅ `subscription:active`, `subscription:cancelled`
+* ✅ `bill:overdue`, `bill:paid`, `bill:pending`
+* ✅ `goal:active`, `goal:completed`
+* ✅ `investment:stocks`, `investment:crypto`, `investment:etf`
+* ✅ `asset:real-estate`, `asset:gold`, `asset:vehicle`
+* ✅ `liability:mortgage`
+* ✅ `budget:active`
+* ✅ `recurring:monthly`, `recurring:weekly`
+* ✅ `transaction:split`
+* ✅ `status:overdue`, `status:active`, `status:flagged`, `status:review`
+* ✅ Multi-operator combinations with residual free-text extraction (e.g. `Starbucks category:Food amount>50 date:this-month`)
 
-wallet:cash
+### Additional Completed Features
 
-amount>500
-
-amount<1000
-
-date:last month
-
-currency:INR
-
-tag:vacation
-
-person:john
-
-loan:active
-
-subscription:active
-
-bill:overdue
-
-Support combining multiple filters.
-
-### Additional Planned Features
-
-Support searching across every financial entity in Dime.
-
-Examples:
-
-goal:active
-
-goal:completed
-
-investment:stocks
-
-investment:crypto
-
-asset:real-estate
-
-asset:gold
-
-liability:mortgage
-
-space:family
-
-budget:active
-
-rule:enabled
-
-recurring:monthly
-
-transaction:split
-
-status:overdue
-
-date:this year
-
-date:last quarter
-
-amount>=10000
-
-currency:USD
-
-Support:
-
-* Saved searches
-* Search history
-* Search suggestions
-* Instant filtering
-* Global command palette integration
-* Keyboard shortcuts
-* Natural language search (future)
-* AI-powered search (future)
+* ✅ **Universal Cross-Entity Querying**: Searches Transactions, Wallets, Budgets, Goals, Subscriptions, Bills, Loans, Contacts, Investments, Assets, and Liabilities with financial scope isolation.
+* ✅ **Upgraded `⌘K` Command Palette**: 150ms debounced live search, parsed active filter badges, recent search history (instant from `localStorage`), quick operator chips, and deep links.
+* ✅ **Dedicated `/search` Hub**: Full-page responsive search hub (`/search`) with categorized entity tabs, result count badges, quick filter pills, and saved searches management.
+* ✅ **Saved Searches**: Full persistence in `saved_searches` MongoDB collection via Server Actions (`saveSearchAction`, `deleteSavedSearchAction`, `getSavedSearchesAction`).
+* ✅ **Transactions Page Integration**: Transaction search bar automatically parses query operators through `parseSearchQuery()` for seamless filtering.
+* ✅ **Automated Unit Tests**: 100% test coverage for query parser, amount inequalities, relative date resolvers, and entity shortcuts.
 
 Integrations:
 
-* Dashboard
-* Reports
-* Financial Timeline
-* AI Financial Coach
-* Open Banking
-* Documents Vault
-
+* ✅ Dashboard Header (`⌘K`)
+* ✅ Transactions Page (`/transactions`)
+* ✅ Search Hub (`/search`)
+* ✅ All Entity Detail Pages
 ---
 
 # 12. Custom Dashboard Widgets

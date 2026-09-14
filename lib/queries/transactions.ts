@@ -3,6 +3,7 @@ import { getCollection } from "@/lib/db/collections"
 import { ObjectId, Filter } from "mongodb"
 import { Transaction } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { parseSearchQuery } from "@/lib/search/parser"
 import { getWallets } from "./wallets"
 
 export interface TransactionFilters {
@@ -75,7 +76,50 @@ function buildQuery(
   }
 
   if (filters.search) {
-    query.description = { $regex: filters.search, $options: "i" }
+    const parsed = parseSearchQuery(filters.search)
+    const { textQuery, operators } = parsed
+
+    if (operators.type && !filters.type) {
+      query.type = operators.type
+    }
+    if (operators.startDate && !filters.startDate) {
+      query.date = { ...(query.date as object), $gte: operators.startDate }
+    }
+    if (operators.endDate && !filters.endDate) {
+      query.date = { ...(query.date as object), $lte: operators.endDate }
+    }
+    if (operators.exactAmount !== undefined) {
+      query.amount = operators.exactAmount
+    } else {
+      if (operators.minAmount !== undefined && filters.minAmount === undefined) {
+        query.amount = { ...(query.amount as object), $gte: operators.minAmount }
+      }
+      if (operators.maxAmount !== undefined && filters.maxAmount === undefined) {
+        query.amount = { ...(query.amount as object), $lte: operators.maxAmount }
+      }
+    }
+    if (operators.isSplit) {
+      query.isSplit = true
+    }
+    if (operators.status === "flagged" && filters.isFlagged === undefined) {
+      query.isFlagged = true
+    }
+    if (operators.status === "review" && filters.needsReview === undefined) {
+      query.needsReview = true
+    }
+    if (operators.tag) {
+      query.tags = { $in: [new RegExp(operators.tag, "i")] }
+    }
+    if (operators.merchant) {
+      query.description = { $regex: operators.merchant, $options: "i" }
+    }
+
+    if (textQuery) {
+      query.$or = [
+        { description: { $regex: textQuery, $options: "i" } },
+        { notes: { $regex: textQuery, $options: "i" } },
+      ]
+    }
   }
 
   if (filters.isFlagged !== undefined) {
