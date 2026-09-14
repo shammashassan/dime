@@ -19,7 +19,7 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
       {/* Weekday Headers */}
       <div className="grid grid-cols-7 border-b border-border/40 bg-muted/40 text-center py-2 sm:py-2.5">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">
+          <div key={w} className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {w}
           </div>
         ))}
@@ -50,7 +50,7 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
               className={cn(
                 "min-h-[62px] sm:min-h-[85px] md:min-h-[105px] p-1 sm:p-2 flex flex-col justify-between transition-colors cursor-pointer group hover:bg-muted/30 relative text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring",
                 !day.isCurrentMonth && "bg-muted/10 opacity-40",
-                day.isToday && "ring-2 ring-primary/40 bg-primary/[0.02]",
+                day.isToday && "bg-primary/[0.02]",
                 day.isDeficit && "bg-rose-500/[0.04]"
               )}
             >
@@ -139,7 +139,7 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                   )
                 })}
                 {day.events.length > 4 && (
-                  <span className="text-[8px] font-black text-muted-foreground leading-none">
+                  <span className="text-[8px] font-medium text-muted-foreground leading-none">
                     +{day.events.length - 4}
                   </span>
                 )}
