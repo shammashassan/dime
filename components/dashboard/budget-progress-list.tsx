@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress"
 import { getBudgetPerformance } from "@/lib/queries/reports"
 import { getPreferences } from "@/lib/queries/preferences"
 import { formatCurrency } from "@/lib/utils"
-import { PiggyBank, Target } from "lucide-react"
+import { PiggyBank } from "lucide-react"
 
 interface BudgetProgressListProps {
   userId: string

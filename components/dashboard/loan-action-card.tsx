@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useEffect, FormEvent } from "react"
+import { useState, useTransition, FormEvent } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowUpRight, ArrowDownLeft, HandCoins, Loader2 } from "lucide-react"
@@ -33,15 +33,10 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [type, setType] = useState<"lent" | "borrowed">("lent")
-  const [contactId, setContactId] = useState(contacts[0]?._id?.toString() || "")
+  const [contactId, setContactId] = useState("")
   const [amount, setAmount] = useState("")
 
-  useEffect(() => {
-    if (!contactId && contacts.length > 0) {
-      setContactId(contacts[0]?._id?.toString() || "")
-    }
-  }, [contacts, contactId])
-
+  const effectiveContactId = contactId || contacts[0]?._id?.toString() || ""
   const currencySymbol = getCurrencySymbol(owedSummary.baseCurrency)
 
   const handleSubmit = (e: FormEvent) => {
@@ -51,12 +46,12 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
       toast.error("Please enter a valid loan amount")
       return
     }
-    if (!contactId) {
+    if (!effectiveContactId) {
       toast.error("Please select a contact")
       return
     }
 
-    const selectedContact = contacts.find((c) => c._id?.toString() === contactId)
+    const selectedContact = contacts.find((c) => c._id?.toString() === effectiveContactId)
     if (!selectedContact) {
       toast.error("Selected contact not found")
       return
@@ -67,7 +62,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
         const amountInCents = Math.round(numAmount * 100)
         const res = await createLoanAction({
           type,
-          contactId,
+          contactId: effectiveContactId,
           contactName: selectedContact.name,
           amount: amountInCents,
           currency: owedSummary.baseCurrency,
@@ -189,7 +184,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
               </Link>
             </div>
           ) : (
-            <Select value={contactId} onValueChange={setContactId} disabled={isPending}>
+            <Select value={effectiveContactId} onValueChange={setContactId} disabled={isPending}>
               <SelectTrigger className="h-9 text-xs" aria-label="Select contact">
                 <SelectValue placeholder="Select contact" />
               </SelectTrigger>

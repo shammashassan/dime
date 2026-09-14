@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useEffect, FormEvent } from "react"
+import { useState, useTransition, FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { PlusCircle, Loader2 } from "lucide-react"
 import { toast } from "sonner"
@@ -48,20 +48,10 @@ export function QuickLogCard({
   const [type, setType] = useState<"expense" | "income">("expense")
   const [amount, setAmount] = useState("")
   const [description, setDescription] = useState("")
-  const [walletId, setWalletId] = useState(initialWalletId)
-  const [categoryId, setCategoryId] = useState("")
+  const [walletId, setWalletId] = useState("")
 
-  useEffect(() => {
-    if (!walletId && wallets.length > 0) {
-      const fallback =
-        defaultWalletId && wallets.some((w) => w._id?.toString() === defaultWalletId)
-          ? defaultWalletId
-          : wallets[0]?._id?.toString() || ""
-      setWalletId(fallback)
-    }
-  }, [wallets, defaultWalletId, walletId])
-
-  const selectedWallet = wallets.find((w) => w._id?.toString() === walletId)
+  const effectiveWalletId = walletId || initialWalletId
+  const selectedWallet = wallets.find((w) => w._id?.toString() === effectiveWalletId)
   const currency = selectedWallet?.currency || baseCurrency
   const currencySymbol = getCurrencySymbol(currency)
 
@@ -79,7 +69,7 @@ export function QuickLogCard({
       toast.error("Please enter a valid amount")
       return
     }
-    if (!walletId) {
+    if (!effectiveWalletId) {
       toast.error("Please select a wallet")
       return
     }
@@ -91,9 +81,9 @@ export function QuickLogCard({
           type,
           amount: amountInCents,
           description: description.trim() || (type === "income" ? "Quick Income" : "Quick Expense"),
-          walletId,
+          walletId: effectiveWalletId,
           currency,
-          categoryId: categoryId || filteredCategories[0]?._id?.toString() || undefined,
+          categoryId: filteredCategories[0]?._id?.toString() || undefined,
           date: new Date(),
           tags: [],
           isRecurring: false,
@@ -171,7 +161,7 @@ export function QuickLogCard({
           </InputGroup>
 
           {/* Wallet Dropdown */}
-          <Select value={walletId} onValueChange={setWalletId} disabled={isPending}>
+          <Select value={effectiveWalletId} onValueChange={setWalletId} disabled={isPending}>
             <SelectTrigger className="h-9 text-xs" aria-label="Select wallet">
               <SelectValue placeholder="Select wallet" />
             </SelectTrigger>
