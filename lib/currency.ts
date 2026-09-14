@@ -266,3 +266,10 @@ export async function getCurrencyConverter(targetCurrency: string, sourceCurrenc
 }
 
 export { SUPPORTED_CURRENCIES, type SupportedCurrency } from "./currencies"
+export {
+  formatDenomination,
+  formatDenominatedCurrency,
+  getCurrencySymbol,
+  isLakhCroreCurrency,
+  type DenominationOptions,
+} from "./denomination"
