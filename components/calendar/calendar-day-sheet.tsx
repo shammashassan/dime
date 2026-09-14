@@ -95,9 +95,9 @@ export function CalendarDaySheet({
         {/* Header */}
         <SheetHeader className="p-5 border-b border-border/40 bg-muted/20">
           <div className="flex items-center justify-between gap-2">
-            <SheetTitle className="text-lg font-bold">{formattedDate}</SheetTitle>
+            <SheetTitle className="text-base font-semibold">{formattedDate}</SheetTitle>
             {day.isToday && (
-              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-bold">
+              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] font-medium">
                 Today
               </Badge>
             )}
@@ -107,8 +107,8 @@ export function CalendarDaySheet({
             <span
               className={
                 day.isDeficit
-                  ? "font-extrabold text-rose-500"
-                  : "font-extrabold text-foreground"
+                  ? "font-semibold text-rose-500 tabular-nums"
+                  : "font-semibold text-foreground tabular-nums"
               }
             >
               {formatCurrency(day.closingBalance, currency)}
@@ -119,18 +119,18 @@ export function CalendarDaySheet({
         {/* Day Flow Banner */}
         <div className="grid grid-cols-2 gap-2 p-4 bg-muted/40 border-b border-border/40 text-xs">
           <div>
-            <span className="text-muted-foreground block text-[10px] uppercase font-bold tracking-wider">
+            <span className="text-muted-foreground block text-[10px] uppercase font-medium tracking-wider">
               Total Inflow
             </span>
-            <span className="text-emerald-500 font-extrabold text-sm">
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-sm tabular-nums">
               +{formatCurrency(day.totalInflow, currency)}
             </span>
           </div>
           <div>
-            <span className="text-muted-foreground block text-[10px] uppercase font-bold tracking-wider">
+            <span className="text-muted-foreground block text-[10px] uppercase font-medium tracking-wider">
               Total Outflow
             </span>
-            <span className="text-rose-500 font-extrabold text-sm">
+            <span className="text-rose-600 dark:text-rose-400 font-semibold text-sm tabular-nums">
               -{formatCurrency(day.totalOutflow, currency)}
             </span>
           </div>
@@ -167,14 +167,14 @@ export function CalendarDaySheet({
                       <Icon className="size-4" />
                     </ItemMedia>
                     <ItemContent className="min-w-0 flex-1">
-                      <ItemTitle className="text-xs font-bold truncate text-foreground block">
+                      <ItemTitle className="text-xs font-medium truncate text-foreground block">
                         {evt.title}
                       </ItemTitle>
                       <ItemDescription className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
                         <span className="capitalize">{evt.type}</span>
                         {evt.walletName && <span>• {evt.walletName}</span>}
                         {evt.status === "overdue" && (
-                          <span className="text-rose-500 font-bold flex items-center gap-0.5">
+                          <span className="text-rose-500 font-medium flex items-center gap-0.5">
                             <AlertCircle className="size-2.5" /> Overdue
                           </span>
                         )}
@@ -185,8 +185,8 @@ export function CalendarDaySheet({
                       <span
                         className={
                           isInflow
-                            ? "text-xs font-black text-emerald-500 tabular-nums"
-                            : "text-xs font-black text-rose-500 tabular-nums"
+                            ? "text-xs font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums"
+                            : "text-xs font-semibold text-rose-600 dark:text-rose-400 tabular-nums"
                         }
                       >
                         {isInflow ? "+" : "-"}
@@ -223,7 +223,7 @@ export function CalendarDaySheet({
             variant="outline"
             size="sm"
             onClick={() => onAddPlanForDate(day.date)}
-            className="w-full rounded-xl font-bold text-xs gap-1.5 h-9 cursor-pointer"
+            className="w-full rounded-xl font-medium text-xs gap-1.5 h-9 cursor-pointer"
           >
             <Plus className="size-3.5" />
             Add Planned Event on this Day

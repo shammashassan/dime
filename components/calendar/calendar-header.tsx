@@ -24,7 +24,7 @@ export function CalendarHeader({
         </div>
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Cash Flow Calendar
             </h1>
             <HoverCard openDelay={150}>
@@ -32,7 +32,7 @@ export function CalendarHeader({
                 <Badge
                   variant="outline"
                   tabIndex={0}
-                  className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+                  className="rounded-md border-primary/30 text-primary bg-primary/5 font-medium text-[10px] h-5 cursor-default focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   {currency}
                 </Badge>
@@ -57,7 +57,7 @@ export function CalendarHeader({
         <Button
           onClick={onOpenAddPlan}
           size="sm"
-          className="rounded-xl font-bold gap-1.5 text-xs h-9 cursor-pointer shadow-sm"
+          className="rounded-xl font-medium gap-1.5 text-xs h-9 cursor-pointer shadow-sm"
         >
           <Plus className="size-3.5" />
           Add Planned

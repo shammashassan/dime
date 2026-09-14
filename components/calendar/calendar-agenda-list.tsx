@@ -104,18 +104,18 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                 <div
                   className={
                     day.isToday
-                      ? "size-9 rounded-xl bg-primary text-primary-foreground flex flex-col items-center justify-center shrink-0 font-extrabold text-xs shadow-xs"
-                      : "size-9 rounded-xl bg-muted text-foreground flex flex-col items-center justify-center shrink-0 font-bold text-xs"
+                      ? "size-9 rounded-xl bg-primary text-primary-foreground flex flex-col items-center justify-center shrink-0 font-semibold text-xs shadow-xs"
+                      : "size-9 rounded-xl bg-muted text-foreground flex flex-col items-center justify-center shrink-0 font-medium text-xs"
                   }
                 >
                   <span>{day.dayOfMonth}</span>
                 </div>
 
                 <div>
-                  <div className="text-xs sm:text-sm font-extrabold text-foreground flex items-center gap-1.5 flex-wrap">
+                  <div className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5 flex-wrap">
                     {dateHeader}
                     {day.isToday && (
-                      <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">
+                      <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
                         Today
                       </span>
                     )}
@@ -128,12 +128,12 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
 
               <div className="flex items-center gap-2 shrink-0">
                 <div className="text-right">
-                  <div className="text-[9px] uppercase font-extrabold tracking-wider text-muted-foreground">
+                  <div className="text-[10px] uppercase font-medium tracking-wider text-muted-foreground">
                     Projected Balance
                   </div>
                   <div
                     className={cn(
-                      "text-xs sm:text-sm font-black tabular-nums flex items-center gap-1 justify-end",
+                      "text-xs sm:text-sm font-semibold tabular-nums flex items-center gap-1 justify-end",
                       day.isDeficit ? "text-rose-500" : "text-foreground"
                     )}
                   >
@@ -174,11 +174,11 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                       </ItemMedia>
 
                       <ItemContent className="min-w-0 flex-1">
-                        <ItemTitle className="text-xs font-bold text-foreground truncate block">
+                        <ItemTitle className="text-xs font-medium text-foreground truncate block">
                           {evt.title}
                         </ItemTitle>
                         <ItemDescription className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5 flex-wrap">
-                          <span className="capitalize font-semibold">{evt.type}</span>
+                          <span className="capitalize font-normal">{evt.type}</span>
                           {evt.category?.name && (
                             <span className="text-muted-foreground/80">• {evt.category.name}</span>
                           )}
@@ -186,7 +186,7 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                             <span className="text-muted-foreground/80">• {evt.walletName}</span>
                           )}
                           {evt.status === "overdue" && (
-                            <span className="text-rose-500 font-bold inline-flex items-center gap-0.5">
+                            <span className="text-rose-500 font-medium inline-flex items-center gap-0.5">
                               <AlertCircle className="size-2.5" /> Overdue
                             </span>
                           )}
@@ -196,7 +196,7 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
                       <ItemActions className="text-right shrink-0">
                         <span
                           className={cn(
-                            "text-xs sm:text-sm font-black tabular-nums",
+                            "text-xs sm:text-sm font-semibold tabular-nums",
                             isInflow
                               ? "text-emerald-600 dark:text-emerald-400"
                               : "text-rose-600 dark:text-rose-400"

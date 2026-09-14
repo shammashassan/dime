@@ -58,10 +58,10 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
               <div className="flex items-center justify-between gap-1 w-full">
                 <span
                   className={cn(
-                    "text-[11px] sm:text-xs font-bold size-5 sm:size-6 flex items-center justify-center rounded-full transition-colors",
+                    "text-[11px] sm:text-xs size-5 sm:size-6 flex items-center justify-center rounded-full transition-colors",
                     day.isToday
-                      ? "bg-primary text-primary-foreground font-black"
-                      : "text-foreground group-hover:text-primary"
+                      ? "bg-primary text-primary-foreground font-semibold"
+                      : "text-foreground font-medium group-hover:text-primary"
                   )}
                 >
                   {day.dayOfMonth}
@@ -70,9 +70,9 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                 {/* Desktop: Full Currency String */}
                 <span
                   className={cn(
-                    "hidden sm:inline-flex text-[10px] font-black tabular-nums truncate items-center gap-0.5",
+                    "hidden sm:inline-flex text-[10px] font-medium tabular-nums truncate items-center gap-0.5",
                     day.isDeficit
-                      ? "text-rose-500"
+                      ? "text-rose-500 font-semibold"
                       : "text-muted-foreground group-hover:text-foreground"
                   )}
                 >
@@ -97,14 +97,14 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                     <div
                       key={evt.id}
                       className={cn(
-                        "text-[10px] font-semibold px-1.5 py-0.5 rounded-md truncate flex items-center justify-between gap-1",
+                        "text-[10px] font-normal px-1.5 py-0.5 rounded-md truncate flex items-center justify-between gap-1",
                         isInflow
                           ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                           : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
                       )}
                     >
                       <span className="truncate">{evt.title}</span>
-                      <span className="font-bold shrink-0 tabular-nums">
+                      <span className="font-medium shrink-0 tabular-nums">
                         {isInflow ? "+" : "-"}{formatCurrency(evt.convertedAmount, currency)}
                       </span>
                     </div>
@@ -112,7 +112,7 @@ export function CalendarMonthGrid({ days, currency, onSelectDay }: CalendarMonth
                 })}
 
                 {overflowCount > 0 && (
-                  <span className="text-[9px] font-bold text-muted-foreground px-1">
+                  <span className="text-[9px] font-medium text-muted-foreground px-1">
                     +{overflowCount} more
                   </span>
                 )}

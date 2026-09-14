@@ -233,7 +233,7 @@ export function PlanEventDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto rounded-xl font-bold cursor-pointer"
+              className="w-full sm:w-auto rounded-xl font-medium cursor-pointer"
             >
               {loading ? "Saving..." : "Add to Calendar"}
             </Button>

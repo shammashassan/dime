@@ -58,7 +58,7 @@ export function CalendarToolbar({
             <ChevronLeft className="size-4" />
           </Button>
 
-          <span className="text-xs font-bold px-3 min-w-[120px] text-center select-none text-foreground">
+          <span className="text-xs font-semibold px-3 min-w-[120px] text-center select-none text-foreground">
             {monthLabel}
           </span>
 
@@ -77,7 +77,7 @@ export function CalendarToolbar({
           variant="outline"
           size="sm"
           onClick={handleToday}
-          className="rounded-xl font-bold text-xs border-border/40 hover:bg-muted/40 cursor-pointer h-9 px-3"
+          className="rounded-xl font-medium text-xs border-border/40 hover:bg-muted/40 cursor-pointer h-9 px-3"
         >
           Today
         </Button>
@@ -90,7 +90,7 @@ export function CalendarToolbar({
           <button
             onClick={() => onWalletModeChange("liquid")}
             className={cn(
-              "rounded-lg px-3 py-1 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
+              "rounded-lg px-3 py-1 text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
               walletMode === "liquid"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
@@ -101,7 +101,7 @@ export function CalendarToolbar({
           <button
             onClick={() => onWalletModeChange("all")}
             className={cn(
-              "rounded-lg px-3 py-1 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
+              "rounded-lg px-3 py-1 text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
               walletMode === "all"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
