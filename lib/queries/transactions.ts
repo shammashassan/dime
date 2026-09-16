@@ -32,6 +32,8 @@ function buildQuery(
     walletId: { $in: allowedWalletIds }
   }
 
+  const andConditions: Filter<Transaction>[] = []
+
   if (filters.startDate || filters.endDate) {
     const dateQuery: { $gte?: Date; $lte?: Date } = {}
     if (filters.startDate) {
@@ -48,10 +50,33 @@ function buildQuery(
   }
 
   if (filters.categoryIds && filters.categoryIds.length > 0) {
-    query.$or = [
-      { categoryId: { $in: filters.categoryIds } },
-      { "splits.categoryId": { $in: filters.categoryIds } }
-    ]
+    const hasUncategorized = filters.categoryIds.includes("uncategorized")
+    const specificCategoryIds = filters.categoryIds.filter(id => id !== "uncategorized")
+
+    const categoryOrConditions: Filter<Transaction>[] = []
+    if (specificCategoryIds.length > 0) {
+      categoryOrConditions.push(
+        { categoryId: { $in: specificCategoryIds } },
+        { "splits.categoryId": { $in: specificCategoryIds } }
+      )
+    }
+    if (hasUncategorized) {
+      categoryOrConditions.push({
+        $and: [
+          { categoryId: { $in: [null, ""] } },
+          {
+            $or: [
+              { splits: { $exists: false } },
+              { splits: { $size: 0 } },
+            ],
+          },
+        ],
+      })
+    }
+
+    if (categoryOrConditions.length > 0) {
+      andConditions.push({ $or: categoryOrConditions })
+    }
   }
 
   if (filters.walletIds && filters.walletIds.length > 0) {
@@ -115,10 +140,12 @@ function buildQuery(
     }
 
     if (textQuery) {
-      query.$or = [
-        { description: { $regex: textQuery, $options: "i" } },
-        { notes: { $regex: textQuery, $options: "i" } },
-      ]
+      andConditions.push({
+        $or: [
+          { description: { $regex: textQuery, $options: "i" } },
+          { notes: { $regex: textQuery, $options: "i" } },
+        ],
+      })
     }
   }
 
@@ -133,6 +160,18 @@ function buildQuery(
   if (filters.recurringId) {
     query.recurringId = filters.recurringId
     query.isRecurring = true
+  }
+
+  if (andConditions.length > 0) {
+    if (scopeFilter.$or) {
+      query.$and = [
+        { $or: scopeFilter.$or },
+        ...andConditions
+      ]
+      delete query.$or
+    } else {
+      query.$and = andConditions
+    }
   }
 
   return query

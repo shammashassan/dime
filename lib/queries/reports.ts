@@ -409,6 +409,7 @@ export const getBudgetPerformance = cache(async (userId: string) => {
       const targetSpent = convertToTarget(spent, budget.currency)
 
       return {
+        id: budget._id.toString(),
         name: budget.name,
         category: catName,
         limit: targetLimit / 100,

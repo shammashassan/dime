@@ -68,14 +68,22 @@ export function DashboardBento({
   defaultWalletId,
 }: DashboardBentoProps) {
   return (
-    <BentoEntrance className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-8">
+    <BentoEntrance className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
       {/* Header */}
       <DashboardHeader userName={userName} scopeName={scopeName} isOrganization={isOrganization} />
 
       {/* Row 0: Focus Badges */}
       <FinancialFocusStrip counts={focusCounts} />
 
-      {/* Row 1: Command Center & Quick Log */}
+      {/* Row 1: Executive KPI Benchmark Strip */}
+      <ExecutiveKpiStrip
+        netWorth={netWorth}
+        monthlyInflow={monthlyInflow}
+        monthlyOutflow={monthlyOutflow}
+        currency={targetCurrency}
+      />
+
+      {/* Row 2: Operations Tier — Command Center & Quick Log (2 : 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <CommandCenterCard />
@@ -90,30 +98,7 @@ export function DashboardBento({
         </div>
       </div>
 
-      {/* Row 2: Loan Action & Financial Health Gauge */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <LoanActionCard contacts={contacts} owedSummary={owedSummary} />
-        </div>
-        <div className="lg:col-span-1">
-          <FinancialHealthGaugeCard
-            score={healthScore}
-            tier={healthTier}
-            pillars={pillars}
-            topRecommendation={topRecommendation}
-          />
-        </div>
-      </div>
-
-      {/* Row 3: Executive KPI Benchmark Strip */}
-      <ExecutiveKpiStrip
-        netWorth={netWorth}
-        monthlyInflow={monthlyInflow}
-        monthlyOutflow={monthlyOutflow}
-        currency={targetCurrency}
-      />
-
-      {/* Row 4: Core Visual Analytics (Shadcn Charts) */}
+      {/* Row 3: Analytics Tier — Cash Flow Trajectory & Category Breakdown (2 : 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <SpendingTrendChart initialData={trendData} currency={targetCurrency} />
@@ -123,9 +108,24 @@ export function DashboardBento({
         </div>
       </div>
 
-      {/* Row 5: AI Spending Insights & Active Goals */}
+      {/* Row 4: Health & Obligations Tier — Financial Health Gauge & Loan Action (1 : 2) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bento-tile">
+        <div className="lg:col-span-1 order-2 lg:order-1">
+          <FinancialHealthGaugeCard
+            score={healthScore}
+            tier={healthTier}
+            pillars={pillars}
+            topRecommendation={topRecommendation}
+          />
+        </div>
+        <div className="lg:col-span-2 order-1 lg:order-2">
+          <LoanActionCard contacts={contacts} owedSummary={owedSummary} />
+        </div>
+      </div>
+
+      {/* Row 5: Intelligence & Goals Tier — AI Insights & Active Goals (2 : 1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <AIInsights userId={userId} />
         </div>
         <div className="lg:col-span-1">
@@ -135,11 +135,11 @@ export function DashboardBento({
 
       {/* Row 6: Live Operations & Upcoming */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bento-tile">
-          <UpcomingRecurring userId={userId} />
+        <div className="bento-tile h-full">
+          <UpcomingRecurring userId={userId} className="h-full" />
         </div>
-        <div className="bento-tile">
-          <BudgetProgressList userId={userId} />
+        <div className="bento-tile h-full">
+          <BudgetProgressList userId={userId} className="h-full" />
         </div>
       </div>
 

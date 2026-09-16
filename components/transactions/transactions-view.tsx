@@ -29,6 +29,7 @@ interface TransactionsViewProps {
   sortBy?: "date" | "amount" | "description"
   sortOrder?: "asc" | "desc"
   hasAnyTransactions: boolean
+  defaultWalletId?: string
 }
 
 export function TransactionsView({
@@ -41,6 +42,7 @@ export function TransactionsView({
   sortBy = "date",
   sortOrder = "desc",
   hasAnyTransactions,
+  defaultWalletId,
 }: TransactionsViewProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [importOpen, setImportOpen] = useState(false)
@@ -177,7 +179,11 @@ export function TransactionsView({
           </div>
           {wallets.length > 0 ? (
             <div className="w-full lg:w-auto">
-              <AddTransactionDialog categories={categories} wallets={wallets} />
+              <AddTransactionDialog
+                categories={categories}
+                wallets={wallets}
+                defaultWalletId={defaultWalletId}
+              />
             </div>
           ) : (
             <span className="text-sm text-muted-foreground italic lg:w-auto">Create a wallet first to add transactions.</span>

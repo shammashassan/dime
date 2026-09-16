@@ -2,11 +2,11 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Activity } from "lucide-react"
+import { ArrowUpRight } from "lucide-react"
+import { Card } from "@/components/ui/card"
 import { Cell, Pie, PieChart } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { HealthTier, PillarId, PillarScore } from "@/types"
 
@@ -90,27 +90,33 @@ export function FinancialHealthGaugeCard({
   }, [activeData])
 
   return (
-    <div
+    <Card
       className={cn(
-        "bento-tile rounded-2xl border border-border/50 bg-card shadow-xs overflow-hidden h-full flex flex-col",
+        "bento-tile flex h-full flex-col justify-between border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0",
         className
       )}
     >
-      {/* Compact Header */}
-      <div className="px-4 py-2.5 border-b border-border/30 flex items-center justify-between">
-        <Link href="/health" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Activity className="size-3.5 text-muted-foreground" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Financial Health
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+            financial health
           </span>
-        </Link>
-        <Link href="/health">
-          <Badge
-            variant="outline"
-            className={cn("text-[10px] font-semibold uppercase tracking-wider cursor-pointer", currentTier.badgeClassName)}
+          <span
+            className={cn(
+              "inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full border",
+              currentTier.badgeClassName
+            )}
           >
             {currentTier.label}
-          </Badge>
+          </span>
+        </div>
+        <Link
+          href="/health"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0"
+        >
+          <span>View hub</span>
+          <ArrowUpRight className="size-3" />
         </Link>
       </div>
 
@@ -226,6 +232,6 @@ export function FinancialHealthGaugeCard({
           </div>
         </ScrollArea>
       )}
-    </div>
+    </Card>
   )
 }

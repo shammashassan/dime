@@ -242,6 +242,7 @@ export interface CreateLoanActionInput {
   amount: number
   currency: string
   date?: string | Date
+  dueDate?: string | Date
 }
 
 export async function createLoanAction(input: CreateLoanActionInput) {
@@ -277,6 +278,7 @@ export async function createLoanAction(input: CreateLoanActionInput) {
       currency: input.currency,
       walletId: wallet._id.toString(),
       date: loanDate,
+      dueDate: input.dueDate ? new Date(input.dueDate) : undefined,
       status: "active",
       reminderSchedule: [7, 3, 1, 0],
     })

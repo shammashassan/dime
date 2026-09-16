@@ -9,6 +9,7 @@ import { requireApprovedUser } from "@/lib/auth-guard"
 import { getWallets } from "@/lib/queries/wallets"
 import { getCategories } from "@/lib/queries/categories"
 import { getFilteredTransactions, getFilteredTransactionsCount } from "@/lib/queries/transactions"
+import { getPreferences } from "@/lib/queries/preferences"
 import { TransactionsView } from "@/components/transactions/transactions-view"
 import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
@@ -70,12 +71,13 @@ async function TransactionsContent({
   const sortOrder = params.sortOrder === "asc" ? "asc" : "desc"
 
   // Fetch in parallel
-  const [wallets, categories, transactions, totalCount, hasAnyTransactions] = await Promise.all([
+  const [wallets, categories, transactions, totalCount, hasAnyTransactions, preferences] = await Promise.all([
     getWallets(userId),
     getCategories(userId),
     getFilteredTransactions(userId, filters, { limit: pageSize, skip }, { sortBy, sortOrder }),
     getFilteredTransactionsCount(userId, filters),
-    getFilteredTransactionsCount(userId, {}).then(c => c > 0)
+    getFilteredTransactionsCount(userId, {}).then(c => c > 0),
+    getPreferences(userId),
   ])
 
   return (
@@ -89,6 +91,7 @@ async function TransactionsContent({
       sortBy={sortBy}
       sortOrder={sortOrder}
       hasAnyTransactions={hasAnyTransactions}
+      defaultWalletId={preferences?.defaultWalletId}
     />
   )
 }

@@ -52,12 +52,11 @@ export function ExecutiveKpiStrip({
   ]
 
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-3 gap-4 w-full", className)}>
+    <div className={cn("flex flex-wrap gap-4 w-full", className)}>
       {items.map((item) => (
         <MetricCard
           key={item.title}
           className="bento-tile"
-          style={{ minWidth: 0 }}
           icon={item.icon}
           color={item.color}
           label={item.title}

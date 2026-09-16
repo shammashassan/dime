@@ -10,9 +10,10 @@ import { Category, Wallet } from "@/types"
 interface AddTransactionDialogProps {
   categories: Category[]
   wallets: Wallet[]
+  defaultWalletId?: string
 }
 
-export function AddTransactionDialog({ categories, wallets }: AddTransactionDialogProps) {
+export function AddTransactionDialog({ categories, wallets, defaultWalletId }: AddTransactionDialogProps) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -23,16 +24,15 @@ export function AddTransactionDialog({ categories, wallets }: AddTransactionDial
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] min-w-0">
-        <DialogHeader>
+        <DialogHeader className="pb-1">
           <DialogTitle>Add Transaction</DialogTitle>
         </DialogHeader>
-        <div className="py-2">
-          <TransactionForm
-            categories={categories}
-            wallets={wallets}
-            onSuccess={() => setOpen(false)}
-          />
-        </div>
+        <TransactionForm
+          categories={categories}
+          wallets={wallets}
+          defaultWalletId={defaultWalletId}
+          onSuccess={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   )

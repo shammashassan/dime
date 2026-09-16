@@ -17,13 +17,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon, Loader2, Sparkles, Trash2, Plus, ArrowDownRight, ArrowUpRight, ArrowLeftRight } from "lucide-react"
+import { CalendarIcon, Loader2, Sparkles, Trash2, Plus, ArrowDownRight, ArrowUpRight, ArrowLeftRight, Zap, SlidersHorizontal } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { ReceiptScannerModal } from "@/components/transactions/receipt-scanner-modal"
 import { generateSplitId, validateSplits } from "@/lib/split-utils"
 import { cn } from "@/lib/utils"
 import { refreshNotifications } from "@/components/notifications/notifications-provider"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 const clientSchema = z
   .object({
@@ -126,6 +127,7 @@ interface TransactionFormProps {
   wallets: Wallet[]
   transactions?: Transaction[]
   initialTransaction?: Transaction
+  defaultWalletId?: string
   onSuccess?: () => void
 }
 
@@ -134,6 +136,7 @@ export function TransactionForm({
   wallets,
   transactions = [],
   initialTransaction,
+  defaultWalletId,
   onSuccess,
 }: TransactionFormProps) {
   const router = useRouter()
@@ -142,6 +145,12 @@ export function TransactionForm({
   const [scannerOpen, setScannerOpen] = useState(false)
 
   const isEditing = !!initialTransaction
+  const [mode, setMode] = useState<"simple" | "detailed">(isEditing ? "detailed" : "simple")
+
+  const preferredWallet = defaultWalletId
+    ? wallets.find((w) => w._id.toString() === defaultWalletId && !w.isArchived)
+    : undefined
+  const hasPreferredWallet = !!preferredWallet
 
   const handleScanComplete = (scanned: any) => {
     setValue("description", scanned.merchant || scanned.description, { shouldDirty: true })
@@ -172,7 +181,11 @@ export function TransactionForm({
   }
 
   // Attempt to pre-resolve source and target wallets if counterpart transaction is in local list
-  let initialWalletId = initialTransaction?.walletId || (wallets[0]?._id?.toString() || "")
+  let initialWalletId =
+    initialTransaction?.walletId ||
+    preferredWallet?._id?.toString() ||
+    wallets[0]?._id?.toString() ||
+    ""
   let initialTargetWalletId: string | undefined = undefined
 
   if (initialTransaction?.type === "transfer" && initialTransaction.linkedTransactionId) {
@@ -219,7 +232,7 @@ export function TransactionForm({
     targetWalletId: initialTargetWalletId,
     categoryId: initialTransaction?.categoryId || "uncategorized",
     amount: initialTransaction?.amount ? initialTransaction.amount / 100 : undefined,
-    currency: initialTransaction?.currency || (wallets[0]?.currency || "USD"),
+    currency: initialTransaction?.currency || (preferredWallet?.currency || wallets[0]?.currency || "USD"),
     description: initialTransaction?.description || "",
     notes: initialTransaction?.notes || "",
     date: initialDate,
@@ -242,6 +255,7 @@ export function TransactionForm({
   } = useForm<any>({
     resolver: zodResolver(clientSchema),
     defaultValues,
+    shouldUnregister: false,
   })
 
   const { fields, append, remove } = useFieldArray({
@@ -462,37 +476,162 @@ export function TransactionForm({
 
   return (
     <>
-      {!isEditing && (
-        <div className="flex items-center justify-between p-3.5 bg-muted/30 rounded-xl border border-border/40 gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Sparkles className="size-4 animate-pulse" />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-bold text-foreground">Have a receipt?</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Scan it to auto-fill the transaction details.</p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setScannerOpen(true)}
-            className="font-semibold cursor-pointer"
-          >
-            Scan Receipt
-          </Button>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && (
           <div className="p-3 text-sm font-medium text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
             {error}
           </div>
         )}
 
-        <FieldGroup>
+        <Tabs
+          value={mode}
+          onValueChange={(val) => setMode(val as "simple" | "detailed")}
+          className="w-full"
+        >
+          {!isEditing && (
+            <div className="flex justify-center w-full mb-2">
+              <TabsList className="inline-flex h-auto p-1 bg-muted/80 rounded-2xl gap-1 border border-border/20">
+                <TabsTrigger
+                  value="simple"
+                  className="flex items-center justify-center gap-1.5 rounded-xl px-5 py-2 text-xs font-semibold transition-all cursor-pointer border-0 shadow-none data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:font-bold data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground dark:data-[state=active]:bg-background dark:data-[state=active]:text-foreground"
+                >
+                  <Zap className="size-3.5 shrink-0" />
+                  Quick Add
+                </TabsTrigger>
+                <TabsTrigger
+                  value="detailed"
+                  className="flex items-center justify-center gap-1.5 rounded-xl px-5 py-2 text-xs font-semibold transition-all cursor-pointer border-0 shadow-none data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:font-bold data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground dark:data-[state=active]:bg-background dark:data-[state=active]:text-foreground"
+                >
+                  <SlidersHorizontal className="size-3.5 shrink-0" />
+                  Detailed
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          )}
+
+          {/* Simple Mode */}
+          <TabsContent value="simple" className="space-y-3.5 pt-1 focus-visible:outline-none">
+            <FieldGroup className="gap-3">
+              {/* Amount */}
+              <Field data-invalid={!!errors.amount}>
+                <FieldLabel>Amount</FieldLabel>
+                <InputGroup>
+                  <InputGroupAddon align="inline-start">
+                    <InputGroupText>{walletCurrency}</InputGroupText>
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    aria-invalid={!!errors.amount}
+                    className="text-base font-semibold"
+                    {...register("amount", { valueAsNumber: true })}
+                    autoFocus
+                  />
+                </InputGroup>
+                {errors.amount?.message && <FieldError>{String(errors.amount.message)}</FieldError>}
+              </Field>
+
+              {/* Description */}
+              <Field data-invalid={!!errors.description}>
+                <FieldLabel>Description</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    type="text"
+                    placeholder="What was this for? (e.g. Lunch, Groceries)"
+                    aria-invalid={!!errors.description}
+                    {...register("description")}
+                  />
+                </InputGroup>
+                {errors.description?.message && <FieldError>{String(errors.description.message)}</FieldError>}
+              </Field>
+
+              {/* Wallet (Conditional: only shown when NO preferred wallet) */}
+              {!hasPreferredWallet && (
+                <Field data-invalid={!!errors.walletId}>
+                  <FieldLabel>Wallet</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="walletId"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={(val) => {
+                          field.onChange(val)
+                          const w = wallets.find((x) => x._id.toString() === val)
+                          if (w) setValue("currency", w.currency)
+                        }}
+                      >
+                        <SelectTrigger aria-invalid={!!errors.walletId} className="h-10 rounded-xl">
+                          <SelectValue placeholder="Select Wallet" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {wallets.map((w) => (
+                            <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                              <div className="flex items-center gap-2">
+                                <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
+                                <span>{w.name} ({w.currency})</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.walletId?.message && <FieldError>{String(errors.walletId.message)}</FieldError>}
+                </Field>
+              )}
+
+              {/* If preferred wallet exists, subtle info chip */}
+              {hasPreferredWallet && preferredWallet && (
+                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-muted/40 text-xs text-muted-foreground border border-border/30">
+                  <div className="flex items-center gap-2">
+                    <span className="size-2.5 rounded-full" style={{ backgroundColor: preferredWallet.color }} />
+                    <span>Paid via <strong className="text-foreground">{preferredWallet.name}</strong></span>
+                  </div>
+                  <span>Today • Expense</span>
+                </div>
+              )}
+            </FieldGroup>
+
+            <div>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-10 rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/95 flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="size-4 animate-spin" />}
+                Add Transaction
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Detailed Mode */}
+          <TabsContent value="detailed" className="space-y-4 pt-1 focus-visible:outline-none">
+            {!isEditing && (
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-2xl border border-border/40 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Sparkles className="size-3.5 animate-pulse" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-bold text-foreground">Have a receipt?</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Scan it to auto-fill the transaction details.</p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setScannerOpen(true)}
+                  className="font-semibold cursor-pointer h-8 text-xs rounded-xl"
+                >
+                  Scan Receipt
+                </Button>
+              </div>
+            )}
+
+        <FieldGroup className="gap-4">
           {/* Transaction Type */}
           <Field>
             <FieldLabel>Transaction Type</FieldLabel>
@@ -500,7 +639,7 @@ export function TransactionForm({
               control={control}
               name="type"
               render={({ field }) => (
-                <div className="grid grid-cols-3 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                <div className="grid grid-cols-3 gap-1 p-1 bg-muted/80 rounded-2xl text-xs font-semibold">
                   {[
                     { value: "expense", label: "Expense", icon: ArrowDownRight },
                     { value: "income", label: "Income", icon: ArrowUpRight },
@@ -514,7 +653,7 @@ export function TransactionForm({
                         type="button"
                         onClick={() => field.onChange(t.value)}
                         className={cn(
-                          "flex items-center justify-center gap-1.5 py-2 px-3 rounded-md transition-all text-center cursor-pointer",
+                          "flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all text-center cursor-pointer",
                           isSelected
                             ? "bg-background text-foreground shadow-xs font-bold"
                             : "text-muted-foreground hover:text-foreground"
@@ -1052,7 +1191,9 @@ export function TransactionForm({
             {isEditing ? "Save Changes" : "Create Transaction"}
           </Button>
         </div>
-      </form>
+      </TabsContent>
+    </Tabs>
+  </form>
 
       {!isEditing && (
         <ReceiptScannerModal

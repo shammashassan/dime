@@ -96,9 +96,9 @@ export function LandingHero({ startAnimation }: { startAnimation: boolean }) {
     >
       {/* ── Background blobs ──────────────────────────────────── */}
       <div aria-hidden="true" className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute left-1/2 top-10 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-primary/10 blur-[110px] dark:bg-primary/6" />
-        <div className="absolute -left-20 top-1/3 h-[340px] w-[340px] rounded-full bg-indigo-500/10 blur-[80px] dark:bg-indigo-500/5" />
-        <div className="absolute right-0 bottom-10 h-[380px] w-[380px] rounded-full bg-purple-500/10 blur-[90px] dark:bg-purple-500/5" />
+        <div className="absolute left-1/2 top-10 h-150 w-150 -translate-x-1/2 rounded-full bg-primary/10 blur-[110px] dark:bg-primary/6" />
+        <div className="absolute -left-20 top-1/3 h-85 w-85 rounded-full bg-indigo-500/10 blur-[80px] dark:bg-indigo-500/5" />
+        <div className="absolute right-0 bottom-10 h-95 w-95 rounded-full bg-purple-500/10 blur-[90px] dark:bg-purple-500/5" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl">

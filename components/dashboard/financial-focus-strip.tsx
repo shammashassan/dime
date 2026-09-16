@@ -1,6 +1,11 @@
 import Link from "next/link"
 import { AlertCircle, CalendarClock, HandCoins, Bell } from "lucide-react"
 import { MetricCard } from "@/components/ui/metric-card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel"
 import { DashboardFocusCounts } from "@/types"
 import { formatCurrency } from "@/lib/utils"
 
@@ -52,25 +57,62 @@ export function FinancialFocusStrip({ counts }: FinancialFocusStripProps) {
   ]
 
   return (
-    <div className="flex flex-wrap gap-4 w-full">
-      {items.map((item) => (
-        <MetricCard
-          key={item.title}
-          asChild
-          className="bento-tile"
-          icon={item.icon}
-          color={item.color}
-          label={item.title}
-          value={item.value}
-          subtext={item.subtext}
-          valueClassName={item.valueClassName}
+    <div className="w-full">
+      {/* Mobile: shadcn Carousel with touch drag & 18% peek */}
+      <div className="block sm:hidden w-full -mx-1 px-1">
+        <Carousel
+          opts={{
+            align: "start",
+            dragFree: true,
+          }}
+          className="w-full"
         >
-          <Link
-            href={item.href}
-            aria-label={`${item.title}: ${item.value}`}
-          />
-        </MetricCard>
-      ))}
+          <CarouselContent className="-ml-3 py-2.5 px-2">
+            {items.map((item) => (
+              <CarouselItem key={item.title} className="pl-3 basis-[82%]">
+                <MetricCard
+                  asChild
+                  className="bento-tile w-full"
+                  style={{ minWidth: "100%" }}
+                  icon={item.icon}
+                  color={item.color}
+                  label={item.title}
+                  value={item.value}
+                  subtext={item.subtext}
+                  valueClassName={item.valueClassName}
+                >
+                  <Link
+                    href={item.href}
+                    aria-label={`${item.title}: ${item.value}`}
+                  />
+                </MetricCard>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
+
+      {/* Tablet & Desktop: Standard flex-wrap row */}
+      <div className="hidden sm:flex flex-wrap gap-4 w-full">
+        {items.map((item) => (
+          <MetricCard
+            key={item.title}
+            asChild
+            className="bento-tile"
+            icon={item.icon}
+            color={item.color}
+            label={item.title}
+            value={item.value}
+            subtext={item.subtext}
+            valueClassName={item.valueClassName}
+          >
+            <Link
+              href={item.href}
+              aria-label={`${item.title}: ${item.value}`}
+            />
+          </MetricCard>
+        ))}
+      </div>
     </div>
   )
 }
