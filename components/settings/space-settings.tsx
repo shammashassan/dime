@@ -477,7 +477,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
 
   if (!activeOrgId) {
     return (
-      <Card className="border border-dashed border-border/60 bg-card rounded-2xl">
+      <Card className="border border-dashed border-border/60 rounded-2xl">
         <CardContent className="flex flex-col items-center justify-center p-8 text-center">
           <Building className="h-10 w-10 text-muted-foreground mb-4 opacity-50" />
           <h3 className="font-bold text-lg">No Active Shared Space</h3>
@@ -492,7 +492,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
   return (
     <div className="space-y-6">
       <form onSubmit={handleSavePreferences}>
-        <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+        <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
           <CardHeader>
             <CardTitle className="text-lg font-bold">Space Preferences</CardTitle>
             <CardDescription>
@@ -592,7 +592,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       </form>
 
       {/* 2. Members Management Card */}
-      <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+      <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
         <CardHeader>
           <CardTitle className="text-lg font-bold">Space Members & Invitations</CardTitle>
           <CardDescription>
@@ -866,7 +866,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       </Card>
 
       {/* 3. Danger Zone Card */}
-      <Card className="border border-rose-500/20 bg-card shadow-md rounded-2xl overflow-hidden">
+      <Card className="border border-rose-500/20 shadow-md rounded-2xl overflow-hidden">
         <CardHeader>
           <CardTitle className="text-lg font-bold text-rose-500 flex items-center gap-2">
             <ShieldAlert className="size-5" /> Danger Zone

@@ -122,7 +122,7 @@ export function CategoryBreakdown({
   return (
     <Card
       className={cn(
-        "bento-tile flex h-full flex-col border-border/50 bg-card shadow-xs",
+        "bento-tile flex h-full flex-col border-border/50 shadow-xs",
         className
       )}
     >

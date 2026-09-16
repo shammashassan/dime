@@ -439,15 +439,15 @@ export function WalletDetails({
                                         }
 
                                         return (
-                                            <Item key={tx._id.toString()} size="sm" className="group" asChild>
-                                                <Link href={`/transactions/${tx._id.toString()}`}>
+                                            <Item key={tx._id.toString()} size="sm" className="group">
+                                                <Link href={`/transactions/${tx._id.toString()}`} className="flex flex-1 items-center gap-2.5 min-w-0">
                                                     <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
                                                         <TxIcon className="size-3.5" />
                                                     </ItemMedia>
 
                                                     <ItemContent className="gap-0.5">
                                                         <ItemTitle className="flex-wrap gap-2">
-                                                            <span className="text-xs font-bold text-foreground truncate">{tx.description}</span>
+                                                            <span className="text-xs font-bold text-foreground truncate group-hover:underline underline-offset-4">{tx.description}</span>
                                                             <span className="text-[10px] font-normal text-muted-foreground">{formatDate(tx.date)}</span>
                                                         </ItemTitle>
                                                         <ItemDescription className="text-[11px]">
@@ -461,46 +461,50 @@ export function WalletDetails({
                                                             )}
                                                         </ItemDescription>
                                                     </ItemContent>
-
-                                                    <ItemActions>
-                                                        <span
-                                                            className={cn(
-                                                                "text-xs font-bold whitespace-nowrap tabular-nums shrink-0",
-                                                                isIncome ? "text-emerald-500" : isExpense ? "text-foreground" : "text-amber-500"
-                                                            )}
-                                                        >
-                                                            {isIncome ? "+" : isExpense ? "-" : ""}
-                                                            {formatCurrency(tx.amount, tx.currency)}
-                                                        </span>
-
-                                                        <div className="size-6 flex items-center justify-center shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                                            <AlertDialog>
-                                                                <AlertDialogTrigger asChild>
-                                                                    <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <Trash2 className="size-3.5" />
-                                                                    </button>
-                                                                </AlertDialogTrigger>
-                                                                <AlertDialogContent>
-                                                                    <AlertDialogHeader>
-                                                                        <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                                                            <Trash2 />
-                                                                        </AlertDialogMedia>
-                                                                        <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
-                                                                        <AlertDialogDescription>
-                                                                            This will permanently delete this transaction and revert the wallet balance. This cannot be undone.
-                                                                        </AlertDialogDescription>
-                                                                    </AlertDialogHeader>
-                                                                    <AlertDialogFooter>
-                                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                        <AlertDialogAction variant="destructive" onClick={() => handleDeleteTransaction(tx._id.toString())}>
-                                                                            Delete
-                                                                        </AlertDialogAction>
-                                                                    </AlertDialogFooter>
-                                                                </AlertDialogContent>
-                                                            </AlertDialog>
-                                                        </div>
-                                                    </ItemActions>
                                                 </Link>
+
+                                                <ItemActions>
+                                                    <span
+                                                        className={cn(
+                                                            "text-xs font-bold whitespace-nowrap tabular-nums shrink-0",
+                                                            isIncome ? "text-emerald-500" : isExpense ? "text-foreground" : "text-amber-500"
+                                                        )}
+                                                    >
+                                                        {isIncome ? "+" : isExpense ? "-" : ""}
+                                                        {formatCurrency(tx.amount, tx.currency)}
+                                                    </span>
+
+                                                    <div className="size-6 flex items-center justify-center shrink-0">
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <button
+                                                                    type="button"
+                                                                    aria-label="Delete transaction"
+                                                                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                >
+                                                                    <Trash2 className="size-3.5" />
+                                                                </button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                                                                        <Trash2 />
+                                                                    </AlertDialogMedia>
+                                                                    <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This will permanently delete this transaction and revert the wallet balance. This cannot be undone.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                    <AlertDialogAction variant="destructive" onClick={() => handleDeleteTransaction(tx._id.toString())}>
+                                                                        Delete
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                </ItemActions>
                                             </Item>
                                         )
                                     })}

@@ -369,9 +369,11 @@ export function ContactDetails({
         <div className="flex items-start gap-3.5">
           <Link
             href="/contacts"
+            aria-label="Back to contacts"
             className="flex items-center justify-center size-11 shrink-0 border border-border/40 hover:bg-muted/50 rounded-2xl transition-colors mt-0.5"
           >
             <ArrowLeft className="size-4" />
+            <span className="sr-only">Back to contacts</span>
           </Link>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -656,96 +658,122 @@ export function ContactDetails({
                         : "#"
 
                     return (
-                      <Item key={event.id} size="sm" className="group flex items-center justify-between gap-3 overflow-hidden" asChild>
-                        <Link href={eventHref}>
-                          <ItemMedia className={cn("size-8 rounded-xl border flex items-center justify-center shrink-0", iconColor)}>
-                            <DotIcon className="size-3.5" />
-                          </ItemMedia>
+                      <Item key={event.id} size="sm" className="group flex items-center justify-between gap-3 overflow-hidden">
+                        {eventHref !== "#" ? (
+                          <Link href={eventHref} className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <ItemMedia className={cn("size-8 rounded-xl border flex items-center justify-center shrink-0", iconColor)}>
+                              <DotIcon className="size-3.5" />
+                            </ItemMedia>
 
-                          <ItemContent className="gap-0.5 min-w-0 flex-1">
-                            <ItemTitle className="flex items-center justify-between gap-2">
-                              <span className="text-xs font-bold text-foreground truncate">{event.title}</span>
-                              <span className="text-[10px] font-normal text-muted-foreground shrink-0">{format(event.date, "PP")}</span>
-                            </ItemTitle>
-                            <ItemDescription className="line-clamp-2 text-[11px] text-muted-foreground leading-snug">
-                              {event.description}
-                            </ItemDescription>
-                          </ItemContent>
+                            <ItemContent className="gap-0.5 min-w-0 flex-1">
+                              <ItemTitle className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-bold text-foreground truncate group-hover:underline underline-offset-4">{event.title}</span>
+                                <span className="text-[10px] font-normal text-muted-foreground shrink-0">{format(event.date, "PP")}</span>
+                              </ItemTitle>
+                              <ItemDescription className="line-clamp-2 text-[11px] text-muted-foreground leading-snug">
+                                {event.description}
+                              </ItemDescription>
+                            </ItemContent>
+                          </Link>
+                        ) : (
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <ItemMedia className={cn("size-8 rounded-xl border flex items-center justify-center shrink-0", iconColor)}>
+                              <DotIcon className="size-3.5" />
+                            </ItemMedia>
 
-                          <ItemActions className="shrink-0 flex items-center gap-1.5 ml-auto text-right">
-                            {event.amount !== undefined && (
-                              <span className={cn("text-xs font-bold whitespace-nowrap tabular-nums text-right", event.type === "overdue" ? "text-rose-500" : "")}>
-                                {event.type === "repayment" ? "-" : ""}{formatCurrency(event.amount, event.currency)}
-                              </span>
-                            )}
+                            <ItemContent className="gap-0.5 min-w-0 flex-1">
+                              <ItemTitle className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-bold text-foreground truncate">{event.title}</span>
+                                <span className="text-[10px] font-normal text-muted-foreground shrink-0">{format(event.date, "PP")}</span>
+                              </ItemTitle>
+                              <ItemDescription className="line-clamp-2 text-[11px] text-muted-foreground leading-snug">
+                                {event.description}
+                              </ItemDescription>
+                            </ItemContent>
+                          </div>
+                        )}
 
-                            <div className="flex items-center gap-1 shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                              <div className="size-6 flex items-center justify-center">
-                                {event.type === "repayment" && event.repaymentId && (
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Trash2 className="size-3.5" />
-                                      </button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                          <Trash2 />
-                                        </AlertDialogMedia>
-                                        <AlertDialogTitle>Delete this repayment?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          This will delete this repayment transaction, update the loan balance, and revert the wallet balance. This cannot be undone.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel disabled={deletingEventId === event.repaymentId}>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          variant="destructive"
-                                          disabled={deletingEventId === event.repaymentId}
-                                          onClick={() => handleDeleteRepaymentEvent(event.repaymentId!)}
-                                        >
-                                          Delete Repayment
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                )}
+                        <ItemActions className="shrink-0 flex items-center gap-1.5 ml-auto text-right">
+                          {event.amount !== undefined && (
+                            <span className={cn("text-xs font-bold whitespace-nowrap tabular-nums text-right", event.type === "overdue" ? "text-rose-500" : "")}>
+                              {event.type === "repayment" ? "-" : ""}{formatCurrency(event.amount, event.currency)}
+                            </span>
+                          )}
 
-                                {event.type === "loan_created" && (
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Trash2 className="size-3.5" />
-                                      </button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                          <Trash2 />
-                                        </AlertDialogMedia>
-                                        <AlertDialogTitle>Delete this loan record?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          This will permanently delete this loan, all its repayments, and revert the associated wallet balances.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel disabled={deletingEventId === event.loanId}>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          variant="destructive"
-                                          disabled={deletingEventId === event.loanId}
-                                          onClick={() => event.loanId && handleDeleteLoanEvent(event.loanId)}
-                                        >
-                                          Delete Loan
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                )}
-                              </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <div className="size-6 flex items-center justify-center">
+                              {event.type === "repayment" && event.repaymentId && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <button
+                                      type="button"
+                                      aria-label="Delete repayment"
+                                      className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <Trash2 className="size-3.5" />
+                                    </button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                                        <Trash2 />
+                                      </AlertDialogMedia>
+                                      <AlertDialogTitle>Delete this repayment?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will delete this repayment transaction, update the loan balance, and revert the wallet balance. This cannot be undone.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel disabled={deletingEventId === event.repaymentId}>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        variant="destructive"
+                                        disabled={deletingEventId === event.repaymentId}
+                                        onClick={() => handleDeleteRepaymentEvent(event.repaymentId!)}
+                                      >
+                                        Delete Repayment
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+
+                              {event.type === "loan_created" && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <button
+                                      type="button"
+                                      aria-label="Delete loan record"
+                                      className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <Trash2 className="size-3.5" />
+                                    </button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                                        <Trash2 />
+                                      </AlertDialogMedia>
+                                      <AlertDialogTitle>Delete this loan record?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently delete this loan, all its repayments, and revert the associated wallet balances.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel disabled={deletingEventId === event.loanId}>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        variant="destructive"
+                                        disabled={deletingEventId === event.loanId}
+                                        onClick={() => event.loanId && handleDeleteLoanEvent(event.loanId)}
+                                      >
+                                        Delete Loan
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
                             </div>
-                          </ItemActions>
-                        </Link>
+                          </div>
+                        </ItemActions>
                       </Item>
                     )
                   })}

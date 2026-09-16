@@ -211,7 +211,7 @@ export function ContactsView({ contacts }: ContactsViewProps) {
           return (
             <Card
               key={idx}
-              className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]"
+              className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]"
               style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }}
             >
               <div
@@ -356,7 +356,7 @@ export function ContactsView({ contacts }: ContactsViewProps) {
             return (
               <Card
                 key={contact._id}
-                className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full justify-between cursor-pointer"
+                className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full justify-between cursor-pointer"
                 onClick={() => router.push(`/contacts/${contact._id}`)}
               >
                 {/* Top Accent Bar */}

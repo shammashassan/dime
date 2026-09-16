@@ -85,7 +85,7 @@ export async function UpcomingRecurring({ userId }: UpcomingRecurringProps) {
   }
 
   return (
-    <Card className="border border-border/40 shadow-xl bg-card">
+    <Card className="border border-border/40 shadow-xl">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div className="flex flex-col gap-1">
           <CardTitle className="text-lg font-bold flex items-center gap-2">

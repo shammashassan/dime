@@ -67,7 +67,7 @@ export function ExpensesList({ expenses, currentUserId }: ExpensesListProps) {
         return (
           <Card
             key={expense._id.toString()}
-            className="group @container relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full justify-between"
+            className="group @container relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full justify-between"
             onClick={() => router.push(`/shared-expenses/${expense._id.toString()}`)}
           >
             {/* Top Accent Line matching Loan Card */}

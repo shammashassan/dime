@@ -31,7 +31,7 @@ export function AssetValuationInsightsCard({
   return (
     <Card
       className={cn(
-        "@container rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden relative bg-card shrink-0",
+        "@container rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden relative shrink-0",
         className
       )}
     >

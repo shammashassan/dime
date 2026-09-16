@@ -51,7 +51,7 @@ export default function GlobalError({
               onClick={() => reset()}
               className="rounded-xl font-bold gap-1.5"
             >
-              <RotateCcw className="size-4" />
+              <RotateCcw data-icon="inline-start" className="size-4" />
               Reload Application
             </Button>
             <Button
@@ -60,7 +60,7 @@ export default function GlobalError({
               onClick={() => { window.location.href = "/" }}
               className="rounded-xl font-bold gap-1.5 border-border/60"
             >
-              <Home className="size-4" />
+              <Home data-icon="inline-start" className="size-4" />
               Return Home
             </Button>
           </EmptyContent>

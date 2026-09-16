@@ -176,6 +176,7 @@ export function PendingTable({ users }: PendingTableProps) {
               <TableRow className="border-border/40 hover:bg-transparent">
                 <TableHead className="w-12 text-center">
                   <Checkbox
+                    aria-label="Select all pending users"
                     checked={pendingUsers.length > 0 && selectedIds.length === pendingUsers.length}
                     onCheckedChange={toggleSelectAll}
                     disabled={pendingUsers.length === 0}
@@ -206,6 +207,7 @@ export function PendingTable({ users }: PendingTableProps) {
                     >
                       <TableCell className="text-center">
                         <Checkbox
+                          aria-label={`Select user ${u.name || u.email}`}
                           checked={isSelected}
                           onCheckedChange={() => toggleSelect(u.id)}
                         />

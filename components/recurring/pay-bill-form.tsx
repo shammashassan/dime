@@ -9,7 +9,7 @@ import { markBillAsPaid } from "@/lib/actions/bills"
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupInput } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2 } from "lucide-react"
@@ -109,29 +109,37 @@ export function PayBillForm({ bill, rule, wallets, onSuccess }: PayBillFormProps
         </Field>
 
         <Field data-invalid={!!errors.walletId}>
-          <FieldLabel>Paid From</FieldLabel>
+          <FieldLabel htmlFor="pay-bill-wallet">Paid From</FieldLabel>
           <Controller
             control={control}
             name="walletId"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger aria-invalid={!!errors.walletId} className="h-10 rounded-xl">
+                <SelectTrigger
+                  id="pay-bill-wallet"
+                  aria-label="Paid From"
+                  aria-invalid={!!errors.walletId}
+                  aria-describedby={errors.walletId ? "pay-bill-wallet-error" : undefined}
+                  className="h-10 rounded-xl"
+                >
                   <SelectValue placeholder="Select Wallet" />
                 </SelectTrigger>
                 <SelectContent>
-                  {wallets.map((w) => (
-                    <SelectItem key={w._id.toString()} value={w._id.toString()}>
-                      <div className="flex items-center gap-2">
-                        <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
-                        <span>{w.name} ({w.currency})</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {wallets.map((w) => (
+                      <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
+                          <span>{w.name} ({w.currency})</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             )}
           />
-          {errors.walletId && <FieldError>{(errors.walletId as any).message}</FieldError>}
+          {errors.walletId && <FieldError id="pay-bill-wallet-error">{(errors.walletId as any).message}</FieldError>}
         </Field>
 
         <Field data-invalid={!!errors.paidDate}>
@@ -143,7 +151,9 @@ export function PayBillForm({ bill, rule, wallets, onSuccess }: PayBillFormProps
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     variant="outline"
+                    aria-label="Pick date paid"
                     className="w-full justify-start font-normal min-w-0"
                   >
                     <CalendarIcon className="mr-2 size-4 text-muted-foreground shrink-0" />

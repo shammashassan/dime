@@ -151,7 +151,9 @@ export function ValuationDialog({
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
+                        aria-label="Pick valuation date"
                         className={cn(
                           "w-full rounded-xl justify-start text-left font-normal bg-transparent border-input",
                           !field.value && "text-muted-foreground"
@@ -177,9 +179,10 @@ export function ValuationDialog({
 
             {/* New Value */}
             <Field data-invalid={!!errors.value}>
-              <FieldLabel>New Value ({assetCurrency})</FieldLabel>
+              <FieldLabel htmlFor="valuation-new-value">New Value ({assetCurrency})</FieldLabel>
               <InputGroup>
                 <InputGroupInput
+                  id="valuation-new-value"
                   type="number"
                   step="any"
                   placeholder="0.00"
@@ -192,9 +195,11 @@ export function ValuationDialog({
 
             {/* Notes */}
             <Field data-invalid={!!errors.notes}>
-              <FieldLabel>Notes (Optional)</FieldLabel>
+              <FieldLabel htmlFor="valuation-notes">Notes (Optional)</FieldLabel>
               <textarea
+                id="valuation-notes"
                 placeholder="Details regarding this appraisal or price change..."
+                aria-label="Notes (Optional)"
                 className="flex min-h-[70px] w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 {...register("notes")}
               />

@@ -243,6 +243,7 @@ export function CSVImportModal({
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept=".csv"
+                aria-label="Upload CSV statement"
                 className="hidden"
               />
               <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground shadow-xs">

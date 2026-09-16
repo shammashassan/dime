@@ -75,7 +75,7 @@ interface MetricCardProps {
 
 function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: MetricCardProps) {
   return (
-    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-50", className)} style={style}>
+    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-50", className)} style={style}>
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: `radial-gradient(120% 100% at 0% 0%, ${color}, transparent 60%)` }} />
       <CardContent className="relative p-4 flex items-center gap-3">
         <div className="size-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: color + "18", color }}>
@@ -229,7 +229,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
     const iconColor = isIncome ? "#10b981" : accent
 
     return (
-      <Card key={rule._id.toString()} onClick={() => router.push(`/recurring/${rule._id.toString()}`)} className={cn("group @container relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", !rule.isActive && "opacity-70")}>
+      <Card key={rule._id.toString()} onClick={() => router.push(`/recurring/${rule._id.toString()}`)} className={cn("group @container relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", !rule.isActive && "opacity-70")}>
         <div className="h-0.75 w-full shrink-0" style={{ backgroundColor: accent }} />
         <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -419,7 +419,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
     const isSkipped = bill.status === "skipped"
 
     return (
-      <Card key={bill._id.toString()} onClick={() => router.push(`/recurring/${bill.ruleId}`)} className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", (isPaid || isSkipped) && "opacity-70")}>
+      <Card key={bill._id.toString()} onClick={() => router.push(`/recurring/${bill.ruleId}`)} className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer", (isPaid || isSkipped) && "opacity-70")}>
         <div className={cn("h-0.75 w-full shrink-0", isPaid ? "bg-emerald-500" : isSkipped ? "bg-muted" : isOverdue ? "bg-rose-500" : "bg-amber-500")} />
         <CardHeader className="flex items-start justify-between gap-2 px-4 pt-4 pb-2">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">

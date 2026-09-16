@@ -118,7 +118,7 @@ export function QuickLogCard({
   return (
     <Card
       className={cn(
-        "bento-tile flex h-full flex-col gap-3 border-border/50 bg-card p-5 shadow-xs",
+        "bento-tile flex h-full flex-col gap-3 border-border/50 p-5 shadow-xs",
         className
       )}
     >

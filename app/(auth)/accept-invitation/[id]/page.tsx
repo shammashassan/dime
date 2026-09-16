@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useSession, authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { toast } from "sonner"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
@@ -193,7 +193,7 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
   if (!sessionData) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 bg-background">
-        <Card ref={cardRef} className="w-full max-w-md border border-border/40 bg-card shadow-lg rounded-2xl overflow-hidden">
+        <Card ref={cardRef} className="w-full max-w-md border border-border/40 shadow-lg rounded-2xl overflow-hidden">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
               <Mail className="h-6 w-6" />
@@ -208,6 +208,7 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
               Collaborate on transactions, balance statements, and monthly budgets in real-time.
             </p>
             <Alert className="bg-primary/5 border-primary/10 text-left rounded-xl">
+              <AlertTitle className="text-xs font-semibold">Sign In Required</AlertTitle>
               <AlertDescription className="text-xs">
                 Please sign in to your Dime account or create a new one to accept and join the workspace.
               </AlertDescription>
@@ -237,7 +238,7 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
   if (inviteError) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 bg-background">
-        <Card ref={cardRef} className="w-full max-w-md border border-rose-500/20 bg-card shadow-lg rounded-2xl overflow-hidden">
+        <Card ref={cardRef} className="w-full max-w-md border border-rose-500/20 shadow-lg rounded-2xl overflow-hidden">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-500 mb-3">
               <AlertTriangle className="h-6 w-6" />
@@ -249,6 +250,7 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
           </CardHeader>
           <CardContent className="text-center text-sm text-muted-foreground py-2">
             <Alert className="bg-rose-500/5 border-rose-500/10 text-left rounded-xl text-rose-500">
+              <AlertTitle className="text-xs font-semibold">Invitation Error</AlertTitle>
               <AlertDescription className="text-xs font-semibold">
                 {inviteError}
               </AlertDescription>
@@ -271,7 +273,7 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
 
     return (
       <div className="flex min-h-screen items-center justify-center p-4 bg-background">
-        <Card ref={cardRef} className="w-full max-w-md border border-border/40 bg-card shadow-lg rounded-2xl overflow-hidden">
+        <Card ref={cardRef} className="w-full max-w-md border border-border/40 shadow-lg rounded-2xl overflow-hidden">
           <CardHeader className="text-center pb-4">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-3">
               <Building className="h-6 w-6" />
@@ -288,27 +290,26 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
 
             {emailMismatch ? (
               <Alert className="bg-amber-500/5 border-amber-500/20 rounded-xl text-amber-600">
-                <div className="flex gap-2.5 items-start">
-                  <AlertTriangle className="size-4 shrink-0 mt-0.5" />
-                  <div className="space-y-1.5 text-left text-xs">
-                    <p className="font-semibold leading-none">Email Address Mismatch</p>
-                    <p className="text-muted-foreground leading-normal">
-                      This invite was sent to <strong>{invitation.email}</strong>, but you are signed in as <strong>{userEmail}</strong>.
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleSignOutAndRetry}
-                      className="h-7 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 rounded-lg px-2 flex items-center gap-1 mt-1 font-bold"
-                    >
-                      <LogOut className="size-3" />
-                      Sign in with correct account
-                    </Button>
-                  </div>
-                </div>
+                <AlertTriangle className="size-4 shrink-0 mt-0.5" />
+                <AlertTitle className="font-semibold text-xs leading-none">Email Address Mismatch</AlertTitle>
+                <AlertDescription className="text-xs text-muted-foreground leading-normal space-y-2">
+                  <p>
+                    This invite was sent to <strong>{invitation.email}</strong>, but you are signed in as <strong>{userEmail}</strong>.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleSignOutAndRetry}
+                    className="h-7 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 rounded-lg px-2 flex items-center gap-1 font-bold"
+                  >
+                    <LogOut data-icon="inline-start" className="size-3" />
+                    Sign in with correct account
+                  </Button>
+                </AlertDescription>
               </Alert>
             ) : (
               <Alert className="bg-primary/5 border-primary/10 text-left rounded-xl">
+                <AlertTitle className="text-xs font-semibold">Shared Space Invitation</AlertTitle>
                 <AlertDescription className="text-xs text-muted-foreground leading-normal">
                   Accepting this invite will link your transactions ledger context to this space. You can easily switch back to your Personal space at any time from the sidebar.
                 </AlertDescription>

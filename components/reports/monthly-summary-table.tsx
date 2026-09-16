@@ -125,7 +125,7 @@ export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps
   }, [rows])
 
   return (
-    <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+    <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
       <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <CardTitle className="text-lg font-bold">Monthly Performance Summary</CardTitle>

@@ -325,8 +325,9 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
           </AlertDialogHeader>
           <div className="py-2">
             <Field>
-              <FieldLabel className="text-xs font-semibold text-muted-foreground">Reason for Ban</FieldLabel>
+              <FieldLabel htmlFor="ban-reason" className="text-xs font-semibold text-muted-foreground">Reason for Ban</FieldLabel>
               <Input
+                id="ban-reason"
                 placeholder="Violating Terms of Service, abuse, etc."
                 value={banReason}
                 onChange={(e) => setBanReason(e.target.value)}

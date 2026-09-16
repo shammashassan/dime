@@ -59,7 +59,7 @@ export function CalendarAgendaList({ days, currency, onSelectDay }: CalendarAgen
 
   if (activeDays.length === 0) {
     return (
-      <Card size="sm" className="rounded-2xl border border-border/50 bg-card p-10 flex flex-col items-center justify-center shadow-xs">
+      <Card size="sm" className="rounded-2xl border border-border/50 p-10 flex flex-col items-center justify-center shadow-xs">
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon" className="bg-emerald-500/10 text-emerald-500">

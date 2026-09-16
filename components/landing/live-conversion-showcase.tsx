@@ -129,7 +129,7 @@ export function LiveConversionShowcase() {
 
   return (
     <section id="analytics" ref={sectionRef} className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
-      <Card className="relative overflow-hidden rounded-[3rem] border border-border bg-card shadow-xl">
+      <Card className="relative overflow-hidden rounded-[3rem] border border-border shadow-xl">
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 to-transparent" />
         <CardContent className="p-12 lg:p-20 relative z-10">
           <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-12 gap-y-16 lg:max-w-none lg:grid-cols-2 lg:items-center">

@@ -25,6 +25,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -212,26 +213,33 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
             {/* Currency & Target Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field data-invalid={!!errors.currency}>
-                <FieldLabel>Currency</FieldLabel>
+                <FieldLabel htmlFor="goal-currency-trigger">Currency</FieldLabel>
                 <Controller
                   control={control}
                   name="currency"
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger aria-invalid={!!errors.currency} className="h-10 rounded-xl">
+                      <SelectTrigger
+                        id="goal-currency-trigger"
+                        aria-invalid={!!errors.currency}
+                        aria-describedby={errors.currency ? "goal-currency-error" : undefined}
+                        className="h-10 rounded-xl"
+                      >
                         <SelectValue placeholder="Select currency" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl">
-                        {CURRENCIES.map((cur) => (
-                          <SelectItem key={cur} value={cur} className="cursor-pointer">
-                            {cur}
-                          </SelectItem>
-                        ))}
+                        <SelectGroup>
+                          {CURRENCIES.map((cur) => (
+                            <SelectItem key={cur} value={cur} className="cursor-pointer">
+                              {cur}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   )}
                 />
-                {errors.currency && <FieldError>{(errors.currency as any).message}</FieldError>}
+                {errors.currency && <FieldError id="goal-currency-error">{(errors.currency as any).message}</FieldError>}
               </Field>
 
               <Field data-invalid={!!errors.targetDate}>

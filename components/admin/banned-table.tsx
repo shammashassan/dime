@@ -67,6 +67,7 @@ export function BannedTable({ users }: BannedTableProps) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
           placeholder="Search banned users..."
+          aria-label="Search banned users"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"

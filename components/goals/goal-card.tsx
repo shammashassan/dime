@@ -71,7 +71,7 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
   return (
     <>
       <Card
-        className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer"
+        className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer"
         onClick={() => router.push(`/goals/${goal._id.toString()}`)}
       >
         {/* Top Accent line */}

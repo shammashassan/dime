@@ -10,7 +10,7 @@ import { createRepayment } from "@/lib/actions/loans"
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -155,12 +155,14 @@ export function RepaymentDialog({
           <FieldGroup>
             {/* Amount */}
             <Field data-invalid={!!errors.amount}>
-              <FieldLabel>Repayment Amount</FieldLabel>
+              <FieldLabel htmlFor="repayment-amount">Repayment Amount</FieldLabel>
               <div className="relative">
                 <input
+                  id="repayment-amount"
                   type="number"
                   step="any"
                   placeholder="0.00"
+                  aria-label="Repayment Amount"
                   className="flex h-9 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pr-12"
                   {...register("amount")}
                 />
@@ -176,21 +178,23 @@ export function RepaymentDialog({
 
             {/* Wallet Selection */}
             <Field data-invalid={!!errors.walletId}>
-              <FieldLabel>Wallet / Account</FieldLabel>
+              <FieldLabel htmlFor="repayment-wallet">Wallet / Account</FieldLabel>
               <Controller
                 control={control}
                 name="walletId"
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="rounded-xl border border-input h-9">
+                    <SelectTrigger id="repayment-wallet" aria-label="Select account or wallet" className="rounded-xl border border-input h-9">
                       <SelectValue placeholder="Select account/wallet" />
                     </SelectTrigger>
                     <SelectContent className="border border-border/40 shadow-lg">
-                      {wallets.map((w) => (
-                        <SelectItem key={w._id.toString()} value={w._id.toString()}>
-                          {w.name} ({formatCurrency(w.balance, w.currency)})
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {wallets.map((w) => (
+                          <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                            {w.name} ({formatCurrency(w.balance, w.currency)})
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 )}
@@ -234,9 +238,11 @@ export function RepaymentDialog({
 
             {/* Notes */}
             <Field data-invalid={!!errors.notes}>
-              <FieldLabel>Notes (Optional)</FieldLabel>
+              <FieldLabel htmlFor="repayment-notes">Notes (Optional)</FieldLabel>
               <textarea
+                id="repayment-notes"
                 placeholder="Repayment details..."
+                aria-label="Notes (Optional)"
                 className="flex min-h-[60px] w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 {...register("notes")}
               />

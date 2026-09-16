@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -23,8 +24,10 @@ export function AdminUsersTabs({
   pendingTab,
   bannedTab,
   adminsTab,
-  defaultTab,
+  defaultTab = "all",
 }: AdminUsersTabsProps) {
+  const [activeTab, setActiveTab] = useState(defaultTab)
+
   const tabNames: Record<string, string> = {
     all: "All Users",
     pending: "Pending Approval",
@@ -32,35 +35,36 @@ export function AdminUsersTabs({
     admins: "Administrators",
   }
 
-  const initialTab = defaultTab && tabNames[defaultTab] ? defaultTab : "all"
-  const [activeTab, setActiveTab] = useState(initialTab)
-
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <div className="flex flex-col gap-4">
-        {/* Desktop TabsList (visible on sm and larger screens) */}
-        <TabsList className="hidden sm:inline-flex rounded-xl bg-muted/80 p-1 self-start items-center gap-1 max-w-full overflow-x-auto scrollbar-hide h-auto border-0">
+    <div className="w-full">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full space-y-4"
+      >
+        {/* Desktop Tabs List */}
+        <TabsList className="hidden sm:inline-flex h-10 bg-muted/60 p-1 border border-border/40 rounded-xl">
           <TabsTrigger
             value="all"
-            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
           >
             All Users
           </TabsTrigger>
           <TabsTrigger
             value="pending"
-            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
           >
             Pending Approval
           </TabsTrigger>
           <TabsTrigger
             value="banned"
-            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
           >
             Banned Users
           </TabsTrigger>
           <TabsTrigger
             value="admins"
-            className="rounded-lg px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer whitespace-nowrap"
+            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
           >
             Administrators
           </TabsTrigger>
@@ -69,22 +73,24 @@ export function AdminUsersTabs({
         {/* Mobile Select (visible on smaller screens) */}
         <div className="sm:hidden w-full">
           <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-full border-border/40 bg-card h-10">
+            <SelectTrigger aria-label="Select user category" className="w-full border-border/40 bg-card h-10">
               <SelectValue placeholder={tabNames[activeTab]} />
             </SelectTrigger>
             <SelectContent className="bg-popover border border-border/40 rounded-xl">
-              <SelectItem value="all" className="rounded-lg">
-                All Users
-              </SelectItem>
-              <SelectItem value="pending" className="rounded-lg">
-                Pending Approval
-              </SelectItem>
-              <SelectItem value="banned" className="rounded-lg">
-                Banned Users
-              </SelectItem>
-              <SelectItem value="admins" className="rounded-lg">
-                Administrators
-              </SelectItem>
+              <SelectGroup>
+                <SelectItem value="all" className="rounded-lg">
+                  All Users
+                </SelectItem>
+                <SelectItem value="pending" className="rounded-lg">
+                  Pending Approval
+                </SelectItem>
+                <SelectItem value="banned" className="rounded-lg">
+                  Banned Users
+                </SelectItem>
+                <SelectItem value="admins" className="rounded-lg">
+                  Administrators
+                </SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
@@ -104,7 +110,7 @@ export function AdminUsersTabs({
             {adminsTab}
           </TabsContent>
         </div>
-      </div>
-    </Tabs>
+      </Tabs>
+    </div>
   )
 }

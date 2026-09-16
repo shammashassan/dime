@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -494,7 +494,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
 
   return (
     <TooltipProvider>
-      <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+      <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between border-b border-border/10 pb-4">
           <div>
             <CardTitle className="text-lg font-bold flex items-center gap-2">
@@ -576,7 +576,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {AUTOMATION_TEMPLATES.map(template => (
-                    <Card key={template.key} className="border border-border/40 bg-card hover:border-border/80 transition-all rounded-2xl shadow-sm flex flex-col justify-between">
+                    <Card key={template.key} className="border border-border/40 hover:border-border/80 transition-all rounded-2xl shadow-sm flex flex-col justify-between">
                       <CardHeader className="p-4 pb-2">
                         <div className="flex justify-between items-start gap-2">
                           <CardTitle className="text-sm font-bold leading-tight">{template.name}</CardTitle>
@@ -622,7 +622,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                   return (
                     <Card
                       key={rule._id.toString()}
-                      className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col min-h-[220px]"
+                      className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col min-h-[220px]"
                     >
                       {/* Top Accent Line */}
                       <div
@@ -978,28 +978,32 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                               <SelectValue placeholder="Select wallet" />
                             </SelectTrigger>
                             <SelectContent>
-                              {wallets.map(w => (
-                                <SelectItem key={w._id.toString()} value={w._id.toString()}>
-                                  <div className="flex items-center gap-2">
-                                    <span className="size-2 rounded-full" style={{ backgroundColor: w.color }} />
-                                    <span>{w.name} ({w.currency})</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
+                              <SelectGroup>
+                                {wallets.map(w => (
+                                  <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                                    <div className="flex items-center gap-2">
+                                      <span className="size-2 rounded-full" style={{ backgroundColor: w.color }} />
+                                      <span>{w.name} ({w.currency})</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                         ) : cond.field === "walletType" ? (
                           <Select value={cond.value} onValueChange={(val) => handleConditionValueChange(idx, val)}>
-                            <SelectTrigger className="h-8 text-xs rounded-xl">
+                            <SelectTrigger className="h-8 text-xs rounded-xl" aria-label="Select wallet type">
                               <SelectValue placeholder="Select wallet type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="bank">Bank / Checking</SelectItem>
-                              <SelectItem value="credit_card">Credit Card</SelectItem>
-                              <SelectItem value="cash">Cash Wallet</SelectItem>
-                              <SelectItem value="savings">Savings Account</SelectItem>
-                              <SelectItem value="investment">Investment Account</SelectItem>
-                              <SelectItem value="lent">Personal Loan / Lent</SelectItem>
+                              <SelectGroup>
+                                <SelectItem value="bank">Bank / Checking</SelectItem>
+                                <SelectItem value="credit_card">Credit Card</SelectItem>
+                                <SelectItem value="cash">Cash Wallet</SelectItem>
+                                <SelectItem value="savings">Savings Account</SelectItem>
+                                <SelectItem value="investment">Investment Account</SelectItem>
+                                <SelectItem value="lent">Personal Loan / Lent</SelectItem>
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                         ) : cond.field === "amount" ? (
@@ -1007,6 +1011,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                             type="number"
                             step="0.01"
                             placeholder="0.00"
+                            aria-label="Condition amount value"
                             className="h-8 text-xs rounded-xl"
                             value={cond.value}
                             onChange={e => handleConditionValueChange(idx, e.target.value)}
@@ -1014,6 +1019,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                         ) : (
                           <Input
                             placeholder="Value..."
+                            aria-label="Condition text value"
                             className="h-8 text-xs rounded-xl"
                             value={cond.value}
                             onChange={e => handleConditionValueChange(idx, e.target.value)}
@@ -1085,29 +1091,33 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                               <SelectValue placeholder="Select Budget" />
                             </SelectTrigger>
                             <SelectContent>
-                              {budgets.length > 0 ? budgets.map(b => (
-                                <SelectItem key={b._id.toString()} value={b._id.toString()}>{b.name}</SelectItem>
-                              )) : (
-                                <SelectItem value="empty" disabled>No active budgets found</SelectItem>
-                              )}
+                              <SelectGroup>
+                                {budgets.length > 0 ? budgets.map(b => (
+                                  <SelectItem key={b._id.toString()} value={b._id.toString()}>{b.name}</SelectItem>
+                                )) : (
+                                  <SelectItem value="empty" disabled>No active budgets found</SelectItem>
+                                )}
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                         )}
 
                         {action.type === "move_to_wallet" && (
                           <Select value={action.walletId} onValueChange={(val) => handleActionValueChange(idx, "walletId", val)}>
-                            <SelectTrigger className="h-8 text-xs rounded-xl">
+                            <SelectTrigger className="h-8 text-xs rounded-xl" aria-label="Select wallet">
                               <SelectValue placeholder="Select Wallet" />
                             </SelectTrigger>
                             <SelectContent>
-                              {wallets.map(w => (
-                                <SelectItem key={w._id.toString()} value={w._id.toString()}>
-                                  <div className="flex items-center gap-2">
-                                    <span className="size-2 rounded-full" style={{ backgroundColor: w.color }} />
-                                    <span>{w.name} ({w.currency})</span>
-                                  </div>
-                                </SelectItem>
-                              ))}
+                              <SelectGroup>
+                                {wallets.map(w => (
+                                  <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                                    <div className="flex items-center gap-2">
+                                      <span className="size-2 rounded-full" style={{ backgroundColor: w.color }} />
+                                      <span>{w.name} ({w.currency})</span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                         )}
@@ -1115,6 +1125,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                         {action.type === "assign_tags" && (
                           <Input
                             placeholder="Comma-separated tags (e.g. business, taxi)"
+                            aria-label="Tags to assign"
                             className="h-8 text-xs rounded-xl"
                             value={action.tags?.join(", ") || ""}
                             onChange={e => handleActionValueChange(idx, "tags", e.target.value.split(",").map(t => t.trim()).filter(Boolean))}
@@ -1124,6 +1135,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                         {action.type === "set_notes" && (
                           <Input
                             placeholder="Notes text..."
+                            aria-label="Notes to set"
                             className="h-8 text-xs rounded-xl"
                             value={action.notes || ""}
                             onChange={e => handleActionValueChange(idx, "notes", e.target.value)}
@@ -1132,12 +1144,14 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
 
                         {action.type === "mark_recurring" && (
                           <Select value={String(action.isRecurring)} onValueChange={(val) => handleActionValueChange(idx, "isRecurring", val === "true")}>
-                            <SelectTrigger className="h-8 text-xs rounded-xl">
+                            <SelectTrigger className="h-8 text-xs rounded-xl" aria-label="Mark recurring status">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="true">Mark as Recurring</SelectItem>
-                              <SelectItem value="false">Mark as Non-Recurring</SelectItem>
+                              <SelectGroup>
+                                <SelectItem value="true">Mark as Recurring</SelectItem>
+                                <SelectItem value="false">Mark as Non-Recurring</SelectItem>
+                              </SelectGroup>
                             </SelectContent>
                           </Select>
                         )}

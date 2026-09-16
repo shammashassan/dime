@@ -34,7 +34,7 @@ export async function MonthlySummary({ userId, className }: MonthlySummaryCardPr
   return (
     <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-6", className)}>
       {/* Income Summary */}
-      <Card className="relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full flex flex-col gap-3 pb-0">
+      <Card className="relative overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full flex flex-col gap-3 pb-0">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-emerald-500" />
@@ -75,7 +75,7 @@ export async function MonthlySummary({ userId, className }: MonthlySummaryCardPr
       </Card>
 
       {/* Expense Summary */}
-      <Card className="relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full flex flex-col gap-3 pb-0">
+      <Card className="relative overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group h-full flex flex-col gap-3 pb-0">
         <CardHeader className="pb-2">
           <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-rose-500" />

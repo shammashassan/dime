@@ -38,7 +38,7 @@ export function SettlementsList({ settlements, currentUserId }: SettlementsListP
         })
 
         return (
-          <Card key={s._id.toString()} className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md transition-all duration-300">
+          <Card key={s._id.toString()} className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-all duration-300">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">

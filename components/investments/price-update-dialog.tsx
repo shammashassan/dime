@@ -63,8 +63,9 @@ export function PriceUpdateDialog({ holdingId, currentPrice, trigger }: PriceUpd
         <form onSubmit={onSubmit} className="space-y-4 pt-2">
           <FieldGroup>
             <Field>
-              <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Market Price per Unit</FieldLabel>
+              <FieldLabel htmlFor="market-price-input" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Market Price per Unit</FieldLabel>
               <Input 
+                id="market-price-input"
                 type="number" 
                 step="any" 
                 value={price} 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 
 export function ResetPasswordForm({ token }: { token: string }) {
@@ -60,6 +60,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
       <CardContent>
         {success ? (
           <Alert className="border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <AlertTitle>Password Reset Successful</AlertTitle>
             <AlertDescription>
               Your password has been successfully reset. You can now sign in with your new password.
             </AlertDescription>
@@ -68,6 +69,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <Alert variant="destructive">
+                <AlertTitle>Reset Failed</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -78,6 +80,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
                 <Input
                   id="new-password"
                   type="password"
+                  autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -89,6 +92,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
                 <Input
                   id="confirm-new-password"
                   type="password"
+                  autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required

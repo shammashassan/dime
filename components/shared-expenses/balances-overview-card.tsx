@@ -38,7 +38,7 @@ export function BalancesOverviewCard({
   const { currency, pairwiseBalances, simplifiedTransfers } = viewModel
 
   return (
-    <Card className="rounded-2xl border border-border/50 bg-card shadow-sm gap-0 py-0 overflow-hidden">
+    <Card className="rounded-2xl border border-border/50 shadow-sm gap-0 py-0 overflow-hidden">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 space-y-0 p-4 border-b border-border/30">
         <div>
           <CardTitle className="text-base font-extrabold flex items-center gap-2">

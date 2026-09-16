@@ -487,16 +487,15 @@ export function RecurringDetails({
                           key={bill._id.toString()}
                           size="sm"
                           className={cn("group", isSkipped && "opacity-60")}
-                          asChild={hasLink}
                         >
                           {hasLink ? (
-                            <Link href={`/transactions/${bill.transactionId}`}>
+                            <Link href={`/transactions/${bill.transactionId}`} className="flex flex-1 items-center gap-2.5 min-w-0">
                               <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
                                 <DotIcon className="size-3.5" />
                               </ItemMedia>
                               <ItemContent className="gap-0.5">
                                 <ItemTitle className="flex-wrap gap-2">
-                                  <span className={cn("text-xs font-bold", isSkipped ? "text-muted-foreground line-through" : "text-foreground")}>
+                                  <span className={cn("text-xs font-bold group-hover:underline underline-offset-4", isSkipped ? "text-muted-foreground line-through" : "text-foreground")}>
                                     {formatDate(bill.dueDate)}
                                   </span>
                                   {isSkipped && (
@@ -509,40 +508,9 @@ export function RecurringDetails({
                                   Paid on {formatDate(bill.paidDate!)}
                                 </ItemDescription>
                               </ItemContent>
-                              <ItemActions>
-                                <span className={cn("text-xs font-bold whitespace-nowrap tabular-nums shrink-0", isSkipped && "text-muted-foreground line-through")}>
-                                  {formatCurrency(bill.actualAmount!, bill.currency)}
-                                </span>
-                                <div className="size-6 flex items-center justify-center shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Trash2 className="size-3.5" />
-                                      </button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                          <Trash2 />
-                                        </AlertDialogMedia>
-                                        <AlertDialogTitle>Delete this bill?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          This will remove the payment record and revert the wallet balance. This cannot be undone.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction variant="destructive" onClick={() => handleDeleteBill(bill)}>
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
-                              </ItemActions>
                             </Link>
                           ) : (
-                            <>
+                            <div className="flex flex-1 items-center gap-2.5 min-w-0">
                               <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
                                 <DotIcon className="size-3.5" />
                               </ItemMedia>
@@ -561,76 +529,30 @@ export function RecurringDetails({
                                   {isSkipped ? "Skipped" : isOverdue ? "Overdue" : "Pending"}
                                 </ItemDescription>
                               </ItemContent>
-                              <ItemActions>
-                                <span className={cn("text-xs font-bold whitespace-nowrap tabular-nums shrink-0", isSkipped && "text-muted-foreground line-through")}>
-                                  {formatCurrency(bill.expectedAmount || 0, bill.currency)}
-                                </span>
-                                {!isSkipped && (
-                                  <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                    <Button size="sm" onClick={() => setPayingBill(bill)} className="rounded-lg font-bold h-7 text-xs shrink-0">
-                                      Pay Now
-                                    </Button>
-                                    <Button size="sm" variant="outline" onClick={() => handleSkipBill(bill)} className="rounded-lg font-bold h-7 text-xs shrink-0 border-border/50 bg-card hover:bg-muted/50">
-                                      Skip
-                                    </Button>
-                                  </div>
-                                )}
-                                <div className="size-6 flex items-center justify-center shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Trash2 className="size-3.5" />
-                                      </button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                          <Trash2 />
-                                        </AlertDialogMedia>
-                                        <AlertDialogTitle>Delete this bill?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          {isSkipped
-                                            ? "This skipped occurrence will be permanently removed from history."
-                                            : "This pending occurrence will be permanently removed."}
-                                          {" "}This cannot be undone.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction variant="destructive" onClick={() => handleDeleteBill(bill)}>
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </div>
-                              </ItemActions>
-                            </>
+                            </div>
                           )}
-                        </Item>
-                      )
-                    })
-                  ) : (
-                    (localHistory as Transaction[]).map((tx) => (
-                      <Item key={tx._id.toString()} size="sm" className="group" asChild>
-                        <Link href={`/transactions/${tx._id.toString()}`}>
-                          <ItemMedia className="size-8 rounded-xl border" style={{ backgroundColor: accent + "18", borderColor: accent + "30", color: accent }}>
-                            {tx.type === "income" ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
-                          </ItemMedia>
-                          <ItemContent className="gap-0.5">
-                            <ItemTitle>
-                              <span className="text-xs font-bold text-foreground">{formatDate(tx.date)}</span>
-                            </ItemTitle>
-                            <ItemDescription className="truncate text-[11px]">{tx.description}</ItemDescription>
-                          </ItemContent>
                           <ItemActions>
-                            <span className={cn("text-xs font-bold whitespace-nowrap tabular-nums shrink-0", tx.type === "income" ? "text-emerald-500" : "text-foreground")}>
-                              {tx.type === "income" ? "+" : ""}{formatCurrency(tx.amount, tx.currency)}
+                            <span className={cn("text-xs font-bold whitespace-nowrap tabular-nums shrink-0", isSkipped && "text-muted-foreground line-through")}>
+                              {formatCurrency(hasLink ? bill.actualAmount! : bill.expectedAmount || 0, bill.currency)}
                             </span>
-                            <div className="size-6 flex items-center justify-center shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                            {!hasLink && !isSkipped && (
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <Button size="sm" onClick={() => setPayingBill(bill)} className="rounded-lg font-bold h-7 text-xs shrink-0">
+                                  Pay Now
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => handleSkipBill(bill)} className="rounded-lg font-bold h-7 text-xs shrink-0 border-border/50 bg-card hover:bg-muted/50">
+                                  Skip
+                                </Button>
+                              </div>
+                            )}
+                            <div className="size-6 flex items-center justify-center shrink-0">
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    type="button"
+                                    aria-label="Delete bill"
+                                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
                                     <Trash2 className="size-3.5" />
                                   </button>
                                 </AlertDialogTrigger>
@@ -639,14 +561,18 @@ export function RecurringDetails({
                                     <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
                                       <Trash2 />
                                     </AlertDialogMedia>
-                                    <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
+                                    <AlertDialogTitle>Delete this bill?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      This will remove this generated transaction and revert the wallet balance. This cannot be undone.
+                                      {hasLink
+                                        ? "This will remove the payment record and revert the wallet balance. This cannot be undone."
+                                        : isSkipped
+                                        ? "This skipped occurrence will be permanently removed from history."
+                                        : "This pending occurrence will be permanently removed. This cannot be undone."}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction variant="destructive" onClick={() => handleDeleteTransaction(tx._id.toString())}>
+                                    <AlertDialogAction variant="destructive" onClick={() => handleDeleteBill(bill)}>
                                       Delete
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
@@ -654,7 +580,58 @@ export function RecurringDetails({
                               </AlertDialog>
                             </div>
                           </ItemActions>
+                        </Item>
+                      )
+                    })
+                  ) : (
+                    (localHistory as Transaction[]).map((tx) => (
+                      <Item key={tx._id.toString()} size="sm" className="group">
+                        <Link href={`/transactions/${tx._id.toString()}`} className="flex flex-1 items-center gap-2.5 min-w-0">
+                          <ItemMedia className="size-8 rounded-xl border" style={{ backgroundColor: accent + "18", borderColor: accent + "30", color: accent }}>
+                            {tx.type === "income" ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
+                          </ItemMedia>
+                          <ItemContent className="gap-0.5">
+                            <ItemTitle>
+                              <span className="text-xs font-bold text-foreground group-hover:underline underline-offset-4">{formatDate(tx.date)}</span>
+                            </ItemTitle>
+                            <ItemDescription className="truncate text-[11px]">{tx.description}</ItemDescription>
+                          </ItemContent>
                         </Link>
+                        <ItemActions>
+                          <span className={cn("text-xs font-bold whitespace-nowrap tabular-nums shrink-0", tx.type === "income" ? "text-emerald-500" : "text-foreground")}>
+                            {tx.type === "income" ? "+" : ""}{formatCurrency(tx.amount, tx.currency)}
+                          </span>
+                          <div className="size-6 flex items-center justify-center shrink-0">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label="Delete transaction"
+                                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                                    <Trash2 />
+                                  </AlertDialogMedia>
+                                  <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will remove this generated transaction and revert the wallet balance. This cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction variant="destructive" onClick={() => handleDeleteTransaction(tx._id.toString())}>
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </ItemActions>
                       </Item>
                     ))
                   )}

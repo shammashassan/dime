@@ -800,7 +800,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
         <div className="flex-1 w-full">
           {/* PROFILE DETAILS */}
           <TabsContent value="profile" className="outline-none">
-            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg font-bold">Profile Details</CardTitle>
                 <CardDescription>
@@ -876,7 +876,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
           {/* SECURITY & LOGIN */}
           <TabsContent value="security" className="outline-none space-y-6">
             {/* 2FA Card */}
-            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-lg font-bold">Two-Factor Authentication (2FA)</CardTitle>
@@ -933,7 +933,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
             </Card>
 
             {/* Passkeys Card */}
-            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-lg font-bold">Passkeys</CardTitle>
@@ -990,7 +990,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
             {/* Change Password Card */}
             {hasCredentials && (
-              <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+              <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
                 <CardHeader>
                   <CardTitle className="text-lg font-bold">Change Password</CardTitle>
                   <CardDescription>
@@ -1061,7 +1061,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
             )}
 
             {/* Active Sessions Card */}
-            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-lg font-bold">Active Sessions</CardTitle>
@@ -1129,7 +1129,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
           {/* PREFERENCES */}
           <TabsContent value="preferences" className="outline-none">
-            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg font-bold">App Preferences</CardTitle>
                 <CardDescription>
@@ -1234,7 +1234,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
           )}
 
           <TabsContent value="invitations" className="outline-none" data-slot="tabs-content">
-            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg font-bold">Invitations</CardTitle>
                 <CardDescription>
@@ -1302,7 +1302,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
           {/* DATA MANAGEMENT */}
           <TabsContent value="data" className="outline-none space-y-6">
             {/* Export Card */}
-            <Card className="border border-border/40 bg-card shadow-md rounded-2xl overflow-hidden">
+            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-lg font-bold">Export Personal Data</CardTitle>
                 <CardDescription>

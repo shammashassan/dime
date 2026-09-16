@@ -64,9 +64,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <Suspense fallback={null}>
-              {children}
-            </Suspense>
+            {children}
             <Suspense fallback={null}>
               {modal}
             </Suspense>

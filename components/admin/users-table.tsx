@@ -36,6 +36,7 @@ export function UsersTable({ users, currentUserRole, currentUserId }: UsersTable
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
           placeholder="Search name, email, username..."
+          aria-label="Search users"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"

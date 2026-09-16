@@ -36,11 +36,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import {
   Edit,
   Trash2,
@@ -64,7 +65,7 @@ interface BudgetsViewProps {
 
 function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: any) {
   return (
-    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]", className)} style={style}>
+    <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]", className)} style={style}>
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: `radial-gradient(120% 100% at 0% 0%, ${color}, transparent 60%)` }} />
       <CardContent className="relative p-4 flex items-center gap-3">
         <div className="size-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style={{ backgroundColor: color + "18", color }}>
@@ -99,7 +100,7 @@ function BudgetCard({
 
   return (
     <Card
-      className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
+      className="group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer"
       onClick={() => router.push(`/budgets/${b._id.toString()}`)}
     >
       {/* Top accent */}
@@ -145,16 +146,19 @@ function BudgetCard({
         </div>
 
         {/* Action buttons — absolutely positioned to prevent layout space reservation */}
-        <div
-          className="absolute top-3.5 right-3 flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="absolute top-3.5 right-3 flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost" size="icon"
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Edit budget"
                 className="size-8 rounded-lg hover:bg-muted/70"
-                onClick={onEdit}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit()
+                }}
               >
                 <Edit className="size-3.5 text-muted-foreground" />
               </Button>
@@ -167,9 +171,15 @@ function BudgetCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost" size="icon"
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Delete budget"
                 className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
-                onClick={onDelete}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete()
+                }}
               >
                 <Trash2 className="size-3.5" />
               </Button>
@@ -368,32 +378,37 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
         {/* Mobile Filter (visible on smaller screens) */}
         <div className="sm:hidden w-full">
           <Select value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-            <SelectTrigger className="w-full border-border/40 bg-card h-10">
+            <SelectTrigger aria-label="Filter budgets by status" className="w-full border-border/40 bg-card h-10">
               <SelectValue placeholder={tabNames[activeTab]} />
             </SelectTrigger>
             <SelectContent className="bg-popover border border-border/40 rounded-xl">
-              <SelectItem value="all" className="rounded-lg">
-                All ({tabCounts.all})
-              </SelectItem>
-              <SelectItem value="under" className="rounded-lg">
-                Under Budget ({tabCounts.under})
-              </SelectItem>
-              <SelectItem value="over" className="rounded-lg">
-                Over Budget ({tabCounts.over})
-              </SelectItem>
+              <SelectGroup>
+                <SelectItem value="all" className="rounded-lg">
+                  All ({tabCounts.all})
+                </SelectItem>
+                <SelectItem value="under" className="rounded-lg">
+                  Under Budget ({tabCounts.under})
+                </SelectItem>
+                <SelectItem value="over" className="rounded-lg">
+                  Over Budget ({tabCounts.over})
+                </SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
         <div className="flex w-full sm:w-auto items-center gap-3 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
           <InputGroup className="w-full sm:w-60 min-w-0">
+            <InputGroupAddon align="inline-start">
+              <Search className="size-3.5" />
+            </InputGroupAddon>
             <InputGroupInput
               placeholder="Search by name..."
+              aria-label="Search budgets by name"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="rounded-xl pl-9"
+              className="rounded-xl"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           </InputGroup>
         </div>
       </div>

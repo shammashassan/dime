@@ -110,7 +110,7 @@ export function AssetHealthDiagnosticsCard({
   return (
     <Card
       className={cn(
-        "rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden bg-card shrink-0",
+        "rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden shrink-0",
         className
       )}
     >

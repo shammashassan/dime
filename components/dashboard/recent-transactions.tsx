@@ -24,7 +24,7 @@ export async function RecentTransactions({ userId }: RecentTransactionsProps) {
   const walletMap = new Map(wallets.map((w) => [w._id.toString(), w]))
 
   return (
-    <Card className="relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300">
+    <Card className="relative overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <div>
           <CardTitle className="text-lg font-bold">Recent Transactions</CardTitle>

@@ -463,7 +463,7 @@ export function SearchResultsView({
             {savedSearches.map((s) => (
               <Card
                 key={s.id}
-                className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-4 transition-all hover:border-primary/50 hover:shadow-xs flex flex-col justify-between gap-3"
+                className="group relative overflow-hidden rounded-2xl border border-border/50 p-4 transition-all hover:border-primary/50 hover:shadow-xs flex flex-col justify-between gap-3"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2.5 min-w-0">

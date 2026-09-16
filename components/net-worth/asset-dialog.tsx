@@ -10,7 +10,7 @@ import { createAsset, updateAsset } from "@/lib/actions/assets"
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -247,9 +247,10 @@ export function AssetDialog({
 
             {/* Name */}
             <Field data-invalid={!!errors.name}>
-              <FieldLabel>Name</FieldLabel>
+              <FieldLabel htmlFor="asset-name">Name</FieldLabel>
               <InputGroup>
                 <InputGroupInput
+                  id="asset-name"
                   placeholder="e.g. Main Residence or Tesla Stock"
                   className="rounded-xl"
                   {...register("name")}
@@ -260,21 +261,23 @@ export function AssetDialog({
 
             {/* Category */}
             <Field data-invalid={!!errors.category}>
-              <FieldLabel>Category</FieldLabel>
+              <FieldLabel htmlFor="asset-category">Category</FieldLabel>
               <Controller
                 name="category"
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="rounded-xl bg-transparent">
+                    <SelectTrigger id="asset-category" aria-label="Select category" className="rounded-xl bg-transparent">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      {categoriesList.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {categoriesList.map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 )}
@@ -286,9 +289,10 @@ export function AssetDialog({
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
                 <Field data-invalid={!!errors.currentValue}>
-                  <FieldLabel>Current Value</FieldLabel>
+                  <FieldLabel htmlFor="asset-current-value">Current Value</FieldLabel>
                   <InputGroup>
                     <InputGroupInput
+                      id="asset-current-value"
                       type="number"
                       step="any"
                       placeholder="0.00"
@@ -301,21 +305,23 @@ export function AssetDialog({
               </div>
               <div>
                 <Field data-invalid={!!errors.currency}>
-                  <FieldLabel>Currency</FieldLabel>
+                  <FieldLabel htmlFor="asset-currency">Currency</FieldLabel>
                   <Controller
                     name="currency"
                     control={control}
                     render={({ field }) => (
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className="rounded-xl bg-transparent">
+                        <SelectTrigger id="asset-currency" aria-label="Select currency" className="rounded-xl bg-transparent">
                           <SelectValue placeholder="USD" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                          {CURRENCIES.map((curr) => (
-                            <SelectItem key={curr} value={curr}>
-                              {curr}
-                            </SelectItem>
-                          ))}
+                          <SelectGroup>
+                            {CURRENCIES.map((curr) => (
+                              <SelectItem key={curr} value={curr}>
+                                {curr}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         </SelectContent>
                       </Select>
                     )}
@@ -327,19 +333,21 @@ export function AssetDialog({
 
             {/* Valuation Method */}
             <Field data-invalid={!!errors.valuationMethod}>
-              <FieldLabel>Valuation Method</FieldLabel>
+              <FieldLabel htmlFor="asset-valuation-method">Valuation Method</FieldLabel>
               <Controller
                 name="valuationMethod"
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="rounded-xl bg-transparent">
+                    <SelectTrigger id="asset-valuation-method" aria-label="Select valuation method" className="rounded-xl bg-transparent">
                       <SelectValue placeholder="Manual" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      <SelectItem value="manual">Manual Valuations</SelectItem>
-                      <SelectItem value="market" disabled>Market Sync (Coming Soon)</SelectItem>
-                      <SelectItem value="calculated" disabled>Calculated (Coming Soon)</SelectItem>
+                      <SelectGroup>
+                        <SelectItem value="manual">Manual Valuations</SelectItem>
+                        <SelectItem value="market" disabled>Market Sync (Coming Soon)</SelectItem>
+                        <SelectItem value="calculated" disabled>Calculated (Coming Soon)</SelectItem>
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 )}
@@ -349,9 +357,10 @@ export function AssetDialog({
 
             {/* Ownership % */}
             <Field data-invalid={!!errors.ownershipPercentage}>
-              <FieldLabel>Ownership Percentage (%)</FieldLabel>
+              <FieldLabel htmlFor="asset-ownership">Ownership Percentage (%)</FieldLabel>
               <InputGroup>
                 <InputGroupInput
+                  id="asset-ownership"
                   type="number"
                   step="any"
                   placeholder="100"
@@ -375,7 +384,9 @@ export function AssetDialog({
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
+                        aria-label="Pick acquisition date"
                         className={cn(
                           "w-full rounded-xl justify-start text-left font-normal bg-transparent border-input",
                           !field.value && "text-muted-foreground"
@@ -401,9 +412,11 @@ export function AssetDialog({
 
             {/* Notes */}
             <Field data-invalid={!!errors.notes}>
-              <FieldLabel>Notes (Optional)</FieldLabel>
+              <FieldLabel htmlFor="asset-notes">Notes (Optional)</FieldLabel>
               <textarea
+                id="asset-notes"
                 placeholder="Purchasing details, registration details, or serial numbers..."
+                aria-label="Notes (Optional)"
                 className="flex min-h-[70px] w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                 {...register("notes")}
               />

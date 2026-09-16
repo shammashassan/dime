@@ -186,7 +186,7 @@ export function InvestmentsView({
 
       {/* ── Tab Contents ── */}
       {!hasData ? (
-        <Card className="rounded-2xl border border-dashed border-border/50 bg-card p-8">
+        <Card className="rounded-2xl border border-dashed border-border/50 p-8">
           <Empty className="py-12">
             <div className="size-16 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center mx-auto mb-4 border border-border/40">
               <Briefcase className="size-8 text-muted-foreground/70" />

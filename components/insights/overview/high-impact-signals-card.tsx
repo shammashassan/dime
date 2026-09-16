@@ -144,11 +144,8 @@ export function HighImpactSignalsCard({
                 return (
                   <HoverCard key={ins.id} openDelay={200}>
                     <HoverCardTrigger asChild>
-                      <Item
-                        asChild
-                        className="cursor-pointer p-2.5 hover:bg-muted/40 transition-colors rounded-xl border-transparent group overflow-hidden"
-                      >
-                        <Link href={href} className="flex items-start gap-2.5 w-full min-w-0">
+                      <Item className="p-2.5 hover:bg-muted/40 transition-colors rounded-xl border-transparent group overflow-hidden flex items-start gap-2.5 w-full min-w-0">
+                        <Link href={href} className="flex items-start gap-2.5 flex-1 min-w-0">
                           {/* Media Icon */}
                           <ItemMedia className={cn("size-7.5 rounded-lg border shrink-0 mt-0.5", iconColor)}>
                             <Icon className="size-4" />
@@ -171,7 +168,7 @@ export function HighImpactSignalsCard({
                               {shortDesc}
                             </ItemDescription>
 
-                            {/* Metric & Utility Actions on the same line */}
+                            {/* Metric descriptor */}
                             <div className="mt-1 flex items-center justify-between gap-1.5 w-full min-w-0">
                               <div className="flex items-center gap-1 min-w-0">
                                 {ins.metricLabel ? (
@@ -184,82 +181,56 @@ export function HighImpactSignalsCard({
                                   </span>
                                 )}
                               </div>
-
-                              {/* Action controls: Star & Dismiss */}
-                              <div className="flex items-center gap-0.5 shrink-0">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      asChild
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-6.5 rounded-md text-muted-foreground hover:text-amber-500 cursor-pointer shrink-0"
-                                    >
-                                      <span
-                                        role="button"
-                                        tabIndex={0}
-                                        aria-label={ins.isBookmarked ? "Remove bookmark" : "Bookmark signal"}
-                                        onClick={(e) => {
-                                          e.preventDefault()
-                                          e.stopPropagation()
-                                          onToggleBookmark(ins.id, !!ins.isBookmarked)
-                                        }}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter" || e.key === " ") {
-                                            e.preventDefault()
-                                            e.stopPropagation()
-                                            onToggleBookmark(ins.id, !!ins.isBookmarked)
-                                          }
-                                        }}
-                                      >
-                                        <Star
-                                          className={cn("size-3.5", ins.isBookmarked ? "fill-amber-500 text-amber-500" : "")}
-                                        />
-                                      </span>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="text-xs">
-                                    {ins.isBookmarked ? "Remove Bookmark" : "Bookmark Signal"}
-                                  </TooltipContent>
-                                </Tooltip>
-
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button
-                                      asChild
-                                      variant="ghost"
-                                      size="icon"
-                                      className="size-6.5 rounded-md text-muted-foreground hover:text-destructive cursor-pointer shrink-0"
-                                    >
-                                      <span
-                                        role="button"
-                                        tabIndex={0}
-                                        aria-label="Dismiss signal"
-                                        onClick={(e) => {
-                                          e.preventDefault()
-                                          e.stopPropagation()
-                                          onDismiss(ins.id)
-                                        }}
-                                        onKeyDown={(e) => {
-                                          if (e.key === "Enter" || e.key === " ") {
-                                            e.preventDefault()
-                                            e.stopPropagation()
-                                            onDismiss(ins.id)
-                                          }
-                                        }}
-                                      >
-                                        <X className="size-3.5" />
-                                      </span>
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top" className="text-xs">
-                                    Dismiss Signal
-                                  </TooltipContent>
-                                </Tooltip>
-                              </div>
                             </div>
                           </ItemContent>
                         </Link>
+
+                        {/* Action controls: Star & Dismiss */}
+                        <div className="flex items-center gap-0.5 shrink-0 self-end">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label={ins.isBookmarked ? "Remove bookmark" : "Bookmark signal"}
+                                className="size-6.5 rounded-md text-muted-foreground hover:text-amber-500 cursor-pointer shrink-0"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  onToggleBookmark(ins.id, !!ins.isBookmarked)
+                                }}
+                              >
+                                <Star
+                                  className={cn("size-3.5", ins.isBookmarked ? "fill-amber-500 text-amber-500" : "")}
+                                />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">
+                              {ins.isBookmarked ? "Remove Bookmark" : "Bookmark Signal"}
+                            </TooltipContent>
+                          </Tooltip>
+
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Dismiss signal"
+                                className="size-6.5 rounded-md text-muted-foreground hover:text-destructive cursor-pointer shrink-0"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  onDismiss(ins.id)
+                                }}
+                              >
+                                <X className="size-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">
+                              Dismiss Signal
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
                       </Item>
                     </HoverCardTrigger>
                     <HoverCardContent

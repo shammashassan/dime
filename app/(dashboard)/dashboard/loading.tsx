@@ -29,7 +29,7 @@ export function DashboardSkeleton() {
 
       {/* Row 1: Command Center & Quick Log */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2 h-[155px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="lg:col-span-2 h-[155px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex flex-col gap-2">
             <div className="flex justify-between items-center">
               <Skeleton className="h-3 w-28 rounded" />
@@ -43,7 +43,7 @@ export function DashboardSkeleton() {
             <Skeleton className="h-7 w-24 rounded-md" />
           </div>
         </Card>
-        <Card className="lg:col-span-1 h-[155px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="lg:col-span-1 h-[155px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex justify-between items-center pb-2 border-b border-border/40">
             <Skeleton className="h-3 w-20 rounded" />
             <Skeleton className="h-6 w-32 rounded-lg" />
@@ -58,7 +58,7 @@ export function DashboardSkeleton() {
 
       {/* Row 2: Loan Action & Financial Health Gauge */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2 h-[260px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="lg:col-span-2 h-[260px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex flex-col gap-3">
             <div className="flex justify-between items-center">
               <Skeleton className="h-3 w-28 rounded" />
@@ -99,7 +99,7 @@ export function DashboardSkeleton() {
       {/* Row 3: Executive KPI Benchmark Strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[...Array(3)].map((_, i) => (
-          <Card key={i} className="h-[105px] p-4.5 border-border/50 bg-card flex flex-col justify-between">
+          <Card key={i} className="h-[105px] p-4.5 border-border/50 flex flex-col justify-between">
             <div className="flex justify-between items-center">
               <Skeleton className="h-3 w-28 rounded" />
               <Skeleton className="size-7 rounded-lg" />
@@ -114,7 +114,7 @@ export function DashboardSkeleton() {
 
       {/* Row 4: Core Visual Analytics */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2 h-[380px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="lg:col-span-2 h-[380px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex justify-between items-center pb-2">
             <div className="flex flex-col gap-1">
               <Skeleton className="h-3 w-28 rounded" />
@@ -124,7 +124,7 @@ export function DashboardSkeleton() {
           </div>
           <Skeleton className="h-[280px] w-full rounded-xl" />
         </Card>
-        <Card className="lg:col-span-1 h-[380px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="lg:col-span-1 h-[380px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex justify-between items-center pb-2">
             <div className="flex flex-col gap-1">
               <Skeleton className="h-3 w-28 rounded" />
@@ -138,7 +138,7 @@ export function DashboardSkeleton() {
 
       {/* Row 5: AI Spending Insights & Active Goals */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="lg:col-span-2 h-[360px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="lg:col-span-2 h-[360px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex justify-between items-start pb-2">
             <div className="flex flex-col gap-1">
               <Skeleton className="h-5 w-44 rounded" />
@@ -152,7 +152,7 @@ export function DashboardSkeleton() {
           </div>
           <Skeleton className="h-4 w-32 rounded" />
         </Card>
-        <Card className="lg:col-span-1 h-[360px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="lg:col-span-1 h-[360px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex justify-between items-center pb-2">
             <div className="flex flex-col gap-1">
               <Skeleton className="h-3 w-24 rounded" />
@@ -170,7 +170,7 @@ export function DashboardSkeleton() {
 
       {/* Row 6: Live Operations & Upcoming */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="h-[300px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="h-[300px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex justify-between items-center pb-2">
             <Skeleton className="h-5 w-40 rounded" />
             <Skeleton className="h-6 w-20 rounded" />
@@ -181,7 +181,7 @@ export function DashboardSkeleton() {
           </div>
           <Skeleton className="h-4 w-36 rounded" />
         </Card>
-        <Card className="h-[300px] p-5 border-border/50 bg-card flex flex-col justify-between">
+        <Card className="h-[300px] p-5 border-border/50 flex flex-col justify-between">
           <div className="flex justify-between items-center pb-2">
             <Skeleton className="h-5 w-36 rounded" />
             <Skeleton className="h-6 w-20 rounded" />
@@ -195,7 +195,7 @@ export function DashboardSkeleton() {
       </div>
 
       {/* Row 7: Recent Transactions Stream */}
-      <Card className="h-[320px] p-5 border-border/50 bg-card flex flex-col justify-between">
+      <Card className="h-[320px] p-5 border-border/50 flex flex-col justify-between">
         <div className="flex justify-between items-center pb-3">
           <div className="flex flex-col gap-1">
             <Skeleton className="h-5 w-44 rounded" />

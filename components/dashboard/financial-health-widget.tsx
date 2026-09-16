@@ -35,7 +35,7 @@ export async function FinancialHealthWidget({ userId, className }: FinancialHeal
   const topRec = recommendations[0]
 
   return (
-    <Card className={cn("rounded-2xl border-border/40 bg-card flex flex-col justify-between", className)}>
+    <Card className={cn("rounded-2xl border-border/40 flex flex-col justify-between", className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

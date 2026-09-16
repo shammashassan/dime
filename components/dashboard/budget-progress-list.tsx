@@ -15,7 +15,7 @@ export async function BudgetProgressList({ userId }: BudgetProgressListProps) {
   const targetCurrency = prefs.defaultCurrency || "USD"
 
   return (
-    <Card className="border border-border/40 shadow-xl bg-card">
+    <Card className="border border-border/40 shadow-xl">
       <CardHeader className="flex flex-col items-start gap-1 pb-4">
         <CardTitle className="text-lg font-bold flex items-center gap-2">
           <PiggyBank className="size-5 text-primary" />

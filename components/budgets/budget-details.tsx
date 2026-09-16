@@ -139,6 +139,8 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-start gap-3.5">
                     <button
+                        type="button"
+                        aria-label="Back to budgets"
                         onClick={() => router.push("/budgets")}
                         className="flex items-center justify-center size-11 shrink-0 border border-border/40 hover:bg-muted/50 rounded-2xl transition-colors mt-0.5 cursor-pointer"
                     >
@@ -409,14 +411,14 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
                                     {sortedTransactions.map((t) => {
                                         const wallet = wallets.find((w) => w._id.toString() === t.walletId)
                                         return (
-                                            <Item key={t._id.toString()} size="sm" className="group" asChild>
-                                                <Link href={`/transactions/${t._id.toString()}`}>
+                                            <Item key={t._id.toString()} size="sm" className="group">
+                                                <Link href={`/transactions/${t._id.toString()}`} className="flex flex-1 items-center gap-2.5 min-w-0">
                                                     <ItemMedia className="size-8 rounded-xl border bg-rose-500/10 text-rose-500 border-rose-500/20">
                                                         <Receipt className="size-3.5" />
                                                     </ItemMedia>
                                                     <ItemContent className="gap-0.5">
                                                         <ItemTitle className="flex-wrap gap-2">
-                                                            <span className="text-xs font-bold text-foreground">
+                                                            <span className="text-xs font-bold text-foreground group-hover:underline underline-offset-4">
                                                                 {t.description || "Transaction"}
                                                             </span>
                                                             <span className="text-[10px] font-normal text-muted-foreground">
@@ -427,44 +429,48 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
                                                             {wallet?.name || "Unknown wallet"}
                                                         </ItemDescription>
                                                     </ItemContent>
-                                                    <ItemActions>
-                                                        <span className="text-xs font-bold whitespace-nowrap tabular-nums text-rose-600 dark:text-rose-400">
-                                                            -{formatCurrency(t.amount, budget.currency)}
-                                                        </span>
-                                                        <div className="size-6 flex items-center justify-center shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                                            <AlertDialog>
-                                                                <AlertDialogTrigger asChild>
-                                                                    <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <Trash2 className="size-3.5" />
-                                                                    </button>
-                                                                </AlertDialogTrigger>
-                                                                <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
-                                                                    <AlertDialogHeader>
-                                                                        <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                                                            <Trash2 />
-                                                                        </AlertDialogMedia>
-                                                                        <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
-                                                                        <AlertDialogDescription>
-                                                                            This will permanently delete this transaction and revert the wallet balance. This cannot be undone.
-                                                                        </AlertDialogDescription>
-                                                                    </AlertDialogHeader>
-                                                                    <AlertDialogFooter>
-                                                                        <AlertDialogCancel className="rounded-xl font-semibold">
-                                                                            Cancel
-                                                                        </AlertDialogCancel>
-                                                                        <AlertDialogAction
-                                                                            variant="destructive"
-                                                                            className="rounded-xl font-semibold"
-                                                                            onClick={() => handleDeleteTransaction(t._id.toString())}
-                                                                        >
-                                                                            Delete
-                                                                        </AlertDialogAction>
-                                                                    </AlertDialogFooter>
-                                                                </AlertDialogContent>
-                                                            </AlertDialog>
-                                                        </div>
-                                                    </ItemActions>
                                                 </Link>
+                                                <ItemActions>
+                                                    <span className="text-xs font-bold whitespace-nowrap tabular-nums text-rose-600 dark:text-rose-400">
+                                                        -{formatCurrency(t.amount, budget.currency)}
+                                                    </span>
+                                                    <div className="size-6 flex items-center justify-center shrink-0">
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <button
+                                                                    type="button"
+                                                                    aria-label="Delete transaction"
+                                                                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                >
+                                                                    <Trash2 className="size-3.5" />
+                                                                </button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                                                                        <Trash2 />
+                                                                    </AlertDialogMedia>
+                                                                    <AlertDialogTitle>Delete this transaction?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This will permanently delete this transaction and revert the wallet balance. This cannot be undone.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel className="rounded-xl font-semibold">
+                                                                        Cancel
+                                                                    </AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        variant="destructive"
+                                                                        className="rounded-xl font-semibold"
+                                                                        onClick={() => handleDeleteTransaction(t._id.toString())}
+                                                                    >
+                                                                        Delete
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                </ItemActions>
                                             </Item>
                                         )
                                     })}

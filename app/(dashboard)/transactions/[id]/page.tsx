@@ -70,7 +70,7 @@ export default async function TransactionDetailPage({
       <div>
         <Button variant="ghost" asChild className="mb-2 pl-0 hover:bg-transparent text-muted-foreground hover:text-foreground">
           <Link href="/transactions" className="flex items-center gap-1.5 text-xs font-bold">
-            <ArrowLeft className="size-3.5" /> Back to Transactions
+            <ArrowLeft data-icon="inline-start" className="size-3.5" /> Back to Transactions
           </Link>
         </Button>
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Transaction Details</h1>

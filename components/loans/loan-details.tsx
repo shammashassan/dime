@@ -735,99 +735,25 @@ export function LoanDetails({
                   const hasLink = !!event.transactionId
 
                   return (
-                    <Item key={event.id} size="sm" className="group" asChild={hasLink}>
+                    <Item key={event.id} size="sm" className="group">
                       {hasLink ? (
-                        <Link href={`/transactions/${event.transactionId}`}>
+                        <Link href={`/transactions/${event.transactionId}`} className="flex flex-1 items-center gap-2.5 min-w-0">
                           <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
                             <DotIcon className="size-3.5" />
                           </ItemMedia>
 
                           <ItemContent className="gap-0.5">
                             <ItemTitle className="flex-wrap gap-2">
-                              <span className="text-xs font-bold text-foreground">{event.title}</span>
+                              <span className="text-xs font-bold text-foreground group-hover:underline underline-offset-4">{event.title}</span>
                               <span className="text-[10px] font-normal text-muted-foreground">{format(event.date, "PP")}</span>
                             </ItemTitle>
                             <ItemDescription className="truncate text-[11px]">
                               {event.description}
                             </ItemDescription>
                           </ItemContent>
-
-                          <ItemActions>
-                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-[76px] text-right">
-                              {event.amount !== undefined
-                                ? `${event.type === "repayment" ? "-" : ""}${formatCurrency(event.amount, loan.currency)}`
-                                : ""}
-                            </span>
-
-                            {/* Fixed-width slot so amounts align across rows whether or not a delete action is present */}
-                            <div className="size-6 flex items-center justify-center shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                              {event.type === "repayment" && event.repaymentId && (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Trash2 className="size-3.5" />
-                                    </button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
-                                    <AlertDialogHeader>
-                                      <AlertDialogMedia>
-                                        <Trash2 />
-                                      </AlertDialogMedia>
-                                      <AlertDialogTitle>Delete this repayment?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        This will delete this repayment transaction, update the loan balance, and revert the wallet balance. This cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel className="rounded-xl font-semibold">Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        variant="destructive"
-                                        className="rounded-xl font-semibold"
-                                        onClick={() => handleDeleteRepayment(event.repaymentId!)}
-                                      >
-                                        Delete Repayment
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              )}
-
-                              {event.type === "created" && (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Trash2 className="size-3.5" />
-                                    </button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
-                                    <AlertDialogHeader>
-                                      <AlertDialogMedia>
-                                        <Trash2 />
-                                      </AlertDialogMedia>
-                                      <AlertDialogTitle>Delete this loan record?</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        This will permanently delete this loan, all repayments, and revert the wallet balances of all associated transactions. You'll be taken back to the loans list.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel className="rounded-xl font-semibold" disabled={isDeletingLoanFromTimeline}>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        variant="destructive"
-                                        className="rounded-xl font-semibold"
-                                        disabled={isDeletingLoanFromTimeline}
-                                        onClick={handleDeleteLoanFromTimeline}
-                                      >
-                                        {isDeletingLoanFromTimeline ? "Deleting..." : "Delete Loan"}
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              )}
-                            </div>
-                          </ItemActions>
                         </Link>
                       ) : (
-                        <>
+                        <div className="flex flex-1 items-center gap-2.5 min-w-0">
                           <ItemMedia className={cn("size-8 rounded-xl border", iconColor)}>
                             <DotIcon className="size-3.5" />
                           </ItemMedia>
@@ -841,17 +767,90 @@ export function LoanDetails({
                               {event.description}
                             </ItemDescription>
                           </ItemContent>
-
-                          <ItemActions>
-                            <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-[76px] text-right">
-                              {event.amount !== undefined
-                                ? `${event.type === "repayment" ? "-" : ""}${formatCurrency(event.amount, loan.currency)}`
-                                : ""}
-                            </span>
-                            <div className="size-6 flex items-center justify-center shrink-0" />
-                          </ItemActions>
-                        </>
+                        </div>
                       )}
+
+                      <ItemActions>
+                        <span className="text-xs font-bold whitespace-nowrap tabular-nums min-w-[76px] text-right">
+                          {event.amount !== undefined
+                            ? `${event.type === "repayment" ? "-" : ""}${formatCurrency(event.amount, loan.currency)}`
+                            : ""}
+                        </span>
+
+                        {/* Fixed-width slot so amounts align across rows whether or not a delete action is present */}
+                        <div className="size-6 flex items-center justify-center shrink-0">
+                          {event.type === "repayment" && event.repaymentId && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label="Delete repayment"
+                                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
+                                <AlertDialogHeader>
+                                  <AlertDialogMedia>
+                                    <Trash2 />
+                                  </AlertDialogMedia>
+                                  <AlertDialogTitle>Delete this repayment?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will delete this repayment transaction, update the loan balance, and revert the wallet balance. This cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl font-semibold">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    variant="destructive"
+                                    className="rounded-xl font-semibold"
+                                    onClick={() => handleDeleteRepayment(event.repaymentId!)}
+                                  >
+                                    Delete Repayment
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+
+                          {event.type === "created" && hasLink && (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label="Delete loan record"
+                                  className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="size-3.5" />
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
+                                <AlertDialogHeader>
+                                  <AlertDialogMedia>
+                                    <Trash2 />
+                                  </AlertDialogMedia>
+                                  <AlertDialogTitle>Delete this loan record?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This will permanently delete this loan, all repayments, and revert the wallet balances of all associated transactions. You'll be taken back to the loans list.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl font-semibold" disabled={isDeletingLoanFromTimeline}>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    variant="destructive"
+                                    className="rounded-xl font-semibold"
+                                    disabled={isDeletingLoanFromTimeline}
+                                    onClick={handleDeleteLoanFromTimeline}
+                                  >
+                                    {isDeletingLoanFromTimeline ? "Deleting..." : "Delete Loan"}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      </ItemActions>
                     </Item>
                   )
                 })}
@@ -946,6 +945,7 @@ export function LoanDetails({
                 <ScrollArea className="h-[120px] bg-muted/30 border border-border/20 rounded-lg">
                   <div className="p-3">
                     <textarea
+                      aria-label="Custom reminder message"
                       ref={(el) => {
                         if (el) {
                           el.style.height = "auto"

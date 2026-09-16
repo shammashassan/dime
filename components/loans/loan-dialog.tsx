@@ -302,8 +302,10 @@ export function LoanDialog({
                   <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
                     <PopoverTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
                         role="combobox"
+                        aria-label="Select or enter contact name"
                         aria-expanded={comboboxOpen}
                         className={cn(
                           "w-full justify-between rounded-xl px-3 text-left font-normal border border-input h-9",
@@ -434,7 +436,7 @@ export function LoanDialog({
                 Interest Rate
                 <Popover>
                   <PopoverTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button type="button" aria-label="Interest rate information" className="text-muted-foreground hover:text-foreground">
                       <Info className="size-3.5" />
                     </button>
                   </PopoverTrigger>

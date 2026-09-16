@@ -416,14 +416,14 @@ export function GoalDetails({ goal, contributions, wallets }: GoalDetailsProps) 
                                     {sortedContributions.map((c) => {
                                         const wallet = wallets.find((w) => w._id.toString() === c.walletId)
                                         return (
-                                            <Item key={c._id.toString()} size="sm" className="group" asChild>
-                                                <Link href={`/transactions/${c._id.toString()}`}>
+                                            <Item key={c._id.toString()} size="sm" className="group">
+                                                <Link href={`/transactions/${c._id.toString()}`} className="flex flex-1 items-center gap-2.5 min-w-0">
                                                     <ItemMedia className="size-8 rounded-xl border bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
                                                         <Plus className="size-3.5" />
                                                     </ItemMedia>
                                                     <ItemContent className="gap-0.5">
                                                         <ItemTitle className="flex-wrap gap-2">
-                                                            <span className="text-xs font-bold text-foreground">Contribution</span>
+                                                            <span className="text-xs font-bold text-foreground group-hover:underline underline-offset-4">Contribution</span>
                                                             <span className="text-[10px] font-normal text-muted-foreground">
                                                                 {format(new Date(c.date), "PP")}
                                                             </span>
@@ -432,44 +432,48 @@ export function GoalDetails({ goal, contributions, wallets }: GoalDetailsProps) 
                                                             {c.notes || `From ${wallet?.name || "wallet"}`}
                                                         </ItemDescription>
                                                     </ItemContent>
-                                                    <ItemActions>
-                                                        <span className="text-xs font-bold whitespace-nowrap tabular-nums text-emerald-600 dark:text-emerald-400">
-                                                            +{formatCurrency(c.amount, goal.currency)}
-                                                        </span>
-                                                        <div className="size-6 flex items-center justify-center shrink-0" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                                                            <AlertDialog>
-                                                                <AlertDialogTrigger asChild>
-                                                                    <button className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                        <Trash2 className="size-3.5" />
-                                                                    </button>
-                                                                </AlertDialogTrigger>
-                                                                <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
-                                                                    <AlertDialogHeader>
-                                                                        <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
-                                                                            <Trash2 />
-                                                                        </AlertDialogMedia>
-                                                                        <AlertDialogTitle>Delete this contribution?</AlertDialogTitle>
-                                                                        <AlertDialogDescription>
-                                                                            This will permanently delete this contribution transaction, revert the wallet balance, and update the goal's saved amount. This cannot be undone.
-                                                                        </AlertDialogDescription>
-                                                                    </AlertDialogHeader>
-                                                                    <AlertDialogFooter>
-                                                                        <AlertDialogCancel className="rounded-xl font-semibold">
-                                                                            Cancel
-                                                                        </AlertDialogCancel>
-                                                                        <AlertDialogAction
-                                                                            variant="destructive"
-                                                                            className="rounded-xl font-semibold"
-                                                                            onClick={() => handleDeleteContribution(c._id.toString())}
-                                                                        >
-                                                                            Delete
-                                                                        </AlertDialogAction>
-                                                                    </AlertDialogFooter>
-                                                                </AlertDialogContent>
-                                                            </AlertDialog>
-                                                        </div>
-                                                    </ItemActions>
                                                 </Link>
+                                                <ItemActions>
+                                                    <span className="text-xs font-bold whitespace-nowrap tabular-nums text-emerald-600 dark:text-emerald-400">
+                                                        +{formatCurrency(c.amount, goal.currency)}
+                                                    </span>
+                                                    <div className="size-6 flex items-center justify-center shrink-0">
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <button
+                                                                    type="button"
+                                                                    aria-label="Delete contribution"
+                                                                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                >
+                                                                    <Trash2 className="size-3.5" />
+                                                                </button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+                                                                        <Trash2 />
+                                                                    </AlertDialogMedia>
+                                                                    <AlertDialogTitle>Delete this contribution?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This will permanently delete this contribution transaction, revert the wallet balance, and update the goal's saved amount. This cannot be undone.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel className="rounded-xl font-semibold">
+                                                                        Cancel
+                                                                    </AlertDialogCancel>
+                                                                    <AlertDialogAction
+                                                                        variant="destructive"
+                                                                        className="rounded-xl font-semibold"
+                                                                        onClick={() => handleDeleteContribution(c._id.toString())}
+                                                                    >
+                                                                        Delete
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </div>
+                                                </ItemActions>
                                             </Item>
                                         )
                                     })}

@@ -380,6 +380,7 @@ export function SignInForm() {
                   <Input
                     id="magic-email"
                     type="email"
+                    autoComplete="email"
                     placeholder="name@example.com"
                     value={magicLinkEmail}
                     onChange={(e) => setMagicLinkEmail(e.target.value)}

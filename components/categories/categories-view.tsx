@@ -118,7 +118,7 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
             {customCategories.map((c) => (
               <Card
                 key={c._id.toString()}
-                className="group relative py-0 gap-0 overflow-hidden rounded-xl border border-border/50 bg-card hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
+                className="group relative py-0 gap-0 overflow-hidden rounded-xl border border-border/50 hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
               >
                 {/* Left colour strip */}
                 <div className="absolute left-0 top-0 bottom-0 w-[3px] shrink-0" style={{ backgroundColor: c.color }} />

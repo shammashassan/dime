@@ -10,7 +10,7 @@ import { createBudget, updateBudget } from "@/lib/actions/budgets"
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupInput } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
@@ -165,34 +165,42 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
 
         {/* Category */}
         <Field data-invalid={!!errors.categoryId}>
-          <FieldLabel>Category</FieldLabel>
+          <FieldLabel htmlFor="budget-category-trigger">Category</FieldLabel>
           <Controller
             control={control}
             name="categoryId"
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger aria-invalid={!!errors.categoryId} className="h-10 rounded-xl">
+                <SelectTrigger
+                  id="budget-category-trigger"
+                  aria-label="Category"
+                  aria-invalid={!!errors.categoryId}
+                  aria-describedby={errors.categoryId ? "budget-category-error" : undefined}
+                  className="h-10 rounded-xl"
+                >
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c._id.toString()} value={c._id.toString()}>
-                      <div className="flex items-center gap-2">
-                        <span className="size-2.5 rounded-full" style={{ backgroundColor: c.color }} />
-                        <span>{c.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    {categories.map((c) => (
+                      <SelectItem key={c._id.toString()} value={c._id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <span className="size-2.5 rounded-full" style={{ backgroundColor: c.color }} />
+                          <span>{c.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             )}
           />
-          {errors.categoryId && <FieldError>{(errors.categoryId as any).message}</FieldError>}
+          {errors.categoryId && <FieldError id="budget-category-error">{(errors.categoryId as any).message}</FieldError>}
         </Field>
 
         {/* Wallet (Optional) */}
         <Field data-invalid={!!errors.walletId}>
-          <FieldLabel>Wallet (Optional)</FieldLabel>
+          <FieldLabel htmlFor="budget-wallet-trigger">Wallet (Optional)</FieldLabel>
           <Controller
             control={control}
             name="walletId"
@@ -209,24 +217,32 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
                   }
                 }}
               >
-                <SelectTrigger aria-invalid={!!errors.walletId} className="h-10 rounded-xl">
+                <SelectTrigger
+                  id="budget-wallet-trigger"
+                  aria-label="Wallet (Optional)"
+                  aria-invalid={!!errors.walletId}
+                  aria-describedby={errors.walletId ? "budget-wallet-error" : undefined}
+                  className="h-10 rounded-xl"
+                >
                   <SelectValue placeholder="All Wallets" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all_wallets">All Wallets</SelectItem>
-                  {wallets.map((w) => (
-                    <SelectItem key={w._id.toString()} value={w._id.toString()}>
-                      <div className="flex items-center gap-2">
-                        <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
-                        <span>{w.name} ({w.currency})</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    <SelectItem value="all_wallets">All Wallets</SelectItem>
+                    {wallets.map((w) => (
+                      <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
+                          <span>{w.name} ({w.currency})</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             )}
           />
-          {errors.walletId && <FieldError>{(errors.walletId as any).message}</FieldError>}
+          {errors.walletId && <FieldError id="budget-wallet-error">{(errors.walletId as any).message}</FieldError>}
         </Field>
 
         {/* Period */}
@@ -314,6 +330,7 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      type="button"
                       variant="outline"
                       className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
                     >
@@ -344,6 +361,7 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      type="button"
                       variant="outline"
                       className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
                     >

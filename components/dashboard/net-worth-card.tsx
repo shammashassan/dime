@@ -35,7 +35,7 @@ export async function NetWorthCard({ userId, className }: NetWorthCardProps) {
   })
 
   return (
-    <Card className={cn("relative overflow-hidden bg-card border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group flex flex-col gap-3 pb-0", className)}>
+    <Card className={cn("relative overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-all duration-300 group flex flex-col gap-3 pb-0", className)}>
       <CardHeader className="pb-2">
         <CardDescription className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-violet-500" />

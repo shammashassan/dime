@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
+import { FieldGroup, Field, FieldLabel, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -119,12 +119,12 @@ export function TransactionDialog({
             {/* Account Selector */}
             {accounts.length > 0 && (
               <Field data-invalid={!!errors.walletId}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Brokerage Account</FieldLabel>
+                <FieldLabel htmlFor="inv-wallet-id" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Brokerage Account</FieldLabel>
                 <Select
                   value={currentWalletId || selectedAccountId}
                   onValueChange={(v) => setValue("walletId", v)}
                 >
-                  <SelectTrigger className="rounded-xl">
+                  <SelectTrigger id="inv-wallet-id" className="rounded-xl">
                     <SelectValue placeholder="Select account" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
@@ -137,15 +137,16 @@ export function TransactionDialog({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {errors.walletId && <FieldError>{errors.walletId.message}</FieldError>}
               </Field>
             )}
 
             <div className="grid grid-cols-2 gap-3">
               {/* Type */}
               <Field data-invalid={!!errors.type}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</FieldLabel>
+                <FieldLabel htmlFor="inv-type" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</FieldLabel>
                 <Select onValueChange={(v) => setValue("type", v as any)} value={currentType}>
-                  <SelectTrigger className="rounded-xl">
+                  <SelectTrigger id="inv-type" className="rounded-xl">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
@@ -158,13 +159,14 @@ export function TransactionDialog({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {errors.type && <FieldError>{errors.type.message}</FieldError>}
               </Field>
 
               {/* Asset Type */}
               <Field data-invalid={!!errors.assetType}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Asset Class</FieldLabel>
+                <FieldLabel htmlFor="inv-asset-type" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Asset Class</FieldLabel>
                 <Select onValueChange={(v) => setValue("assetType", v as any)} defaultValue={watch("assetType")}>
-                  <SelectTrigger className="rounded-xl">
+                  <SelectTrigger id="inv-asset-type" className="rounded-xl">
                     <SelectValue placeholder="Select asset type" />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
@@ -179,41 +181,47 @@ export function TransactionDialog({
                     </SelectGroup>
                   </SelectContent>
                 </Select>
+                {errors.assetType && <FieldError>{errors.assetType.message}</FieldError>}
               </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Field data-invalid={!!errors.symbol}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ticker / Symbol</FieldLabel>
-                <Input {...register("symbol")} placeholder="e.g. AAPL" className="uppercase rounded-xl" />
+                <FieldLabel htmlFor="inv-symbol" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ticker / Symbol</FieldLabel>
+                <Input id="inv-symbol" {...register("symbol")} placeholder="e.g. AAPL" className="uppercase rounded-xl" />
+                {errors.symbol && <FieldError>{errors.symbol.message}</FieldError>}
               </Field>
 
               <Field data-invalid={!!errors.name}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Asset Name</FieldLabel>
-                <Input {...register("name")} placeholder="e.g. Apple Inc." className="rounded-xl" />
+                <FieldLabel htmlFor="inv-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Asset Name</FieldLabel>
+                <Input id="inv-name" {...register("name")} placeholder="e.g. Apple Inc." className="rounded-xl" />
+                {errors.name && <FieldError>{errors.name.message}</FieldError>}
               </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Field data-invalid={!!errors.quantity}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Quantity</FieldLabel>
-                <Input type="number" step="any" {...register("quantity", { valueAsNumber: true })} className="rounded-xl" />
+                <FieldLabel htmlFor="inv-quantity" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Quantity</FieldLabel>
+                <Input id="inv-quantity" type="number" step="any" {...register("quantity", { valueAsNumber: true })} className="rounded-xl" />
+                {errors.quantity && <FieldError>{errors.quantity.message}</FieldError>}
               </Field>
 
               <Field data-invalid={!!errors.price}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Price per Unit</FieldLabel>
-                <Input type="number" step="any" {...register("price", { valueAsNumber: true })} className="rounded-xl" />
+                <FieldLabel htmlFor="inv-price" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Price per Unit</FieldLabel>
+                <Input id="inv-price" type="number" step="any" {...register("price", { valueAsNumber: true })} className="rounded-xl" />
+                {errors.price && <FieldError>{errors.price.message}</FieldError>}
               </Field>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <Field data-invalid={!!errors.fees}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Fees</FieldLabel>
-                <Input type="number" step="any" {...register("fees", { valueAsNumber: true })} className="rounded-xl" />
+                <FieldLabel htmlFor="inv-fees" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Fees</FieldLabel>
+                <Input id="inv-fees" type="number" step="any" {...register("fees", { valueAsNumber: true })} className="rounded-xl" />
+                {errors.fees && <FieldError>{errors.fees.message}</FieldError>}
               </Field>
 
               <Field data-invalid={!!errors.date}>
-                <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</FieldLabel>
+                <FieldLabel htmlFor="inv-date-trigger" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</FieldLabel>
                 <Controller
                   control={control}
                   name="date"
@@ -221,6 +229,7 @@ export function TransactionDialog({
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
+                          id="inv-date-trigger"
                           variant="outline"
                           type="button"
                           className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
@@ -242,12 +251,14 @@ export function TransactionDialog({
                     </Popover>
                   )}
                 />
+                {errors.date && <FieldError>{errors.date.message}</FieldError>}
               </Field>
             </div>
 
             <Field data-invalid={!!errors.notes}>
-              <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Notes (Optional)</FieldLabel>
-              <Textarea {...register("notes")} placeholder="Transaction notes or confirmation reference..." className="rounded-xl resize-none" rows={2} />
+              <FieldLabel htmlFor="inv-notes" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Notes (Optional)</FieldLabel>
+              <Textarea id="inv-notes" {...register("notes")} placeholder="Transaction notes or confirmation reference..." className="rounded-xl resize-none" rows={2} />
+              {errors.notes && <FieldError>{errors.notes.message}</FieldError>}
             </Field>
 
           </FieldGroup>
