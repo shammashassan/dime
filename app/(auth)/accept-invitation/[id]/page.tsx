@@ -29,7 +29,7 @@ interface InvitationDetails {
   createdAt: Date
 }
 
-export default function AcceptInvitationPage({ params }: AcceptInvitationPageProps) {
+function AcceptInvitationContent({ params }: AcceptInvitationPageProps) {
   const { id } = React.use(params)
   const router = useRouter()
   const { data: sessionData, isPending: sessionLoading } = useSession()
@@ -341,4 +341,22 @@ export default function AcceptInvitationPage({ params }: AcceptInvitationPagePro
   }
 
   return null
+}
+
+export default function AcceptInvitationPage(props: AcceptInvitationPageProps) {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+          <Card className="w-full max-w-md border border-border/40 shadow-xl rounded-2xl overflow-hidden p-6 text-center flex flex-col items-center">
+            <div className="size-12 rounded-2xl bg-muted animate-pulse mb-3" />
+            <div className="h-6 w-48 bg-muted rounded animate-pulse mb-2" />
+            <div className="h-4 w-64 bg-muted rounded animate-pulse" />
+          </Card>
+        </div>
+      }
+    >
+      <AcceptInvitationContent {...props} />
+    </React.Suspense>
+  )
 }

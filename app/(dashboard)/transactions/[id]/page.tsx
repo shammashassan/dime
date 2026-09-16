@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { requireApprovedUser } from "@/lib/auth-guard"
+import TransactionDetailLoading from "./loading"
 
 export const metadata: Metadata = {
   title: "Transaction Details",
@@ -16,7 +18,7 @@ import Link from "next/link"
 import { Wallet } from "@/types"
 import { serializeData } from "@/lib/utils"
 
-export default async function TransactionDetailPage({
+async function TransactionDetailContent({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -76,7 +78,7 @@ export default async function TransactionDetailPage({
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Transaction Details</h1>
       </div>
 
-      <div className="p-6 rounded-2xl border border-border/40 bg-card shadow-sm">
+      <div className="p-6 rounded-2xl border border-border/40 shadow-xs">
         <TransactionDetails
           transaction={serializeData(transaction)}
           category={serializeData(category)}
@@ -86,6 +88,16 @@ export default async function TransactionDetailPage({
         />
       </div>
     </div>
+  )
+}
+
+export default function TransactionDetailPage(props: {
+  params: Promise<{ id: string }>
+}) {
+  return (
+    <Suspense fallback={<TransactionDetailLoading />}>
+      <TransactionDetailContent {...props} />
+    </Suspense>
   )
 }
 

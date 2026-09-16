@@ -19,7 +19,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function GoalDetailContent({ id }: { id: string }) {
+async function GoalDetailContent({ params }: PageProps) {
+  const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -42,12 +43,10 @@ async function GoalDetailContent({ id }: { id: string }) {
   )
 }
 
-export default async function GoalDetailPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function GoalDetailPage(props: PageProps) {
   return (
     <Suspense fallback={<GoalDetailSkeleton />}>
-      <GoalDetailContent id={id} />
+      <GoalDetailContent {...props} />
     </Suspense>
   )
 }

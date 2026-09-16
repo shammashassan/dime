@@ -1,19 +1,23 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { getSharedExpensesOverviewAction } from "@/lib/actions/shared-expenses"
+import { SharedExpensesClient } from "@/components/shared-expenses/shared-expenses-client"
+import { getCollection, walletsCollection } from "@/lib/db/collections"
+import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { SharedExpensesSkeleton } from "./loading"
 
 export const metadata: Metadata = {
   title: "Shared Expenses",
   description: "Split bills and group expenses fairly, track who paid what, and settle balances easily.",
 }
-import { SharedExpensesClient } from "@/components/shared-expenses/shared-expenses-client"
-import { getCollection, walletsCollection } from "@/lib/db/collections"
-import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 
-export default async function SharedExpensesPage({
-  searchParams,
-}: {
+interface SharedExpensesPageProps {
   searchParams: Promise<{ contactId?: string }>
-}) {
+}
+
+async function SharedExpensesContent({
+  searchParams,
+}: SharedExpensesPageProps) {
   const { contactId } = await searchParams
   const scope = await getFinancialScope()
 
@@ -35,5 +39,13 @@ export default async function SharedExpensesPage({
       currentUserId={overviewData.currentUserId}
       currentUserName={overviewData.currentUserName}
     />
+  )
+}
+
+export default function SharedExpensesPage(props: SharedExpensesPageProps) {
+  return (
+    <Suspense fallback={<SharedExpensesSkeleton />}>
+      <SharedExpensesContent {...props} />
+    </Suspense>
   )
 }

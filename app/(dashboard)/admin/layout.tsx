@@ -1,12 +1,22 @@
+import { Suspense } from "react"
 import { requireAdmin } from "@/lib/auth-guard"
 
-export default async function AdminLayout({
+async function AdminGuard() {
+  await requireAdmin()
+  return null
+}
+
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Enforce session presence and admin user status for all subroutes
-  await requireAdmin()
-
-  return <>{children}</>
+  return (
+    <>
+      <Suspense fallback={null}>
+        <AdminGuard />
+      </Suspense>
+      {children}
+    </>
+  )
 }

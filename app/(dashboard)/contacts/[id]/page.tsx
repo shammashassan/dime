@@ -22,7 +22,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function ContactDetailContent({ id }: { id: string }) {
+async function ContactDetailContent({ params }: PageProps) {
+  const { id } = await params
   await requireApprovedUser()
   const scope = await getFinancialScope()
   const scopeFilter = getScopeFilter(scope)
@@ -83,12 +84,10 @@ async function ContactDetailContent({ id }: { id: string }) {
   )
 }
 
-export default async function ContactDetailPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function ContactDetailPage(props: PageProps) {
   return (
     <Suspense fallback={<ContactDetailSkeleton />}>
-      <ContactDetailContent id={id} />
+      <ContactDetailContent {...props} />
     </Suspense>
   )
 }

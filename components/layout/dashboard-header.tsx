@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Home } from "lucide-react"
@@ -33,7 +34,7 @@ const PAGE_LABELS: Record<string, string> = {
   "users": "User Management",
 }
 
-export function DashboardHeader() {
+function HeaderBreadcrumb() {
   const pathname = usePathname()
   const segments = pathname.split("/").filter(Boolean)
   const lastSegment = segments[segments.length - 1] || ""
@@ -42,6 +43,21 @@ export function DashboardHeader() {
     (lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1))
   const isHome = pathname === "/dashboard"
 
+  if (isHome) return null
+
+  return (
+    <>
+      <BreadcrumbSeparator />
+      <BreadcrumbItem>
+        <BreadcrumbPage className="text-foreground font-medium">
+          {pageLabel}
+        </BreadcrumbPage>
+      </BreadcrumbItem>
+    </>
+  )
+}
+
+export function DashboardHeader() {
   return (
     <header className="sticky top-0 z-50 flex h-(--header-height) shrink-0 items-center gap-2 border-b bg-background/80 backdrop-blur-md transition-all ease-linear">
       <div className="flex w-full items-center justify-between gap-2 px-4 lg:gap-4 lg:px-6">
@@ -65,14 +81,9 @@ export function DashboardHeader() {
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              {!isHome && <BreadcrumbSeparator />}
-              {!isHome && (
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="text-foreground font-medium">
-                    {pageLabel}
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              )}
+              <React.Suspense fallback={null}>
+                <HeaderBreadcrumb />
+              </React.Suspense>
             </BreadcrumbList>
           </Breadcrumb>
         </div>

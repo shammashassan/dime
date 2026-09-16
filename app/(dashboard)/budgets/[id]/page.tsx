@@ -20,7 +20,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function BudgetDetailContent({ id }: { id: string }) {
+async function BudgetDetailContent({ params }: PageProps) {
+  const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -53,12 +54,10 @@ async function BudgetDetailContent({ id }: { id: string }) {
   )
 }
 
-export default async function BudgetDetailPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function BudgetDetailPage(props: PageProps) {
   return (
     <Suspense fallback={<BudgetDetailSkeleton />}>
-      <BudgetDetailContent id={id} />
+      <BudgetDetailContent {...props} />
     </Suspense>
   )
 }

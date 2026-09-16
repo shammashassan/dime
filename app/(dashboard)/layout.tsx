@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar"
@@ -7,15 +8,21 @@ import { SiteFooter } from "@/components/layout/site-footer"
 import { WorkspaceLoader } from "@/components/layout/workspace-loader"
 import { NotificationsProvider } from "@/components/notifications/notifications-provider"
 
-export default async function DashboardLayout({
+async function AuthGuard() {
+  await requireApprovedUser()
+  return null
+}
+
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  await requireApprovedUser()
-
   return (
     <NotificationsProvider>
+      <Suspense fallback={null}>
+        <AuthGuard />
+      </Suspense>
       <div className="[--header-height:calc(--spacing(14))] flex min-h-screen w-full">
         <SidebarProvider className="flex flex-col">
           <DashboardHeader />

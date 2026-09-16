@@ -22,7 +22,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function RecurringDetailContent({ id }: { id: string }) {
+async function RecurringDetailContent({ params }: PageProps) {
+  const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -54,12 +55,10 @@ async function RecurringDetailContent({ id }: { id: string }) {
   )
 }
 
-export default async function RecurringDetailPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function RecurringDetailPage(props: PageProps) {
   return (
     <Suspense fallback={<RecurringDetailSkeleton />}>
-      <RecurringDetailContent id={id} />
+      <RecurringDetailContent {...props} />
     </Suspense>
   )
 }

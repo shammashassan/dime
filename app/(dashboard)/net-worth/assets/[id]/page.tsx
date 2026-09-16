@@ -17,7 +17,12 @@ import {
 } from "@/lib/calculations/asset-valuation"
 import { AssetDetailSkeleton } from "./loading"
 
-async function AssetDetailContent({ id }: { id: string }) {
+async function AssetDetailContent({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   await requireApprovedUser()
 
   const asset = await getAssetById(id)
@@ -44,16 +49,12 @@ async function AssetDetailContent({ id }: { id: string }) {
   )
 }
 
-export default async function AssetDetailPage({
-  params,
-}: {
+export default function AssetDetailPage(props: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
-
   return (
     <Suspense fallback={<AssetDetailSkeleton />}>
-      <AssetDetailContent id={id} />
+      <AssetDetailContent {...props} />
     </Suspense>
   )
 }

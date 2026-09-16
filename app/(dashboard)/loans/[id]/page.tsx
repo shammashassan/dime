@@ -19,7 +19,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function LoanDetailContent({ id }: { id: string }) {
+async function LoanDetailContent({ params }: PageProps) {
+  const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -45,12 +46,10 @@ async function LoanDetailContent({ id }: { id: string }) {
   )
 }
 
-export default async function LoanDetailPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function LoanDetailPage(props: PageProps) {
   return (
     <Suspense fallback={<LoanDetailSkeleton />}>
-      <LoanDetailContent id={id} />
+      <LoanDetailContent {...props} />
     </Suspense>
   )
 }

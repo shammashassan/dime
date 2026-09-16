@@ -94,8 +94,89 @@ type SidebarUser = {
   role?: string | null
 }
 
-export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+function SidebarNav({
+  isAdmin,
+  onLinkClick,
+}: {
+  isAdmin: boolean
+  onLinkClick: () => void
+}) {
   const pathname = usePathname()
+
+  return (
+    <>
+      <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
+        <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarMenu>
+          {NAV_ITEMS.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                isActive={
+                  item.href === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname.startsWith(item.href)
+                }
+              >
+                <Link href={item.href} onClick={onLinkClick}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroup>
+
+      {isAdmin && (
+        <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="User Management"
+                isActive={pathname.startsWith("/admin")}
+              >
+                <Link href="/admin/users" onClick={onLinkClick}>
+                  <Shield />
+                  <span>User Management</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
+    </>
+  )
+}
+
+function SidebarNavFallback({
+  onLinkClick,
+}: {
+  onLinkClick: () => void
+}) {
+  return (
+    <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
+      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarMenu>
+        {NAV_ITEMS.map((item) => (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton asChild tooltip={item.title} isActive={false}>
+              <Link href={item.href} onClick={onLinkClick}>
+                <item.icon />
+                <span>{item.title}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  )
+}
+
+export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isMobile, setOpenMobile } = useSidebar()
   const { data: session } = authClient.useSession()
   const mounted = React.useSyncExternalStore(
@@ -149,68 +230,9 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
 
       {/* ── Navigation ── */}
       <SidebarContent>
-        <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
-          <SidebarMenu>
-            {NAV_ITEMS.map((item) => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.title}
-                  isActive={
-                    item.href === "/dashboard"
-                      ? pathname === "/dashboard"
-                      : pathname.startsWith(item.href)
-                  }
-                >
-                  <Link href={item.href} onClick={handleLinkClick}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* ── Admin ── */}
-        {isAdmin && (
-          <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  tooltip="User Management"
-                  isActive={pathname.startsWith("/admin")}
-                >
-                  <Link href="/admin/users" onClick={handleLinkClick}>
-                    <Shield />
-                    <span>User Management</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
-
-        {/* ── Settings at bottom ── */}
-        {/* <SidebarGroup className="mt-auto group-data-[collapsible=icon]:mt-2">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="Settings"
-                isActive={pathname === "/settings"}
-              >
-                <Link href="/settings">
-                  <Settings />
-                  <span>Settings</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup> */}
+        <React.Suspense fallback={<SidebarNavFallback onLinkClick={handleLinkClick} />}>
+          <SidebarNav isAdmin={isAdmin} onLinkClick={handleLinkClick} />
+        </React.Suspense>
       </SidebarContent>
 
       {/* ── User footer ── */}

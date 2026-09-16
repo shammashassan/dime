@@ -21,7 +21,8 @@ interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function WalletDetailContent({ id }: { id: string }) {
+async function WalletDetailContent({ params }: PageProps) {
+  const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -66,12 +67,10 @@ async function WalletDetailContent({ id }: { id: string }) {
   )
 }
 
-export default async function WalletDetailPage({ params }: PageProps) {
-  const { id } = await params
-
+export default function WalletDetailPage(props: PageProps) {
   return (
     <Suspense fallback={<WalletDetailSkeleton />}>
-      <WalletDetailContent id={id} />
+      <WalletDetailContent {...props} />
     </Suspense>
   )
 }

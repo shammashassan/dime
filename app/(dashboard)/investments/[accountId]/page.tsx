@@ -24,7 +24,7 @@ import Link from "next/link"
 
 import { AccountDetailSkeleton } from "./loading"
 
-export default async function AccountDetail({
+async function AccountDetailContent({
   params,
 }: {
   params: Promise<{ accountId: string }>
@@ -126,6 +126,16 @@ export default async function AccountDetail({
         </Suspense>
       </div>
     </div>
+  )
+}
+
+export default function AccountDetailPage(props: {
+  params: Promise<{ accountId: string }>
+}) {
+  return (
+    <Suspense fallback={<AccountDetailSkeleton />}>
+      <AccountDetailContent {...props} />
+    </Suspense>
   )
 }
 
