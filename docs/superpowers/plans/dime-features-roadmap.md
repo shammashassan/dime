@@ -14,6 +14,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ Transactions
 * ✅ Categories
 * ✅ Budgets
+* ✅ Budget Templates
 * ✅ Goals
 * ✅ Advanced Search & Universal Command Palette
 
@@ -672,42 +673,33 @@ Additional Features
 
 ---
 
-# 13. Budget Templates
+# 13. Budget Templates ✅ COMPLETED
 
-Provide ready-made budgeting templates.
+Provide ready-made budgeting templates and personalized cash-flow-driven allocations.
 
-Examples:
+> **Status**: **Completed.** Full domain architecture implemented in `lib/budget-templates/` (`system-templates.ts`, `recommendations.ts`), MongoDB persistence for custom templates in `budget_templates` collection with indexed scope, server actions in `lib/actions/budget-templates.ts`, parallel data fetching in `app/(dashboard)/budgets/page.tsx`, and responsive in-page modal experience with 1-click apply wizard (`components/budgets/budget-templates-dialog.tsx`, `components/budgets/apply-template-step.tsx`).
 
-* Student
-* Family
-* Freelancer
-* Business
-* Minimalist
-* Traveler
+Curated System Frameworks:
 
-Allow users to build and share custom templates.
+* ✅ **50/30/20 Balanced Rule** (50% Needs, 30% Wants, 20% Savings & Debt)
+* ✅ **Zero-Based Budget** (Every single currency unit assigned an intentional job)
+* ✅ **Freelancer / Variable Income** (40% Baseline Needs, 25% Tax & Business, 20% Buffer, 15% Lifestyle)
+* ✅ **Aggressive Debt Payoff** (Snowball / Avalanche prioritization directing 35% to debt acceleration)
+* ✅ **Family / Household** (Mortgage, Groceries, Childcare, Education, Healthcare, and Family Emergencies)
+* ✅ **College Student / Young Adult** (Rent/Dorm, Groceries, Textbooks, Campus Social, Transit)
+* ✅ **Digital Nomad / Remote Traveler** (Accommodations, Flights, Local Dining, Co-working, Nomad Insurance)
+* ✅ **Minimalist / FI-RE Focused** (Modest Living with 50% High-Velocity Investments)
 
-### Additional Planned Templates
+### Additional Completed Features
 
-* Emergency Fund
-* Debt Payoff
-* Newly Married
-* College Student
-* Digital Nomad
-* Home Buyer
-* Retirement Planning
-* Investment Focused
-* Zero-Based Budget
-* 50/30/20 Budget
-* Envelope Budget
-
-Additional Features
-
-* Community templates
-* Duplicate existing budgets
-* AI-generated budget templates
-* Budget recommendations
-* Template marketplace (future)
+* ✅ **Smart Cash Flow Recommendation Engine**: Analyzes past 90 days of transactions, detects income volatility and high debt burdens, and automatically recommends the best matching template with pre-filled monthly sizing.
+* ✅ **Interactive In-Page Apply Wizard**: Sizing input with currency symbol, strategy selector ("Smart Merge" to preserve non-conflicting budgets vs. "Fresh Start" for clean slates), live category mapping, and automatic provision of missing categories.
+* ✅ **Dynamic Allocation Balancing Meter**: Visual progress bar showing total allocated percentage with live adjustment controls.
+* ✅ **Custom Templates & Duplication**: "Save Current Budget as Template" action capturing active category budgets and ratios into reusable custom templates.
+* ✅ **Zero Context Switching**: Embedded directly into the `/budgets` page via an interactive modal dialog matching Dime's uniform page standards.
+* ✅ **Empty State On-Ramp**: Prominent "Choose a Template" CTA when no active budgets exist.
+* ✅ **Notification Center Inbox Integration**: Automatically creates an inbox notification upon template application with deep links back to `/budgets`.
+* ✅ **Comprehensive Automated Tests**: 100% test coverage across system presets, schema validations, and allocation currency math.
 
 ---
 

@@ -24,11 +24,15 @@ export async function initDatabase() {
     await transactions.createIndex({ tags: 1 })
     await transactions.createIndex({ organizationId: 1, date: -1 })
 
-    // 2. Create indexes for budgets
+    // 2. Create indexes for budgets & budget templates
     const budgets = db.collection("budgets")
     await budgets.createIndex({ userId: 1, isActive: 1 })
     await budgets.createIndex({ userId: 1, categoryId: 1 })
     await budgets.createIndex({ organizationId: 1, isActive: 1 })
+
+    const budgetTemplates = db.collection("budget_templates")
+    await budgetTemplates.createIndex({ userId: 1, isSystem: 1 })
+    await budgetTemplates.createIndex({ organizationId: 1 })
 
     // 3. Create indexes for recurring rules
     const recurringRules = db.collection("recurring_rules")

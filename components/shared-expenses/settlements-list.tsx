@@ -29,7 +29,7 @@ export function SettlementsList({ settlements, currentUserId }: SettlementsListP
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {settlements.map((s) => {
         const dateStr = new Date(s.settledAt).toLocaleDateString(undefined, {
           month: "short",

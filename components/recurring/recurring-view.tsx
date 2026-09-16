@@ -629,14 +629,14 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
           {billInstances.filter(b => b.status !== "paid" && b.status !== "skipped").length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2"><AlertTriangle className="size-4" /> Action Required (Due / Overdue)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {billInstances.filter(b => b.status !== "paid" && b.status !== "skipped").map(renderBillInstanceCard)}
               </div>
             </div>
           )}
 
           {displayedRules.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {displayedRules.map(renderRuleCard)}
             </div>
           ) : (
@@ -658,7 +658,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
           {billInstances.filter(b => b.status !== "paid" && b.status !== "skipped").length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2"><AlertTriangle className="size-4" /> Action Required (Due / Overdue)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {billInstances.filter(b => b.status !== "paid" && b.status !== "skipped").map(renderBillInstanceCard)}
               </div>
             </div>
@@ -667,7 +667,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
           <div className="space-y-3">
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2"><CalendarDays className="size-4" /> Upcoming Bills</h3>
             {displayedRules.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {displayedRules.map(renderRuleCard)}
               </div>
             ) : (
@@ -686,7 +686,7 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
           </div>
         </div>
       ) : displayedRules.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {displayedRules.map(renderRuleCard)}
         </div>
       ) : (

@@ -1,9 +1,11 @@
 "use client"
 
-import { useState, useTransition, useEffect } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Budget, Category, Wallet } from "@/types"
+import { Budget, Category, Wallet, BudgetTemplate } from "@/types"
 import { BudgetWithSpending } from "@/lib/queries/budgets"
+import { TemplateRecommendation } from "@/lib/budget-templates/recommendations"
+import { BudgetTemplatesDialog } from "./budget-templates-dialog"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -54,6 +56,7 @@ import {
   Loader2,
   Search,
   ArrowDownRight,
+  Sparkles,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -61,9 +64,21 @@ interface BudgetsViewProps {
   budgets: BudgetWithSpending[]
   categories: Category[]
   wallets: Wallet[]
+  templates?: BudgetTemplate[]
+  recommendation?: TemplateRecommendation | null
 }
 
-function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: any) {
+interface MetricCardProps {
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+  label: string
+  value: string | number
+  valueClassName?: string
+  className?: string
+  style?: React.CSSProperties
+}
+
+function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: MetricCardProps) {
   return (
     <Card className={cn("group relative py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]", className)} style={style}>
       <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: `radial-gradient(120% 100% at 0% 0%, ${color}, transparent 60%)` }} />
@@ -251,14 +266,31 @@ function BudgetCard({
   )
 }
 
-export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) {
+export function BudgetsView({
+  budgets,
+  categories,
+  wallets,
+  templates = [],
+  recommendation,
+}: BudgetsViewProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isTemplatesOpen, setIsTemplatesOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null)
   const [deletingBudgetId, setDeletingBudgetId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<"all" | "under" | "over">("all")
   const [search, setSearch] = useState("")
+
+  const activeRecommendation: TemplateRecommendation = recommendation || {
+    recommendedTemplateId: "50-30-20",
+    templateName: "50/30/20 Balanced Rule",
+    rationale: "A balanced, battle-tested starting point dividing your monthly budget into 50% Needs, 30% Wants, and 20% Savings.",
+    suggestedMonthlyAmount: 300000,
+    currency: wallets[0]?.currency || "USD",
+    averageMonthlyIncome: 300000,
+    hasSufficientData: false,
+  }
 
   const displayedBudgets = budgets.filter(b => {
     const isOver = b.spent > b.amount
@@ -310,7 +342,7 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
     toast.promise(p, {
       loading: "Deleting...",
       success: "Budget deleted",
-      error: (err: any) => err.message || "Failed to delete",
+      error: (err: unknown) => (err instanceof Error ? err.message : "Failed to delete"),
     })
   }
 
@@ -328,9 +360,19 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
             </p>
           </div>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">
-          <Plus className="size-4" />Create Budget
-        </Button>
+        <div className="flex items-center gap-2 self-start md:self-center">
+          <Button
+            variant="outline"
+            onClick={() => setIsTemplatesOpen(true)}
+            className="rounded-xl font-bold gap-2 text-xs border-border/50 hover:bg-muted/40 cursor-pointer h-9 shadow-xs"
+          >
+            <Sparkles className="size-3.5 text-primary" />
+            Templates
+          </Button>
+          <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 text-xs h-9 shadow-xs active:scale-95 transition-transform">
+            <Plus className="size-4" />Create Budget
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-4">
@@ -377,7 +419,7 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
 
         {/* Mobile Filter (visible on smaller screens) */}
         <div className="sm:hidden w-full">
-          <Select value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+          <Select value={activeTab} onValueChange={(v) => setActiveTab(v as "all" | "under" | "over")}>
             <SelectTrigger aria-label="Filter budgets by status" className="w-full border-border/40 bg-card h-10">
               <SelectValue placeholder={tabNames[activeTab]} />
             </SelectTrigger>
@@ -421,15 +463,20 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
             </EmptyMedia>
             <EmptyHeader>
               <EmptyTitle>No budgets yet</EmptyTitle>
-              <EmptyDescription>Create a budget to monitor and control your spending.</EmptyDescription>
+              <EmptyDescription>Create a budget to monitor and control your spending, or get started instantly with a template.</EmptyDescription>
             </EmptyHeader>
-            <div className="mt-4">
-              <Button onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2"><Plus className="size-4" /> Create First Budget</Button>
+            <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
+              <Button onClick={() => setIsTemplatesOpen(true)} className="rounded-xl font-bold gap-2 text-xs h-9 shadow-xs">
+                <Sparkles className="size-3.5" /> Choose a Template
+              </Button>
+              <Button variant="outline" onClick={() => setIsCreateOpen(true)} className="rounded-xl font-bold gap-2 text-xs h-9 border-border/50 hover:bg-muted/40">
+                <Plus className="size-3.5" /> Create Custom Budget
+              </Button>
             </div>
           </Empty>
         </Card>
       ) : displayedBudgets.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {displayedBudgets.map((b) => (
             <BudgetCard
               key={b._id.toString()}
@@ -447,7 +494,7 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
             </EmptyMedia>
             <EmptyHeader>
               <EmptyTitle>No budgets found</EmptyTitle>
-              <EmptyDescription>Adjust your filters or search to find what you're looking for.</EmptyDescription>
+              <EmptyDescription>Adjust your filters or search to find what you&apos;re looking for.</EmptyDescription>
             </EmptyHeader>
           </Empty>
         </Card>
@@ -487,6 +534,16 @@ export function BudgetsView({ budgets, categories, wallets }: BudgetsViewProps) 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <BudgetTemplatesDialog
+        open={isTemplatesOpen}
+        onOpenChange={setIsTemplatesOpen}
+        templates={templates}
+        recommendation={activeRecommendation}
+        categories={categories}
+        wallets={wallets}
+        activeBudgetsCount={budgets.filter((b) => b.isActive).length}
+      />
     </div>
   )
 }

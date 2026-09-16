@@ -347,7 +347,7 @@ export function ContactsView({ contacts }: ContactsViewProps) {
           </Empty>
         </Card>
       ) : filteredContacts.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredContacts.map((contact) => {
             const hasBorrowing = contact.totalOwed > 0
             const hasLending = contact.totalOwed < 0

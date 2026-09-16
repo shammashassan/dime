@@ -92,6 +92,43 @@ export interface Budget {
   version?: number
 }
 
+export interface BudgetTemplateAllocation {
+  categoryName: string
+  categoryId?: string
+  group: "Needs" | "Wants" | "Savings" | "Custom"
+  percentage: number // 0–100
+  fixedAmount?: number // in cents/paise
+  suggestedColor: string
+  suggestedIcon: string
+  alertThreshold: number // default 80
+  description?: string
+}
+
+export interface BudgetTemplate {
+  _id: ObjectId | string
+  userId: string | null // null = system preset
+  organizationId?: string | null
+  name: string
+  tagline: string
+  description: string
+  category: "framework" | "lifestyle" | "goals" | "custom"
+  methodology: "percentage" | "fixed"
+  icon: string
+  color: string
+  tags: string[]
+  allocations: BudgetTemplateAllocation[]
+  rulesSummary: string[]
+  isSystem: boolean
+  basedOnTemplateId?: string
+  period: "daily" | "weekly" | "monthly" | "yearly"
+  createdAt: Date
+  updatedAt: Date
+  ownerUserId?: string
+  createdBy?: string
+  updatedBy?: string
+  version?: number
+}
+
 export interface RecurringRule {
   _id: ObjectId
   userId: string

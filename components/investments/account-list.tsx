@@ -31,7 +31,7 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
   const grandTotalValue = accounts.reduce((sum, a) => sum + Math.max(0, a.totalValue), 0)
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
       {accounts.map(account => {
         const isPositive = account.unrealizedGain >= 0
         const returnPercentage = account.totalCostBasis > 0 ? (account.unrealizedGain / account.totalCostBasis) * 100 : 0

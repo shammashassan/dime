@@ -150,6 +150,14 @@
   }
 }
 
+@utility no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+  }
+}
+
 /* Suppress scrollbars on all dialog / sheet content that scrolls */
 [data-slot="dialog-content"],
 [data-slot="sheet-content"] {

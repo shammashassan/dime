@@ -391,7 +391,7 @@ export function LoansList({
           </Empty>
         </Card>
       ) : filteredLoans.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredLoans.map((loan) => {
             const repaidAmount = loan.amount - loan.remainingAmount
             const progress = loan.amount > 0 ? (repaidAmount / loan.amount) * 100 : 0

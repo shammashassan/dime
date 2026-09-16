@@ -27,12 +27,14 @@ import {
   CalendarPlanEvent,
   Goal,
   SavedSearch,
+  BudgetTemplate,
 } from "@/types"
 
 export const walletsCollection = db.collection<Wallet>("wallets")
 export const transactionsCollection = db.collection<Transaction>("transactions")
 export const categoriesCollection = db.collection<Category>("categories")
 export const budgetsCollection = db.collection<Budget>("budgets")
+export const budgetTemplatesCollection = db.collection<BudgetTemplate>("budget_templates")
 export const recurringRulesCollection = db.collection<RecurringRule>("recurring_rules")
 export const exchangeRatesCollection = db.collection<ExchangeRate>("exchange_rates")
 export const organizationSettingsCollection = db.collection<OrganizationSettings>("organization_settings")

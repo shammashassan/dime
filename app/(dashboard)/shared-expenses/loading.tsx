@@ -43,8 +43,8 @@ export function SharedExpensesSkeleton() {
         <Skeleton className="h-9 w-full sm:w-60 rounded-xl" />
       </div>
 
-      {/* Content 3-Column Card Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Content Card Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
           <Skeleton key={i} className="h-48 w-full rounded-2xl" />
         ))}
