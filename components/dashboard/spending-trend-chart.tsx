@@ -110,7 +110,7 @@ export function SpendingTrendChart({
   return (
     <Card
       className={cn(
-        "@container/card bento-tile flex h-full flex-col border-border/50 bg-card/60 shadow-xs backdrop-blur-xs",
+        "@container/card bento-tile flex h-full flex-col border-border/50 bg-card shadow-xs",
         className
       )}
     >

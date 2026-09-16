@@ -96,6 +96,7 @@ export default async function DashboardPage() {
       owedSummary={owedSummary}
       healthScore={healthScoreData.overallScore}
       healthTier={healthScoreData.tier}
+      pillars={serializeData(healthScoreData.pillars)}
       topRecommendation={topRecommendation}
       netWorth={netWorthData.currentNetWorth}
       monthlyInflow={monthlyInflow}

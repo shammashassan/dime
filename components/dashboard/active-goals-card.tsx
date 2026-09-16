@@ -28,7 +28,7 @@ export function ActiveGoalsCard({
   return (
     <Card
       className={cn(
-        "bento-tile flex h-full flex-col justify-between border-border/50 bg-card/60 p-5 shadow-xs backdrop-blur-xs",
+        "bento-tile flex h-full flex-col justify-between border-border/50 bg-card p-5 shadow-xs",
         className
       )}
     >

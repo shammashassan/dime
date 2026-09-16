@@ -2,15 +2,18 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { ArrowUpRight } from "lucide-react"
-import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from "recharts"
-import { Card } from "@/components/ui/card"
+import { Activity } from "lucide-react"
+import { Cell, Pie, PieChart } from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { HealthTier, PillarId, PillarScore } from "@/types"
 
 export interface FinancialHealthGaugeCardProps {
   score: number
-  tier: "needs_attention" | "fair" | "good" | "excellent"
+  tier: HealthTier
+  pillars?: Record<PillarId, PillarScore>
   topRecommendation?: {
     title: string
     potentialPoints: number
@@ -19,118 +22,210 @@ export interface FinancialHealthGaugeCardProps {
   className?: string
 }
 
+const PILLAR_CONFIG: Record<PillarId, { label: string; color: string }> = {
+  liquidity: { label: "Liquidity", color: "var(--chart-1)" },
+  savings: { label: "Savings", color: "var(--chart-2)" },
+  debt: { label: "Debt", color: "var(--chart-3)" },
+  budget: { label: "Budget", color: "var(--chart-4)" },
+  growth: { label: "Growth", color: "var(--chart-5)" },
+}
+
 const tierConfig: Record<
-  "needs_attention" | "fair" | "good" | "excellent",
+  HealthTier,
   {
     label: string
     badgeClassName: string
-    fill: string
   }
 > = {
   needs_attention: {
     label: "Needs Attention",
     badgeClassName: "text-rose-500 border-rose-500/20 bg-rose-500/10",
-    fill: "#f43f5e",
   },
   fair: {
     label: "Fair",
     badgeClassName: "text-amber-500 border-amber-500/20 bg-amber-500/10",
-    fill: "#f59e0b",
   },
   good: {
     label: "Good",
     badgeClassName: "text-blue-500 border-blue-500/20 bg-blue-500/10",
-    fill: "#3b82f6",
   },
   excellent: {
     label: "Excellent",
     badgeClassName: "text-emerald-500 border-emerald-500/20 bg-emerald-500/10",
-    fill: "#10b981",
   },
 }
 
 export function FinancialHealthGaugeCard({
   score,
   tier,
-  topRecommendation,
+  pillars,
   className,
 }: FinancialHealthGaugeCardProps) {
   const currentTier = tierConfig[tier] || tierConfig.fair
   const safeScore = typeof score === "number" && !isNaN(score) ? score : 0
-  const chartData = [{ value: Math.min(Math.max(safeScore, 0), 100), fill: currentTier.fill }]
+  const [activeIndex, setActiveIndex] = React.useState<number | undefined>(undefined)
+
+  const activeData = React.useMemo(() => {
+    const ids: PillarId[] = ["liquidity", "savings", "debt", "budget", "growth"]
+    return ids.map((id) => {
+      const conf = PILLAR_CONFIG[id]
+      const p = pillars ? pillars[id] : undefined
+      const scoreVal = p ? p.score : Math.round(safeScore / 5)
+
+      return {
+        id,
+        category: conf.label,
+        value: Math.max(scoreVal, 0.5),
+        score: scoreVal,
+        color: conf.color,
+      }
+    })
+  }, [pillars, safeScore])
+
+  const chartConfig = React.useMemo(() => {
+    return activeData.reduce((acc, item) => {
+      acc[item.id] = { label: item.category, color: item.color }
+      return acc
+    }, {} as ChartConfig)
+  }, [activeData])
 
   return (
-    <Card
+    <div
       className={cn(
-        "bento-tile flex h-full flex-col justify-between border-border/50 bg-card/60 p-5 shadow-xs backdrop-blur-xs",
+        "bento-tile rounded-2xl border border-border/50 bg-card shadow-xs overflow-hidden h-full flex flex-col",
         className
       )}
     >
-      <div className="flex items-center justify-between pb-1">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
-          financial health
-        </span>
-        <Badge
-          variant="outline"
-          className={cn("text-[10px] font-semibold uppercase tracking-wider", currentTier.badgeClassName)}
-        >
-          {currentTier.label}
-        </Badge>
+      {/* Compact Header */}
+      <div className="px-4 py-2.5 border-b border-border/30 flex items-center justify-between">
+        <Link href="/health" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <Activity className="size-3.5 text-muted-foreground" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Financial Health
+          </span>
+        </Link>
+        <Link href="/health">
+          <Badge
+            variant="outline"
+            className={cn("text-[10px] font-semibold uppercase tracking-wider cursor-pointer", currentTier.badgeClassName)}
+          >
+            {currentTier.label}
+          </Badge>
+        </Link>
       </div>
 
-      {/* Radial Semi-Circular Arc */}
-      <div className="relative flex h-36 flex-col items-center justify-center my-1 [&_.recharts-radial-bar-background-sector]:fill-muted/40">
-        <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 200, height: 144 }}>
-          <RadialBarChart
-            cx="50%"
-            cy="75%"
-            innerRadius="65%"
-            outerRadius="90%"
-            barSize={14}
-            data={chartData}
-            startAngle={180}
-            endAngle={0}
+      {/* Main Larger Center Gauge - Dead Space Removed */}
+      <div className="px-3 pt-2 pb-1 flex-1 flex flex-col items-center justify-center min-h-[120px]">
+        {activeData.length > 0 ? (
+          <ChartContainer
+            config={chartConfig}
+            className="w-full max-w-[280px] h-[125px] mx-auto overflow-visible"
           >
-            <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-            <RadialBar
-              background={{ fill: "var(--muted)" }}
-              dataKey="value"
-              cornerRadius={8}
-            />
-          </RadialBarChart>
-        </ResponsiveContainer>
-        <div className="pointer-events-none absolute top-[52%] flex flex-col items-center select-none">
-          <span className="text-3xl font-extrabold tracking-tight text-foreground">{safeScore}</span>
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">/ 100</span>
-        </div>
-      </div>
-
-      {/* Recommendation & Link footer */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-border/40">
-        {topRecommendation ? (
-          <Link
-            href={topRecommendation.actionPath}
-            className="group flex items-center justify-between text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <span className="truncate pr-2">{topRecommendation.title}</span>
-            <Badge
-              variant="outline"
-              className="shrink-0 gap-1 border-emerald-500/20 bg-emerald-500/10 text-[11px] font-semibold text-emerald-500 transition-colors group-hover:bg-emerald-500/20"
-            >
-              +{topRecommendation.potentialPoints} pts
-              <ArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </Badge>
-          </Link>
+            <PieChart>
+              <Pie
+                data={activeData}
+                dataKey="value"
+                nameKey="category"
+                cx="50%"
+                cy="92%"
+                startAngle={180}
+                endAngle={0}
+                innerRadius={62}
+                outerRadius={94}
+                cornerRadius={5}
+                paddingAngle={4}
+                minAngle={12}
+                stroke="var(--card)"
+                strokeWidth={2}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(undefined)}
+              >
+                {activeData.map((entry, index) => (
+                  <Cell
+                    key={entry.id}
+                    fill={entry.color}
+                    style={{
+                      opacity: activeIndex === undefined || activeIndex === index ? 1 : 0.35,
+                      transition: "opacity 0.2s ease-in-out",
+                      outline: "none",
+                    }}
+                  />
+                ))}
+              </Pie>
+              <text x="50%" y="92%" textAnchor="middle" className="pointer-events-none">
+                <tspan
+                  x="50%"
+                  dy="-8"
+                  className="fill-foreground text-base sm:text-lg font-extrabold tabular-nums tracking-tight"
+                >
+                  {safeScore} / 100
+                </tspan>
+                <tspan
+                  x="50%"
+                  dy="15"
+                  className="fill-muted-foreground text-[8px] font-bold uppercase tracking-wider"
+                >
+                  Health Score
+                </tspan>
+              </text>
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    hideLabel
+                    formatter={(value, name, item) => {
+                      const categoryName = String(name)
+                      const color = item.payload?.color || item.color || item.payload?.fill
+                      const scoreVal = item.payload?.score ?? Number(value)
+                      return (
+                        <>
+                          <div
+                            className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
+                            style={{ backgroundColor: color }}
+                          />
+                          <div className="flex flex-1 justify-between items-center leading-none gap-2">
+                            <span className="text-muted-foreground font-medium">{categoryName}:</span>
+                            <span className="font-mono font-bold text-foreground">
+                              {scoreVal} / 20 pts
+                            </span>
+                          </div>
+                        </>
+                      )
+                    }}
+                  />
+                }
+              />
+            </PieChart>
+          </ChartContainer>
         ) : (
-          <Link
-            href="/health"
-            className="group flex items-center justify-between text-xs font-medium text-primary hover:underline"
-          >
-            <span>Explore full health breakdown</span>
-            <ArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
+          <div className="text-xs text-muted-foreground py-6 text-center">No health data.</div>
         )}
       </div>
-    </Card>
+
+      {/* shadcn ScrollArea for Legend Row */}
+      {activeData.length > 0 && (
+        <ScrollArea className="max-h-[56px] w-full border-t border-border/30 bg-muted/5 px-3 py-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5">
+            {activeData.map((entry, index) => (
+              <div
+                key={entry.id}
+                className={cn(
+                  "flex items-center gap-1.5 text-xs transition-opacity cursor-default",
+                  activeIndex !== undefined && activeIndex !== index ? "opacity-30" : "opacity-100"
+                )}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(undefined)}
+              >
+                <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
+                <span className="font-bold text-foreground">{entry.category}</span>
+                <span className="text-[10px] font-extrabold text-muted-foreground/80 bg-muted/40 px-1.5 py-0.5 rounded-full border border-border/30">
+                  {entry.score}/20
+                </span>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      )}
+    </div>
   )
 }

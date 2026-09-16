@@ -80,7 +80,7 @@ export function ReceiptScannerModal({
 
     setIsScanning(true)
     const reader = new FileReader()
-    
+
     reader.onload = async () => {
       try {
         const base64Image = reader.result as string
@@ -133,7 +133,7 @@ export function ReceiptScannerModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[460px] rounded-3xl border border-border/50 shadow-2xl">
+      <DialogContent className="sm:max-w-115 rounded-3xl border border-border/50 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Sparkles className="size-5 text-primary animate-pulse" />
@@ -174,7 +174,7 @@ export function ReceiptScannerModal({
 
           {file && !scannedData && (
             /* Selected File State & Scanning */
-            <div className="relative rounded-2xl border bg-muted/20 p-6 flex flex-col items-center justify-center gap-4 overflow-hidden min-h-[220px]">
+            <div className="relative rounded-2xl border bg-muted/20 p-6 flex flex-col items-center justify-center gap-4 overflow-hidden min-h-55">
               {previewUrl ? (
                 <div className="relative size-24 rounded-lg overflow-hidden border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -183,16 +183,16 @@ export function ReceiptScannerModal({
               ) : (
                 <FileText className="size-16 text-muted-foreground animate-pulse" />
               )}
-              
+
               <div className="text-center">
-                <p className="text-sm font-bold text-foreground truncate max-w-[280px]">{file.name}</p>
+                <p className="text-sm font-bold text-foreground truncate max-w-70">{file.name}</p>
                 <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
               </div>
 
               {isScanning && (
                 /* Scanning Beam Animation overlay */
                 <div className="absolute inset-0 bg-background/70 backdrop-blur-xs flex flex-col items-center justify-center gap-3">
-                  <div className="relative w-full max-w-[280px] h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="relative w-full max-w-70 h-2 bg-muted rounded-full overflow-hidden">
                     <div className="absolute top-0 bottom-0 left-0 bg-primary w-24 rounded-full animate-[shimmer_1.5s_infinite_linear]" style={{
                       animation: "shimmer 1.5s infinite linear",
                       backgroundImage: "linear-gradient(90deg, transparent, var(--primary), transparent)",

@@ -168,7 +168,7 @@ export function LandingWorkflow() {
             <div
               key={idx}
               className="workflow-card group relative p-8 rounded-3xl border border-border/40 bg-card/45
-                backdrop-blur-sm flex flex-col justify-between min-h-[250px]
+                backdrop-blur-sm flex flex-col justify-between min-h-62.5
                 transition-[background-color,border-color,transform] duration-300 hover:bg-card/75 hover:border-border/80 hover:-translate-y-1"
             >
               {/* Subtle hover gradient */}

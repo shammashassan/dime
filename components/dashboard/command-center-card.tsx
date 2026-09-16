@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Search, Plus, PiggyBank, Target, Users, ArrowLeftRight } from "lucide-react"
+import { Search, PiggyBank, Target, Users, ArrowLeftRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
@@ -19,7 +19,7 @@ export function CommandCenterCard({ className }: CommandCenterCardProps = {}) {
   return (
     <Card
       className={cn(
-        "bento-tile flex h-full flex-col justify-between gap-4 border-border/50 bg-card/60 p-5 shadow-xs backdrop-blur-xs",
+        "bento-tile flex h-full flex-col gap-3 border-border/50 bg-card p-5 shadow-xs",
         className
       )}
     >
@@ -54,16 +54,10 @@ export function CommandCenterCard({ className }: CommandCenterCardProps = {}) {
       </div>
 
       {/* Quick action buttons */}
-      <div className="flex flex-wrap items-center gap-2 border-t border-border/40 pt-1">
+      <div className="flex flex-wrap items-center gap-2 border-t border-border/40 pt-2.5">
         <span className="mr-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/50">
           quick actions
         </span>
-        <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs font-medium" asChild>
-          <Link href="/transactions?new=1">
-            <Plus className="size-3.5" />
-            Add Transaction
-          </Link>
-        </Button>
         <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs font-medium" asChild>
           <Link href="/budgets">
             <PiggyBank className="size-3.5" />

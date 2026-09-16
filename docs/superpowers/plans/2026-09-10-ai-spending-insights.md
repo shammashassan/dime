@@ -2017,8 +2017,8 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
   const topInsights = data.insights.slice(0, 3)
 
   return (
-    <Card className={`relative overflow-hidden bg-card transition-colors duration-300 h-[400px] flex flex-col ${className}`}>
-      <div className="absolute right-0 top-0 -z-10 translate-x-12 -translate-y-12 size-40 rounded-full bg-primary/5 blur-[40px]" />
+    <Card className={`relative overflow-hidden bg-card transition-colors duration-300 h-100 flex flex-col ${className}`}>
+      <div className="absolute right-0 top-0 -z-10 translate-x-12 -translate-y-12 size-40 rounded-full bg-primary/5 blur-2xl" />
 
       <CardHeader className="flex flex-row items-start justify-between pb-3">
         <div>

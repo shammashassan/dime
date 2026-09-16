@@ -14,7 +14,7 @@ import { ActiveGoalsCard } from "./active-goals-card"
 import { UpcomingRecurring } from "./upcoming-recurring"
 import { BudgetProgressList } from "./budget-progress-list"
 import { RecentTransactions } from "./recent-transactions"
-import { Wallet, Category, Contact, Goal, DashboardFocusCounts, OwedSummaries } from "@/types"
+import { Wallet, Category, Contact, Goal, DashboardFocusCounts, OwedSummaries, HealthTier, PillarId, PillarScore } from "@/types"
 
 export interface DashboardBentoProps {
   userName: string
@@ -27,7 +27,8 @@ export interface DashboardBentoProps {
   focusCounts: DashboardFocusCounts
   owedSummary: OwedSummaries
   healthScore: number
-  healthTier: "needs_attention" | "fair" | "good" | "excellent"
+  healthTier: HealthTier
+  pillars?: Record<PillarId, PillarScore>
   topRecommendation?: {
     title: string
     potentialPoints: number
@@ -55,6 +56,7 @@ export function DashboardBento({
   owedSummary,
   healthScore,
   healthTier,
+  pillars,
   topRecommendation,
   netWorth,
   monthlyInflow,
@@ -97,6 +99,7 @@ export function DashboardBento({
           <FinancialHealthGaugeCard
             score={healthScore}
             tier={healthTier}
+            pillars={pillars}
             topRecommendation={topRecommendation}
           />
         </div>

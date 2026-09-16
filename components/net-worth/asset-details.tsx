@@ -25,6 +25,7 @@ import {
 import { AssetDialog } from "./asset-dialog"
 import { ValuationDialog } from "./valuation-dialog"
 import { AssetValuationInsightsCard } from "./asset-valuation-insights-card"
+import { AssetHealthDiagnosticsCard } from "./asset-health-card"
 import {
   calculateAssetValuationMetrics,
   type AssetValuationMetrics,
@@ -106,6 +107,7 @@ export function AssetDetails({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [valuationOpen, setValuationOpen] = useState(false)
 
   const metrics = useMemo(() => {
     return valuationMetrics || calculateAssetValuationMetrics(asset, valuations)
@@ -341,6 +343,8 @@ export function AssetDetails({
           <ValuationDialog
             assetId={asset._id.toString()}
             assetCurrency={asset.currency}
+            open={valuationOpen}
+            onOpenChange={setValuationOpen}
             trigger={
               <Button className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform">
                 <Plus className="size-4" />
@@ -430,10 +434,10 @@ export function AssetDetails({
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
         {/* ── Left column: Item Info + Notes + placeholders ── */}
-        <div className="lg:col-span-1 flex flex-col gap-4">
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
+        <div className="lg:col-span-1 flex flex-col gap-4 h-full">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden shrink-0">
             <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
               <Info className="size-3.5 text-muted-foreground" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Item Information</span>
@@ -475,7 +479,15 @@ export function AssetDetails({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75">
+          <AssetValuationInsightsCard
+            metrics={metrics}
+            briefing={briefing}
+            currency={asset.currency}
+            onLogValuationClick={() => setValuationOpen(true)}
+            className="shrink-0"
+          />
+
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75 shrink-0">
             <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
               <Link2 className="size-3.5 text-muted-foreground" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Attachments</span>
@@ -485,27 +497,21 @@ export function AssetDetails({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75">
-            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75 flex-1 flex flex-col">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2 shrink-0">
               <Globe className="size-3.5 text-muted-foreground" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Market Sync</span>
             </div>
-            <div className="p-4 text-[11px] text-muted-foreground leading-relaxed">
+            <div className="p-4 text-[11px] text-muted-foreground leading-relaxed flex-1">
               Real-time synchronization with gold/silver indices, crypto accounts, and stock indices. (Coming soon)
             </div>
           </Card>
-
-          <AssetValuationInsightsCard
-            metrics={metrics}
-            briefing={briefing}
-            currency={asset.currency}
-          />
         </div>
 
         {/* ── Right column: Chart + Timeline ───────────── */}
-        <div className="lg:col-span-2 flex flex-col gap-4 lg:h-0 lg:min-h-full">
+        <div className="lg:col-span-2 flex flex-col gap-4 h-full">
           {/* Chart */}
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden shrink-0">
             <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendingUp className="size-3.5 text-muted-foreground" />
@@ -620,8 +626,8 @@ export function AssetDetails({
           </Card>
 
           {/* Valuation Timeline — row-card pattern like Loan History & Timeline */}
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 flex-1 min-h-0 overflow-hidden">
-            <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between">
+          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden flex-1 flex flex-col min-h-[160px]">
+            <div className="px-4 py-3.5 border-b border-border/30 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <Clock className="size-3.5 text-muted-foreground" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Valuation Timeline</span>
@@ -645,11 +651,11 @@ export function AssetDetails({
             </div>
 
             {timelineEvents.length === 0 ? (
-              <div className="text-center py-8 text-xs text-muted-foreground">
+              <div className="text-center py-8 text-xs text-muted-foreground flex-1 flex items-center justify-center">
                 No valuation entries registered yet.
               </div>
             ) : (
-              <ScrollArea className="flex-1 min-h-0">
+              <ScrollArea className="flex-1 min-h-0 max-h-[300px]">
                 <div className="flex flex-col divide-y divide-border/30">
                   {timelineEvents.map((event) => (
                     <div key={event.id} className="group flex items-center gap-3 px-4 py-3.5 hover:bg-muted/20 transition-colors">
@@ -722,6 +728,14 @@ export function AssetDetails({
               </ScrollArea>
             )}
           </Card>
+
+          {/* ── Valuation Health & Diagnostics Card ── */}
+          <AssetHealthDiagnosticsCard
+            asset={asset}
+            valuations={valuations}
+            metrics={metrics}
+            className="shrink-0"
+          />
         </div>
       </div>
     </div>

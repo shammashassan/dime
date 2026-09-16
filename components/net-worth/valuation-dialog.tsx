@@ -30,12 +30,27 @@ interface ValuationDialogProps {
   assetId: string
   assetCurrency: string
   trigger?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   onSuccess?: () => void
 }
 
-export function ValuationDialog({ assetId, assetCurrency, trigger, onSuccess }: ValuationDialogProps) {
+export function ValuationDialog({
+  assetId,
+  assetCurrency,
+  trigger,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+  onSuccess,
+}: ValuationDialogProps) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : internalOpen
+  const setOpen = (newOpen: boolean) => {
+    if (!isControlled) setInternalOpen(newOpen)
+    setControlledOpen?.(newOpen)
+  }
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -96,14 +111,16 @@ export function ValuationDialog({ assetId, assetCurrency, trigger, onSuccess }: 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
+      {trigger !== undefined ? (
+        trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
           <Button className="rounded-xl font-semibold">
             <Plus className="size-4 mr-1.5" />
             Log Valuation
           </Button>
-        )}
-      </DialogTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
