@@ -1,6 +1,6 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
-import { parseSearchQuery, parseAmountToCents, resolveDateRange } from "../parser"
+import { parseSearchQuery, parseAmountToCents, resolveDateRange } from "../search-parser"
 
 describe("Search Query Parser Engine", () => {
   it("1. extracts pure free-text when no operators are present", () => {

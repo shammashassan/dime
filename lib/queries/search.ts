@@ -1,5 +1,5 @@
 import { cache } from "react"
-import { Filter, ObjectId } from "mongodb"
+import { Filter } from "mongodb"
 import {
   walletsCollection,
   transactionsCollection,
@@ -13,14 +13,12 @@ import {
   goalsCollection,
 } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { parseSearchQuery } from "@/lib/search/parser"
+import { parseSearchQuery } from "@/lib/search-parser"
 import type {
   SearchResultItem,
   SearchEntityType,
   UniversalSearchResults,
   ParsedSearchQuery,
-} from "@/lib/search/types"
-import type {
   Transaction,
   Wallet,
   Budget,
@@ -62,6 +60,14 @@ const APP_PAGES: PageNavigationItem[] = [
     url: "/transactions",
     iconName: "ArrowLeftRight",
     keywords: ["transactions", "expenses", "income", "transfers", "ledger", "payments", "history", "spend"],
+  },
+  {
+    id: "page-timeline",
+    title: "Financial Timeline",
+    subtitle: "Chronological activity feed & milestones",
+    url: "/timeline",
+    iconName: "History",
+    keywords: ["timeline", "history", "milestones", "feed", "activity", "story", "life", "events"],
   },
   {
     id: "page-wallets",

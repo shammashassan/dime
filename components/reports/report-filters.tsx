@@ -109,7 +109,7 @@ export function ReportFilters() {
 
 
   return (
-    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
       {/* Date Range Popover */}
       <Popover>
         <PopoverTrigger asChild>

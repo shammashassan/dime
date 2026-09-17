@@ -1,9 +1,9 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { ObjectId, Filter } from "mongodb"
-import { Transaction } from "@/types"
+import { Transaction, InvestmentTransaction, Wallet } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { parseSearchQuery } from "@/lib/search/parser"
+import { parseSearchQuery } from "@/lib/search-parser"
 import { getWallets } from "./wallets"
 
 export interface TransactionFilters {
@@ -254,16 +254,59 @@ export const getTransactionById = cache(
 )
 
 export const getRecentTransactions = cache(
-  async (userId: string, limit: number = 5): Promise<Transaction[]> => {
+  async (userId: string, limit: number = 6): Promise<Transaction[]> => {
     const scope = await getFinancialScope()
     const scopeFilter = getScopeFilter(scope)
-    const transactionsColl = await getCollection<Transaction>("transactions")
-    const wallets = await getWallets(userId)
-    const allowedWalletIds = wallets.map(w => w._id.toString())
+    const [transactionsColl, invColl, walletsColl] = await Promise.all([
+      getCollection<Transaction>("transactions"),
+      getCollection<InvestmentTransaction>("investment_transactions"),
+      getCollection<Wallet>("wallets"),
+    ])
 
-    return transactionsColl.find({ 
-      walletId: { $in: allowedWalletIds },
-      ...scopeFilter
-    }).sort({ date: -1, createdAt: -1 }).limit(limit).toArray()
+    const allWallets = await walletsColl.find(scopeFilter).toArray()
+    const walletCurrencyMap = new Map(allWallets.map((w) => [w._id.toString(), w.currency]))
+
+    const [regularTxs, invTxs] = await Promise.all([
+      transactionsColl.find(scopeFilter).sort({ date: -1, createdAt: -1 }).limit(limit).toArray(),
+      invColl.find(scopeFilter).sort({ date: -1, createdAt: -1 }).limit(limit).toArray(),
+    ])
+
+    const mappedInvTxs: Transaction[] = invTxs.map((it) => {
+      const isPositive =
+        it.type === "sell" || it.type === "cash_dividend" || it.type === "interest"
+      const amount = Math.abs(it.cashImpact !== 0 ? it.cashImpact : it.grossAmount || 0)
+      const currency = walletCurrencyMap.get(it.walletId) || "USD"
+
+      let description = `${it.type.toUpperCase()} ${it.symbol}`
+      if (it.type === "cash_dividend") {
+        description = `Dividend: ${it.symbol}`
+      } else if (it.quantity > 0 && it.price > 0) {
+        description = `${it.type.toUpperCase()} ${it.symbol} (${it.quantity} @ ${(it.price / 100).toFixed(2)})`
+      }
+
+      return {
+        _id: it._id,
+        userId: it.userId,
+        walletId: it.walletId,
+        categoryId: null,
+        type: isPositive ? "income" : "expense",
+        amount,
+        currency,
+        description,
+        notes: it.notes || `Investment · ${it.assetType?.toUpperCase() || "ASSET"}`,
+        date: it.date,
+        tags: ["investment", it.type, it.symbol].filter(Boolean),
+        isRecurring: false,
+        isInvestment: true,
+        investmentType: it.type,
+        symbol: it.symbol,
+        createdAt: it.createdAt,
+        updatedAt: it.updatedAt,
+      }
+    })
+
+    const combined = [...regularTxs, ...mappedInvTxs]
+    combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    return combined.slice(0, limit)
   }
 )

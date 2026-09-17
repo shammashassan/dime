@@ -11,6 +11,7 @@ import {
   transactionsCollection,
   categoriesCollection
 } from "@/lib/db/collections"
+import { db } from "@/lib/db/client"
 import {
   createSharedExpenseSchema,
   CreateSharedExpenseInput,
@@ -151,6 +152,53 @@ export async function recordSettlementAction(rawInput: RecordSettlementInput) {
   const parsed = recordSettlementSchema.parse(rawInput)
   const now = new Date()
 
+  // Helper to resolve display names for participants
+  const resolveParticipantDisplayName = async (
+    participantId: string,
+    participantType: "user" | "contact",
+    providedName?: string
+  ): Promise<string> => {
+    if (providedName && providedName.trim().length > 0) {
+      return providedName.trim()
+    }
+    if (participantId === session.user.id) {
+      return session.user.name || "You"
+    }
+    if (participantType === "contact") {
+      if (ObjectId.isValid(participantId)) {
+        const c = await contactsCollection.findOne({ _id: new ObjectId(participantId) })
+        if (c?.name) return c.name
+      }
+    } else if (participantType === "user") {
+      const query: Record<string, unknown>[] = [{ id: participantId }]
+      if (ObjectId.isValid(participantId)) {
+        query.push({ _id: new ObjectId(participantId) })
+      }
+      const u = await db.collection("user").findOne({ $or: query })
+      if (u?.name) return u.name as string
+    }
+    return "Partner"
+  }
+
+  const [fromName, toName] = await Promise.all([
+    resolveParticipantDisplayName(
+      parsed.fromParticipantId,
+      parsed.fromParticipantType,
+      parsed.fromParticipantName
+    ),
+    resolveParticipantDisplayName(
+      parsed.toParticipantId,
+      parsed.toParticipantType,
+      parsed.toParticipantName
+    ),
+  ])
+
+  const isUserPaying = parsed.fromParticipantId === session.user.id
+  const isUserReceiving = parsed.toParticipantId === session.user.id
+
+  const fromDisplayName = isUserPaying ? "You" : fromName
+  const toDisplayName = isUserReceiving ? "You" : toName
+
   // Optional Wallet Transaction creation if walletId is provided
   let createdTransactionId: string | undefined = undefined
 
@@ -171,7 +219,6 @@ export async function recordSettlementAction(rawInput: RecordSettlementInput) {
       }
 
       // If current user is receiving money from settlement -> income, if paying -> expense
-      const isUserReceiving = parsed.toParticipantId === session.user.id
       const txType = isUserReceiving ? "income" : "expense"
 
       const tx: Transaction = {
@@ -183,7 +230,7 @@ export async function recordSettlementAction(rawInput: RecordSettlementInput) {
         amount: parsed.amount,
         currency: parsed.currency,
         description: `Expense Settlement - ${parsed.notes || "Repayment"}`,
-        notes: `Settlement from ${parsed.fromParticipantId} to ${parsed.toParticipantId}`,
+        notes: `Settlement from ${fromDisplayName} to ${toDisplayName}`,
         date: parsed.settledAt,
         tags: ["shared-expense", "settlement"],
         isRecurring: false,
@@ -212,8 +259,10 @@ export async function recordSettlementAction(rawInput: RecordSettlementInput) {
     expenseId: parsed.expenseId,
     fromParticipantId: parsed.fromParticipantId,
     fromParticipantType: parsed.fromParticipantType,
+    fromParticipantName: isUserPaying ? (session.user.name || "You") : fromName,
     toParticipantId: parsed.toParticipantId,
     toParticipantType: parsed.toParticipantType,
+    toParticipantName: isUserReceiving ? (session.user.name || "You") : toName,
     amount: parsed.amount,
     currency: parsed.currency,
     paymentMethod: parsed.paymentMethod,
@@ -330,12 +379,40 @@ export async function getSharedExpensesOverviewAction(contactId?: string) {
       )
     : enrichedExpenses
 
+  // Enrich settlements with participant names if needed
+  const enrichedSettlements = rawSettlements.map((s) => {
+    let fromName = s.fromParticipantName
+    let toName = s.toParticipantName
+
+    if (!fromName) {
+      if (s.fromParticipantId === session.user.id) {
+        fromName = session.user.name || "You"
+      } else if (s.fromParticipantType === "contact" && contactMap.has(s.fromParticipantId)) {
+        fromName = contactMap.get(s.fromParticipantId)!.name
+      }
+    }
+
+    if (!toName) {
+      if (s.toParticipantId === session.user.id) {
+        toName = session.user.name || "You"
+      } else if (s.toParticipantType === "contact" && contactMap.has(s.toParticipantId)) {
+        toName = contactMap.get(s.toParticipantId)!.name
+      }
+    }
+
+    return {
+      ...s,
+      fromParticipantName: fromName,
+      toParticipantName: toName,
+    }
+  })
+
   const filteredSettlements = contactId
-    ? rawSettlements.filter(
+    ? enrichedSettlements.filter(
         (s) =>
           s.fromParticipantId === contactId || s.toParticipantId === contactId
       )
-    : rawSettlements
+    : enrichedSettlements
 
   // Build ViewModel using pure domain function
   const viewModel = buildSharedExpensesOverviewViewModel({

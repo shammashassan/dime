@@ -3,7 +3,7 @@ import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Reports & Analytics",
-  description: "Analyze your income, expenses, cash flow trends, and category breakdowns.",
+  description: "Analyze your income, expenses, cash flow trends, category breakdowns, and spending heatmaps.",
 }
 import { requireApprovedUser } from "@/lib/auth-guard"
 import {
@@ -14,8 +14,11 @@ import {
   getMonthlyNetSavings,
   getBudgetPerformance,
 } from "@/lib/queries/reports"
+import { getSpendingHeatmapData } from "@/lib/queries/heatmaps"
+import { getWallets } from "@/lib/queries/wallets"
+import { getCategories } from "@/lib/queries/categories"
 import { getPreferences } from "@/lib/queries/preferences"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, serializeData } from "@/lib/utils"
 import { IncomeExpenseTrendChart } from "@/components/reports/income-expense-trend-chart"
 import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart"
 import { SpendingDayChart } from "@/components/reports/spending-day-chart"
@@ -24,7 +27,8 @@ import { NetSavingsChart } from "@/components/reports/net-savings-chart"
 import { BudgetPerformanceChart } from "@/components/reports/budget-performance-chart"
 import { ReportFilters } from "@/components/reports/report-filters"
 import { MonthlySummaryTable } from "@/components/reports/monthly-summary-table"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ReportsNavTabs } from "@/components/reports/reports-nav-tabs"
+import { SpendingHeatmapView } from "@/components/reports/spending-heatmap-view"
 import { MetricCard } from "@/components/ui/metric-card"
 import { unstable_rethrow } from "next/navigation"
 import { BarChart3, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownRight } from "lucide-react"
@@ -35,20 +39,80 @@ async function ReportsContent({
   searchParams,
 }: {
   searchParams: Promise<{
+    tab?: string
     monthsCount?: string
     categoryFrom?: string
     categoryTo?: string
+    metric?: "expense" | "income" | "net" | "count"
+    timeframe?: string
+    walletId?: string
+    categoryId?: string
   }>
 }) {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
   const params = await searchParams
+  const activeTab = params.tab === "heatmap" ? "heatmap" : "overview"
 
+  if (activeTab === "heatmap") {
+    try {
+      const [heatmapData, wallets, categories] = await Promise.all([
+        getSpendingHeatmapData(userId, {
+          metric: params.metric,
+          timeframe: params.timeframe,
+          walletId: params.walletId,
+          categoryId: params.categoryId,
+        }),
+        getWallets(userId),
+        getCategories(userId),
+      ])
+
+      return (
+        <div className="flex flex-col gap-7 w-full">
+          {/* Header Section */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
+              <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+                <BarChart3 className="size-6" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Analyze spending patterns, habit streaks, and year-long financial activity heatmaps.
+                </p>
+              </div>
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="self-start lg:self-center shrink-0">
+              <Suspense fallback={null}>
+                <ReportsNavTabs />
+              </Suspense>
+            </div>
+          </div>
+
+          {/* Activity Heatmap View */}
+          <Suspense fallback={<ReportsSkeleton />}>
+            <SpendingHeatmapView
+              data={serializeData(heatmapData)}
+              wallets={serializeData(wallets)}
+              categories={serializeData(categories)}
+            />
+          </Suspense>
+        </div>
+      )
+    } catch (error) {
+      unstable_rethrow(error)
+      console.error("Failed to load spending heatmap:", error)
+      throw error
+    }
+  }
+
+  // Otherwise, load standard Overview & Trends tab
   const categoryFrom = params.categoryFrom ? new Date(params.categoryFrom) : undefined
   const categoryTo = params.categoryTo ? new Date(params.categoryTo) : undefined
 
-  // Dynamically calculate monthsCount based on custom date range if selected
   let monthsCount = params.monthsCount ? parseInt(params.monthsCount, 10) : 6
   if (categoryFrom && categoryTo) {
     const diffTime = Math.abs(categoryTo.getTime() - categoryFrom.getTime())
@@ -95,7 +159,6 @@ async function ReportsContent({
     console.error("Failed to load reports data:", error)
   }
 
-  // Calculate metrics based on the active trendData
   const totalIncome = trendData.reduce((sum, item) => sum + item.income, 0)
   const totalExpense = trendData.reduce((sum, item) => sum + item.expense, 0)
   const netSavings = totalIncome - totalExpense
@@ -104,12 +167,12 @@ async function ReportsContent({
   return (
     <div className="flex flex-col gap-7 w-full">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
           <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
             <BarChart3 className="size-6" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Analyze spending trends, category breakdowns, and monthly financial summaries.
@@ -117,8 +180,13 @@ async function ReportsContent({
           </div>
         </div>
 
-        {/* Global Filter Component */}
-        <div className="self-start lg:self-center">
+        {/* Navigation Tabs + Global Date Filter Component */}
+        <div className="flex flex-col lg:items-end 2xl:flex-row 2xl:items-center gap-2.5 self-start lg:self-center shrink-0">
+          <div className="flex items-center">
+            <Suspense fallback={null}>
+              <ReportsNavTabs />
+            </Suspense>
+          </div>
           <ReportFilters />
         </div>
       </div>
@@ -164,22 +232,11 @@ async function ReportsContent({
 
       {/* Bento grid of 6 charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 1. Cash flow Area chart */}
         <IncomeExpenseTrendChart data={trendData} monthsCount={monthsCount} currency={currency} />
-
-        {/* 2. Category Breakdown Pie chart */}
         <CategoryBreakdownChart data={breakdownData} currency={currency} />
-
-        {/* 3. Spending day Bar chart */}
         <SpendingDayChart data={spendingDayData} currency={currency} />
-
-        {/* 4. Net Worth History line/area chart */}
         <NetWorthHistoryChart data={walletHistoryData} monthsCount={monthsCount} currency={currency} />
-
-        {/* 5. Net Savings positive/negative bar chart */}
         <NetSavingsChart data={savingsData} currency={currency} />
-
-        {/* 6. Budget Performance grouped bar chart */}
         <BudgetPerformanceChart data={budgetPerformanceData} currency={currency} />
       </div>
 
@@ -195,9 +252,14 @@ export default async function ReportsPage({
   searchParams,
 }: {
   searchParams: Promise<{
+    tab?: string
     monthsCount?: string
     categoryFrom?: string
     categoryTo?: string
+    metric?: "expense" | "income" | "net" | "count"
+    timeframe?: string
+    walletId?: string
+    categoryId?: string
   }>
 }) {
   return (

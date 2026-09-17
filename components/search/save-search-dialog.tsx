@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field"
 import { saveSearchAction } from "@/lib/actions/search"
-import type { SerializedSavedSearch } from "@/lib/search/types"
+import type { SerializedSavedSearch } from "@/types"
 
 interface SaveSearchDialogProps {
   query: string

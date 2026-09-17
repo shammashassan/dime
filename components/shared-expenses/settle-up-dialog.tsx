@@ -117,12 +117,17 @@ export function SettleUpDialog({
     setError(null)
 
     try {
+      const payerP = participants.find((p) => p.id === fromId)
+      const receiverP = participants.find((p) => p.id === toId)
+
       await recordSettlementAction({
         expenseId,
         fromParticipantId: fromId,
         fromParticipantType: fromType,
+        fromParticipantName: payerP?.name,
         toParticipantId: toId,
         toParticipantType: toType,
+        toParticipantName: receiverP?.name,
         amount: amountCents,
         currency,
         paymentMethod,

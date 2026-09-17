@@ -1,9 +1,9 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { BudgetTemplate } from "@/types"
-import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates/system-templates"
-import { computeTemplateRecommendation, TemplateRecommendation } from "@/lib/budget-templates/recommendations"
+import { BudgetTemplate, TemplateRecommendation } from "@/types"
+import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates"
+import { computeTemplateRecommendation } from "@/lib/calculations/budget-recommendations"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getBudgetTemplates = cache(async (userId: string): Promise<BudgetTemplate[]> => {

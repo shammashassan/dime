@@ -9,7 +9,7 @@ import {
   ApplyTemplateInput,
   SaveCurrentBudgetsInput,
 } from "@/lib/validations/budget-template.schema"
-import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates/system-templates"
+import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates"
 import { Budget, Category, BudgetTemplate, Notification } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"

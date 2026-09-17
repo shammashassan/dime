@@ -26,6 +26,7 @@ import {
   CalendarDays,
   Activity,
   Sparkles,
+  History,
 } from "lucide-react"
 import { SpaceSwitcher } from "@/components/layout/space-switcher"
 import {
@@ -70,6 +71,7 @@ import { toast } from "sonner"
 const NAV_ITEMS = [
   { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { title: "Transactions", href: "/transactions", icon: ArrowLeftRight },
+  { title: "Timeline", href: "/timeline", icon: History },
   { title: "Wallets", href: "/wallets", icon: Wallet },
   { title: "Investments", href: "/investments", icon: LineChart },
   { title: "Net Worth", href: "/net-worth", icon: TrendingUp },

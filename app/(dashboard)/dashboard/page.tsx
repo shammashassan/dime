@@ -9,6 +9,7 @@ import { getContacts, getOwedSummaries } from "@/lib/queries/loans"
 import { getGoals } from "@/lib/queries/goals"
 import { getDashboardFocusCounts } from "@/lib/queries/dashboard"
 import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/reports"
+import { getSpendingHeatmapData } from "@/lib/queries/heatmaps"
 import { getFinancialHealthScore } from "@/lib/queries/financial-health"
 import { getNetWorthSummary } from "@/lib/queries/net-worth"
 import { DashboardBento } from "@/components/dashboard/dashboard-bento"
@@ -37,6 +38,7 @@ async function DashboardContent() {
     categoryBreakdown,
     healthScoreData,
     netWorthData,
+    heatmapData,
   ] = await Promise.all([
     getPreferences(userId),
     getWallets(userId),
@@ -49,6 +51,7 @@ async function DashboardContent() {
     getCategoryBreakdown(userId),
     getFinancialHealthScore(userId),
     getNetWorthSummary(userId),
+    getSpendingHeatmapData(userId, { timeframe: "trailing-12" }),
   ])
 
   const targetCurrency = prefs?.defaultCurrency || "USD"
@@ -104,6 +107,8 @@ async function DashboardContent() {
       monthlyInflow={monthlyInflow}
       monthlyOutflow={monthlyOutflow}
       trendData={trendData}
+      heatmapDays={serializeData(heatmapData.days)}
+      heatmapHabits={serializeData(heatmapData.habits)}
       categoryBreakdown={categoryBreakdown}
       userId={userId}
       targetCurrency={targetCurrency}

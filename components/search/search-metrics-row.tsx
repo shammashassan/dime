@@ -1,7 +1,7 @@
 import React from "react"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Search, Layers, SlidersHorizontal, Bookmark } from "lucide-react"
-import type { SearchEntityType } from "@/lib/search/types"
+import type { SearchEntityType } from "@/types"
 
 const ENTITY_LABELS: Record<string, string> = {
   transaction: "Transactions",

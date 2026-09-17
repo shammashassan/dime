@@ -45,10 +45,16 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ Financial Health Score
 * ✅ AI Spending Insights
 * ✅ Packed Bento Dashboard (Custom Dashboard Redesign)
+* ✅ Spending Heatmaps & Habit Streaks
 
 ## People
 
 * ✅ Contacts
+
+## Platform
+
+* ✅ Financial Timeline
+* ✅ Financial Inbox & Notifications Center
 
 ---
 
@@ -289,7 +295,7 @@ Future Enhancements:
 Extend Shared Spaces and Contacts with expense splitting, dynamic pairwise balance calculation, and debt simplification graph algorithms.
 
 Status:
-**Completed.** Dedicated domain architecture implemented in `lib/shared-expenses/` (`splits.ts`, `balances.ts`, `simplification.ts`, `view-models.ts`) with canonical database persistence (`shared_expenses`, `shared_settlements`), thin server actions, `/shared-expenses` dashboard route, interactive Settle-Up modal, optional wallet linking, inbox notification triggers, and Contacts page integration.
+**Completed.** Pure graph calculations and balance logic implemented in calculation engines (`lib/calculations/shared-expenses.ts`), database persistence in `shared_expenses` and `shared_settlements` collections, Server Actions in `lib/actions/shared-expenses.ts`, dedicated `/shared-expenses` dashboard route, interactive Settle-Up modal, optional wallet linking, inbox notification triggers, and Contacts page integration.
 
 Features:
 * ✅ Equal split mode
@@ -301,7 +307,7 @@ Features:
 * ✅ Shared Expenses feed & Settlement history log
 * ✅ Integration with Contacts (`/shared-expenses?contactId=...`)
 * ✅ Notification Center inbox notifications for shared expenses
-* ✅ Dedicated domain architecture (`lib/shared-expenses/`) matching Net Worth & Investments
+* ✅ Layered architecture with pure calculations separated from server actions and UI
 
 ---
 
@@ -677,7 +683,7 @@ Additional Features
 
 Provide ready-made budgeting templates and personalized cash-flow-driven allocations.
 
-> **Status**: **Completed.** Full domain architecture implemented in `lib/budget-templates/` (`system-templates.ts`, `recommendations.ts`), MongoDB persistence for custom templates in `budget_templates` collection with indexed scope, server actions in `lib/actions/budget-templates.ts`, parallel data fetching in `app/(dashboard)/budgets/page.tsx`, and responsive in-page modal experience with 1-click apply wizard (`components/budgets/budget-templates-dialog.tsx`, `components/budgets/apply-template-step.tsx`).
+> **Status**: **Completed.** Domain logic implemented for system presets and recommendations, MongoDB persistence for custom templates in `budget_templates` collection with indexed scope, server actions in `lib/actions/budget-templates.ts`, parallel data fetching in `app/(dashboard)/budgets/page.tsx`, and responsive in-page modal experience with 1-click apply wizard (`components/budgets/budget-templates-dialog.tsx`, `components/budgets/apply-template-step.tsx`).
 
 Curated System Frameworks:
 
@@ -703,64 +709,53 @@ Curated System Frameworks:
 
 ---
 
-# 14. Spending Heatmaps
+# 14. Spending Heatmaps ✅ COMPLETED
 
-GitHub-style heatmaps for:
+Interactive GitHub-style activity heatmaps and financial habit telemetry.
 
-* Daily spending
-* Monthly spending
-* Income
-* Savings
-* Transactions
-
-Clicking a day should drill into transactions.
-
-### Additional Planned Features
-
-* Net Worth heatmap
-* Cash flow heatmap
-* Budget utilization heatmap
-* Investment activity
-* Goal contributions
-* Bill payments
-* Subscription renewals
-* Loan repayments
+> **Status**: **Completed.** Full SVG contribution graph primitive adapted from Kibo UI / Chánh Đại (`components/reports/contribution-graph.tsx`), pure calculation and quantile partitioning engine (`lib/calculations/heatmaps.ts`), cached multi-currency query layer (`lib/queries/heatmaps.ts`), URL-driven tab integration in `/reports` (`/reports?tab=heatmap`), interactive anchored day inspection popovers (`HeatmapDayPopover`), and 90-day mini-rhythm widget on the Packed Bento Dashboard.
 
 Support:
 
-* Weekly view
-* Monthly view
-* Yearly view
-* Custom ranges
-* Category filtering
-* Wallet filtering
-* Space filtering
+* ✅ Daily spending intensity (quantile-scaled levels 0–4)
+* ✅ Income inflows intensity
+* ✅ Net cash flow (positive / negative tracking)
+* ✅ Transaction frequency volume
+* ✅ Interactive day inspection anchored Popovers with transaction previews
+* ✅ Direct deep linking to `/transactions?from=YYYY-MM-DD&to=YYYY-MM-DD`
+* ✅ Habit Telemetry (Current zero-spend streak, longest streak, daily average spend, peak spend day)
+* ✅ Timeframe switcher (Trailing 12 Months, 2026, 2025, etc.)
+* ✅ Category and Wallet filtering
+* ✅ Packed Bento Dashboard 90-day mini-rhythm card (`SpendingHeatmapWidget`)
+* ✅ 100% automated test coverage on quantile partitioning, calendar grouping, and streak calculations.
 
 Integrations:
 
-* Reports
-* Dashboard
-* Financial Timeline
-* AI Insights
+* ✅ Reports (`/reports?tab=heatmap`)
+* ✅ Dashboard Overview (Row 3b mini-rhythm card)
+* ✅ Transactions Ledger (date-filtered drilldown)
+* ✅ Command Palette & Deep Links
 
 ---
 
-# 15. Financial Timeline
+# 15. Financial Timeline ✅ COMPLETED
 
-Chronological financial activity feed.
+Chronological financial activity feed and milestone telemetry.
+
+> **Status**: **Completed.** Pure deterministic calculation and grouping engine implemented in `lib/calculations/timeline.ts`, cached multi-entity data aggregation in `lib/queries/timeline.ts`, types in `types/index.ts`, validation schemas in `lib/validations/timeline.schema.ts`, dedicated `/timeline` page with Next.js 16 Suspense architecture, standard Dime page header, `MetricCard` KPI strip, shadcn `Tabs` category filter navigation, shadcn `Item` event cards, vertical spine activity feed, URL-synchronized search & date range picker, CSV/JSON export, sidebar navigation, and `⌘K` command palette integration. Dashboard unified recent transactions stream combines standard and investment transactions seamlessly into full-width Bento layout.
 
 Include:
 
-* Salary received
-* Bills paid
-* Goal achieved
-* Loan created
-* Loan repaid
-* Investments
-* Subscription renewals
-* Large purchases
-* Budget milestones
-* Shared expense settlements
+* ✅ Salary received
+* ✅ Bills paid
+* ✅ Goal achieved
+* ✅ Loan created
+* ✅ Loan repaid
+* ✅ Investments
+* ✅ Subscription renewals
+* ✅ Large purchases
+* ✅ Budget milestones
+* ✅ Shared expense settlements
 
 Support filtering by event type.
 
@@ -800,6 +795,14 @@ Integrations:
 * Notifications
 * AI Coach
 * Search
+
+Architecture & Layering:
+* Calculations: `lib/calculations/timeline.ts` (pure event synthesis, milestone detection, date bracket grouping)
+* Queries: `lib/queries/timeline.ts` (cached cross-collection fetching with `React.cache`)
+* Types: `types/index.ts`
+* Route: `app/(dashboard)/timeline/page.tsx`, `loading.tsx`, `error.tsx`
+* Presentation: `components/timeline/`
+* Tests: `lib/calculations/__tests__/timeline.test.ts`
 
 ---
 
@@ -1277,3 +1280,34 @@ Every new feature should:
 * Be API-first where practical.
 * Support localization and multi-currency.
 * Remain scalable for future Open Banking and Investment integrations.
+
+---
+
+## 🏛️ Codebase Folder Structure & Layering Rules
+
+Dime strictly adheres to a **horizontal layered architecture**. Never create feature or module folders directly inside `lib/`.
+
+| Layer / Directory | Permitted Contents | Rules & Conventions |
+| :--- | :--- | :--- |
+| `lib/actions/` | Next.js Server Actions (`"use server"`) | Auth & scope guards, Zod validation, mutations, `revalidatePath`, `updateTag`. |
+| `lib/calculations/` | Pure business logic, math, transforms, algorithms | 100% deterministic & side-effect free. Never import React, DOM, or DB clients. |
+| `lib/calculations/__tests__/` | Unit test suites | Node native test runner (`node:test`, `node:assert/strict`). |
+| `lib/queries/` | Read-only data fetching & aggregation | Wrapped in `React.cache()`. Queries MongoDB collections with scope filters. |
+| `lib/validators/` | Zod validation schemas | Shared schemas for form inputs, URL query params, and Server Action payloads. |
+| `lib/db/` | MongoDB client & collection exports | `client.ts`, `collections.ts`. |
+| `types/` | TypeScript types & interfaces | Data models, DTOs, view models, and domain types. |
+| `components/<feature>/` | UI presentation components | Composed using shadcn/ui primitives. Small, focused, accessible. |
+| `app/(dashboard)/<route>/` | Next.js 16 App Router pages | Server Components default, `await searchParams`, co-located `loading.tsx` & `error.tsx`. |
+
+### 🚫 Strict Anti-Patterns
+
+1. **NO module/feature folders inside `lib/`**:
+   * ❌ `lib/timeline/`, `lib/investments/`, `lib/loans/`
+   * ✅ Split across layers: `lib/calculations/timeline.ts`, `lib/queries/timeline.ts`, `lib/actions/timeline.ts`, `types/index.ts`.
+   *(Note: Existing legacy folders like `lib/budget-templates/`, `lib/shared-expenses/`, and `lib/search/` are earmarked for progressive migration into this standard).*
+2. **NO business calculations inside Server Components or Client Components**:
+   * All business math and data aggregation must live in `lib/calculations/` to remain easily testable.
+3. **NO raw DB access inside Client Components or Actions**:
+   * Read queries belong in `lib/queries/`. Mutations belong in `lib/actions/`.
+4. **NO `middleware.ts`**:
+   * Next.js 16 route protection lives in `proxy.ts` only.

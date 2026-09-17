@@ -31,8 +31,10 @@ export const recordSettlementSchema = z.object({
   expenseId: z.string().optional(),
   fromParticipantId: z.string().min(1, "Payer participant is required"),
   fromParticipantType: z.enum(["user", "contact"]),
+  fromParticipantName: z.string().optional(),
   toParticipantId: z.string().min(1, "Receiver participant is required"),
   toParticipantType: z.enum(["user", "contact"]),
+  toParticipantName: z.string().optional(),
   amount: z.number().positive("Settlement amount must be greater than zero"), // in cents/paise
   currency: z.string().min(3).max(3),
   paymentMethod: z.string().optional(),

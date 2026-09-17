@@ -14,6 +14,8 @@ import { ActiveGoalsCard } from "./active-goals-card"
 import { UpcomingRecurring } from "./upcoming-recurring"
 import { BudgetProgressList } from "./budget-progress-list"
 import { RecentTransactions } from "./recent-transactions"
+import { SpendingHeatmapWidget } from "./spending-heatmap-widget"
+import { HeatmapDaySummary, HeatmapHabitStats } from "@/lib/calculations/heatmaps"
 import { Wallet, Category, Contact, Goal, DashboardFocusCounts, OwedSummaries, HealthTier, PillarId, PillarScore } from "@/types"
 
 export interface DashboardBentoProps {
@@ -38,6 +40,8 @@ export interface DashboardBentoProps {
   monthlyInflow: number
   monthlyOutflow: number
   trendData: Array<{ date: string; income: number; expense: number }>
+  heatmapDays?: HeatmapDaySummary[]
+  heatmapHabits?: HeatmapHabitStats
   categoryBreakdown: CategoryItem[]
   userId: string
   targetCurrency: string
@@ -62,6 +66,8 @@ export function DashboardBento({
   monthlyInflow,
   monthlyOutflow,
   trendData,
+  heatmapDays,
+  heatmapHabits,
   categoryBreakdown,
   userId,
   targetCurrency,
@@ -106,6 +112,16 @@ export function DashboardBento({
         <div className="lg:col-span-1">
           <CategoryBreakdown data={categoryBreakdown} currency={targetCurrency} />
         </div>
+      </div>
+
+      {/* Row 3b: Spending Rhythm Activity Heatmap */}
+      <div className="w-full">
+        <SpendingHeatmapWidget
+          heatmapDays={heatmapDays}
+          habits={heatmapHabits}
+          trendData={trendData}
+          currency={targetCurrency}
+        />
       </div>
 
       {/* Row 4: Health & Obligations Tier — Financial Health Gauge & Loan Action (1 : 2) */}

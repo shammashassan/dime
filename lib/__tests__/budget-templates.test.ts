@@ -1,11 +1,11 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
-import { SYSTEM_BUDGET_TEMPLATES } from "../system-templates"
+import { SYSTEM_BUDGET_TEMPLATES } from "../budget-templates"
 import {
   applyTemplateInputSchema,
   saveCurrentBudgetsSchema,
   createCustomTemplateSchema,
-} from "../../validations/budget-template.schema"
+} from "../validations/budget-template.schema"
 
 describe("Budget Templates System Presets", () => {
   it("includes exactly 8 curated system presets", () => {

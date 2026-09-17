@@ -47,7 +47,7 @@ import type {
   UniversalSearchResults,
   SearchResultItem,
   SerializedSavedSearch,
-} from "@/lib/search/types"
+} from "@/types"
 
 const ICON_MAP: Record<string, React.ElementType> = {
   LayoutDashboard,

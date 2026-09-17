@@ -19,7 +19,7 @@ import type {
   UniversalSearchResults,
   SerializedSavedSearch,
   SearchEntityType,
-} from "@/lib/search/types"
+} from "@/types"
 
 /**
  * Executes a universal search for the authenticated user.

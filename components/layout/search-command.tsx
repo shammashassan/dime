@@ -39,7 +39,7 @@ import { Kbd } from "@/components/ui/kbd"
 import { authClient } from "@/lib/auth-client"
 import { universalSearchAction } from "@/lib/actions/search"
 import { formatCurrency } from "@/lib/utils"
-import type { SearchResultItem } from "@/lib/search/types"
+import type { SearchResultItem } from "@/types"
 
 const ICON_MAP: Record<string, React.ElementType> = {
   LayoutDashboard,

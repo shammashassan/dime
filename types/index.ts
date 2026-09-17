@@ -43,6 +43,9 @@ export interface Transaction {
   splits?: { id: string; categoryId: string; amount: number; percentage?: number; notes?: string }[]
   loanId?: string
   isLoanPrincipal?: boolean
+  isInvestment?: boolean
+  investmentType?: string
+  symbol?: string
   createdAt: Date
   updatedAt: Date
   organizationId?: string | null
@@ -127,6 +130,16 @@ export interface BudgetTemplate {
   createdBy?: string
   updatedBy?: string
   version?: number
+}
+
+export interface TemplateRecommendation {
+  recommendedTemplateId: string
+  templateName: string
+  rationale: string
+  suggestedMonthlyAmount: number // in smallest currency unit (cents / paise)
+  currency: string
+  averageMonthlyIncome: number
+  hasSufficientData: boolean
 }
 
 export interface RecurringRule {
@@ -733,8 +746,10 @@ export interface SharedSettlement {
   expenseId?: string                // Optional link to a specific SharedExpense
   fromParticipantId: string         // Payer participant ID
   fromParticipantType: ParticipantType
+  fromParticipantName?: string      // Payer display name
   toParticipantId: string           // Receiver participant ID
   toParticipantType: ParticipantType
+  toParticipantName?: string        // Receiver display name
   amount: number                    // Amount settled in cents/paise
   currency: string
   paymentMethod?: string            // "cash", "upi", "bank_transfer", "other"
@@ -1098,7 +1113,7 @@ export interface SerializedCalendarPlanEvent extends Omit<CalendarPlanEvent, "_i
 }
 
 // Re-export Search domain types
-export * from "@/lib/search/types"
+export * from "./search"
 
 // ── Dashboard Focus Domain Types ──
 
@@ -1110,4 +1125,79 @@ export interface DashboardFocusCounts {
   unreadNotificationsCount: number
   baseCurrency: string
 }
+
+// ── Financial Timeline Domain Types ──
+
+export type TimelineEventType =
+  | "transaction"
+  | "goal_milestone"
+  | "goal_completed"
+  | "loan_originated"
+  | "loan_repayment"
+  | "loan_settled"
+  | "bill_paid"
+  | "subscription_renewed"
+  | "investment_trade"
+  | "dividend_received"
+  | "shared_settlement"
+  | "asset_created"
+  | "asset_revaluation"
+
+export type TimelineEventCategory =
+  | "all"
+  | "milestones"
+  | "transactions"
+  | "bills_subscriptions"
+  | "investments"
+  | "loans"
+  | "shared"
+
+export type TimelineEventImpact = "inflow" | "outflow" | "neutral" | "milestone"
+
+export interface TimelineEventBadge {
+  label: string
+  variant?: "default" | "secondary" | "destructive" | "outline" | "success"
+}
+
+export interface TimelineEvent {
+  id: string
+  type: TimelineEventType
+  category: TimelineEventCategory
+  title: string
+  description: string
+  date: string // ISO date string for safe RSC -> Client serialization
+  amount?: number // in cents/paise (positive integer; impact defines direction)
+  currency?: string
+  impact: TimelineEventImpact
+  iconName: string
+  badge?: TimelineEventBadge
+  isMilestone: boolean
+  milestoneReason?: string
+  href?: string
+  metadata?: Record<string, unknown>
+}
+
+export interface TimelineDateGroup {
+  label: string // "Today", "Yesterday", "This Week", "Earlier this Month", "August 2026", etc.
+  dateKey: string // YYYY-MM-DD or YYYY-MM
+  netAmount: number // net cash flow for this date group in cents
+  events: TimelineEvent[]
+}
+
+export interface TimelineSummaryStats {
+  totalEvents: number
+  milestonesCount: number
+  totalInflow: number // in cents
+  totalOutflow: number // in cents
+  netFlow: number // in cents
+  currency: string
+}
+
+export interface TimelineData {
+  events: TimelineEvent[]
+  groups: TimelineDateGroup[]
+  stats: TimelineSummaryStats
+  currency: string
+}
+
 

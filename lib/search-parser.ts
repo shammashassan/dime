@@ -3,7 +3,7 @@ import type {
   ParsedSearchQuery,
   SearchEntityType,
   SearchOperators,
-} from "./types"
+} from "@/types"
 
 /**
  * Normalizes an amount string (e.g. "50", "12.50", "1,000", "5k") into integer cents/paise.

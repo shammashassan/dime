@@ -1,17 +1,9 @@
 import { getCollection } from "@/lib/db/collections"
 import { getScopeFilter, getFinancialScope } from "@/lib/scope"
-import { Transaction, Loan, Wallet } from "@/types"
-import { SYSTEM_BUDGET_TEMPLATES } from "./system-templates"
+import { Transaction, Loan, Wallet, TemplateRecommendation } from "@/types"
+import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates"
 
-export interface TemplateRecommendation {
-  recommendedTemplateId: string
-  templateName: string
-  rationale: string
-  suggestedMonthlyAmount: number // in smallest currency unit (cents / paise)
-  currency: string
-  averageMonthlyIncome: number
-  hasSufficientData: boolean
-}
+export type { TemplateRecommendation }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function computeTemplateRecommendation(userId: string): Promise<TemplateRecommendation> {
@@ -63,13 +55,21 @@ export async function computeTemplateRecommendation(userId: string): Promise<Tem
     }
   }
 
-  const avgMonthlyIncome = Math.round(totalIncome > 0 ? totalIncome / 3 : (totalExpense > 0 ? totalExpense / 3 : (currency === "INR" ? 5000000 : 300000)))
+  const avgMonthlyIncome = Math.round(
+    totalIncome > 0
+      ? totalIncome / 3
+      : totalExpense > 0
+        ? totalExpense / 3
+        : currency === "INR"
+          ? 5000000
+          : 300000
+  )
   const hasSufficientData = txs.length >= 10
 
   // Check active debts
   const activeLoans = await loansColl.find({ ...filter, status: "active", type: "borrowed" }).toArray()
   const totalBorrowedDebt = activeLoans.reduce((sum, l) => sum + (l.remainingAmount ?? l.amount), 0)
-  const isHighDebt = totalBorrowedDebt > (avgMonthlyIncome * 2) // Total debt > 2 months income
+  const isHighDebt = totalBorrowedDebt > avgMonthlyIncome * 2 // Total debt > 2 months income
 
   // Measure income volatility (standard deviation of 3 months / mean)
   const monthlyIncomes = [m1Income, m2Income, m3Income].filter((v) => v > 0)

@@ -2,13 +2,14 @@ import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { getRecentTransactions } from "@/lib/queries/transactions"
 import { getCategories } from "@/lib/queries/categories"
-import { getWallets } from "@/lib/queries/wallets"
+import { getAllWalletsIncludingArchived } from "@/lib/queries/wallets"
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
 import {
   ArrowUpRight,
   ArrowDownRight,
   ArrowLeftRight,
   ChevronRight,
+  TrendingUp,
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -21,9 +22,9 @@ interface RecentTransactionsProps {
 
 export async function RecentTransactions({ userId, className }: RecentTransactionsProps) {
   const [transactions, categories, wallets] = await Promise.all([
-    getRecentTransactions(userId, 5),
+    getRecentTransactions(userId, 6),
     getCategories(userId),
-    getWallets(userId),
+    getAllWalletsIncludingArchived(userId),
   ])
 
   const categoryMap = new Map(categories.map((c) => [c._id.toString(), c]))
@@ -101,8 +102,22 @@ export async function RecentTransactions({ userId, className }: RecentTransactio
                 let prefix = ""
                 let iconStyles = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
                 let Icon = ArrowLeftRight
+                const itemHref = tx.isInvestment
+                  ? "/investments"
+                  : `/transactions/${tx._id.toString()}`
 
-                if (tx.type === "income") {
+                if (tx.isInvestment) {
+                  Icon = TrendingUp
+                  if (tx.type === "income") {
+                    amountColor = "text-emerald-600 dark:text-emerald-400"
+                    prefix = "+"
+                    iconStyles = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                  } else {
+                    amountColor = "text-foreground"
+                    prefix = "-"
+                    iconStyles = "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
+                  }
+                } else if (tx.type === "income") {
                   amountColor = "text-emerald-600 dark:text-emerald-400"
                   prefix = "+"
                   Icon = ArrowUpRight
@@ -126,7 +141,7 @@ export async function RecentTransactions({ userId, className }: RecentTransactio
                   >
                     <TableCell className="font-medium py-2.5 pl-5">
                       <Link
-                        href={`/transactions/${tx._id.toString()}`}
+                        href={itemHref}
                         className="flex items-center gap-3 group/link text-left"
                       >
                         <div
@@ -142,6 +157,14 @@ export async function RecentTransactions({ userId, className }: RecentTransactio
                             <span className="font-bold text-xs text-foreground truncate group-hover/link:text-primary transition-colors">
                               {tx.description}
                             </span>
+                            {tx.isInvestment && (
+                              <Badge
+                                variant="outline"
+                                className="rounded-full text-[8px] uppercase tracking-wider font-extrabold px-1 py-0 h-3.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 shrink-0"
+                              >
+                                Investment
+                              </Badge>
+                            )}
                             {tx.isRecurring && (
                               <Badge
                                 variant="outline"
@@ -180,6 +203,14 @@ export async function RecentTransactions({ userId, className }: RecentTransactio
                             style={{ backgroundColor: category.color || "#888888" }}
                           />
                           <span className="truncate">{category.name}</span>
+                        </Badge>
+                      ) : tx.isInvestment ? (
+                        <Badge
+                          variant="outline"
+                          className="rounded-full text-[9px] font-semibold px-2 py-0 h-4 bg-indigo-500/10 border-indigo-500/20 text-indigo-600 dark:text-indigo-400 inline-flex items-center gap-1 max-w-[130px] truncate"
+                        >
+                          <TrendingUp className="size-2.5 shrink-0" />
+                          <span className="truncate">Investment</span>
                         </Badge>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
@@ -236,8 +267,8 @@ export async function RecentTransactions({ userId, className }: RecentTransactio
                         className="size-6 rounded-md text-muted-foreground hover:text-foreground opacity-60 group-hover:opacity-100 group-hover:bg-muted transition-all"
                       >
                         <Link
-                          href={`/transactions/${tx._id.toString()}`}
-                          aria-label={`View transaction ${tx.description}`}
+                          href={itemHref}
+                          aria-label={`View ${tx.isInvestment ? "investment" : "transaction"} ${tx.description}`}
                         >
                           <ChevronRight className="size-3.5" />
                         </Link>

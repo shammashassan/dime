@@ -761,31 +761,36 @@ export function SharedExpenseDetails({
           ) : (
             <ScrollArea className="max-h-80">
               <ItemGroup className="gap-0 divide-y divide-border/30 px-2 py-1">
-                {linkedSettlements.map((s) => (
-                  <Item key={s._id.toString()} size="sm" asChild className="cursor-pointer">
-                    <Link href="#" onClick={(e) => e.preventDefault()}>
-                      <ItemMedia className="size-8 rounded-xl border bg-emerald-500/10 text-emerald-600 border-emerald-500/20 flex items-center justify-center">
-                        <HandCoins className="size-3.5" />
-                      </ItemMedia>
-                      <ItemContent className="gap-0.5">
-                        <ItemTitle className="flex-wrap gap-1">
-                          <span className="text-xs font-bold text-foreground truncate">
-                            {s.paymentMethod || "Cash"}
+                {linkedSettlements.map((s) => {
+                  const fromLabel = s.fromParticipantId === currentUserId ? "You" : (s.fromParticipantName || expense.participants.find((p) => p.participantId === s.fromParticipantId)?.name || "Partner")
+                  const toLabel = s.toParticipantId === currentUserId ? "You" : (s.toParticipantName || expense.participants.find((p) => p.participantId === s.toParticipantId)?.name || "Partner")
+
+                  return (
+                    <Item key={s._id.toString()} size="sm" asChild className="cursor-pointer">
+                      <Link href="#" onClick={(e) => e.preventDefault()}>
+                        <ItemMedia className="size-8 rounded-xl border bg-emerald-500/10 text-emerald-600 border-emerald-500/20 flex items-center justify-center">
+                          <HandCoins className="size-3.5" />
+                        </ItemMedia>
+                        <ItemContent className="gap-0.5">
+                          <ItemTitle className="flex-wrap gap-1">
+                            <span className="text-xs font-bold text-foreground truncate">
+                              {s.paymentMethod || "Cash"}
+                            </span>
+                            <span className="text-[10px] font-normal text-muted-foreground">{formatDate(s.settledAt)}</span>
+                          </ItemTitle>
+                          <ItemDescription className="text-[10px] truncate">
+                            {s.notes ? `${fromLabel} → ${toLabel} • ${s.notes}` : `${fromLabel} → ${toLabel}`}
+                          </ItemDescription>
+                        </ItemContent>
+                        <ItemActions>
+                          <span className="text-xs font-black font-mono text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                            +{formatCurrency(s.amount, s.currency)}
                           </span>
-                          <span className="text-[10px] font-normal text-muted-foreground">{formatDate(s.settledAt)}</span>
-                        </ItemTitle>
-                        <ItemDescription className="text-[10px] truncate">
-                          {s.notes || "Recorded settlement"}
-                        </ItemDescription>
-                      </ItemContent>
-                      <ItemActions>
-                        <span className="text-xs font-black font-mono text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                          +{formatCurrency(s.amount, s.currency)}
-                        </span>
-                      </ItemActions>
-                    </Link>
-                  </Item>
-                ))}
+                        </ItemActions>
+                      </Link>
+                    </Item>
+                  )
+                })}
               </ItemGroup>
             </ScrollArea>
           )}

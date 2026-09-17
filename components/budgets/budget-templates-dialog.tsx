@@ -1,8 +1,7 @@
 "use client"
 
 import React, { useState, useTransition } from "react"
-import { BudgetTemplate, Category, Wallet } from "@/types"
-import { TemplateRecommendation } from "@/lib/budget-templates/recommendations"
+import { BudgetTemplate, Category, Wallet, TemplateRecommendation } from "@/types"
 import { saveCurrentBudgetsAsTemplateAction, deleteCustomTemplateAction } from "@/lib/actions/budget-templates"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"

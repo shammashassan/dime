@@ -2,9 +2,8 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Budget, Category, Wallet, BudgetTemplate } from "@/types"
+import { Budget, Category, Wallet, BudgetTemplate, TemplateRecommendation } from "@/types"
 import { BudgetWithSpending } from "@/lib/queries/budgets"
-import { TemplateRecommendation } from "@/lib/budget-templates/recommendations"
 import { BudgetTemplatesDialog } from "./budget-templates-dialog"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { Button } from "@/components/ui/button"

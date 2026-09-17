@@ -4,8 +4,8 @@ export function ReportsSkeleton() {
   return (
     <div className="flex flex-col gap-7 w-full">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3.5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
           <Skeleton className="size-12 rounded-2xl shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1.5">
             <Skeleton className="h-8 w-56 rounded-lg" />
@@ -14,19 +14,22 @@ export function ReportsSkeleton() {
         </div>
 
         {/* Global Filter Component Skeleton */}
-        <div className="self-start lg:self-center flex items-center gap-2">
-          <Skeleton className="h-10 w-44 rounded-xl" />
-          <Skeleton className="h-10 w-32 rounded-xl" />
+        <div className="flex flex-col lg:items-end 2xl:flex-row 2xl:items-center gap-2.5 self-start lg:self-center shrink-0">
+          <Skeleton className="h-10 w-64 rounded-2xl" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-10 w-44 rounded-xl" />
+            <Skeleton className="h-10 w-32 rounded-xl" />
+          </div>
         </div>
       </div>
 
       {/* MetricCards row */}
       <div className="flex flex-wrap gap-4">
-        {[...Array(5)].map((_, i) => (
+        {[...Array(4)].map((_, i) => (
           <Skeleton
             key={i}
             className="h-[90px] flex-1 min-w-[200px] rounded-2xl"
-            style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
+            style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 0.75rem))" }}
           />
         ))}
       </div>

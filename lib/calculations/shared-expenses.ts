@@ -138,6 +138,7 @@ export function calculateDynamicBalances(
   pairwiseBalances: PairwiseBalance[]
 } {
   const currency = options.currency || expenses[0]?.currency || "USD"
+  const currentUserId = options.currentUserId
 
   const participantMap = new Map<
     string,
@@ -186,8 +187,16 @@ export function calculateDynamicBalances(
   const settlementPaidFromMap = new Map<string, Map<string, number>>()
 
   for (const s of settlements) {
-    getOrCreateParticipant(s.fromParticipantId, s.fromParticipantType, "Participant")
-    getOrCreateParticipant(s.toParticipantId, s.toParticipantType, "Participant")
+    getOrCreateParticipant(
+      s.fromParticipantId,
+      s.fromParticipantType,
+      s.fromParticipantName || (s.fromParticipantId === currentUserId ? "You" : "Participant")
+    )
+    getOrCreateParticipant(
+      s.toParticipantId,
+      s.toParticipantType,
+      s.toParticipantName || (s.toParticipantId === currentUserId ? "You" : "Participant")
+    )
 
     if (!settlementPaidFromMap.has(s.fromParticipantId)) {
       settlementPaidFromMap.set(s.fromParticipantId, new Map())

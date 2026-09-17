@@ -47,9 +47,9 @@ export function SettlementsList({ settlements, currentUserId }: SettlementsListP
 
                 <div>
                   <div className="flex items-center gap-1.5 text-sm font-bold">
-                    <span>{s.fromParticipantId === currentUserId ? "You" : "Partner"}</span>
+                    <span>{s.fromParticipantId === currentUserId ? "You" : (s.fromParticipantName || "Partner")}</span>
                     <ArrowRight className="size-3.5 text-muted-foreground" />
-                    <span>{s.toParticipantId === currentUserId ? "You" : "Partner"}</span>
+                    <span>{s.toParticipantId === currentUserId ? "You" : (s.toParticipantName || "Partner")}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
