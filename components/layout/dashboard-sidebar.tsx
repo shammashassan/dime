@@ -27,6 +27,7 @@ import {
   Activity,
   Sparkles,
   History,
+  Compass,
 } from "lucide-react"
 import { SpaceSwitcher } from "@/components/layout/space-switcher"
 import {
@@ -79,6 +80,7 @@ const NAV_ITEMS = [
   { title: "Calendar", href: "/calendar", icon: CalendarDays },
   { title: "Health", href: "/health", icon: Activity },
   { title: "Insights", href: "/insights", icon: Sparkles },
+  { title: "Coach", href: "/coach", icon: Compass },
   { title: "Budgets", href: "/budgets", icon: PiggyBank },
   { title: "Goals", href: "/goals", icon: Target },
   { title: "Loans", href: "/loans", icon: HandCoins },

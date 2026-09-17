@@ -141,6 +141,16 @@ export async function initDatabase() {
       { expireAfterSeconds: 30 * 24 * 60 * 60 }
     )
 
+    // 8. Create indexes for coach messages
+    const coachMessages = db.collection("coach_messages")
+    await coachMessages.createIndex({ userId: 1, createdAt: -1 })
+    // TTL index: Automatically delete all coach messages after 30 days.
+    // createdAt is always set (never null), so every message is unconditionally purged.
+    await coachMessages.createIndex(
+      { createdAt: 1 },
+      { expireAfterSeconds: 30 * 24 * 60 * 60 }
+    )
+
     console.log("Database indexes verified/created.")
 
     // 5. Seed default categories if none exist

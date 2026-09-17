@@ -28,6 +28,7 @@ import {
   Goal,
   SavedSearch,
   BudgetTemplate,
+  CoachMessage,
 } from "@/types"
 
 export const walletsCollection = db.collection<Wallet>("wallets")
@@ -58,6 +59,7 @@ export const userInsightStatesCollection = db.collection<UserInsightState>("user
 export const calendarEventsCollection = db.collection<CalendarPlanEvent>("calendar_events")
 export const goalsCollection = db.collection<Goal>("goals")
 export const savedSearchesCollection = db.collection<SavedSearch>("saved_searches")
+export const coachMessagesCollection = db.collection<CoachMessage>("coach_messages")
 
 export async function getCollection<T extends object>(name: string) {
   return db.collection<T>(name)

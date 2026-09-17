@@ -1200,4 +1200,120 @@ export interface TimelineData {
   currency: string
 }
 
+// ── AI Financial Coach Domain Types ──
+
+export type CoachStrategyCategory =
+  | "emergency_fund"
+  | "debt_payoff"
+  | "goal_acceleration"
+  | "budget_tuning"
+  | "subscription_trim"
+  | "wealth_diversification"
+
+export type CoachStrategyImpact = "high" | "medium" | "easy_win"
+
+export interface CoachStrategy {
+  id: string
+  category: CoachStrategyCategory
+  impact: CoachStrategyImpact
+  title: string
+  subtitle: string
+  primaryMetric: {
+    label: string
+    value: string
+    delta?: string
+  }
+  description: string
+  actionLabel: string
+  actionUrl: string
+  score: number
+  details: {
+    currentValue: number
+    projectedValue: number
+    monthlyBenefitCents: number
+    timelineImpactMonths?: number
+  }
+}
+
+export interface EmergencyFundAnalysis {
+  liquidSavingsCents: number
+  monthlyBurnRateCents: number
+  currentRunwayMonths: number
+  targetRunwayMonths: number
+  shortfallCents: number
+  healthTier: "critical" | "warning" | "adequate" | "healthy" | "exceptional"
+}
+
+export interface DebtPayoffComparison {
+  totalDebtCents: number
+  activeLoanCount: number
+  currentPayoffMonths: number
+  acceleratedPayoffMonths: number
+  monthsSaved: number
+  interestSavedCents: number
+  snowballPriorityLoan?: {
+    loanId: string
+    name: string
+    balanceCents: number
+  }
+  avalanchePriorityLoan?: {
+    loanId: string
+    name: string
+    balanceCents: number
+  }
+}
+
+export interface GoalAccelerationItem {
+  goalId: string
+  name: string
+  targetCents: number
+  currentCents: number
+  status: "ahead" | "on_track" | "behind"
+  requiredMonthlyCents: number
+  currentMonthlyRunRateCents: number
+  suggestedMonthlyBoostCents: number
+}
+
+export interface CoachMessage {
+  _id: ObjectId
+  userId: string
+  organizationId?: string | null
+  role: "user" | "coach"
+  content: string
+  createdAt: Date
+}
+
+export interface SerializedCoachMessage {
+  _id: string
+  userId: string
+  organizationId?: string | null
+  role: "user" | "coach"
+  content: string
+  createdAt: string
+}
+
+export interface CoachSummaryBrief {
+  headline: string
+  focalAdvice: string
+  keyHighlights: string[]
+  isAiGenerated: boolean
+}
+
+export interface CoachOverviewData {
+  metrics: {
+    emergencyRunwayMonths: number
+    monthsToDebtFree: number | null
+    potentialMonthlyOptimizationCents: number
+    goalsOnTrackRatio: { onTrack: number; total: number }
+    healthScore: number
+  }
+  summaryBrief: CoachSummaryBrief
+  strategies: CoachStrategy[]
+  emergencyFund: EmergencyFundAnalysis
+  debtComparison: DebtPayoffComparison | null
+  goalAccelerations: GoalAccelerationItem[]
+  recentChatMessages: SerializedCoachMessage[]
+  targetCurrency: string
+}
+
 

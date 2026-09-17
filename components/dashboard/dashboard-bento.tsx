@@ -10,6 +10,7 @@ import { ExecutiveKpiStrip } from "./executive-kpi-strip"
 import { SpendingTrendChart } from "./spending-trend-chart"
 import { CategoryBreakdown, CategoryItem } from "./category-breakdown"
 import { AIInsights } from "./ai-insights"
+import { CoachWidget } from "./coach-widget"
 import { ActiveGoalsCard } from "./active-goals-card"
 import { UpcomingRecurring } from "./upcoming-recurring"
 import { BudgetProgressList } from "./budget-progress-list"
@@ -139,13 +140,16 @@ export function DashboardBento({
         </div>
       </div>
 
-      {/* Row 5: Intelligence & Goals Tier — AI Insights & Active Goals (2 : 1) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <AIInsights userId={userId} />
+      {/* Row 5: Intelligence & Goals Tier — AI Coach, AI Insights & Active Goals (1 : 1 : 1) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-1">
+          <CoachWidget userId={userId} className="h-full" />
         </div>
         <div className="lg:col-span-1">
-          <ActiveGoalsCard goals={goals} currency={targetCurrency} />
+          <AIInsights userId={userId} className="h-full" />
+        </div>
+        <div className="lg:col-span-1">
+          <ActiveGoalsCard goals={goals} currency={targetCurrency} className="h-full" />
         </div>
       </div>
 

@@ -46,6 +46,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 * ✅ AI Spending Insights
 * ✅ Packed Bento Dashboard (Custom Dashboard Redesign)
 * ✅ Spending Heatmaps & Habit Streaks
+* ✅ AI Financial Coach
 
 ## People
 
@@ -806,61 +807,33 @@ Architecture & Layering:
 
 ---
 
-# 16. AI Financial Coach
+# 16. AI Financial Coach ✅ COMPLETED
 
-Provide intelligent financial coaching.
+Intelligent, deterministic personal financial coaching with 100% on-demand AI reasoning.
 
-Examples:
+Features & Core Capabilities:
+* **Zero AI on Page Load**: Immediate sub-5ms pure TypeScript execution calculating emergency fund runway, debt payoff plans, goal acceleration gaps, subscription trimming, and budget tuning without third-party LLM latency.
+* **On-Demand AI Reasoning**: Gemini AI analysis triggered strictly when requested by the user ("Refresh with AI Analysis" or conversational chat inquiries).
+* **Emergency Fund Runway Engine**: Tracks liquid reserves (bank, cash, savings) against 3-month and 6-month essential spending baselines.
+* **Debt Payoff Engine (Snowball vs. Avalanche)**: Compares smallest-balance-first vs. highest-interest-first debt repayment trajectories, total interest savings, and debt-free dates.
+* **Goal Acceleration Matrix**: Computes monthly acceleration delta gaps to pull milestone completion dates forward.
+* **Interactive What-If Scenario Simulator**: Real-time client-side parameter tweaking (monthly discretionary cuts, debt acceleration payments, goal booster additions) recalculating runway, debt-free timelines, and total savings dynamically.
+* **Official shadcn Chat Interface**: Built using official shadcn messaging primitives (`MessageScroller`, `Message`, `Bubble`, `Marker`, `Attachment`, `Questionnaire`) with prompt suggestions, user feedback markers, context-aware financial memory, and chat history management.
+* **UI Design Uniformity**: Matches existing dashboard pages (`health`, `insights`, `timeline`, `net-worth`, `dashboard`) using standard `MetricCard`, `Sheet`, `HoverCard`, and standard `Skeleton` loading states.
+* **Strict Safety & Regulatory Disclaimers**: Prominently marked as educational/informational analysis, never financial or investment advice.
 
-* You could save ₹3,000 monthly by reducing restaurant spending.
-* Your emergency fund covers five months.
-* Increase your SIP by ₹2,000 to reach your goal six months earlier.
-* Paying an extra ₹5,000 toward your loan saves four months.
-
-Provide recommendations, never financial advice.
-
-### Additional Planned Capabilities
-
-Financial Coaching
-
-* Savings optimization
-* Debt payoff strategies
-* Budget improvements
-* Spending reduction opportunities
-* Subscription optimization
-* Investment allocation suggestions
-* Goal acceleration
-* Emergency fund planning
-* Retirement planning assistance
-
-AI Summaries
-
-* Weekly review
-* Monthly review
-* Quarterly review
-* Year-end review
-
-Smart Recommendations
-
-* Spending anomalies
-* Budget adjustments
-* Portfolio diversification
-* Cash flow improvements
-* Net worth growth suggestions
-* Goal prioritization
-* Bill optimization
-* Financial habit coaching
-
-Future Integrations
-
-* Financial Planner
-* Reports
-* Dashboard
-* Financial Timeline
-* Investment Tracker
-* Open Banking
-* Documents Vault
-* Financial Health Score
+Architecture:
+* Pure Calculations: `lib/calculations/coach.ts` (100% deterministic functions: `analyzeEmergencyFund`, `analyzeDebtPayoff`, `analyzeGoalAcceleration`, `analyzeSubscriptionTrimming`, `analyzeBudgetTuning`, `synthesizeCoachStrategies`, `generateDeterministicBriefing`, `generateOnDemandAiBriefing`, `generateCoachChatAnswer`)
+* Unit Tests: `lib/calculations/__tests__/coach.test.ts` (10 node test suites covering calculations and fallbacks)
+* Validation Schemas: `lib/validations/coach.schema.ts` (`askCoachSchema`, `simulateCoachScenarioSchema`)
+* Cached Query Layer: `lib/queries/coach.ts` (`getCoachOverviewData` wrapped in `React.cache`)
+* Server Actions: `lib/actions/coach.ts` (`askCoachAction`, `clearCoachChatAction`, `refreshAiBriefingAction`)
+* Database Collections: `coachMessagesCollection` in `lib/db/collections.ts`
+* Type Definitions: `types/index.ts` (`CoachStrategy`, `EmergencyFundAnalysis`, `DebtPayoffComparison`, `GoalAccelerationItem`, `CoachMessage`, `SerializedCoachMessage`, `CoachSummaryBrief`, `CoachOverviewData`)
+* Route: `app/(dashboard)/coach/page.tsx`, `loading.tsx`, `error.tsx`
+* UI Components: `components/coach/` (`coach-header`, `coach-metrics-row`, `coach-overview-card`, `coach-strategy-card`, `coach-playbooks-view`, `coach-simulator-sheet`, `coach-chat-sheet`, `coach-client`)
+* Dashboard Bento: `components/dashboard/coach-widget.tsx` (integrated into `dashboard-bento.tsx` Row 5)
+* Navigation: Integrated into `dashboard-sidebar.tsx` and `search-command.tsx`
 ---
 
 # 17. Open Banking & Account Sync (Future)
