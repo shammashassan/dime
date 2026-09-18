@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useOptimistic } from "react"
+import { useState, useEffect, useTransition, useOptimistic } from "react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -22,6 +22,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
@@ -29,10 +30,11 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-  EmptyMedia
+  EmptyMedia,
+  EmptyContent,
 } from "@/components/ui/empty"
 import { Transaction, Category, Wallet } from "@/types"
-import { deleteTransaction } from "@/lib/actions/transactions"
+import { deleteTransaction, bulkDeleteTransactions } from "@/lib/actions/transactions"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import {
@@ -50,7 +52,12 @@ import {
   ArrowDown,
   Flag,
   RefreshCw,
+  Plus,
+  RotateCcw,
+  FilterX,
+  FileSpreadsheet,
 } from "lucide-react"
+import { BulkActionsToolbar } from "./bulk-actions-toolbar"
 import Link from "next/link"
 import {
   Select,
@@ -158,6 +165,8 @@ export function TransactionTable({
     })
   }
 
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
+
   const handleBulkDelete = () => {
     if (selectedIds.length === 0) return
     const count = selectedIds.length
@@ -165,10 +174,9 @@ export function TransactionTable({
     const deletePromise = new Promise((resolve, reject) => {
       startTransition(async () => {
         try {
-          const results = await Promise.all(selectedIds.map((id) => deleteTransaction(id)))
-          const failed = results.find((r) => r && !r.success)
-          if (failed) {
-            reject(new Error(failed.error || "Unauthorized"))
+          const res = await bulkDeleteTransactions(selectedIds)
+          if (res && !res.success) {
+            reject(new Error(res.error || "Unauthorized"))
           } else {
             setSelectedIds([])
             setShowBulkDeleteDialog(false)
@@ -187,6 +195,66 @@ export function TransactionTable({
       error: (err: any) => err.message || "Failed to delete selected transactions",
     })
   }
+
+  // Keyboard navigation inside table: j/k to move, x/space to select, Delete to delete, Esc to clear
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("[role='dialog']") ||
+          target.closest("[role='menu']"))
+      ) {
+        return
+      }
+
+      if (e.key === "j" || (e.key === "ArrowDown" && !e.metaKey && !e.ctrlKey)) {
+        e.preventDefault()
+        setFocusedIndex((prev) => {
+          if (prev === null) return 0
+          return Math.min(prev + 1, optimisticTransactions.length - 1)
+        })
+      } else if (e.key === "k" || (e.key === "ArrowUp" && !e.metaKey && !e.ctrlKey)) {
+        e.preventDefault()
+        setFocusedIndex((prev) => {
+          if (prev === null) return 0
+          return Math.max(prev - 1, 0)
+        })
+      } else if (e.key === "x" || e.key === " ") {
+        if (focusedIndex !== null && optimisticTransactions[focusedIndex]) {
+          e.preventDefault()
+          toggleSelect(optimisticTransactions[focusedIndex]._id.toString())
+        }
+      } else if (e.key === "Escape") {
+        if (selectedIds.length > 0) {
+          e.preventDefault()
+          setSelectedIds([])
+        } else if (focusedIndex !== null) {
+          setFocusedIndex(null)
+        }
+      } else if (e.key === "Delete" || e.key === "Backspace") {
+        if (selectedIds.length > 0) {
+          e.preventDefault()
+          setShowBulkDeleteDialog(true)
+        } else if (focusedIndex !== null && optimisticTransactions[focusedIndex]) {
+          e.preventDefault()
+          setDeletingTxId(optimisticTransactions[focusedIndex]._id.toString())
+        }
+      } else if (e.key === "e") {
+        if (focusedIndex !== null && optimisticTransactions[focusedIndex]) {
+          e.preventDefault()
+          onEditClick(optimisticTransactions[focusedIndex])
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [focusedIndex, optimisticTransactions, selectedIds, onEditClick])
 
   // Pagination navigation
   const totalPages = Math.ceil(totalCount / pageSize)
@@ -224,23 +292,17 @@ export function TransactionTable({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Top Toolbar */}
-      {selectedIds.length > 0 && (
-        <div className="flex items-center justify-between gap-3 bg-muted/20 p-3 rounded-xl border border-border/40 animate-in fade-in-50 slide-in-from-top-1 duration-150">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowBulkDeleteDialog(true)}
-              disabled={isPending}
-              className="gap-1 font-semibold text-xs h-8"
-            >
-              <Trash2 className="size-3.5" />
-              Delete Selected ({selectedIds.length})
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Floating Bulk Actions Toolbar */}
+      <BulkActionsToolbar
+        selectedIds={selectedIds}
+        categories={categories}
+        wallets={wallets}
+        onClearSelection={() => setSelectedIds([])}
+        onSuccess={() => {
+          setSelectedIds([])
+          router.refresh()
+        }}
+      />
 
       {!hasAnyTransactions ? (
         <div className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full bg-card">
@@ -250,336 +312,377 @@ export function TransactionTable({
             </EmptyMedia>
             <EmptyHeader>
               <EmptyTitle>No transactions yet</EmptyTitle>
-              <EmptyDescription>Add a transaction to start tracking your finances.</EmptyDescription>
+              <EmptyDescription>Add your first transaction or import a statement to get started.</EmptyDescription>
             </EmptyHeader>
+            <EmptyContent className="flex flex-row flex-wrap justify-center gap-2.5 mt-2">
+              <Button
+                size="sm"
+                onClick={() => window.dispatchEvent(new CustomEvent("dime:quick-add-transaction"))}
+                className="gap-1.5 rounded-xl font-semibold cursor-pointer"
+              >
+                <Plus className="size-3.5" />
+                Add Transaction
+              </Button>
+              {wallets.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.dispatchEvent(new CustomEvent("dime:open-import-csv"))}
+                  className="gap-1.5 rounded-xl font-semibold cursor-pointer"
+                >
+                  <FileSpreadsheet className="size-3.5 text-emerald-500" />
+                  Import CSV
+                </Button>
+              )}
+            </EmptyContent>
           </Empty>
         </div>
       ) : optimisticTransactions.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border/40 py-16 text-center w-full bg-card">
           <Empty>
-            <EmptyMedia className="bg-primary/5 text-primary">
-              <ArrowLeftRight className="size-8" />
+            <EmptyMedia className="bg-muted text-muted-foreground">
+              <FilterX className="size-8" />
             </EmptyMedia>
             <EmptyHeader>
               <EmptyTitle>No transactions found</EmptyTitle>
               <EmptyDescription>Adjust your filters or search to find what you're looking for.</EmptyDescription>
             </EmptyHeader>
+            <EmptyContent className="flex flex-row justify-center gap-2.5 mt-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => router.push(pathname)}
+                className="gap-1.5 rounded-xl font-semibold cursor-pointer"
+              >
+                <RotateCcw className="size-3.5" />
+                Reset Filters
+              </Button>
+            </EmptyContent>
           </Empty>
         </div>
       ) : (
         <>
           {/* Main Table */}
           <div className="rounded-xl border border-border/40 overflow-hidden bg-card shadow-sm">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border/40 hover:bg-transparent">
-                <TableHead className="w-12 text-center">
-                  <Checkbox
-                    checked={
-                      optimisticTransactions.length > 0 &&
-                      selectedIds.length === optimisticTransactions.length
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border/40 hover:bg-transparent">
+                    <TableHead className="w-12 text-center">
+                      <Checkbox
+                        checked={
+                          optimisticTransactions.length > 0 &&
+                          selectedIds.length === optimisticTransactions.length
+                        }
+                        onCheckedChange={toggleSelectAll}
+                        disabled={optimisticTransactions.length === 0}
+                      />
+                    </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wider font-semibold">
+                      <button
+                        onClick={() => handleSort("description")}
+                        className="flex items-center hover:text-foreground transition-colors"
+                      >
+                        Description
+                        <SortIcon col="description" />
+                      </button>
+                    </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wider font-semibold">Category</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wider font-semibold">Wallet</TableHead>
+                    <TableHead className="text-xs uppercase tracking-wider font-semibold">
+                      <button
+                        onClick={() => handleSort("date")}
+                        className="flex items-center hover:text-foreground transition-colors"
+                      >
+                        Date
+                        <SortIcon col="date" />
+                      </button>
+                    </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wider font-semibold text-right">
+                      <button
+                        onClick={() => handleSort("amount")}
+                        className="flex items-center ml-auto hover:text-foreground transition-colors"
+                      >
+                        Amount
+                        <SortIcon col="amount" />
+                      </button>
+                    </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wider font-semibold text-right w-20">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {optimisticTransactions.map((tx, index) => {
+                    const category = categoryMap.get(tx.categoryId || "")
+                    const wallet = walletMap.get(tx.walletId)
+                    const isSelected = selectedIds.includes(tx._id.toString())
+                    const isFocused = focusedIndex === index
+
+                    let amountColor = "text-foreground"
+                    let prefix = ""
+                    let Icon = ArrowLeftRight
+
+                    if (tx.type === "income") {
+                      amountColor = "text-emerald-500 font-semibold"
+                      prefix = "+"
+                      Icon = ArrowUpRight
+                    } else if (tx.type === "expense") {
+                      amountColor = "text-rose-500 font-semibold"
+                      prefix = "-"
+                      Icon = ArrowDownRight
+                    } else if (tx.type === "transfer") {
+                      amountColor = "text-blue-500 font-semibold"
+                      prefix = tx.transferType === "credit" ? "+" : "-"
+                      Icon = ArrowLeftRight
                     }
-                    onCheckedChange={toggleSelectAll}
-                    disabled={optimisticTransactions.length === 0}
-                  />
-                </TableHead>
-                <TableHead className="text-xs uppercase tracking-wider font-semibold">
-                  <button
-                    onClick={() => handleSort("description")}
-                    className="flex items-center hover:text-foreground transition-colors"
-                  >
-                    Description
-                    <SortIcon col="description" />
-                  </button>
-                </TableHead>
-                <TableHead className="text-xs uppercase tracking-wider font-semibold">Category</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider font-semibold">Wallet</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider font-semibold">
-                  <button
-                    onClick={() => handleSort("date")}
-                    className="flex items-center hover:text-foreground transition-colors"
-                  >
-                    Date
-                    <SortIcon col="date" />
-                  </button>
-                </TableHead>
-                <TableHead className="text-xs uppercase tracking-wider font-semibold text-right">
-                  <button
-                    onClick={() => handleSort("amount")}
-                    className="flex items-center ml-auto hover:text-foreground transition-colors"
-                  >
-                    Amount
-                    <SortIcon col="amount" />
-                  </button>
-                </TableHead>
-                <TableHead className="text-xs uppercase tracking-wider font-semibold text-right w-20">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {optimisticTransactions.map((tx) => {
-                  const category = categoryMap.get(tx.categoryId || "")
-                  const wallet = walletMap.get(tx.walletId)
-                  const isSelected = selectedIds.includes(tx._id.toString())
 
-                  let amountColor = "text-foreground"
-                  let prefix = ""
-                  let Icon = ArrowLeftRight
-
-                  if (tx.type === "income") {
-                    amountColor = "text-emerald-500 font-semibold"
-                    prefix = "+"
-                    Icon = ArrowUpRight
-                  } else if (tx.type === "expense") {
-                    amountColor = "text-rose-500 font-semibold"
-                    prefix = "-"
-                    Icon = ArrowDownRight
-                  } else if (tx.type === "transfer") {
-                    amountColor = "text-blue-500 font-semibold"
-                    prefix = tx.transferType === "credit" ? "+" : "-"
-                    Icon = ArrowLeftRight
-                  }
-
-                  return (
-                    <TableRow
-                      key={tx._id.toString()}
-                      className={`border-border/40 transition-colors ${
-                        isSelected ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/40"
-                      }`}
-                    >
-                      <TableCell className="text-center">
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => toggleSelect(tx._id.toString())}
-                        />
-                      </TableCell>
-                      <TableCell className="font-medium max-w-[200px] truncate">
-                        <Link
-                          href={`/transactions/${tx._id.toString()}`}
-                          className="flex items-center gap-2 group cursor-pointer"
-                        >
-                          <div className="p-1.5 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0 group-hover:bg-accent group-hover:text-primary transition-colors">
-                            <Icon className="size-3.5" />
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="truncate group-hover:underline text-foreground text-xs font-semibold">
-                              {tx.description}
-                            </span>
-                            <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
-                              {tx.isRecurring && (
-                                <RefreshCw className="size-3 text-purple-500 shrink-0" />
-                              )}
-                              {tx.isFlagged && (
-                                <Flag className="size-3 text-rose-500 fill-rose-500/20 shrink-0" />
-                              )}
-                              {tx.needsReview && (
-                                <AlertTriangle className="size-3 text-amber-500 shrink-0" />
-                              )}
-                              {(tx.isRecurring || tx.isFlagged || tx.needsReview) && tx.notes && (
-                                <span className="text-muted-foreground/30 select-none text-[9px]">|</span>
-                              )}
-                              {tx.notes && (
-                                <span className="text-[10px] text-muted-foreground truncate max-w-xs">
-                                  {tx.notes}
-                                </span>
-                              )}
+                    return (
+                      <TableRow
+                        key={tx._id.toString()}
+                        data-focused={isFocused}
+                        onClick={() => setFocusedIndex(index)}
+                        className={`border-border/40 transition-colors ${isFocused
+                          ? "ring-1 ring-inset ring-primary/60 bg-primary/10 hover:bg-primary/15"
+                          : isSelected
+                            ? "bg-primary/5 hover:bg-primary/10"
+                            : "hover:bg-muted/40"
+                          }`}
+                      >
+                        <TableCell className="text-center">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleSelect(tx._id.toString())}
+                          />
+                        </TableCell>
+                        <TableCell className="font-medium max-w-50 truncate">
+                          <Link
+                            href={`/transactions/${tx._id.toString()}`}
+                            className="flex items-center gap-2 group cursor-pointer"
+                          >
+                            <div className="p-1.5 rounded-full bg-muted flex items-center justify-center text-muted-foreground shrink-0 group-hover:bg-accent group-hover:text-primary transition-colors">
+                              <Icon className="size-3.5" />
                             </div>
-                          </div>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        {tx.splits && tx.splits.length > 0 ? (
-                          <div className="flex flex-col gap-1 max-w-[150px]">
-                            <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider select-none">Split ({tx.splits.length})</span>
-                            <div className="flex flex-wrap gap-1">
-                              {tx.splits.slice(0, 2).map((split, i) => {
-                                const splitCat = categoryMap.get(split.categoryId)
-                                return (
-                                  <Badge key={split.id || i} variant="outline" className="text-[9px] px-1.5 py-0.5 whitespace-nowrap bg-muted/30 max-w-[120px] truncate">
-                                    <span
-                                      className="size-1 rounded-full shrink-0 mr-1"
-                                      style={{ backgroundColor: splitCat?.color || "gray" }}
-                                    />
-                                    {splitCat?.name || "Uncategorized"}
+                            <div className="flex flex-col min-w-0">
+                              <span className="truncate group-hover:underline text-foreground text-xs font-semibold">
+                                {tx.description}
+                              </span>
+                              <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+                                {tx.isRecurring && (
+                                  <RefreshCw className="size-3 text-purple-500 shrink-0" />
+                                )}
+                                {tx.isFlagged && (
+                                  <Flag className="size-3 text-rose-500 fill-rose-500/20 shrink-0" />
+                                )}
+                                {tx.needsReview && (
+                                  <AlertTriangle className="size-3 text-amber-500 shrink-0" />
+                                )}
+                                {(tx.isRecurring || tx.isFlagged || tx.needsReview) && tx.notes && (
+                                  <span className="text-muted-foreground/30 select-none text-[9px]">|</span>
+                                )}
+                                {tx.notes && (
+                                  <span className="text-[10px] text-muted-foreground truncate max-w-xs">
+                                    {tx.notes}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          {tx.splits && tx.splits.length > 0 ? (
+                            <div className="flex flex-col gap-1 max-w-37.5">
+                              <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider select-none">Split ({tx.splits.length})</span>
+                              <div className="flex flex-wrap gap-1">
+                                {tx.splits.slice(0, 2).map((split, i) => {
+                                  const splitCat = categoryMap.get(split.categoryId)
+                                  return (
+                                    <Badge key={split.id || i} variant="outline" className="text-[9px] px-1.5 py-0.5 whitespace-nowrap bg-muted/30 max-w-30 truncate">
+                                      <span
+                                        className="size-1 rounded-full shrink-0 mr-1"
+                                        style={{ backgroundColor: splitCat?.color || "gray" }}
+                                      />
+                                      {splitCat?.name || "Uncategorized"}
+                                    </Badge>
+                                  )
+                                })}
+                                {tx.splits.length > 2 && (
+                                  <Badge variant="outline" className="text-[9px] px-1 py-0.5 text-muted-foreground bg-muted/10">
+                                    +{tx.splits.length - 2} more
                                   </Badge>
-                                )
-                              })}
-                              {tx.splits.length > 2 && (
-                                <Badge variant="outline" className="text-[9px] px-1 py-0.5 text-muted-foreground bg-muted/10">
-                                  +{tx.splits.length - 2} more
-                                </Badge>
-                              )}
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ) : category ? (
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="size-2 rounded-full shrink-0"
-                              style={{ backgroundColor: category.color || "gray" }}
-                            />
-                            <span className="text-xs">{category.name}</span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {wallet ? (
-                          <div className="flex items-center gap-1.5">
-                            <span
-                              className="size-2.5 rounded-full border border-border/40 shrink-0"
-                              style={{ backgroundColor: wallet.color || "gray" }}
-                            />
-                            <span className="text-xs font-medium">{wallet.name}</span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatDate(tx.date)}
-                      </TableCell>
-                      <TableCell className={`text-right text-sm whitespace-nowrap ${amountColor}`}>
-                        {prefix} {formatCurrency(tx.amount, tx.currency)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="size-8 p-0" disabled={isPending}>
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="size-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40 bg-popover border border-border/40 shadow-md">
-                            <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
-                            <DropdownMenuItem asChild className="gap-2 text-xs">
-                              <Link href={`/transactions/${tx._id.toString()}`}>
-                                <Eye className="size-3.5" /> View Details
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onEditClick(tx)} className="gap-2 text-xs">
-                              <Edit className="size-3.5" /> Edit Details
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="border-border/40" />
-                            <DropdownMenuItem
-                              onClick={() => setDeletingTxId(tx._id.toString())}
-                              className="gap-2 text-xs text-rose-600 dark:text-rose-400 focus:bg-destructive/15 focus:text-destructive"
-                            >
-                              <Trash2 className="size-3.5" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-
-      {/* Pagination Footer */}
-      <div className="flex w-full flex-col-reverse items-center justify-between gap-4 overflow-auto p-1 sm:flex-row sm:gap-8 py-2">
-        <div className="flex-1 whitespace-nowrap text-muted-foreground text-sm">
-          {selectedIds.length} of {totalCount} row(s) selected.
-        </div>
-        <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
-          <div className="flex items-center space-x-2">
-            <p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
-            <Select
-              value={`${pageSize}`}
-              onValueChange={handlePageSizeChange}
-            >
-              <SelectTrigger className="h-8 w-18 data-size:h-8 border-border/40">
-                <SelectValue placeholder={pageSize} />
-              </SelectTrigger>
-              <SelectContent side="top" className="border-border/40 bg-popover">
-                {[10, 20, 30, 40, 50].map((size) => (
-                  <SelectItem key={size} value={`${size}`}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                          ) : category ? (
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="size-2 rounded-full shrink-0"
+                                style={{ backgroundColor: category.color || "gray" }}
+                              />
+                              <span className="text-xs">{category.name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {wallet ? (
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="size-2.5 rounded-full border border-border/40 shrink-0"
+                                style={{ backgroundColor: wallet.color || "gray" }}
+                              />
+                              <span className="text-xs font-medium">{wallet.name}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                          {formatDate(tx.date)}
+                        </TableCell>
+                        <TableCell className={`text-right text-sm whitespace-nowrap ${amountColor}`}>
+                          {prefix} {formatCurrency(tx.amount, tx.currency)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="size-8 p-0" disabled={isPending}>
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="size-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40 bg-popover border border-border/40 shadow-md">
+                              <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
+                              <DropdownMenuItem asChild className="gap-2 text-xs">
+                                <Link href={`/transactions/${tx._id.toString()}`}>
+                                  <Eye className="size-3.5" /> View Details
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => onEditClick(tx)} className="gap-2 text-xs">
+                                <Edit className="size-3.5" /> Edit Details
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator className="border-border/40" />
+                              <DropdownMenuItem
+                                onClick={() => setDeletingTxId(tx._id.toString())}
+                                className="gap-2 text-xs text-rose-600 dark:text-rose-400 focus:bg-destructive/15 focus:text-destructive"
+                              >
+                                <Trash2 className="size-3.5" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
           </div>
-          <div className="flex items-center justify-center font-medium text-sm">
-            Page {currentPage} of {totalPages || 1}
+
+          {/* Pagination Footer */}
+          <div className="flex w-full flex-col-reverse items-center justify-between gap-4 overflow-auto p-1 sm:flex-row sm:gap-8 py-2">
+            <div className="flex-1 whitespace-nowrap text-muted-foreground text-sm">
+              {selectedIds.length} of {totalCount} row(s) selected.
+            </div>
+            <div className="flex flex-col-reverse items-center gap-4 sm:flex-row sm:gap-6 lg:gap-8">
+              <div className="flex items-center space-x-2">
+                <p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
+                <Select
+                  value={`${pageSize}`}
+                  onValueChange={handlePageSizeChange}
+                >
+                  <SelectTrigger className="h-8 w-18 data-size:h-8 border-border/40">
+                    <SelectValue placeholder={pageSize} />
+                  </SelectTrigger>
+                  <SelectContent side="top" className="border-border/40 bg-popover">
+                    {[10, 20, 30, 40, 50].map((size) => (
+                      <SelectItem key={size} value={`${size}`}>
+                        {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-center font-medium text-sm">
+                Page {currentPage} of {totalPages || 1}
+              </div>
+              <Pagination className="w-auto mx-0">
+                <PaginationContent className="gap-1">
+                  {/* First Page */}
+                  <PaginationItem>
+                    <PaginationFirst
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage > 1 && !isPending) handlePageChange(1)
+                      }}
+                      className={cn(
+                        (currentPage <= 1 || isPending) && "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+
+                  {/* Previous Page */}
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage > 1 && !isPending) handlePageChange(currentPage - 1)
+                      }}
+                      className={cn(
+                        (currentPage <= 1 || isPending) && "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+
+                  {/* Next Page */}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage < totalPages && !isPending) handlePageChange(currentPage + 1)
+                      }}
+                      className={cn(
+                        (currentPage >= totalPages || isPending) && "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+                  <PaginationItem className="hidden sm:inline-block">
+                    <PaginationLast
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        if (currentPage < totalPages && !isPending) handlePageChange(totalPages)
+                      }}
+                      className={cn(
+                        (currentPage >= totalPages || isPending) && "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
-          <Pagination className="w-auto mx-0">
-            <PaginationContent className="gap-1">
-              {/* First Page */}
-              <PaginationItem>
-                <PaginationFirst
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    if (currentPage > 1 && !isPending) handlePageChange(1)
-                  }}
-                  className={cn(
-                    (currentPage <= 1 || isPending) && "pointer-events-none opacity-50"
-                  )}
-                />
-              </PaginationItem>
-
-              {/* Previous Page */}
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    if (currentPage > 1 && !isPending) handlePageChange(currentPage - 1)
-                  }}
-                  className={cn(
-                    (currentPage <= 1 || isPending) && "pointer-events-none opacity-50"
-                  )}
-                />
-              </PaginationItem>
-
-              {/* Next Page */}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    if (currentPage < totalPages && !isPending) handlePageChange(currentPage + 1)
-                  }}
-                  className={cn(
-                    (currentPage >= totalPages || isPending) && "pointer-events-none opacity-50"
-                  )}
-                />
-              </PaginationItem>
-              <PaginationItem className="hidden sm:inline-block">
-                <PaginationLast
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    if (currentPage < totalPages && !isPending) handlePageChange(totalPages)
-                  }}
-                  className={cn(
-                    (currentPage >= totalPages || isPending) && "pointer-events-none opacity-50"
-                  )}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </div>
-      </>
+        </>
       )}
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deletingTxId} onOpenChange={(open) => !open && setDeletingTxId(null)}>
-        <AlertDialogContent className="bg-popover border border-border/40 shadow-xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-bold text-rose-600 dark:text-rose-400">Delete Transaction</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
-              Are you sure you want to delete this transaction? This will permanently adjust the associated wallet's balance.
+            <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+              <Trash2 />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this transaction? This will permanently adjust the associated wallet&apos;s balance.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleDelete}>
-              {isPending ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : null}
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin" data-icon="inline-start" />}
               Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -588,20 +691,20 @@ export function TransactionTable({
 
       {/* Bulk Delete Alert */}
       <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
-        <AlertDialogContent className="bg-popover border border-border/40 shadow-xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
-              <AlertTriangle className="size-5 text-rose-500" />
-              Delete {selectedIds.length} Transactions
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+              <AlertTriangle />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Delete {selectedIds.length} Transactions</AlertDialogTitle>
+            <AlertDialogDescription>
               Are you sure you want to delete the {selectedIds.length} selected transactions? This will permanently revert all their balance modifications in their respective wallets.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={handleBulkDelete}>
-              {isPending ? <Loader2 className="size-3.5 animate-spin mr-1.5" /> : null}
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleBulkDelete} disabled={isPending}>
+              {isPending && <Loader2 className="animate-spin" data-icon="inline-start" />}
               Delete Selected
             </AlertDialogAction>
           </AlertDialogFooter>

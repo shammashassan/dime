@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useTransition } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -12,17 +12,37 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible"
 import { Category, Wallet } from "@/types"
-import { Search, Calendar as CalendarIcon, SlidersHorizontal, X, ChevronDown, CircleDashed, Loader2 } from "lucide-react"
+import {
+  Search,
+  Calendar as CalendarIcon,
+  SlidersHorizontal,
+  X,
+  ChevronDown,
+  CircleDashed,
+  Loader2,
+  Layers,
+  ArrowDownRight,
+  ArrowUpRight,
+  ArrowLeftRight,
+  Flag,
+  Clock,
+} from "lucide-react"
 import { format } from "date-fns"
 import { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
+import { SavedTransactionViews } from "./saved-transaction-views"
 
 interface TransactionFiltersProps {
   categories: Category[]
   wallets: Wallet[]
+  defaultCurrency?: string
 }
 
-export function TransactionFilters({ categories, wallets }: TransactionFiltersProps) {
+export function TransactionFilters({
+  categories,
+  wallets,
+  defaultCurrency = "USD",
+}: TransactionFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -221,10 +241,10 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
       onOpenChange={setIsOpen}
       className="p-4 rounded-xl border border-border/40 bg-card shadow-sm transition-all"
     >
-      {/* Primary Filters Row */}
+      {/* Primary Filters Row — Sleek Single Line */}
       <div className="flex flex-wrap items-center gap-2.5">
         {/* Search */}
-        <div className="relative flex-1 min-w-[220px] w-full sm:w-auto">
+        <div className="relative flex-1 min-w-[200px] w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
           <Input
             placeholder="Search transactions..."
@@ -239,6 +259,11 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
           />
         </div>
 
+        {/* Views Filter Dropdown */}
+        <div className="w-full sm:w-40">
+          <SavedTransactionViews defaultCurrency={defaultCurrency || wallets[0]?.currency || "USD"} />
+        </div>
+
         {/* Type Select */}
         <div className="w-full sm:w-36">
           <Select value={type} onValueChange={handleTypeChange}>
@@ -246,10 +271,32 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="expense">Expense</SelectItem>
-              <SelectItem value="income">Income</SelectItem>
-              <SelectItem value="transfer">Transfer</SelectItem>
+              <SelectGroup>
+                <SelectItem value="all">
+                  <div className="flex items-center gap-2">
+                    <Layers className="size-3.5 text-muted-foreground shrink-0" />
+                    <span>All Types</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="expense">
+                  <div className="flex items-center gap-2">
+                    <ArrowDownRight className="size-3.5 text-rose-500 shrink-0" />
+                    <span>Expense</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="income">
+                  <div className="flex items-center gap-2">
+                    <ArrowUpRight className="size-3.5 text-emerald-500 shrink-0" />
+                    <span>Income</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="transfer">
+                  <div className="flex items-center gap-2">
+                    <ArrowLeftRight className="size-3.5 text-sky-500 shrink-0" />
+                    <span>Transfer</span>
+                  </div>
+                </SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
@@ -261,61 +308,60 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="uncategorized">
-                <div className="flex items-center gap-2">
-                  <CircleDashed className="size-3.5 text-muted-foreground shrink-0" />
-                  <span>Uncategorized</span>
-                </div>
-              </SelectItem>
-              {categories.map((c) => (
-                <SelectItem key={c._id.toString()} value={c._id.toString()}>
+              <SelectGroup>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="uncategorized">
                   <div className="flex items-center gap-2">
-                    <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
-                    <span className="truncate">{c.name}</span>
+                    <CircleDashed className="size-3.5 text-muted-foreground shrink-0" />
+                    <span>Uncategorized</span>
                   </div>
                 </SelectItem>
-              ))}
+                {categories.map((c) => (
+                  <SelectItem key={c._id.toString()} value={c._id.toString()}>
+                    <div className="flex items-center gap-2">
+                      <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                      <span className="truncate">{c.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-        {/* Collapsible Trigger for More Filters */}
+        {/* Collapsible Trigger for More Filters (Icon-only) */}
         <CollapsibleTrigger asChild>
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             className={cn(
-              "h-9 font-medium gap-2 transition-colors",
+              "size-9 shrink-0 relative transition-colors cursor-pointer",
               isOpen && "bg-muted/60",
-              secondaryFilterCount > 0 && "border-primary/40 text-foreground"
+              secondaryFilterCount > 0 && "border-primary/40 text-primary"
             )}
+            title={isOpen ? "Collapse filters" : "Expand more filters"}
+            aria-label={isOpen ? "Collapse filters" : "Expand more filters"}
           >
-            <SlidersHorizontal className="size-3.5 text-muted-foreground" />
-            <span>Filters</span>
+            <SlidersHorizontal className="size-4" />
             {secondaryFilterCount > 0 && (
-              <Badge variant="secondary" className="px-1.5 py-0 text-xs font-mono leading-none">
+              <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-xs">
                 {secondaryFilterCount}
-              </Badge>
+              </span>
             )}
-            <ChevronDown
-              className={cn(
-                "size-3.5 text-muted-foreground transition-transform duration-200",
-                isOpen && "rotate-180"
-              )}
-            />
           </Button>
         </CollapsibleTrigger>
 
-        {/* Clear Button */}
+        {/* Clear Button (Icon-only) */}
         {hasActiveFilters && (
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={clearFilters}
-            className="h-9 font-medium text-muted-foreground hover:text-foreground gap-1.5"
+            className="size-9 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+            title="Clear all filters"
+            aria-label="Clear all filters"
           >
-            <X className="size-3.5" /> Clear
+            <X className="size-4" />
           </Button>
         )}
 
@@ -337,15 +383,17 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
                 <SelectValue placeholder="All Wallets" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Wallets</SelectItem>
-                {wallets.map((w) => (
-                  <SelectItem key={w._id.toString()} value={w._id.toString()}>
-                    <div className="flex items-center gap-2">
-                      <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: w.color }} />
-                      <span className="truncate">{w.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  <SelectItem value="all">All Wallets</SelectItem>
+                  {wallets.map((w) => (
+                    <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                      <div className="flex items-center gap-2">
+                        <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: w.color }} />
+                        <span className="truncate">{w.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>
@@ -430,9 +478,26 @@ export function TransactionFilters({ categories, wallets }: TransactionFiltersPr
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="flagged">Flagged</SelectItem>
-                <SelectItem value="review">Needs Review</SelectItem>
+                <SelectGroup>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Layers className="size-3.5 text-muted-foreground shrink-0" />
+                      <span>All Statuses</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="flagged">
+                    <div className="flex items-center gap-2">
+                      <Flag className="size-3.5 text-rose-500 shrink-0" />
+                      <span>Flagged</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="review">
+                    <div className="flex items-center gap-2">
+                      <Clock className="size-3.5 text-amber-500 shrink-0" />
+                      <span>Needs Review</span>
+                    </div>
+                  </SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </div>

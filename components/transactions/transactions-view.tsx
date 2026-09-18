@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { TransactionTable } from "./transaction-table"
 import { TransactionFilters } from "./transaction-filters"
 import { AddTransactionDialog } from "./add-transaction-dialog"
@@ -30,6 +30,7 @@ interface TransactionsViewProps {
   sortOrder?: "asc" | "desc"
   hasAnyTransactions: boolean
   defaultWalletId?: string
+  defaultCurrency?: string
 }
 
 export function TransactionsView({
@@ -43,9 +44,17 @@ export function TransactionsView({
   sortOrder = "desc",
   hasAnyTransactions,
   defaultWalletId,
+  defaultCurrency = "USD",
 }: TransactionsViewProps) {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [importOpen, setImportOpen] = useState(false)
+
+  // Listen for open-import-csv event from empty states or shortcuts
+  useEffect(() => {
+    const handleOpenImport = () => setImportOpen(true)
+    window.addEventListener("dime:open-import-csv", handleOpenImport)
+    return () => window.removeEventListener("dime:open-import-csv", handleOpenImport)
+  }, [])
 
   const handleExportSummaryCSV = () => {
     const categoryMap = new Map(categories.map((c) => [c._id.toString(), c]))
@@ -192,7 +201,11 @@ export function TransactionsView({
       </div>
 
       {/* Filters */}
-      <TransactionFilters categories={categories} wallets={wallets} />
+      <TransactionFilters
+        categories={categories}
+        wallets={wallets}
+        defaultCurrency={defaultCurrency}
+      />
 
       {/* Table */}
       <TransactionTable

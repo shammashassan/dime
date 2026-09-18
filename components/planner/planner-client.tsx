@@ -35,12 +35,15 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
   Table as TableIcon,
   LayoutDashboard,
   Target,
+  Trash2,
+  Loader2,
 } from "lucide-react"
 import {
   Select,
@@ -345,19 +348,24 @@ export function PlannerClient({ baseline, savedScenarios }: PlannerClientProps) 
 
       {/* ── Delete Confirmation Dialog ── */}
       <AlertDialog open={!!deletingId} onOpenChange={(open) => !open && setDeletingId(null)}>
-        <AlertDialogContent className="rounded-2xl border-border/50 shadow-xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
+            <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+              <Trash2 />
+            </AlertDialogMedia>
             <AlertDialogTitle>Delete Scenario?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs">
+            <AlertDialogDescription>
               This will only remove the saved scenario configuration. None of your actual financial data (wallets, loans, goals) will be affected.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl text-xs">Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
+              disabled={isPending}
               onClick={() => deletingId && handleDeleteScenario(deletingId)}
-              className="rounded-xl text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
+              {isPending && <Loader2 className="animate-spin" data-icon="inline-start" />}
               Delete Scenario
             </AlertDialogAction>
           </AlertDialogFooter>

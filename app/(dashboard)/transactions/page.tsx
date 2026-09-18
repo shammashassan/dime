@@ -92,6 +92,7 @@ async function TransactionsContent({
       sortOrder={sortOrder}
       hasAnyTransactions={hasAnyTransactions}
       defaultWalletId={preferences?.defaultWalletId}
+      defaultCurrency={preferences?.defaultCurrency || wallets[0]?.currency || "USD"}
     />
   )
 }

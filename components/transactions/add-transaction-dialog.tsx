@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
@@ -15,6 +15,12 @@ interface AddTransactionDialogProps {
 
 export function AddTransactionDialog({ categories, wallets, defaultWalletId }: AddTransactionDialogProps) {
   const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    const handleQuickAdd = () => setOpen(true)
+    window.addEventListener("dime:quick-add-transaction", handleQuickAdd)
+    return () => window.removeEventListener("dime:quick-add-transaction", handleQuickAdd)
+  }, [])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

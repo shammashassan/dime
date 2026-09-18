@@ -969,3 +969,418 @@ export async function importTransactionsAction(walletId: string, transactionsLis
   return { success: true, count: documentsToInsert.length }
 }
 
+/**
+ * Bulk deletes multiple transactions atomically, reverting their balance impact on wallets and goals.
+ */
+export async function bulkDeleteTransactions(ids: string[]) {
+  try {
+    await requireApprovedUser()
+    if (!ids || ids.length === 0) return { success: true, count: 0 }
+
+    const scope = await getFinancialScope()
+    if (scope.isOrganization) {
+      const member = await db.collection("member").findOne({
+        userId: scope.userId,
+        organizationId: scope.organizationId,
+      })
+      const role = (member?.role as Role) || "member"
+      if (!canDeleteTransactions(role)) {
+        return { success: false, error: "Unauthorized" }
+      }
+    }
+
+    const transactionsColl = await getCollection<Transaction>("transactions")
+    const walletsColl = await getCollection<Wallet>("wallets")
+    const oids = ids.map((id) => new ObjectId(id))
+
+    const txs = await transactionsColl
+      .find({ _id: { $in: oids }, ...getScopeFilter(scope) })
+      .toArray()
+
+    if (txs.length === 0) return { success: true, count: 0 }
+
+    // Check bill instance side-effects
+    try {
+      const billColl = await getCollection<BillInstance>("bill_instances")
+      const txIdStrs = txs.map((t) => t._id.toString())
+      await billColl.deleteMany({ transactionId: { $in: txIdStrs } })
+    } catch (err) {
+      console.error("Failed to process bill deletion side effects in bulk delete:", err)
+    }
+
+    // Revert goal balances if linked
+    const goalReversions: Record<string, number> = {}
+    for (const tx of txs) {
+      if (tx.goalId) {
+        goalReversions[tx.goalId] = (goalReversions[tx.goalId] || 0) + tx.amount
+      }
+    }
+    if (Object.keys(goalReversions).length > 0) {
+      try {
+        const goalsColl = await getCollection<any>("goals")
+        for (const [gId, amount] of Object.entries(goalReversions)) {
+          await goalsColl.updateOne(
+            { _id: new ObjectId(gId), ...getScopeFilter(scope) },
+            {
+              $inc: { currentAmount: -amount, version: 1 },
+              $set: { updatedAt: new Date(), updatedBy: scope.userId },
+            }
+          )
+        }
+        updateTag("goals")
+        revalidatePath("/goals")
+      } catch (err) {
+        console.error("Failed to revert goal balances in bulk delete:", err)
+      }
+    }
+
+    // Calculate balance adjustments and include linked transfer records
+    const allIdsToDelete = new Set<string>(txs.map((t) => t._id.toString()))
+    const walletAdjustments: Record<string, number> = {}
+
+    for (const tx of txs) {
+      if (tx.type !== "transfer") {
+        const delta = tx.type === "income" ? -tx.amount : tx.amount
+        walletAdjustments[tx.walletId] = (walletAdjustments[tx.walletId] || 0) + delta
+      } else {
+        if (tx.transferType === "debit") {
+          walletAdjustments[tx.walletId] = (walletAdjustments[tx.walletId] || 0) + tx.amount
+          if (tx.linkedTransactionId && !allIdsToDelete.has(tx.linkedTransactionId)) {
+            const linkedTx = await transactionsColl.findOne({
+              _id: new ObjectId(tx.linkedTransactionId),
+              ...getScopeFilter(scope),
+            })
+            if (linkedTx) {
+              walletAdjustments[linkedTx.walletId] =
+                (walletAdjustments[linkedTx.walletId] || 0) - linkedTx.amount
+              allIdsToDelete.add(tx.linkedTransactionId)
+            }
+          }
+        } else {
+          walletAdjustments[tx.walletId] = (walletAdjustments[tx.walletId] || 0) - tx.amount
+          if (tx.linkedTransactionId && !allIdsToDelete.has(tx.linkedTransactionId)) {
+            const linkedTx = await transactionsColl.findOne({
+              _id: new ObjectId(tx.linkedTransactionId),
+              ...getScopeFilter(scope),
+            })
+            if (linkedTx) {
+              walletAdjustments[linkedTx.walletId] =
+                (walletAdjustments[linkedTx.walletId] || 0) + linkedTx.amount
+              allIdsToDelete.add(tx.linkedTransactionId)
+            }
+          }
+        }
+      }
+    }
+
+    // Delete loan linkages if applicable
+    try {
+      const { handleTransactionDeletedHook } = await import("@/lib/actions/loans")
+      for (const tx of txs) {
+        await handleTransactionDeletedHook(tx._id.toString(), scope)
+      }
+    } catch (err) {
+      console.error("Failed to run loan delete hook in bulk delete:", err)
+    }
+
+    // Delete transactions
+    const deleteOids = Array.from(allIdsToDelete).map((id) => new ObjectId(id))
+    await transactionsColl.deleteMany({ _id: { $in: deleteOids }, ...getScopeFilter(scope) })
+
+    // Apply wallet adjustments
+    const walletBulkOps = Object.entries(walletAdjustments)
+      .filter(([_, delta]) => delta !== 0)
+      .map(([wId, delta]) => ({
+        updateOne: {
+          filter: { _id: new ObjectId(wId), ...getScopeFilter(scope) },
+          update: {
+            $inc: { balance: delta, version: 1 },
+            $set: { updatedAt: new Date(), updatedBy: scope.userId },
+          },
+        },
+      }))
+
+    if (walletBulkOps.length > 0) {
+      await walletsColl.bulkWrite(walletBulkOps)
+    }
+
+    updateTag("transactions")
+    updateTag("wallets")
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+    revalidatePath("/", "layout")
+
+    return { success: true, count: txs.length }
+  } catch (error: any) {
+    console.error("bulkDeleteTransactions error:", error)
+    return { success: false, error: error.message || "Failed to delete transactions in bulk" }
+  }
+}
+
+/**
+ * Bulk updates the category for non-transfer transactions.
+ */
+export async function bulkUpdateTransactionCategory(ids: string[], categoryId: string | null) {
+  try {
+    await requireApprovedUser()
+    if (!ids || ids.length === 0) return { success: true, count: 0 }
+
+    const scope = await getFinancialScope()
+    if (scope.isOrganization) {
+      const member = await db.collection("member").findOne({
+        userId: scope.userId,
+        organizationId: scope.organizationId,
+      })
+      const role = (member?.role as Role) || "member"
+      if (!canEditTransactions(role)) {
+        return { success: false, error: "Unauthorized" }
+      }
+    }
+
+    if (categoryId) {
+      const categoriesColl = await getCollection<Category>("categories")
+      const cat = await categoriesColl.findOne({
+        _id: new ObjectId(categoryId),
+        $or: [{ userId: scope.userId }, { userId: null }],
+      })
+      if (!cat) {
+        return { success: false, error: "Category not found" }
+      }
+    }
+
+    const oids = ids.map((id) => new ObjectId(id))
+    const transactionsColl = await getCollection<Transaction>("transactions")
+
+    const res = await transactionsColl.updateMany(
+      { _id: { $in: oids }, type: { $ne: "transfer" }, ...getScopeFilter(scope) },
+      {
+        $set: {
+          categoryId: categoryId || null,
+          updatedAt: new Date(),
+          updatedBy: scope.userId,
+        },
+        $inc: { version: 1 },
+      }
+    )
+
+    updateTag("transactions")
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+
+    return { success: true, count: res.modifiedCount }
+  } catch (error: any) {
+    console.error("bulkUpdateTransactionCategory error:", error)
+    return { success: false, error: error.message || "Failed to update categories in bulk" }
+  }
+}
+
+/**
+ * Bulk moves non-transfer transactions to a new target wallet with balance integrity.
+ */
+export async function bulkUpdateTransactionWallet(ids: string[], targetWalletId: string) {
+  try {
+    await requireApprovedUser()
+    if (!ids || ids.length === 0) return { success: true, count: 0 }
+
+    const scope = await getFinancialScope()
+    if (scope.isOrganization) {
+      const member = await db.collection("member").findOne({
+        userId: scope.userId,
+        organizationId: scope.organizationId,
+      })
+      const role = (member?.role as Role) || "member"
+      if (!canEditTransactions(role)) {
+        return { success: false, error: "Unauthorized" }
+      }
+    }
+
+    const walletsColl = await getCollection<Wallet>("wallets")
+    const targetWallet = await walletsColl.findOne({
+      _id: new ObjectId(targetWalletId),
+      ...getScopeFilter(scope),
+    })
+    if (!targetWallet) {
+      return { success: false, error: "Target wallet not found" }
+    }
+
+    const oids = ids.map((id) => new ObjectId(id))
+    const transactionsColl = await getCollection<Transaction>("transactions")
+
+    const txs = await transactionsColl
+      .find({
+        _id: { $in: oids },
+        walletId: { $ne: targetWalletId },
+        type: { $ne: "transfer" },
+        ...getScopeFilter(scope),
+      })
+      .toArray()
+
+    if (txs.length === 0) {
+      return { success: true, count: 0 }
+    }
+
+    const walletAdjustments: Record<string, number> = {}
+    let targetWalletDelta = 0
+    const txUpdateOps: any[] = []
+
+    for (const tx of txs) {
+      // Revert from old wallet
+      const revertDelta = tx.type === "income" ? -tx.amount : tx.amount
+      walletAdjustments[tx.walletId] = (walletAdjustments[tx.walletId] || 0) + revertDelta
+
+      // Convert amount if target wallet has a different currency
+      const newAmount =
+        tx.currency === targetWallet.currency
+          ? tx.amount
+          : await convertCurrency(tx.amount, tx.currency, targetWallet.currency)
+
+      // Apply to new wallet
+      const applyDelta = tx.type === "income" ? newAmount : -newAmount
+      targetWalletDelta += applyDelta
+
+      txUpdateOps.push({
+        updateOne: {
+          filter: { _id: tx._id },
+          update: {
+            $set: {
+              walletId: targetWalletId,
+              currency: targetWallet.currency,
+              amount: newAmount,
+              updatedAt: new Date(),
+              updatedBy: scope.userId,
+            },
+            $inc: { version: 1 },
+          },
+        },
+      })
+    }
+
+    if (txUpdateOps.length > 0) {
+      await transactionsColl.bulkWrite(txUpdateOps)
+    }
+
+    const walletBulkOps = Object.entries(walletAdjustments)
+      .filter(([_, delta]) => delta !== 0)
+      .map(([wId, delta]) => ({
+        updateOne: {
+          filter: { _id: new ObjectId(wId), ...getScopeFilter(scope) },
+          update: {
+            $inc: { balance: delta, version: 1 },
+            $set: { updatedAt: new Date(), updatedBy: scope.userId },
+          },
+        },
+      }))
+
+    if (targetWalletDelta !== 0) {
+      walletBulkOps.push({
+        updateOne: {
+          filter: { _id: targetWallet._id, ...getScopeFilter(scope) },
+          update: {
+            $inc: { balance: targetWalletDelta, version: 1 },
+            $set: { updatedAt: new Date(), updatedBy: scope.userId },
+          },
+        },
+      })
+    }
+
+    if (walletBulkOps.length > 0) {
+      await walletsColl.bulkWrite(walletBulkOps)
+    }
+
+    updateTag("transactions")
+    updateTag("wallets")
+    revalidatePath("/transactions")
+    revalidatePath("/dashboard")
+    revalidatePath("/", "layout")
+
+    return { success: true, count: txs.length }
+  } catch (error: any) {
+    console.error("bulkUpdateTransactionWallet error:", error)
+    return { success: false, error: error.message || "Failed to move transactions to wallet" }
+  }
+}
+
+/**
+ * Bulk adds tags to selected transactions.
+ */
+export async function bulkAddTransactionTags(ids: string[], tags: string[]) {
+  try {
+    await requireApprovedUser()
+    if (!ids || ids.length === 0) return { success: true, count: 0 }
+
+    const scope = await getFinancialScope()
+    if (scope.isOrganization) {
+      const member = await db.collection("member").findOne({
+        userId: scope.userId,
+        organizationId: scope.organizationId,
+      })
+      const role = (member?.role as Role) || "member"
+      if (!canEditTransactions(role)) {
+        return { success: false, error: "Unauthorized" }
+      }
+    }
+
+    const cleanTags = tags.map((t) => t.trim().toLowerCase()).filter(Boolean)
+    if (cleanTags.length === 0) {
+      return { success: true, count: 0 }
+    }
+
+    const oids = ids.map((id) => new ObjectId(id))
+    const transactionsColl = await getCollection<Transaction>("transactions")
+
+    const res = await transactionsColl.updateMany(
+      { _id: { $in: oids }, ...getScopeFilter(scope) },
+      {
+        $addToSet: { tags: { $each: cleanTags } },
+        $set: { updatedAt: new Date(), updatedBy: scope.userId },
+        $inc: { version: 1 },
+      }
+    )
+
+    updateTag("transactions")
+    revalidatePath("/transactions")
+
+    return { success: true, count: res.modifiedCount }
+  } catch (error: any) {
+    console.error("bulkAddTransactionTags error:", error)
+    return { success: false, error: error.message || "Failed to add tags in bulk" }
+  }
+}
+
+/**
+ * Fetches lightweight metadata (wallets and categories) for global quick transaction modals.
+ */
+export async function getQuickTransactionMeta() {
+  try {
+    await requireApprovedUser()
+    const scope = await getFinancialScope()
+    const scopeFilter = getScopeFilter(scope)
+
+    const [walletsColl, categoriesColl] = await Promise.all([
+      getCollection<Wallet>("wallets"),
+      getCollection<Category>("categories"),
+    ])
+
+    const [wallets, categories] = await Promise.all([
+      walletsColl.find({ ...scopeFilter, isArchived: false }).toArray(),
+      categoriesColl.find({ $or: [{ userId: scope.userId }, { userId: null }] }).toArray(),
+    ])
+
+    const preferences = await getPreferences(scope.userId)
+
+    return {
+      wallets: JSON.parse(JSON.stringify(wallets)) as Wallet[],
+      categories: JSON.parse(JSON.stringify(categories)) as Category[],
+      defaultWalletId: preferences.defaultWalletId || (wallets[0] ? wallets[0]._id.toString() : undefined),
+    }
+  } catch (error) {
+    console.error("Failed to fetch quick transaction meta:", error)
+    return {
+      wallets: [],
+      categories: [],
+      defaultWalletId: undefined,
+    }
+  }
+}
+
+

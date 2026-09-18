@@ -25,6 +25,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
@@ -1574,23 +1575,26 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
       {/* Delete Account Alert Dialog */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="bg-background border border-border/40 rounded-2xl shadow-xl">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-extrabold tracking-tight text-rose-500">
+            <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+              <Trash2 />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
               Delete Dime Account permanently?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-muted-foreground">
+            <AlertDialogDescription>
               Are you sure? This action is absolute. All logged transactions, budgets, custom wallets, preferences, and credential details will be deleted from our systems. There is no backup or recovery.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl border-border/40">Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={handleDeleteAccount}
-              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/95"
               disabled={isPending}
             >
-              {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {isPending && <Loader2 className="animate-spin" data-icon="inline-start" />}
               Wipe Everything & Delete
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -7,6 +7,7 @@ import { ImpersonationBanner } from "@/components/layout/impersonation-banner"
 import { SiteFooter } from "@/components/layout/site-footer"
 import { WorkspaceLoader } from "@/components/layout/workspace-loader"
 import { NotificationsProvider } from "@/components/notifications/notifications-provider"
+import { KeyboardShortcutsProvider } from "@/components/keyboard/keyboard-shortcuts-provider"
 
 async function AuthGuard() {
   await requireApprovedUser()
@@ -32,7 +33,9 @@ export default function DashboardLayout({
               <WorkspaceLoader />
               <ImpersonationBanner />
               <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 overflow-y-auto h-full scrollbar-hide">
-                {children}
+                <KeyboardShortcutsProvider>
+                  {children}
+                </KeyboardShortcutsProvider>
               </div>
             </SidebarInset>
           </div>

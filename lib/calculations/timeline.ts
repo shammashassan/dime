@@ -7,6 +7,8 @@ import {
   isSameMonth,
   isSameYear,
   startOfDay,
+  isSameDay,
+  subDays,
 } from "date-fns"
 import type {
   TimelineEvent,
@@ -490,10 +492,13 @@ export function groupEventsByDateBracket(
     let groupKey: string
     let groupLabel: string
 
-    if (isToday(evDate)) {
+    const isEventToday = isSameDay(evDate, referenceDate)
+    const isEventYesterday = isSameDay(evDate, subDays(referenceDate, 1))
+
+    if (isEventToday) {
       groupKey = "today"
       groupLabel = "Today"
-    } else if (isYesterday(evDate)) {
+    } else if (isEventYesterday) {
       groupKey = "yesterday"
       groupLabel = "Yesterday"
     } else if (differenceInCalendarDays(referenceDate, evDate) <= 7 && differenceInCalendarDays(referenceDate, evDate) > 0) {

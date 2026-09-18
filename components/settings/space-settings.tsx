@@ -949,8 +949,8 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction disabled={isLeaving} onClick={handleLeaveSpace} className="bg-rose-500 hover:bg-rose-600">
+                    <AlertDialogCancel disabled={isLeaving}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" disabled={isLeaving} onClick={handleLeaveSpace}>
                       Yes, Leave Space
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -982,8 +982,8 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction disabled={isDeleting} onClick={handleDeleteSpace} className="bg-rose-500 hover:bg-rose-600">
+                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" disabled={isDeleting} onClick={handleDeleteSpace}>
                       Yes, Delete Permanently
                     </AlertDialogAction>
                   </AlertDialogFooter>

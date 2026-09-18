@@ -57,6 +57,7 @@ Before implementing any feature, carefully review the existing codebase, databas
 
 * ✅ Financial Timeline
 * ✅ Financial Inbox & Notifications Center
+* ✅ Product Polish & User Experience (Bulk Actions, Keyboard Navigation, Saved Views)
 
 ---
 
@@ -1102,49 +1103,22 @@ Integrations
 
 ---
 
-# 21. Product Polish & User Experience (New)
+# 21. Product Polish & User Experience ✅ COMPLETED
 
-Focus on refining the overall user experience and making Dime feel like a premium product.
+Focus on refining the overall user experience and making Dime feel like a premium, power-user personal finance operating system.
 
-Features
+### Completed Features
 
-* Global Command Palette
-* Universal Search
-* Keyboard Shortcuts
-* Bulk Actions
-* Improved Empty States
-* Better Onboarding
-* Responsive Improvements
-* Accessibility Improvements
-* Performance Optimizations
-* Offline Support
-* Better Loading States
-* Skeleton Screens
-* Faster Navigation
-* View Preferences
-* Saved Filters
-* Saved Views
-
-Dashboard
-
-* Better information density
-* Bento layouts
-* Dashboard personalization
-* Widget improvements
-
-Reports
-
-* Better chart interactions
-* Export improvements
-* Drill-down analytics
-
-General
-
-* Consistent animations
-* Improved mobile experience
-* Better tablet layouts
-* Better desktop layouts
-* UI consistency audit
+* ✅ **Bulk Transaction Actions**: Multi-select transactions, batch category reassignment, batch wallet transfer with real-time multi-currency exchange rate conversion, batch tag additions, and batch deletion with atomic multi-wallet balance reversions (`bulkWrite`). Contextual floating dock with clear selection and destructive `AlertDialog` confirmations.
+* ✅ **Keyboard-First Transactions Table**: Full table navigation without touching the mouse (`j`/`k` row cursor, `x`/`Space` selection toggle, `Delete`/`Backspace` batch delete prompt, `e` row edit, `Esc` selection clear). Visible high-contrast focus rings (`ring-2 ring-primary/60 bg-primary/10`) and full typing guards (`input`, `textarea`, `select`, `contenteditable`).
+* ✅ **Global Keyboard Shortcuts Engine**: Linear/Superhuman style chord architecture (`lib/shortcuts-config.ts`).
+  * `g` navigation chords (`g d` dashboard, `g t` transactions, `g b` budgets, `g r` reports, `g c` calendar, `g i` investments, `g n` net worth, `g w` wallets, `g l` loans, `g s` subscriptions, `g p` planner, `g e` review, `g m` timeline, `g u` rules, `g x` settings).
+  * `?` Cheat-Sheet Dialog Modal with categorized shortcuts and keyboard chip displays.
+  * `c` Global Quick Transaction modal opening from anywhere in the app with auto-fetched wallets and categories.
+  * Discoverable keyboard shortcut trigger button in `DashboardHeader` and shortcut command jump in `SearchCommand`.
+* ✅ **Saved Transaction Views**: Built-in default quick view tabs (*All*, *This Month*, *Expenses*, *Income*, *High Value*) plus customizable saved filter views with custom names persisted in `localStorage` and synchronized with URL `searchParams`.
+* ✅ **Action-Oriented Empty States**: Distinct states for genuinely empty transaction history (with *Add Transaction* and *Import CSV* action triggers) vs zero-result filtered states (with *Reset Filters* CTA).
+* ✅ **Pure Calculation & Balance Integrity Engine**: Side-effect free math in `lib/calculations/bulk-transactions.ts` with 100% test coverage validating balance calculations, currency conversions, and tag union deduplication.
 
 ---
 

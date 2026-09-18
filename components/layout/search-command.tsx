@@ -25,6 +25,7 @@ import {
   SlidersHorizontal,
   Compass,
   FileText,
+  Keyboard,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -153,6 +154,11 @@ export function SearchCommand() {
   }, [query, open])
 
   const onSelectEntity = (path: string, searchToSave?: string) => {
+    if (path === "#shortcuts") {
+      setOpen(false)
+      window.dispatchEvent(new CustomEvent("dime:open-shortcuts-help"))
+      return
+    }
     if (searchToSave) {
       saveRecentSearch(searchToSave)
     }
@@ -179,6 +185,7 @@ export function SearchCommand() {
     { path: "/reports?tab=review", label: "Monthly Review", icon: FileText },
     { path: "/categories", label: "Categories", icon: Tags },
     { path: "/settings", label: "Settings & Profile", icon: Cog },
+    { path: "#shortcuts", label: "Keyboard Shortcuts (?)", icon: Keyboard },
   ]
 
   if (isAdmin) {

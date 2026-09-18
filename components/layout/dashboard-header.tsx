@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator"
 import { ModeToggle } from "@/components/layout/mode-toggle"
 import { SearchCommand } from "@/components/layout/search-command"
 import { NotificationMenu } from "@/components/notifications/notification-menu"
+import { Button } from "@/components/ui/button"
+import { Kbd } from "@/components/ui/kbd"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -89,8 +91,17 @@ export function DashboardHeader() {
         </div>
 
         {/* Right: actions */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <SearchCommand />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => window.dispatchEvent(new CustomEvent("dime:open-shortcuts-help"))}
+            className="h-8 px-2 rounded-xl text-muted-foreground hover:text-foreground hidden sm:inline-flex items-center gap-1 cursor-pointer"
+            title="Keyboard shortcuts (?)"
+          >
+            <Kbd className="text-[10px] font-mono px-1 py-0.5 shadow-none border-border/60">?</Kbd>
+          </Button>
           <NotificationMenu />
           <ModeToggle />
         </div>
