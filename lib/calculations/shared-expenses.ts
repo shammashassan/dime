@@ -123,6 +123,7 @@ export function validateExpenseSplits(
 export interface CalculateBalancesOptions {
   currentUserId?: string
   currency?: string
+  convert?: (amount: number, from: string) => number
 }
 
 /**
@@ -139,6 +140,7 @@ export function calculateDynamicBalances(
 } {
   const currency = options.currency || expenses[0]?.currency || "USD"
   const currentUserId = options.currentUserId
+  const convert = options.convert
 
   const participantMap = new Map<
     string,
@@ -172,6 +174,7 @@ export function calculateDynamicBalances(
   }
 
   for (const expense of expenses) {
+    const expCurrency = expense.currency || currency
     for (const p of expense.participants) {
       const entry = getOrCreateParticipant(
         p.participantId,
@@ -179,8 +182,10 @@ export function calculateDynamicBalances(
         p.name,
         p.email
       )
-      entry.totalPaid += p.amountPaid
-      entry.totalShare += p.amountOwed
+      const paid = convert ? convert(p.amountPaid, expCurrency) : p.amountPaid
+      const share = convert ? convert(p.amountOwed, expCurrency) : p.amountOwed
+      entry.totalPaid += paid
+      entry.totalShare += share
     }
   }
 
@@ -203,7 +208,9 @@ export function calculateDynamicBalances(
     }
     const fromMap = settlementPaidFromMap.get(s.fromParticipantId)!
     const current = fromMap.get(s.toParticipantId) || 0
-    fromMap.set(s.toParticipantId, current + s.amount)
+    const settCurrency = s.currency || currency
+    const settAmount = convert ? convert(s.amount, settCurrency) : s.amount
+    fromMap.set(s.toParticipantId, current + settAmount)
   }
 
   const participantSummaries: ParticipantSummary[] = Array.from(
@@ -238,6 +245,7 @@ export function calculateDynamicBalances(
   const pairwiseDebtMap = new Map<string, Map<string, number>>()
 
   for (const expense of expenses) {
+    const expCurrency = expense.currency || currency
     const totalPaid = expense.totalAmount
     if (totalPaid <= 0) continue
 
@@ -249,7 +257,8 @@ export function calculateDynamicBalances(
         if (debtor.participantId === payer.participantId) continue
         if (debtor.amountOwed <= 0) continue
 
-        const debt = Math.round(debtor.amountOwed * payerRatio)
+        const rawDebt = Math.round(debtor.amountOwed * payerRatio)
+        const debt = convert ? convert(rawDebt, expCurrency) : rawDebt
 
         if (!pairwiseDebtMap.has(debtor.participantId)) {
           pairwiseDebtMap.set(debtor.participantId, new Map())
@@ -388,6 +397,7 @@ export interface BuildOverviewViewModelOptions {
   expenses: SharedExpense[]
   settlements: SharedSettlement[]
   baseCurrency?: string
+  convert?: (amount: number, from: string) => number
 }
 
 /**
@@ -396,13 +406,13 @@ export interface BuildOverviewViewModelOptions {
 export function buildSharedExpensesOverviewViewModel(
   options: BuildOverviewViewModelOptions
 ): SharedExpensesOverviewViewModel {
-  const { currentUserId, currentUserName, expenses, settlements, baseCurrency = "USD" } = options
+  const { currentUserId, currentUserName, expenses, settlements, baseCurrency = "USD", convert } = options
   const currency = baseCurrency || expenses[0]?.currency || "USD"
 
   const { participantSummaries, pairwiseBalances } = calculateDynamicBalances(
     expenses,
     settlements,
-    { currentUserId, currency }
+    { currentUserId, currency, convert }
   )
 
   let currentUserSummary = participantSummaries.find((p) => p.id === currentUserId)
@@ -432,7 +442,11 @@ export function buildSharedExpensesOverviewViewModel(
     }
   }
 
-  const totalSharedAmount = expenses.reduce((acc, e) => acc + e.totalAmount, 0)
+  const totalSharedAmount = expenses.reduce((acc, e) => {
+    const rawAmt = e.totalAmount
+    const convertedAmt = convert ? convert(rawAmt, e.currency || currency) : rawAmt
+    return acc + convertedAmt
+  }, 0)
   const activeExpenseCount = expenses.filter((e) => e.status !== "settled").length
 
   return {

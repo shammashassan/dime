@@ -19,6 +19,8 @@ import {
   RecordSettlementInput,
 } from "@/lib/validations/shared-expenses"
 import { validateExpenseSplits, buildSharedExpensesOverviewViewModel } from "@/lib/calculations/shared-expenses"
+import { getActiveBaseCurrency } from "@/lib/queries/loans"
+import { getCurrencyConverter } from "@/lib/currency"
 import { SharedExpense, SharedSettlement, Transaction, Category, Notification } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
@@ -414,12 +416,20 @@ export async function getSharedExpensesOverviewAction(contactId?: string) {
       )
     : enrichedSettlements
 
+  const baseCurrency = await getActiveBaseCurrency()
+  const expCurrencies = filteredExpenses.map((e) => e.currency || "USD")
+  const settCurrencies = filteredSettlements.map((s) => s.currency || "USD")
+  const allCurrencies = Array.from(new Set([...expCurrencies, ...settCurrencies]))
+  const convert = await getCurrencyConverter(baseCurrency, allCurrencies)
+
   // Build ViewModel using pure domain function
   const viewModel = buildSharedExpensesOverviewViewModel({
     currentUserId: session.user.id,
     currentUserName: session.user.name,
     expenses: JSON.parse(JSON.stringify(filteredExpenses)),
     settlements: JSON.parse(JSON.stringify(filteredSettlements)),
+    baseCurrency,
+    convert,
   })
 
   // Also fetch user's contacts list for UI selectors

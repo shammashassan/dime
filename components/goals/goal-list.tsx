@@ -41,6 +41,25 @@ import {
 interface GoalListProps {
   initialGoals: Goal[]
   wallets: Wallet[]
+  baseCurrency?: string
+  exchangeRates?: Record<string, number>
+}
+
+function convertToCurrency(
+  amount: number,
+  fromCurrency: string,
+  targetCurrency: string,
+  rates?: Record<string, number>
+): number {
+  if (!fromCurrency || fromCurrency.toUpperCase() === targetCurrency.toUpperCase()) {
+    return amount
+  }
+  if (!rates) return amount
+  const fromRate = rates[fromCurrency.toUpperCase()]
+  if (fromRate && fromRate > 0) {
+    return Math.round(amount / fromRate)
+  }
+  return amount
 }
 
 function MetricCard({ icon: Icon, color, label, value, valueClassName, className, style }: any) {
@@ -60,7 +79,7 @@ function MetricCard({ icon: Icon, color, label, value, valueClassName, className
   )
 }
 
-export function GoalList({ initialGoals, wallets }: GoalListProps) {
+export function GoalList({ initialGoals, wallets, baseCurrency, exchangeRates }: GoalListProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [goals, setGoals] = useState<Goal[]>(initialGoals)
@@ -129,9 +148,17 @@ export function GoalList({ initialGoals, wallets }: GoalListProps) {
     completed: `Completed (${tabCounts.completed})`,
   }
 
+  const resolvedBaseCurrency = baseCurrency || wallets[0]?.currency || "USD"
+
   const metrics = {
-    totalTarget: goals.reduce((sum, g) => sum + g.targetAmount, 0),
-    totalSaved: goals.reduce((sum, g) => sum + g.currentAmount, 0),
+    totalTarget: goals.reduce(
+      (sum, g) => sum + convertToCurrency(g.targetAmount, g.currency, resolvedBaseCurrency, exchangeRates),
+      0
+    ),
+    totalSaved: goals.reduce(
+      (sum, g) => sum + convertToCurrency(g.currentAmount, g.currency, resolvedBaseCurrency, exchangeRates),
+      0
+    ),
     activeCount: tabCounts.active,
     completedCount: tabCounts.completed,
   }
@@ -157,8 +184,8 @@ export function GoalList({ initialGoals, wallets }: GoalListProps) {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Target} color="#6366f1" label="Total Target" value={formatCurrency(metrics.totalTarget, wallets[0]?.currency || "USD")} />
-        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Sparkles} color="#10b981" label="Total Saved" value={formatCurrency(metrics.totalSaved, wallets[0]?.currency || "USD")} />
+        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Target} color="#6366f1" label="Total Target" value={formatCurrency(metrics.totalTarget, resolvedBaseCurrency)} />
+        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Sparkles} color="#10b981" label="Total Saved" value={formatCurrency(metrics.totalSaved, resolvedBaseCurrency)} />
         <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Activity} color="#f59e0b" label="Active Goals" value={metrics.activeCount} />
         <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Trophy} color="#8b5cf6" label="Completed Goals" value={metrics.completedCount} />
       </div>

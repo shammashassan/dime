@@ -44,6 +44,7 @@ export function RecentTransactionsCard({ transactions = [], currency }: RecentTr
                 const isBuy = tx.type === "buy"
                 const isSell = tx.type === "sell"
                 const isDividend = tx.type === "cash_dividend"
+                const txCurrency = tx.currency || currency
 
                 const totalAmount = tx.quantity * tx.price + tx.fees
 
@@ -81,12 +82,12 @@ export function RecentTransactionsCard({ transactions = [], currency }: RecentTr
                               </Badge>
                             </ItemTitle>
                             <ItemDescription className="text-[10px] leading-tight truncate">
-                              {format(new Date(tx.date), "MMM d, yyyy")} &middot; {tx.quantity} units @ {formatCurrency(tx.price, currency)}
+                              {format(new Date(tx.date), "MMM d, yyyy")} &middot; {tx.quantity} units @ {formatCurrency(tx.price, txCurrency)}
                             </ItemDescription>
                           </ItemContent>
                           <ItemActions className="text-right shrink-0 pl-2 flex flex-col items-end gap-0.5">
                             <span className="font-bold text-xs tabular-nums block leading-tight">
-                              {formatCurrency(totalAmount, currency)}
+                              {formatCurrency(totalAmount, txCurrency)}
                             </span>
                             <span className="text-[10px] text-muted-foreground leading-tight capitalize">
                               {tx.assetType}
@@ -110,15 +111,15 @@ export function RecentTransactionsCard({ transactions = [], currency }: RecentTr
                           Quantity: <span className="font-semibold text-foreground">{tx.quantity}</span>
                         </p>
                         <p>
-                          Price per Unit: <span className="font-semibold text-foreground">{formatCurrency(tx.price, currency)}</span>
+                          Price per Unit: <span className="font-semibold text-foreground">{formatCurrency(tx.price, txCurrency)}</span>
                         </p>
                         {tx.fees > 0 && (
                           <p>
-                            Fees: <span className="font-semibold text-foreground">{formatCurrency(tx.fees, currency)}</span>
+                            Fees: <span className="font-semibold text-foreground">{formatCurrency(tx.fees, txCurrency)}</span>
                           </p>
                         )}
                         <p>
-                          Total Impact: <span className="font-semibold text-foreground">{formatCurrency(totalAmount, currency)}</span>
+                          Total Impact: <span className="font-semibold text-foreground">{formatCurrency(totalAmount, txCurrency)}</span>
                         </p>
                       </div>
                     </HoverCardContent>

@@ -4,6 +4,7 @@ import { getCollection } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { getPreferences } from "@/lib/queries/preferences"
 import { getOrganizationSettings } from "@/lib/queries/organization"
+import { getCurrencyConverter } from "@/lib/currency"
 import {
   synthesizeTimelineEvents,
   groupEventsByDateBracket,
@@ -120,17 +121,18 @@ export const getTimelineData = cache(
       categoryMap.set(c._id.toString(), { name: c.name, color: c.color, icon: c.icon })
     }
 
+    const loanMap = new Map(loans.map((l) => [l._id.toString(), l]))
+
     const bundle: RawTimelineEntityBundle = {
       transactions: transactions.map((t) => ({
         _id: t._id.toString(),
-        date: t.date,
         amount: t.amount,
         currency: t.currency,
+        date: t.date,
         type: t.type,
-        description: t.description,
-        notes: t.notes,
         walletId: t.walletId,
         categoryId: t.categoryId,
+        description: t.description,
         isRecurring: t.isRecurring,
         isFlagged: t.isFlagged,
         splits: t.splits,
@@ -154,13 +156,19 @@ export const getTimelineData = cache(
         status: l.status,
         remainingAmount: l.remainingAmount,
       })),
-      loanRepayments: repayments.map((r) => ({
-        _id: r._id.toString(),
-        loanId: r.loanId,
-        amount: r.amount,
-        date: r.date,
-        notes: r.notes,
-      })),
+      loanRepayments: repayments.map((r) => {
+        const linkedLoan = loanMap.get(r.loanId)
+        return {
+          _id: r._id.toString(),
+          loanId: r.loanId,
+          amount: r.amount,
+          date: r.date,
+          notes: r.notes,
+          personName: linkedLoan?.personName,
+          loanType: linkedLoan?.type,
+          currency: linkedLoan?.currency || baseCurrency,
+        }
+      }),
       bills: bills.map((b) => ({
         _id: b._id.toString(),
         description: b.description,
@@ -219,8 +227,24 @@ export const getTimelineData = cache(
       categoryMap,
     }
 
+    // Resolve distinct currencies and pre-fetch converter
+    const sourceCurrencies = Array.from(
+      new Set([
+        ...transactions.map((t) => t.currency).filter(Boolean),
+        ...goals.map((g) => g.currency).filter(Boolean),
+        ...loans.map((l) => l.currency).filter(Boolean),
+        ...repayments.map((r) => loanMap.get(r.loanId)?.currency || baseCurrency).filter(Boolean),
+        ...bills.map((b) => b.currency).filter(Boolean),
+        ...recurring.map((r) => r.currency).filter(Boolean),
+        ...investments.map((i) => walletMap.get(i.walletId)?.currency || baseCurrency),
+        ...sharedSettlements.map((s) => s.currency).filter(Boolean),
+        ...assets.map((a) => a.currency).filter(Boolean),
+      ])
+    )
+    const convert = await getCurrencyConverter(baseCurrency, sourceCurrencies as string[])
+
     // Pure synthesis
-    const rawEvents = synthesizeTimelineEvents(bundle, baseCurrency)
+    const rawEvents = synthesizeTimelineEvents(bundle, baseCurrency, convert)
 
     // Apply optional filter parameters
     const filteredEvents = filterTimelineEvents(rawEvents, {

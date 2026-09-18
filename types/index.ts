@@ -612,6 +612,9 @@ export interface InvestmentHolding {
   status: "active" | "closed"
   realizedGain: number
   currency: string
+  convertedCurrentValue?: number
+  convertedTotalCostBasis?: number
+  convertedUnrealizedGain?: number
   exchange?: string
   isin?: string
   cusip?: string
@@ -649,6 +652,8 @@ export interface InvestmentTransaction {
   cashImpact: number
   realizedGain?: number
   dividendAmount?: number
+  currency?: string
+  convertedGrossAmount?: number
   date: Date
   notes?: string
   metadata?: Record<string, unknown>
@@ -1168,6 +1173,7 @@ export interface TimelineEvent {
   date: string // ISO date string for safe RSC -> Client serialization
   amount?: number // in cents/paise (positive integer; impact defines direction)
   currency?: string
+  convertedAmount?: number // in cents/paise normalized to baseCurrency
   impact: TimelineEventImpact
   iconName: string
   badge?: TimelineEventBadge

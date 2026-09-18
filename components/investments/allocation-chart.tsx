@@ -37,7 +37,7 @@ export function AllocationChart({
   const holdingsWithValue = React.useMemo(() => {
     return holdings.map((h) => ({
       ...h,
-      currentValue: h.quantity * h.currentPrice,
+      currentValue: h.convertedCurrentValue ?? (h.quantity * h.currentPrice),
     }))
   }, [holdings])
 

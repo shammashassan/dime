@@ -95,7 +95,7 @@ export function TopPerformersCard({
                       <div className="flex items-center justify-between text-[11px] pt-1 border-t border-emerald-500/15">
                         <span className="text-muted-foreground font-medium">Unrealized Gain</span>
                         <span className={cn("font-mono font-extrabold tabular-nums", topGainer.gain >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
-                          {topGainer.gain >= 0 ? "+" : ""}{formatCurrency(topGainer.gain, currency)}
+                          {topGainer.gain >= 0 ? "+" : ""}{formatCurrency(topGainer.gain, topGainer.currency || currency)}
                         </span>
                       </div>
                     </Link>
@@ -106,7 +106,7 @@ export function TopPerformersCard({
                       <p className="font-bold text-xs">Highest Performing Holding</p>
                     </div>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      <span className="font-bold text-foreground">{topGainer.name} ({topGainer.symbol})</span> is your top position with <span className="font-bold text-emerald-600">+{topGainer.returnPct.toFixed(2)}%</span> return ({formatCurrency(topGainer.gain, currency)}).
+                      <span className="font-bold text-foreground">{topGainer.name} ({topGainer.symbol})</span> is your top position with <span className="font-bold text-emerald-600">+{topGainer.returnPct.toFixed(2)}%</span> return ({formatCurrency(topGainer.gain, topGainer.currency || currency)}).
                     </p>
                   </HoverCardContent>
                 </HoverCard>
@@ -160,7 +160,7 @@ export function TopPerformersCard({
                           {secondHolding.returnPct >= 0 ? "Unrealized Gain" : "Unrealized Loss"}
                         </span>
                         <span className={cn("font-mono font-extrabold tabular-nums", secondHolding.gain >= 0 ? "text-foreground" : "text-rose-600 dark:text-rose-400")}>
-                          {secondHolding.gain >= 0 ? "+" : ""}{formatCurrency(secondHolding.gain, currency)}
+                          {secondHolding.gain >= 0 ? "+" : ""}{formatCurrency(secondHolding.gain, secondHolding.currency || currency)}
                         </span>
                       </div>
                     </Link>
@@ -168,7 +168,7 @@ export function TopPerformersCard({
                   <HoverCardContent side="top" className="w-60 text-xs rounded-xl border border-border/40 shadow-lg p-3">
                     <p className="font-bold text-xs mb-1">{secondHolding.name} ({secondHolding.symbol})</p>
                     <p className="text-[11px] text-muted-foreground">
-                      Return: <span className="font-bold text-foreground">{secondHolding.returnPct >= 0 ? "+" : ""}{secondHolding.returnPct.toFixed(2)}%</span> ({formatCurrency(secondHolding.gain, currency)}).
+                      Return: <span className="font-bold text-foreground">{secondHolding.returnPct >= 0 ? "+" : ""}{secondHolding.returnPct.toFixed(2)}%</span> ({formatCurrency(secondHolding.gain, secondHolding.currency || currency)}).
                     </p>
                   </HoverCardContent>
                 </HoverCard>

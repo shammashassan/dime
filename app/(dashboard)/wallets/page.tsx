@@ -7,6 +7,8 @@ export const metadata: Metadata = {
 }
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getAllWalletsIncludingArchived } from "@/lib/queries/wallets"
+import { getPreferences } from "@/lib/queries/preferences"
+import { getExchangeRates } from "@/lib/currency"
 import { WalletsView } from "@/components/wallets/wallets-view"
 import { serializeData } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -17,9 +19,21 @@ async function WalletsContent() {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
-  const wallets = await getAllWalletsIncludingArchived(userId)
+  const [wallets, prefs] = await Promise.all([
+    getAllWalletsIncludingArchived(userId),
+    getPreferences(userId),
+  ])
 
-  return <WalletsView wallets={serializeData(wallets)} />
+  const baseCurrency = prefs?.defaultCurrency || "USD"
+  const exchangeRates = await getExchangeRates(baseCurrency)
+
+  return (
+    <WalletsView
+      wallets={serializeData(wallets)}
+      baseCurrency={baseCurrency}
+      exchangeRates={exchangeRates}
+    />
+  )
 }
 
 export default async function WalletsPage() {

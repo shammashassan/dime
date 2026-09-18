@@ -44,7 +44,8 @@ export function calculateAllocationPercentages(
 
 export function deriveHoldingState(
   transactions: InvestmentTransaction[],
-  latestPrices: Map<string, number> = new Map()
+  latestPrices: Map<string, number> = new Map(),
+  walletCurrencyMap?: Map<string, string>
 ): InvestmentHolding[] {
   const holdingMap = new Map<string, InvestmentHolding>()
 
@@ -54,6 +55,7 @@ export function deriveHoldingState(
     const holdingId = tx.holdingId
     
     if (!holdingMap.has(holdingId)) {
+      const holdingCurrency = walletCurrencyMap?.get(tx.walletId) || tx.currency || "USD"
       holdingMap.set(holdingId, {
         _id: holdingId as any,
         userId: tx.userId,
@@ -68,7 +70,7 @@ export function deriveHoldingState(
         currentPrice: latestPrices.get(holdingId) || 0,
         status: "active",
         realizedGain: 0,
-        currency: "USD",
+        currency: holdingCurrency,
         exchange: tx.metadata?.exchange as string | undefined,
         isin: tx.metadata?.isin as string | undefined,
         cusip: tx.metadata?.cusip as string | undefined,
@@ -142,30 +144,51 @@ export interface AccountViewModel {
   totalCostBasis: number
   unrealizedGain: number
   realizedGain: number
+  convertedTotalValue?: number
+  convertedUnrealizedGain?: number
   holdings: InvestmentHolding[]
 }
 
-export function buildPortfolioViewModel(holdings: InvestmentHolding[]): PortfolioViewModel {
+export function buildPortfolioViewModel(
+  holdings: InvestmentHolding[],
+  convert?: (amount: number, from: string) => number
+): PortfolioViewModel {
   const activeHoldings = holdings.filter(h => h.status === "active")
   
-  const totalValue = activeHoldings.reduce((sum, h) => sum + (h.quantity * h.currentPrice), 0)
-  const totalCostBasis = activeHoldings.reduce((sum, h) => sum + h.totalCostBasis, 0)
-  const unrealizedGain = totalValue - totalCostBasis
-  const realizedGain = holdings.reduce((sum, h) => sum + (h.realizedGain || 0), 0)
+  let totalValue = 0
+  let totalCostBasis = 0
+  let realizedGain = 0
 
+  for (const h of activeHoldings) {
+    const rawVal = h.quantity * h.currentPrice
+    const rawCost = h.totalCostBasis
+    totalValue += convert ? convert(rawVal, h.currency || "USD") : rawVal
+    totalCostBasis += convert ? convert(rawCost, h.currency || "USD") : rawCost
+  }
+
+  for (const h of holdings) {
+    const rawRealized = h.realizedGain || 0
+    realizedGain += convert ? convert(rawRealized, h.currency || "USD") : rawRealized
+  }
+
+  const unrealizedGain = totalValue - totalCostBasis
   const accountIds = new Set(holdings.map(h => h.walletId))
 
   return {
-    totalValue,
-    totalCostBasis,
-    unrealizedGain,
-    realizedGain,
+    totalValue: Math.round(totalValue),
+    totalCostBasis: Math.round(totalCostBasis),
+    unrealizedGain: Math.round(unrealizedGain),
+    realizedGain: Math.round(realizedGain),
     holdingsCount: activeHoldings.length,
     accountsCount: accountIds.size
   }
 }
 
-export function buildAccountViewModel(holdings: InvestmentHolding[], account: Wallet): AccountViewModel {
+export function buildAccountViewModel(
+  holdings: InvestmentHolding[],
+  account: Wallet,
+  convert?: (amount: number, from: string) => number
+): AccountViewModel {
   const accountHoldings = holdings.filter(h => h.walletId === account._id.toString())
   const activeHoldings = accountHoldings.filter(h => h.status === "active")
   
@@ -173,6 +196,10 @@ export function buildAccountViewModel(holdings: InvestmentHolding[], account: Wa
   const totalCostBasis = activeHoldings.reduce((sum, h) => sum + h.totalCostBasis, 0)
   const unrealizedGain = totalValue - totalCostBasis
   const realizedGain = accountHoldings.reduce((sum, h) => sum + (h.realizedGain || 0), 0)
+
+  const accountCurrency = account.currency || "USD"
+  const convertedTotalValue = convert ? convert(totalValue, accountCurrency) : totalValue
+  const convertedUnrealizedGain = convert ? convert(unrealizedGain, accountCurrency) : unrealizedGain
 
   return {
     accountId: account._id.toString(),
@@ -183,6 +210,8 @@ export function buildAccountViewModel(holdings: InvestmentHolding[], account: Wa
     totalCostBasis,
     unrealizedGain,
     realizedGain,
+    convertedTotalValue,
+    convertedUnrealizedGain,
     holdings: accountHoldings
   }
 }

@@ -9,6 +9,8 @@ export const metadata: Metadata = {
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getGoals } from "@/lib/queries/goals"
 import { getWallets } from "@/lib/queries/wallets"
+import { getPreferences } from "@/lib/queries/preferences"
+import { getExchangeRates } from "@/lib/currency"
 import { GoalList } from "@/components/goals/goal-list"
 import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
@@ -16,12 +18,23 @@ import { serializeData } from "@/lib/utils"
 import { GoalsSkeleton } from "./loading"
 
 async function GoalsContent({ userId }: { userId: string }) {
-  const [goals, wallets] = await Promise.all([
+  const [goals, wallets, prefs] = await Promise.all([
     getGoals(userId),
     getWallets(userId),
+    getPreferences(userId),
   ])
 
-  return <GoalList initialGoals={serializeData(goals)} wallets={serializeData(wallets)} />
+  const baseCurrency = prefs?.defaultCurrency || "USD"
+  const exchangeRates = await getExchangeRates(baseCurrency)
+
+  return (
+    <GoalList
+      initialGoals={serializeData(goals)}
+      wallets={serializeData(wallets)}
+      baseCurrency={baseCurrency}
+      exchangeRates={exchangeRates}
+    />
+  )
 }
 
 export default async function GoalsPage() {

@@ -67,6 +67,25 @@ import { authClient } from "@/lib/auth-client"
 
 interface WalletsViewProps {
   wallets: Wallet[]
+  baseCurrency?: string
+  exchangeRates?: Record<string, number>
+}
+
+function convertToCurrency(
+  amount: number,
+  fromCurrency: string,
+  targetCurrency: string,
+  rates?: Record<string, number>
+): number {
+  if (!fromCurrency || fromCurrency.toUpperCase() === targetCurrency.toUpperCase()) {
+    return amount
+  }
+  if (!rates) return amount
+  const fromRate = rates[fromCurrency.toUpperCase()]
+  if (fromRate && fromRate > 0) {
+    return Math.round(amount / fromRate)
+  }
+  return amount
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -106,7 +125,7 @@ function MetricCard({ icon: Icon, color, label, value, valueClassName, className
   )
 }
 
-export function WalletsView({ wallets }: WalletsViewProps) {
+export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsViewProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [addOpen, setAddOpen] = useState(false)
@@ -189,8 +208,13 @@ export function WalletsView({ wallets }: WalletsViewProps) {
     archived: `Archived (${tabCounts.archived})`,
   }
 
+  const resolvedBaseCurrency = baseCurrency || activeWallets[0]?.currency || "USD"
+
   const metrics = {
-    totalBalance: activeWallets.reduce((sum, w) => sum + w.balance, 0),
+    totalBalance: activeWallets.reduce(
+      (sum, w) => sum + convertToCurrency(w.balance, w.currency, resolvedBaseCurrency, exchangeRates),
+      0
+    ),
     activeCount: activeWallets.length,
     archivedCount: archivedWallets.length,
   }
@@ -337,7 +361,7 @@ export function WalletsView({ wallets }: WalletsViewProps) {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Coins} color="#10b981" label="Total Active Balance" value={formatCurrency(metrics.totalBalance, activeWallets[0]?.currency || "USD")} />
+        <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Coins} color="#10b981" label="Total Active Balance" value={formatCurrency(metrics.totalBalance, resolvedBaseCurrency)} />
         <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={WalletIcon} color="#6366f1" label="Active Wallets" value={metrics.activeCount} />
         <MetricCard style={{ minWidth: "clamp(200px, calc((848px - 100%) * 9999), calc(50% - 1rem))" }} icon={Archive} color="#f59e0b" label="Archived Wallets" value={metrics.archivedCount} />
       </div>

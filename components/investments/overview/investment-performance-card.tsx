@@ -26,7 +26,8 @@ export function InvestmentPerformanceCard({
   const holdingsWithValue = React.useMemo(() => {
     return holdings.map((h) => ({
       ...h,
-      currentValue: h.quantity * h.currentPrice,
+      currentValue: h.convertedCurrentValue ?? (h.quantity * h.currentPrice),
+      totalCostBasis: h.convertedTotalCostBasis ?? h.totalCostBasis,
     }))
   }, [holdings])
 

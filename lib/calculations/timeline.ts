@@ -152,7 +152,8 @@ export function toSafeISOString(dateVal: Date | string | undefined | null, fallb
  */
 export function synthesizeTimelineEvents(
   bundle: RawTimelineEntityBundle,
-  baseCurrency = "USD"
+  baseCurrency = "USD",
+  convert?: (amount: number, from: string) => number
 ): TimelineEvent[] {
   const events: TimelineEvent[] = []
   const walletMap = bundle.walletMap || new Map()
@@ -165,6 +166,7 @@ export function synthesizeTimelineEvents(
       const dateStr = toSafeISOString(tx.date)
       const amount = Math.abs(tx.amount || 0)
       const currency = tx.currency || baseCurrency
+      const convertedAmount = convert ? convert(amount, currency) : amount
       const category = tx.categoryId ? categoryMap.get(tx.categoryId) : undefined
       const wallet = tx.walletId ? walletMap.get(tx.walletId) : undefined
 
@@ -207,6 +209,7 @@ export function synthesizeTimelineEvents(
         date: dateStr,
         amount,
         currency,
+        convertedAmount,
         impact,
         iconName,
         badge: {
@@ -234,6 +237,7 @@ export function synthesizeTimelineEvents(
       const dateStr = toSafeISOString(g.createdAt)
 
       if (isCompleted) {
+        const goalCurr = g.currency || baseCurrency
         events.push({
           id: `goal-achieved-${goalId}`,
           type: "goal_completed",
@@ -242,7 +246,8 @@ export function synthesizeTimelineEvents(
           description: `Successfully reached 100% of target target (${pct}%)`,
           date: dateStr,
           amount: g.targetAmount,
-          currency: g.currency || baseCurrency,
+          currency: goalCurr,
+          convertedAmount: convert ? convert(g.targetAmount, goalCurr) : g.targetAmount,
           impact: "milestone",
           iconName: "Trophy",
           badge: { label: "Goal Reached! 🏆", variant: "default" },
@@ -251,6 +256,7 @@ export function synthesizeTimelineEvents(
           href: `/goals/${goalId}`,
         })
       } else if (pct >= 50) {
+        const goalCurr = g.currency || baseCurrency
         events.push({
           id: `goal-milestone-${goalId}`,
           type: "goal_milestone",
@@ -259,7 +265,8 @@ export function synthesizeTimelineEvents(
           description: `Progress milestone crossed for ${g.name}`,
           date: dateStr,
           amount: g.currentAmount,
-          currency: g.currency || baseCurrency,
+          currency: goalCurr,
+          convertedAmount: convert ? convert(g.currentAmount, goalCurr) : g.currentAmount,
           impact: "milestone",
           iconName: "Target",
           badge: { label: `${pct}% Milestone`, variant: "outline" },
@@ -277,6 +284,7 @@ export function synthesizeTimelineEvents(
       const loanId = typeof loan._id === "string" ? loan._id : loan._id.toString()
       const dateStr = toSafeISOString(loan.date)
       const isFullySettled = loan.status === "fully_repaid" || loan.remainingAmount <= 0
+      const loanCurr = loan.currency || baseCurrency
 
       if (isFullySettled) {
         events.push({
@@ -287,7 +295,8 @@ export function synthesizeTimelineEvents(
           description: `The ${loan.type === "lent" ? "lent money" : "debt"} with ${loan.personName} has been completely cleared.`,
           date: dateStr,
           amount: loan.amount,
-          currency: loan.currency || baseCurrency,
+          currency: loanCurr,
+          convertedAmount: convert ? convert(loan.amount, loanCurr) : loan.amount,
           impact: "milestone",
           iconName: "CheckCheck",
           badge: { label: "Fully Settled 🏆", variant: "default" },
@@ -304,7 +313,8 @@ export function synthesizeTimelineEvents(
           description: `Initial principal • Status: ${loan.status.replace("_", " ").toUpperCase()}`,
           date: dateStr,
           amount: loan.amount,
-          currency: loan.currency || baseCurrency,
+          currency: loanCurr,
+          convertedAmount: convert ? convert(loan.amount, loanCurr) : loan.amount,
           impact: loan.type === "lent" ? "outflow" : "inflow",
           iconName: "HandCoins",
           badge: { label: loan.type === "lent" ? "LENT" : "BORROWED", variant: "secondary" },
@@ -320,6 +330,7 @@ export function synthesizeTimelineEvents(
       const repId = typeof rep._id === "string" ? rep._id : rep._id.toString()
       const dateStr = toSafeISOString(rep.date)
       const isLent = rep.loanType === "lent"
+      const repCurr = rep.currency || baseCurrency
 
       events.push({
         id: `repayment-${repId}`,
@@ -329,7 +340,8 @@ export function synthesizeTimelineEvents(
         description: rep.notes ? `Repayment • ${rep.notes}` : "Loan Repayment",
         date: dateStr,
         amount: rep.amount,
-        currency: rep.currency || baseCurrency,
+        currency: repCurr,
+        convertedAmount: convert ? convert(rep.amount, repCurr) : rep.amount,
         impact: isLent ? "inflow" : "outflow",
         iconName: "CheckCircle2",
         badge: { label: "Repayment", variant: "outline" },
@@ -346,6 +358,7 @@ export function synthesizeTimelineEvents(
       const isPaid = bill.status === "paid"
       const dateStr = toSafeISOString(isPaid ? bill.paidDate || bill.dueDate : bill.dueDate)
       const amount = bill.actualAmount ?? bill.expectedAmount ?? bill.amount ?? 0
+      const billCurr = bill.currency || baseCurrency
 
       events.push({
         id: `bill-${billId}`,
@@ -355,7 +368,8 @@ export function synthesizeTimelineEvents(
         description: `Bill ${isPaid ? "Paid" : "Due"} • ${bill.status.toUpperCase()}`,
         date: dateStr,
         amount,
-        currency: bill.currency || baseCurrency,
+        currency: billCurr,
+        convertedAmount: convert ? convert(amount, billCurr) : amount,
         impact: isPaid ? "outflow" : "neutral",
         iconName: "Receipt",
         badge: { label: isPaid ? "Paid Bill" : "Pending Bill", variant: isPaid ? "outline" : "secondary" },
@@ -370,6 +384,7 @@ export function synthesizeTimelineEvents(
       if (rec.kind === "subscription" && rec.isActive) {
         const recId = typeof rec._id === "string" ? rec._id : rec._id.toString()
         const dateStr = toSafeISOString(rec.lastProcessedDate || rec.nextRenewalDate)
+        const recCurr = rec.currency || baseCurrency
 
         events.push({
           id: `sub-${recId}`,
@@ -379,7 +394,8 @@ export function synthesizeTimelineEvents(
           description: `Cycle: ${rec.frequency.toUpperCase()}`,
           date: dateStr,
           amount: rec.amount,
-          currency: rec.currency || baseCurrency,
+          currency: recCurr,
+          convertedAmount: convert ? convert(rec.amount, recCurr) : rec.amount,
           impact: "outflow",
           iconName: "Repeat",
           badge: { label: "Subscription", variant: "secondary" },
@@ -397,6 +413,7 @@ export function synthesizeTimelineEvents(
       const dateStr = toSafeISOString(it.date)
       const isDividend = /dividend/i.test(it.type)
       const itAmount = it.totalAmount ?? (it.price && it.quantity ? Math.round(it.price * it.quantity) : 0)
+      const itCurr = it.currency || baseCurrency
 
       events.push({
         id: `inv-${itId}`,
@@ -408,7 +425,8 @@ export function synthesizeTimelineEvents(
         description: it.notes || `Holding: ${it.symbol} • ${it.type.toUpperCase()}`,
         date: dateStr,
         amount: itAmount,
-        currency: it.currency || baseCurrency,
+        currency: itCurr,
+        convertedAmount: convert ? convert(itAmount, itCurr) : itAmount,
         impact: it.type === "buy" ? "outflow" : "inflow",
         iconName: isDividend ? "Sparkles" : "TrendingUp",
         badge: {
@@ -428,6 +446,7 @@ export function synthesizeTimelineEvents(
       const setId = typeof set._id === "string" ? set._id : set._id.toString()
       const dateStr = toSafeISOString(set.settledAt)
       const isPayer = set.isPayer !== false
+      const setCurr = set.currency || baseCurrency
 
       events.push({
         id: `shared-${setId}`,
@@ -437,7 +456,8 @@ export function synthesizeTimelineEvents(
         description: `Shared Expenses Settlement${set.method ? ` via ${set.method}` : ""}`,
         date: dateStr,
         amount: set.amount,
-        currency: set.currency || baseCurrency,
+        currency: setCurr,
+        convertedAmount: convert ? convert(set.amount, setCurr) : set.amount,
         impact: isPayer ? "outflow" : "inflow",
         iconName: "Users2",
         badge: { label: "Shared Settle Up", variant: "outline" },
@@ -452,6 +472,7 @@ export function synthesizeTimelineEvents(
     for (const ast of bundle.assets) {
       const astId = typeof ast._id === "string" ? ast._id : ast._id.toString()
       const dateStr = toSafeISOString(ast.createdAt)
+      const astCurr = ast.currency || baseCurrency
 
       events.push({
         id: `asset-${astId}`,
@@ -461,7 +482,8 @@ export function synthesizeTimelineEvents(
         description: `Category: ${ast.category.replace("_", " ").toUpperCase()}`,
         date: dateStr,
         amount: ast.currentValue,
-        currency: ast.currency || baseCurrency,
+        currency: astCurr,
+        convertedAmount: convert ? convert(ast.currentValue, astCurr) : ast.currentValue,
         impact: "neutral",
         iconName: ast.kind === "asset" ? "Building2" : "CreditCard",
         badge: { label: ast.kind.toUpperCase(), variant: "secondary" },
@@ -526,10 +548,11 @@ export function groupEventsByDateBracket(
     const group = groupMap.get(groupKey)!
     group.events.push(ev)
 
+    const evVal = ev.convertedAmount ?? ev.amount ?? 0
     if (ev.impact === "inflow" && ev.amount) {
-      group.netAmount += ev.amount
+      group.netAmount += evVal
     } else if (ev.impact === "outflow" && ev.amount) {
-      group.netAmount -= ev.amount
+      group.netAmount -= evVal
     }
   }
 
@@ -556,10 +579,11 @@ export function calculateTimelineStats(
     if (ev.isMilestone) {
       milestonesCount++
     }
+    const evVal = ev.convertedAmount ?? ev.amount ?? 0
     if (ev.impact === "inflow" && ev.amount) {
-      totalInflow += ev.amount
+      totalInflow += evVal
     } else if (ev.impact === "outflow" && ev.amount) {
-      totalOutflow += ev.amount
+      totalOutflow += evVal
     }
   }
 

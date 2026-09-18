@@ -23,7 +23,7 @@ export function TopAccountsCard({
   accounts: AccountViewModel[]
   currency: string
 }) {
-  const totalValue = accounts.reduce((sum, a) => sum + Math.max(0, a.totalValue), 0)
+  const totalValue = accounts.reduce((sum, a) => sum + Math.max(0, a.convertedTotalValue ?? a.totalValue), 0)
 
   return (
     <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto md:h-full flex flex-col bg-card">
@@ -40,7 +40,8 @@ export function TopAccountsCard({
           <ScrollArea className="max-h-[220px] px-2">
             <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0 py-1.5">
               {accounts.map((account) => {
-                const percentage = totalValue > 0 ? ((account.totalValue / totalValue) * 100).toFixed(1) : "0.0"
+                const accountVal = account.convertedTotalValue ?? account.totalValue
+                const percentage = totalValue > 0 ? ((accountVal / totalValue) * 100).toFixed(1) : "0.0"
                 const color = account.color || "#8b5cf6"
                 const isPositive = account.unrealizedGain >= 0
 
@@ -68,7 +69,7 @@ export function TopAccountsCard({
                               {formatCurrency(account.totalValue, account.currency || currency)}
                             </span>
                             <span className={`text-[10px] font-bold leading-tight ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                              {isPositive ? '+' : ''}{formatCurrency(account.unrealizedGain, currency)}
+                              {isPositive ? '+' : ''}{formatCurrency(account.unrealizedGain, account.currency || currency)}
                             </span>
                           </ItemActions>
                         </Link>

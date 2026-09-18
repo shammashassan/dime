@@ -24,14 +24,19 @@ export function TopHoldingsCard({
   currency: string
 }) {
   const activeHoldings = holdings.filter((h) => h.status === "active")
-  const holdingsWithValue = activeHoldings.map((h) => ({
-    ...h,
-    currentValue: h.quantity * h.currentPrice,
-  }))
+  const holdingsWithValue = activeHoldings.map((h) => {
+    const rawVal = h.quantity * h.currentPrice
+    const convertedVal = h.convertedCurrentValue ?? rawVal
+    return {
+      ...h,
+      currentValue: rawVal,
+      convertedCurrentValue: convertedVal,
+    }
+  })
 
-  const totalValue = holdingsWithValue.reduce((sum, h) => sum + Math.max(0, h.currentValue), 0)
+  const totalValue = holdingsWithValue.reduce((sum, h) => sum + Math.max(0, h.convertedCurrentValue), 0)
 
-  const topHoldings = [...holdingsWithValue].sort((a, b) => b.currentValue - a.currentValue).slice(0, 5)
+  const topHoldings = [...holdingsWithValue].sort((a, b) => b.convertedCurrentValue - a.convertedCurrentValue).slice(0, 5)
 
   return (
     <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden h-auto md:h-full flex flex-col bg-card">
@@ -48,7 +53,7 @@ export function TopHoldingsCard({
           <ScrollArea className="max-h-[220px] px-2">
             <ItemGroup className="flex flex-col divide-y divide-border/20 gap-0 py-1.5">
               {topHoldings.map((holding) => {
-                const percentage = totalValue > 0 ? ((holding.currentValue / totalValue) * 100).toFixed(1) : "0.0"
+                const percentage = totalValue > 0 ? ((holding.convertedCurrentValue / totalValue) * 100).toFixed(1) : "0.0"
                 const href = `/investments/${holding.walletId}/${holding.symbol}`
 
                 return (
@@ -69,7 +74,7 @@ export function TopHoldingsCard({
                           </ItemContent>
                           <ItemActions className="text-right shrink-0 pl-2 flex flex-col items-end gap-0.5">
                             <span className="font-bold text-xs tabular-nums block leading-tight">
-                              {formatCurrency(holding.currentValue, currency)}
+                              {formatCurrency(holding.convertedCurrentValue, currency)}
                             </span>
                             <span className="text-[10px] text-muted-foreground leading-tight">
                               {percentage}% of portfolio
@@ -93,10 +98,10 @@ export function TopHoldingsCard({
                           Quantity: <span className="font-semibold text-foreground">{holding.quantity}</span>
                         </p>
                         <p>
-                          Current Value: <span className="font-semibold text-foreground">{formatCurrency(holding.currentValue, currency)}</span> ({percentage}%)
+                          Current Value: <span className="font-semibold text-foreground">{formatCurrency(holding.convertedCurrentValue, currency)}</span> ({percentage}%)
                         </p>
                         <p>
-                          Avg Cost: <span className="font-semibold text-foreground">{formatCurrency(holding.averageCostBasis, currency)}</span>
+                          Avg Cost: <span className="font-semibold text-foreground">{formatCurrency(holding.averageCostBasis, holding.currency || currency)}</span>
                         </p>
                       </div>
                     </HoverCardContent>

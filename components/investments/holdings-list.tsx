@@ -46,6 +46,7 @@ export function HoldingsList({ holdings, accountId, currency }: { holdings: Inve
             const unrealizedGain = totalValue - holding.totalCostBasis
             const returnPercentage = holding.totalCostBasis > 0 ? (unrealizedGain / holding.totalCostBasis) * 100 : 0
             const isPositive = unrealizedGain >= 0
+            const rowCurrency = holding.currency || currency
             const linkHref = accountId ? `/investments/${accountId}/${holding.symbol}` : `/investments/${holding.walletId}/${holding.symbol}`
 
             return (
@@ -70,19 +71,19 @@ export function HoldingsList({ holdings, accountId, currency }: { holdings: Inve
                   {holding.quantity.toLocaleString(undefined, { maximumFractionDigits: 4 })}
                 </TableCell>
                 <TableCell className="text-right tabular-nums font-semibold text-sm py-3">
-                  {formatCurrency(holding.currentPrice, currency)}
+                  {formatCurrency(holding.currentPrice, rowCurrency)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums font-medium text-sm text-muted-foreground py-3">
-                  {formatCurrency(holding.averageCostBasis, currency)}
+                  {formatCurrency(holding.averageCostBasis, rowCurrency)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums font-extrabold text-sm text-foreground py-3">
-                  {formatCurrency(totalValue, currency)}
+                  {formatCurrency(totalValue, rowCurrency)}
                 </TableCell>
                 <TableCell className="text-right tabular-nums py-3">
                   <div className={`flex flex-col items-end ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                     <div className="flex items-center gap-0.5 font-extrabold text-sm">
                       {isPositive ? <ArrowUpRight className="size-3.5" /> : <ArrowDownRight className="size-3.5" />}
-                      <span>{isPositive ? '+' : ''}{formatCurrency(unrealizedGain, currency)}</span>
+                      <span>{isPositive ? '+' : ''}{formatCurrency(unrealizedGain, rowCurrency)}</span>
                     </div>
                     <span className="text-[11px] font-semibold">
                       {isPositive ? '+' : ''}{returnPercentage.toFixed(2)}%

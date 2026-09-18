@@ -10,6 +10,7 @@ import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { db } from "@/lib/db/client"
 import { canManageBudgets, Role } from "@/lib/permissions"
 import { createNotification } from "@/lib/actions/notifications"
+import { convertCurrency } from "@/lib/currency"
 
 async function updateWalletBalance(scope: any, walletId: string, amountChange: number) {
   const walletsColl = await getCollection<Wallet>("wallets")
@@ -228,20 +229,25 @@ export async function contributeToGoal(id: string, amount: number, walletId: str
 
   const txResult = await transactionsColl.insertOne(tx as Transaction)
 
+  // Convert contribution to goal currency if different
+  const goalAmount = wallet.currency !== goal.currency
+    ? await convertCurrency(amount, wallet.currency, goal.currency)
+    : amount
+
   // 2. Decrement wallet balance
   await updateWalletBalance(scope, walletId, -amount)
 
-  // 3. Increment goal balance
+  // 3. Increment goal balance in goal currency
   await goalsColl.updateOne(
     { _id: goal._id, ...getScopeFilter(scope) },
     {
-      $inc: { currentAmount: amount, version: 1 },
+      $inc: { currentAmount: goalAmount, version: 1 },
       $set: { updatedAt: new Date(), updatedBy: scope.userId }
     }
   )
 
   // 4. Milestone & Goal Completion Celebration
-  const newAmount = (goal.currentAmount || 0) + amount
+  const newAmount = (goal.currentAmount || 0) + goalAmount
   const oldPct = Math.floor(((goal.currentAmount || 0) / goal.targetAmount) * 100)
   const newPct = Math.floor((newAmount / goal.targetAmount) * 100)
 

@@ -28,7 +28,7 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
     return null
   }
 
-  const grandTotalValue = accounts.reduce((sum, a) => sum + Math.max(0, a.totalValue), 0)
+  const grandTotalValue = accounts.reduce((sum, a) => sum + Math.max(0, a.convertedTotalValue ?? a.totalValue), 0)
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -36,7 +36,8 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
         const isPositive = account.unrealizedGain >= 0
         const returnPercentage = account.totalCostBasis > 0 ? (account.unrealizedGain / account.totalCostBasis) * 100 : 0
         const walletColor = account.color || "#8b5cf6"
-        const sharePct = grandTotalValue > 0 ? Math.min(100, Math.max(0, (account.totalValue / grandTotalValue) * 100)) : 0
+        const accountVal = account.convertedTotalValue ?? account.totalValue
+        const sharePct = grandTotalValue > 0 ? Math.min(100, Math.max(0, (accountVal / grandTotalValue) * 100)) : 0
 
         return (
           <Card
@@ -99,7 +100,7 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
                   </p>
                   <p className={cn("text-[clamp(0.75rem,4.2cqw,1.1rem)] font-black tabular-nums leading-none flex items-center justify-end gap-0.5 truncate", isPositive ? "text-emerald-500" : "text-rose-500")}>
                     {isPositive ? <ArrowUpRight className="size-3.5 shrink-0" /> : <ArrowDownRight className="size-3.5 shrink-0" />}
-                    <span className="truncate">{isPositive ? '+' : ''}{formatCurrency(account.unrealizedGain, currency)}</span>
+                    <span className="truncate">{isPositive ? '+' : ''}{formatCurrency(account.unrealizedGain, account.currency || currency)}</span>
                   </p>
                   <span className={cn("text-[10px] font-bold block mt-0.5 truncate", isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400")}>
                     ({isPositive ? '+' : ''}{returnPercentage.toFixed(1)}%)

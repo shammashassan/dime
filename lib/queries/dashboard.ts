@@ -9,13 +9,15 @@ export function calculateFocusCounts({
   loans,
   unreadNotifications,
   baseCurrency,
+  convert,
 }: {
   now: Date
-  bills: Array<{ dueDate: Date | string; status: string; amount?: number; expectedAmount?: number; actualAmount?: number }>
+  bills: Array<{ dueDate: Date | string; status: string; amount?: number; expectedAmount?: number; actualAmount?: number; currency?: string }>
   recurring: Array<{ nextRun?: Date | string | null; nextRenewalDate?: Date | string | null; nextDueDate?: Date | string | null; status?: string; isActive?: boolean }>
   loans: Array<{ dueDate?: Date | string | null; status?: string; remainingAmount?: number }>
   unreadNotifications: number
   baseCurrency: string
+  convert?: (amount: number, from: string) => number
 }): DashboardFocusCounts {
   const startOfToday = startOfDay(now)
   const sevenDaysFromNow = endOfDay(addDays(now, 7))
@@ -27,10 +29,12 @@ export function calculateFocusCounts({
   for (const b of bills) {
     if (b.status === "paid" || b.status === "cancelled" || b.status === "skipped") continue
     const due = new Date(b.dueDate)
-    const amount = b.amount ?? b.expectedAmount ?? b.actualAmount ?? 0
+    const rawAmount = b.amount ?? b.expectedAmount ?? b.actualAmount ?? 0
+    const billCurrency = b.currency || baseCurrency
+    const converted = convert ? convert(rawAmount, billCurrency) : rawAmount
     if (isBefore(due, startOfToday)) {
       overdueBillsCount++
-      overdueBillsAmount += amount
+      overdueBillsAmount += converted
     } else if (due <= sevenDaysFromNow) {
       upcomingRenewalsCount++
     }
@@ -96,6 +100,10 @@ export const getDashboardFocusCounts = cache(async (userId: string): Promise<Das
     }),
   ])
 
+  const billsCurrencies = Array.from(new Set(bills.map((b) => b.currency).filter(Boolean)))
+  const { getCurrencyConverter } = await import("@/lib/currency")
+  const convert = await getCurrencyConverter(baseCurrency, billsCurrencies)
+
   return calculateFocusCounts({
     now,
     bills,
@@ -103,5 +111,6 @@ export const getDashboardFocusCounts = cache(async (userId: string): Promise<Das
     loans,
     unreadNotifications: unreadCount,
     baseCurrency,
+    convert,
   })
 })
