@@ -16,7 +16,9 @@ export function KeyboardShortcutsProvider({
     <>
       {children}
       <KeyboardShortcutsDialog />
-      <GlobalTransactionDialog />
+      <React.Suspense fallback={null}>
+        <GlobalTransactionDialog />
+      </React.Suspense>
     </>
   )
 }

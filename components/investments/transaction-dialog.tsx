@@ -23,6 +23,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
 import { toast } from "sonner"
 import { Loader2, Plus, TrendingUp, CalendarIcon } from "lucide-react"
+import { TickerSearchCombobox } from "@/components/investments/ticker-search-combobox"
 
 interface TransactionDialogProps {
   accounts?: Wallet[]
@@ -188,7 +189,28 @@ export function TransactionDialog({
             <div className="grid grid-cols-2 gap-3">
               <Field data-invalid={!!errors.symbol}>
                 <FieldLabel htmlFor="inv-symbol" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Ticker / Symbol</FieldLabel>
-                <Input id="inv-symbol" {...register("symbol")} placeholder="e.g. AAPL" className="uppercase rounded-xl" />
+                <Controller
+                  name="symbol"
+                  control={control}
+                  render={({ field }) => (
+                    <TickerSearchCombobox
+                      id="inv-symbol"
+                      value={field.value || ""}
+                      onChange={(v) => field.onChange(v)}
+                      onSelectResult={(result) => {
+                        field.onChange(result.symbol)
+                        const currentName = watch("name")
+                        if (!currentName || currentName.trim() === "" || currentName === field.value) {
+                          setValue("name", result.name)
+                        }
+                        if (result.assetType) {
+                          setValue("assetType", result.assetType as any)
+                        }
+                      }}
+                      placeholder="e.g. AAPL, BTC"
+                    />
+                  )}
+                />
                 {errors.symbol && <FieldError>{errors.symbol.message}</FieldError>}
               </Field>
 

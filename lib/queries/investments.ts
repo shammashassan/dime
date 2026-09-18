@@ -1,9 +1,23 @@
 import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
-import { InvestmentTransaction, InvestmentPrice, InvestmentHolding, Wallet } from "@/types"
+import {
+  InvestmentTransaction,
+  InvestmentPrice,
+  InvestmentHolding,
+  Wallet,
+  Watchlist,
+  WatchlistItem,
+  PriceHistoryPoint,
+  PortfolioRisk,
+  SectorAllocation,
+} from "@/types"
 import { ObjectId } from "mongodb"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { deriveHoldingState } from "@/lib/calculations/investments"
+import {
+  deriveHoldingState,
+  calculatePortfolioRisk,
+  calculateSectorAllocation,
+} from "@/lib/calculations/investments"
 
 export const getTransactionsByAccount = cache(async (accountId: string) => {
   const scope = await getFinancialScope()
@@ -121,4 +135,87 @@ export const getRecentInvestmentTransactions = cache(async (limit: number = 10):
     currency: t.currency || walletCurrencyMap.get(t.walletId) || "USD",
   }))
 })
+
+export const getPriceHistory = cache(
+  async (holdingId: string, days: number = 365): Promise<PriceHistoryPoint[]> => {
+    const pricesColl = await getCollection<InvestmentPrice>("investment_prices")
+
+    const cutoffDate = new Date(Date.now() - days * 24 * 3600 * 1000)
+
+    const prices = await pricesColl
+      .find({
+        holdingId,
+        date: { $gte: cutoffDate },
+      })
+      .sort({ date: 1 })
+      .toArray()
+
+    return prices.map((p) => ({
+      date: p.date instanceof Date ? p.date.toISOString().slice(0, 10) : String(p.date).slice(0, 10),
+      price: p.price,
+      source: p.source || "manual",
+    }))
+  }
+)
+
+export const getDividendTransactions = cache(
+  async (userId: string, accountId?: string): Promise<InvestmentTransaction[]> => {
+    const scope = await getFinancialScope()
+    const transactionsColl = await getCollection<InvestmentTransaction>("investment_transactions")
+
+    const query: any = {
+      ...getScopeFilter(scope),
+      type: { $in: ["cash_dividend", "reinvested_dividend"] },
+    }
+
+    if (accountId) {
+      query.walletId = accountId
+    }
+
+    return transactionsColl.find(query).sort({ date: -1 }).toArray()
+  }
+)
+
+export const getWatchlists = cache(
+  async (userId: string): Promise<Array<Watchlist & { items: WatchlistItem[] }>> => {
+    const scope = await getFinancialScope()
+    const watchlistsColl = await getCollection<Watchlist>("watchlists")
+    const itemsColl = await getCollection<WatchlistItem>("watchlist_items")
+
+    const watchlists = await watchlistsColl
+      .find({ ...getScopeFilter(scope) })
+      .sort({ createdAt: -1 })
+      .toArray()
+
+    if (watchlists.length === 0) return []
+
+    const watchlistIds = watchlists.map((w) => w._id.toString())
+    const allItems = await itemsColl
+      .find({ watchlistId: { $in: watchlistIds } })
+      .sort({ createdAt: 1 })
+      .toArray()
+
+    const itemsByWatchlist = new Map<string, WatchlistItem[]>()
+    for (const item of allItems) {
+      const list = itemsByWatchlist.get(item.watchlistId) || []
+      list.push(item)
+      itemsByWatchlist.set(item.watchlistId, list)
+    }
+
+    return watchlists.map((w) => ({
+      ...w,
+      items: itemsByWatchlist.get(w._id.toString()) || [],
+    }))
+  }
+)
+
+export function getPortfolioRiskAndAllocation(holdings: InvestmentHolding[]): {
+  risk: PortfolioRisk
+  allocation: SectorAllocation[]
+} {
+  return {
+    risk: calculatePortfolioRisk(holdings),
+    allocation: calculateSectorAllocation(holdings),
+  }
+}
 

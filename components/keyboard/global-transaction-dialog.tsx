@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,6 @@ export function GlobalTransactionDialog() {
   const [wallets, setWallets] = React.useState<Wallet[]>([])
   const [categories, setCategories] = React.useState<Category[]>([])
   const [defaultWalletId, setDefaultWalletId] = React.useState<string | undefined>(undefined)
-  const pathname = usePathname()
   const router = useRouter()
 
   const fetchMeta = React.useCallback(async () => {
@@ -41,7 +40,7 @@ export function GlobalTransactionDialog() {
   React.useEffect(() => {
     const handleOpen = () => {
       // If user is already on /transactions, the in-page AddTransactionDialog handles it
-      if (pathname === "/transactions") return
+      if (typeof window !== "undefined" && window.location.pathname === "/transactions") return
 
       setOpen(true)
       fetchMeta()
@@ -49,7 +48,7 @@ export function GlobalTransactionDialog() {
 
     window.addEventListener("dime:quick-add-transaction", handleOpen)
     return () => window.removeEventListener("dime:quick-add-transaction", handleOpen)
-  }, [pathname, fetchMeta])
+  }, [fetchMeta])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

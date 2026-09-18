@@ -22,6 +22,7 @@ export const assetSchema = z.object({
   valuationMethod: z.enum(["manual", "market", "calculated"]).default("manual"),
   ownershipPercentage: z.number().min(0).max(100).default(100),
   acquiredAt: z.coerce.date().optional().nullable(),
+  symbol: z.string().trim().toUpperCase().optional().nullable(),
   notes: z.string().optional(),
   status: z.enum(["active", "archived"]).default("active"),
   isArchived: z.boolean().default(false)

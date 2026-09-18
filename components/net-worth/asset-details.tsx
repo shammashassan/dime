@@ -26,6 +26,7 @@ import { AssetDialog } from "./asset-dialog"
 import { ValuationDialog } from "./valuation-dialog"
 import { AssetValuationInsightsCard } from "./asset-valuation-insights-card"
 import { AssetHealthDiagnosticsCard } from "./asset-health-card"
+import { AssetMarketSyncCard } from "./asset-market-sync-card"
 import {
   calculateAssetValuationMetrics,
   type AssetValuationMetrics,
@@ -129,6 +130,7 @@ export function AssetDetails({
   const sortedValuations = [...valuations].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   )
+  const latestMarketValuation = sortedValuations.filter((v) => v.source === "market").pop()
 
   const [timeRange, setTimeRange] = useState("all")
 
@@ -497,15 +499,10 @@ export function AssetDetails({
             </div>
           </Card>
 
-          <Card className="rounded-2xl border border-border/40 shadow-sm gap-0 py-0 overflow-hidden opacity-75 flex-1 flex flex-col">
-            <div className="px-4 py-3.5 border-b border-border/30 flex items-center gap-2 shrink-0">
-              <Globe className="size-3.5 text-muted-foreground" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Market Sync</span>
-            </div>
-            <div className="p-4 text-[11px] text-muted-foreground leading-relaxed flex-1">
-              Real-time synchronization with gold/silver indices, crypto accounts, and stock indices. (Coming soon)
-            </div>
-          </Card>
+          <AssetMarketSyncCard
+            asset={asset}
+            latestMarketValuation={latestMarketValuation}
+          />
         </div>
 
         {/* ── Right column: Chart + Timeline ───────────── */}

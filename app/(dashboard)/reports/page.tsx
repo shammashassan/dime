@@ -32,6 +32,10 @@ import { SpendingHeatmapView } from "@/components/reports/spending-heatmap-view"
 import { MonthlyReviewView } from "@/components/reports/monthly-review-view"
 import { MonthlyReviewFilters } from "@/components/reports/monthly-review-filters"
 import { getMonthlyReviewData } from "@/lib/queries/monthly-review"
+import { QuarterlyReviewView } from "@/components/reports/quarterly-review-view"
+import { AnnualReviewView } from "@/components/reports/annual-review-view"
+import { PeriodReviewFilters } from "@/components/reports/period-review-filters"
+import { getQuarterlyReviewData, getAnnualReviewData } from "@/lib/queries/annual-review"
 import { MetricCard } from "@/components/ui/metric-card"
 import { unstable_rethrow } from "next/navigation"
 import { BarChart3, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownRight } from "lucide-react"
@@ -44,6 +48,8 @@ async function ReportsContent({
   searchParams: Promise<{
     tab?: string
     month?: string
+    year?: string
+    quarter?: string
     monthsCount?: string
     categoryFrom?: string
     categoryTo?: string
@@ -57,7 +63,16 @@ async function ReportsContent({
   const userId = session.user.id
 
   const params = await searchParams
-  const activeTab = params.tab === "review" ? "review" : params.tab === "heatmap" ? "heatmap" : "overview"
+  const activeTab =
+    params.tab === "review"
+      ? "review"
+      : params.tab === "quarterly"
+      ? "quarterly"
+      : params.tab === "annual"
+      ? "annual"
+      : params.tab === "heatmap"
+      ? "heatmap"
+      : "overview"
 
   if (activeTab === "review") {
     const reviewData = await getMonthlyReviewData(userId, params.month)
@@ -90,6 +105,97 @@ async function ReportsContent({
 
         <MonthlyReviewView
           data={serializeData(reviewData)}
+          navTabs={
+            <Suspense fallback={null}>
+              <ReportsNavTabs />
+            </Suspense>
+          }
+        />
+      </div>
+    )
+  }
+
+  if (activeTab === "quarterly") {
+    const currentYear = new Date().getFullYear()
+    const currentQuarter = Math.ceil((new Date().getMonth() + 1) / 3) as 1 | 2 | 3 | 4
+    const year = params.year ? parseInt(params.year, 10) : currentYear
+    const quarter = params.quarter ? (parseInt(params.quarter, 10) as 1 | 2 | 3 | 4) : currentQuarter
+
+    const quarterlyData = await getQuarterlyReviewData(userId, year, quarter)
+    return (
+      <div className="flex flex-col gap-7 w-full">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
+            <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+              <BarChart3 className="size-6" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Quarterly financial retrospective, multi-month trends, and category rollups.
+              </p>
+            </div>
+          </div>
+
+          <div className="self-start lg:self-center shrink-0">
+            <Suspense fallback={null}>
+              <PeriodReviewFilters
+                period="quarterly"
+                currentYear={year}
+                currentQuarter={quarter}
+                availableQuarters={quarterlyData.availableQuarters}
+              />
+            </Suspense>
+          </div>
+        </div>
+
+        <QuarterlyReviewView
+          data={serializeData(quarterlyData)}
+          navTabs={
+            <Suspense fallback={null}>
+              <ReportsNavTabs />
+            </Suspense>
+          }
+        />
+      </div>
+    )
+  }
+
+  if (activeTab === "annual") {
+    const currentYear = new Date().getFullYear()
+    const year = params.year ? parseInt(params.year, 10) : currentYear
+
+    const annualData = await getAnnualReviewData(userId, year)
+    return (
+      <div className="flex flex-col gap-7 w-full">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
+            <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+              <BarChart3 className="size-6" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Full-year financial retrospective, annual wealth trajectory, and quarterly rollups.
+              </p>
+            </div>
+          </div>
+
+          <div className="self-start lg:self-center shrink-0">
+            <Suspense fallback={null}>
+              <PeriodReviewFilters
+                period="annual"
+                currentYear={year}
+                availableYears={annualData.availableYears}
+              />
+            </Suspense>
+          </div>
+        </div>
+
+        <AnnualReviewView
+          data={serializeData(annualData)}
           navTabs={
             <Suspense fallback={null}>
               <ReportsNavTabs />
@@ -292,6 +398,9 @@ export default async function ReportsPage({
 }: {
   searchParams: Promise<{
     tab?: string
+    month?: string
+    year?: string
+    quarter?: string
     monthsCount?: string
     categoryFrom?: string
     categoryTo?: string

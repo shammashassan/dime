@@ -44,6 +44,7 @@ export async function createAsset(input: AssetInput) {
       valuationMethod: validated.valuationMethod,
       ownershipPercentage: validated.ownershipPercentage,
       acquiredAt: validated.acquiredAt || undefined,
+      symbol: validated.symbol || undefined,
       notes: validated.notes,
       status: validated.status,
       isArchived: validated.isArchived,
@@ -122,6 +123,7 @@ export async function updateAsset(id: string, input: AssetInput) {
           valuationMethod: validated.valuationMethod,
           ownershipPercentage: validated.ownershipPercentage,
           acquiredAt: validated.acquiredAt || undefined,
+          symbol: validated.symbol || undefined,
           notes: validated.notes,
           status: validated.status,
           isArchived: validated.isArchived,
@@ -351,5 +353,81 @@ export async function deleteAssetValuation(valuationId: string) {
     return { success: true }
   } catch (err: any) {
     return { success: false, error: err.message || "Failed to delete valuation record" }
+  }
+}
+
+export async function syncAssetMarketPriceAction(params: {
+  assetId: string
+  symbol: string
+  quantity?: number
+}) {
+  try {
+    await requireApprovedUser()
+    const scope = await checkWritePermission()
+
+    const assetsColl = await getCollection<Asset>("assets")
+    const assetOid = new ObjectId(params.assetId)
+    const asset = await assetsColl.findOne({ _id: assetOid, ...getScopeFilter(scope) })
+    if (!asset) {
+      return { success: false, error: "Asset not found or unauthorized" }
+    }
+
+    let assetType = "stock"
+    if (asset.category === "crypto") assetType = "crypto"
+    else if (asset.category === "gold") assetType = "commodity"
+
+    const { getMarketPrice } = await import("@/lib/market-prices")
+    const priceInCents = await getMarketPrice(params.symbol, assetType, undefined, asset.currency)
+    if (priceInCents === null || priceInCents <= 0) {
+      return { success: false, error: `Could not fetch live market quote for "${params.symbol}"` }
+    }
+
+    let newValueCents = priceInCents
+    if (params.quantity && params.quantity > 0) {
+      newValueCents = Math.round(params.quantity * priceInCents)
+    }
+    const ownershipFactor = (asset.ownershipPercentage || 100) / 100
+    newValueCents = Math.round(newValueCents * ownershipFactor)
+
+    const valuationsColl = await getCollection<AssetValuation>("asset_valuations")
+    const valuation: Omit<AssetValuation, "_id"> = {
+      assetId: params.assetId,
+      userId: scope.userId,
+      organizationId: scope.organizationId,
+      date: new Date(),
+      value: newValueCents,
+      source: "market",
+      notes: `Market sync: ${params.symbol} @ ${(priceInCents / 100).toFixed(2)} ${asset.currency}${params.quantity ? ` (${params.quantity} units)` : ""}`,
+      createdAt: new Date(),
+    }
+    await valuationsColl.insertOne(valuation as AssetValuation)
+
+    await assetsColl.updateOne(
+      { _id: assetOid },
+      {
+        $set: {
+          currentValue: newValueCents,
+          valuationMethod: "market",
+          symbol: params.symbol,
+          updatedAt: new Date(),
+        },
+      }
+    )
+
+    updateTag("assets")
+    updateTag("asset_valuations")
+    updateTag("net-worth")
+    revalidatePath("/net-worth")
+    revalidatePath(`/net-worth/assets/${params.assetId}`)
+    revalidatePath("/", "layout")
+
+    return {
+      success: true,
+      priceInCents,
+      newValueCents,
+      symbol: params.symbol,
+    }
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to sync market valuation" }
   }
 }

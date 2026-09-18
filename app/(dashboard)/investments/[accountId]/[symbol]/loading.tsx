@@ -30,8 +30,21 @@ export default function HoldingDetailLoading() {
         ))}
       </div>
 
-      {/* Transaction History Table */}
-      <Skeleton className="h-[300px] w-full rounded-2xl" />
+      {/* Main Grid: 1/3 Left + 2/3 Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
+        {/* Left Column Skeletons */}
+        <div className="lg:col-span-1 flex flex-col gap-4">
+          <Skeleton className="h-44 w-full rounded-2xl" />
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <Skeleton className="h-44 w-full rounded-2xl" />
+        </div>
+
+        {/* Right Column Skeletons */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
+          <Skeleton className="h-56 w-full rounded-2xl" />
+          <Skeleton className="min-h-56 flex-1 w-full rounded-2xl" />
+        </div>
+      </div>
     </div>
   )
 }

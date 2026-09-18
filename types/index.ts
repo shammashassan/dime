@@ -496,6 +496,7 @@ export interface Asset {
   valuationMethod: AssetValuationMethod;
   ownershipPercentage: number;
   acquiredAt?: Date;
+  symbol?: string;
   notes?: string;
   status: AssetStatus;
   isArchived: boolean;
@@ -1424,4 +1425,129 @@ export interface LatestCompletedMonthSummary {
   hasTransactions: boolean
 }
 
+// ─── Annual & Quarterly Review Types ─────────────────────────────────────────
 
+export interface PeriodReviewMetrics {
+  totalIncomeCents: number
+  totalExpenseCents: number
+  netSavingsCents: number
+  savingsRatePercentage: number
+  netWorthOpeningCents: number
+  netWorthClosingCents: number
+  netWorthDeltaCents: number
+}
+
+export interface PeriodReviewCategorySpend {
+  categoryId: string
+  categoryName: string
+  categoryIcon?: string
+  categoryColor?: string
+  amountCents: number
+  percentage: number
+  previousPeriodAmountCents: number
+  deltaPercentage: number
+}
+
+export interface PeriodReviewMonthlyBreakdown {
+  monthKey: string   // "YYYY-MM"
+  monthLabel: string // "Jan", "Feb", etc.
+  incomeCents: number
+  expenseCents: number
+  netSavingsCents: number
+}
+
+export interface QuarterlyReviewData {
+  period: "quarterly"
+  year: number
+  quarter: 1 | 2 | 3 | 4
+  quarterLabel: string          // "Q3 2026"
+  targetCurrency: string
+  metrics: PeriodReviewMetrics
+  previousQuarterMetrics: PeriodReviewMetrics | null
+  monthlyBreakdown: PeriodReviewMonthlyBreakdown[]  // 3 months
+  topCategories: PeriodReviewCategorySpend[]
+  topExpenses?: MonthlyReviewTransactionItem[]
+  topIncomes?: MonthlyReviewTransactionItem[]
+  executiveBrief: MonthlyReviewSummaryBrief
+  availableQuarters: { year: number; quarter: 1 | 2 | 3 | 4; label: string }[]
+}
+
+export interface AnnualReviewData {
+  period: "annual"
+  year: number
+  yearLabel: string             // "2026"
+  targetCurrency: string
+  metrics: PeriodReviewMetrics
+  previousYearMetrics: PeriodReviewMetrics | null
+  monthlyBreakdown: PeriodReviewMonthlyBreakdown[]  // 12 months
+  topCategories: PeriodReviewCategorySpend[]
+  topExpenses?: MonthlyReviewTransactionItem[]
+  topIncomes?: MonthlyReviewTransactionItem[]
+  quarterlyBreakdown: {
+    quarter: 1 | 2 | 3 | 4
+    label: string               // "Q1", "Q2", etc.
+    incomeCents: number
+    expenseCents: number
+    netSavingsCents: number
+  }[]
+  executiveBrief: MonthlyReviewSummaryBrief
+  availableYears: number[]
+}
+
+// ─── Investment Portfolio Enhancement Types ───────────────────────────────────
+
+/** Money-Weighted (XIRR) and simple return metrics for a holding or portfolio */
+export interface PortfolioReturn {
+  xirr: number | null           // annualized money-weighted return (null if < 2 cash flows or non-convergent)
+  simpleReturn: number          // (currentValue - costBasis) / costBasis
+  absoluteGainCents: number
+  holdingPeriodDays: number
+}
+
+/** Dividend income summary for a holding or the whole portfolio */
+export interface DividendSummary {
+  holdingId?: string
+  symbol?: string
+  totalDividendCents: number
+  dividendCount: number
+  annualYield: number | null    // dividendCents / costBasis (null if zero cost basis)
+  lastDividendDate: Date | null
+  byYear: { year: number; totalCents: number }[]
+}
+
+/** Sector/asset-class allocation breakdown */
+export interface SectorAllocation {
+  sector: string                // matches InvestmentHolding.assetType
+  label: string                 // Human-readable label e.g. "Stocks", "Crypto"
+  valuePercent: number
+  valueCents: number
+}
+
+/** Portfolio concentration risk metrics */
+export interface PortfolioRisk {
+  hhiIndex: number              // 0–1; lower = more diversified
+  diversificationScore: number  // (1 - hhiIndex) * 100, 0–100
+  concentrationWarnings: {
+    symbol: string
+    holdingPercent: number
+    message: string
+  }[]
+  assetClassCount: number
+  singleAssetRisk: "low" | "moderate" | "high"
+}
+
+/** Single price history data point for chart rendering */
+export interface PriceHistoryPoint {
+  date: string    // ISO date string "YYYY-MM-DD"
+  price: number   // price per unit (raw market price, NOT in cents)
+  source: "manual" | "market"
+}
+
+/** Market price fetch result from external API */
+export interface MarketPriceResult {
+  symbol: string
+  price: number
+  currency: string
+  source: "yahoo" | "coingecko" | "metals" | "cached" | "fallback"
+  fetchedAt: Date
+}

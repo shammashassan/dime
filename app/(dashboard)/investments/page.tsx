@@ -6,7 +6,12 @@ export const metadata: Metadata = {
   description: "Monitor investment portfolios, asset allocations, capital gains, and performance.",
 }
 import { requireApprovedUser } from "@/lib/auth-guard"
-import { getPortfolioHoldings, getRecentInvestmentTransactions } from "@/lib/queries/investments"
+import {
+  getPortfolioHoldings,
+  getRecentInvestmentTransactions,
+  getDividendTransactions,
+  getWatchlists,
+} from "@/lib/queries/investments"
 import { getCollection } from "@/lib/db/collections"
 import { Wallet } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
@@ -23,13 +28,22 @@ async function InvestmentsContent() {
   const session = await requireApprovedUser()
   const scope = await getFinancialScope()
 
-  const [holdings, allWallets, baseCurrency, recentTransactions] = await Promise.all([
+  const [
+    holdings,
+    allWallets,
+    baseCurrency,
+    recentTransactions,
+    dividendTransactions,
+    watchlists,
+  ] = await Promise.all([
     getPortfolioHoldings(),
     getCollection<Wallet>("wallets").then((c) =>
       c.find({ type: "investment", ...getScopeFilter(scope) }).toArray()
     ),
     getActiveBaseCurrency(),
-    getRecentInvestmentTransactions(10),
+    getRecentInvestmentTransactions(50),
+    getDividendTransactions(session.user.id),
+    getWatchlists(session.user.id),
   ])
 
   const holdingCurrencies = holdings.map((h) => h.currency || "USD")
@@ -50,6 +64,12 @@ async function InvestmentsContent() {
     }
   })
 
+  // Merge recent transactions and dividend transactions without duplicates
+  const txMap = new Map<string, any>()
+  for (const t of recentTransactions) txMap.set(t._id.toString(), t)
+  for (const t of dividendTransactions) txMap.set(t._id.toString(), t)
+  const mergedTransactions = Array.from(txMap.values())
+
   const portfolioData = buildPortfolioViewModel(holdings, convert)
   const accountData = allWallets.map((wallet) => buildAccountViewModel(holdings, wallet, convert))
 
@@ -58,7 +78,8 @@ async function InvestmentsContent() {
     holdings: normalizedHoldings,
     portfolioData,
     accountData,
-    recentTransactions,
+    transactions: mergedTransactions,
+    watchlists,
   })
 
   return (
@@ -67,8 +88,9 @@ async function InvestmentsContent() {
       holdings={serialized.holdings}
       portfolioData={serialized.portfolioData}
       accountData={serialized.accountData}
-      transactions={serialized.recentTransactions}
+      transactions={serialized.transactions}
       currency={baseCurrency}
+      watchlists={serialized.watchlists}
     />
   )
 }

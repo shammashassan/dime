@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { BarChart3, CalendarDays, FileText } from "lucide-react"
+import { BarChart3, CalendarDays, FileText, ClipboardList, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function ReportsNavTabs() {
@@ -11,7 +11,16 @@ export function ReportsNavTabs() {
   const searchParams = useSearchParams()
 
   const rawTab = searchParams.get("tab")
-  const currentTab = rawTab === "review" ? "review" : rawTab === "heatmap" ? "heatmap" : "overview"
+  const currentTab =
+    rawTab === "review"
+      ? "review"
+      : rawTab === "heatmap"
+      ? "heatmap"
+      : rawTab === "quarterly"
+      ? "quarterly"
+      : rawTab === "annual"
+      ? "annual"
+      : "overview"
 
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -24,7 +33,7 @@ export function ReportsNavTabs() {
   }
 
   return (
-    <div className="flex items-center rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
+    <div className="flex items-center rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs overflow-x-auto max-w-full">
       <button
         onClick={() => handleTabChange("overview")}
         className={cn(
@@ -60,6 +69,30 @@ export function ReportsNavTabs() {
       >
         <FileText className="size-3.5 text-amber-500" />
         <span>Monthly Review</span>
+      </button>
+      <button
+        onClick={() => handleTabChange("quarterly")}
+        className={cn(
+          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+          currentTab === "quarterly"
+            ? "bg-background text-foreground shadow-xs font-semibold"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <ClipboardList className="size-3.5 text-violet-500" />
+        <span>Quarterly Review</span>
+      </button>
+      <button
+        onClick={() => handleTabChange("annual")}
+        className={cn(
+          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+          currentTab === "annual"
+            ? "bg-background text-foreground shadow-xs font-semibold"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Calendar className="size-3.5 text-blue-500" />
+        <span>Annual Review</span>
       </button>
     </div>
   )

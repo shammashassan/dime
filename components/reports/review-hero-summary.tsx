@@ -11,31 +11,44 @@ export interface ReviewHeroSummaryProps {
     totalExpenseCents: number
     netSavingsCents: number
     savingsRatePercentage: number
-    incomeDeltaPercentage: number
-    expenseDeltaPercentage: number
-    openingNetWorthCents: number
-    closingNetWorthCents: number
+    incomeDeltaPercentage?: number
+    expenseDeltaPercentage?: number
+    openingNetWorthCents?: number
+    closingNetWorthCents?: number
+    netWorthOpeningCents?: number
+    netWorthClosingCents?: number
     netWorthDeltaCents: number
   }
   currency: string
+  comparisonLabel?: string
 }
 
-export function ReviewHeroSummary({ metrics, currency }: ReviewHeroSummaryProps) {
+export function ReviewHeroSummary({
+  metrics,
+  currency,
+  comparisonLabel = "MoM",
+}: ReviewHeroSummaryProps) {
   const isNetPositive = metrics.netSavingsCents >= 0
   const isNetWorthUp = metrics.netWorthDeltaCents >= 0
 
+  const periodWord = comparisonLabel === "YoY" ? "year" : comparisonLabel === "QoQ" ? "quarter" : "month"
+
+  const incDelta = metrics.incomeDeltaPercentage ?? 0
+  const expDelta = metrics.expenseDeltaPercentage ?? 0
+
   const incomeSubtext =
-    metrics.incomeDeltaPercentage !== 0
-      ? `${metrics.incomeDeltaPercentage > 0 ? "+" : ""}${metrics.incomeDeltaPercentage}% MoM`
-      : "Total month inflows"
+    incDelta !== 0
+      ? `${incDelta > 0 ? "+" : ""}${incDelta}% ${comparisonLabel}`
+      : `Total ${periodWord} inflows`
 
   const expenseSubtext =
-    metrics.expenseDeltaPercentage !== 0
-      ? `${metrics.expenseDeltaPercentage > 0 ? "+" : ""}${metrics.expenseDeltaPercentage}% MoM`
-      : "Total month outflows"
+    expDelta !== 0
+      ? `${expDelta > 0 ? "+" : ""}${expDelta}% ${comparisonLabel}`
+      : `Total ${periodWord} outflows`
 
+  const closingBalance = metrics.closingNetWorthCents ?? metrics.netWorthClosingCents ?? 0
   const savingsSubtext = `${isNetPositive ? "+" : ""}${formatCurrency(metrics.netSavingsCents, currency)} retained`
-  const netWorthSubtext = `Closing balance: ${formatCurrency(metrics.closingNetWorthCents, currency)}`
+  const netWorthSubtext = `Closing balance: ${formatCurrency(closingBalance, currency)}`
 
   return (
     <div className="flex flex-wrap gap-4">

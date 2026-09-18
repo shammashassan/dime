@@ -59,11 +59,11 @@ export function ReviewWealthPulse({
         </div>
         {totalContributedCents > 0 ? (
           <span className="text-[11px] font-mono font-medium text-emerald-600 dark:text-emerald-400 shrink-0 text-right">
-            +{formatCurrency(totalContributedCents, currency)} saved
+            +{formatCurrency(totalContributedCents, currency)}
           </span>
-        ) : subscriptionChanges && subscriptionChanges.activeCount > 0 ? (
+        ) : subscriptionChanges && subscriptionChanges.totalMonthlyCostCents > 0 ? (
           <span className="text-[11px] font-mono font-medium text-muted-foreground shrink-0 text-right">
-            {subscriptionChanges.activeCount} recurring ({formatCurrency(subscriptionChanges.totalMonthlyCostCents, currency)}/mo)
+            {formatCurrency(subscriptionChanges.totalMonthlyCostCents, currency)}/mo
           </span>
         ) : null}
       </div>
@@ -133,7 +133,7 @@ export function ReviewWealthPulse({
                 <Item
                   variant="outline"
                   size="xs"
-                  className="flex-col items-stretch p-2.5 rounded-xl border-border/30 bg-muted/20 gap-1.5 w-full min-w-0 overflow-hidden"
+                  className="flex-col items-stretch p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-default gap-1.5 w-full min-w-0 overflow-hidden"
                 >
                   <ItemHeader className="w-full min-w-0 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">

@@ -15,6 +15,8 @@ import { TopAccountsCard } from "./overview/top-accounts-card"
 import { RecentTransactionsCard } from "./overview/recent-transactions-card"
 import { InvestmentPerformanceCard } from "./overview/investment-performance-card"
 import { TopPerformersCard } from "./overview/top-performers-card"
+import { WatchlistView } from "./watchlist-view"
+import { SyncPricesButton } from "./sync-prices-button"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
@@ -38,8 +40,10 @@ import {
   Briefcase,
   TrendingUp,
   Coins,
+  Bookmark,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import type { Watchlist, WatchlistItem } from "@/types"
 
 interface InvestmentsViewProps {
   accounts: Wallet[]
@@ -48,6 +52,7 @@ interface InvestmentsViewProps {
   portfolioData: PortfolioViewModel
   accountData: AccountViewModel[]
   currency: string
+  watchlists?: Array<Watchlist & { items: WatchlistItem[] }>
 }
 
 export function InvestmentsView({
@@ -57,8 +62,9 @@ export function InvestmentsView({
   portfolioData,
   accountData,
   currency,
+  watchlists = [],
 }: InvestmentsViewProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "accounts" | "holdings">("overview")
+  const [activeTab, setActiveTab] = useState<"overview" | "accounts" | "holdings" | "watchlists">("overview")
   const [search, setSearch] = useState("")
   const [addWalletOpen, setAddWalletOpen] = useState(false)
   const [addTxOpen, setAddTxOpen] = useState(false)
@@ -93,6 +99,8 @@ export function InvestmentsView({
 
         {/* Action Buttons */}
         <div className="flex items-center justify-start md:justify-end gap-2.5 flex-wrap w-full md:w-auto">
+          <SyncPricesButton />
+
           <Button
             variant="outline"
             onClick={() => setAddWalletOpen(true)}
@@ -152,6 +160,17 @@ export function InvestmentsView({
           >
             Holdings &amp; Assets ({holdings.length})
           </button>
+          <button
+            onClick={() => setActiveTab("watchlists")}
+            className={cn(
+              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
+              activeTab === "watchlists"
+                ? "bg-background text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Watchlists ({watchlists.length})
+          </button>
         </div>
 
         {/* Mobile Select */}
@@ -164,12 +183,13 @@ export function InvestmentsView({
               <SelectItem value="overview">Overview</SelectItem>
               <SelectItem value="accounts">Brokerage Accounts ({accounts.length})</SelectItem>
               <SelectItem value="holdings">Holdings &amp; Assets ({holdings.length})</SelectItem>
+              <SelectItem value="watchlists">Watchlists ({watchlists.length})</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Search */}
-        {activeTab !== "overview" && (
+        {activeTab !== "overview" && activeTab !== "watchlists" && (
           <div className="w-full sm:w-72 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
             <InputGroup className="rounded-xl border-border/40 bg-card">
               <Search className="size-4 text-muted-foreground ml-3" />
@@ -185,7 +205,7 @@ export function InvestmentsView({
       </div>
 
       {/* ── Tab Contents ── */}
-      {!hasData ? (
+      {!hasData && activeTab !== "watchlists" ? (
         <Card className="rounded-2xl border border-dashed border-border/50 p-8">
           <Empty className="py-12">
             <div className="size-16 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center mx-auto mb-4 border border-border/40">
@@ -205,8 +225,10 @@ export function InvestmentsView({
             </div>
           </Empty>
         </Card>
+      ) : activeTab === "watchlists" ? (
+        <WatchlistView watchlists={watchlists} />
       ) : activeTab === "overview" ? (
-        /* Bento Grid (with new Asymmetric 2-Card Middle Row) */
+        /* Bento Grid */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
           {/* Top Row */}
           <div className="lg:col-span-2">
@@ -223,6 +245,8 @@ export function InvestmentsView({
           <div className="lg:col-span-1">
             <TopPerformersCard holdings={holdings} currency={currency} />
           </div>
+
+
 
           {/* Bottom Row */}
           <div className="lg:col-span-1">
