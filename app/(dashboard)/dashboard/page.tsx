@@ -12,6 +12,7 @@ import { getDailyIncomeExpenseTrend, getCategoryBreakdown } from "@/lib/queries/
 import { getSpendingHeatmapData } from "@/lib/queries/heatmaps"
 import { getFinancialHealthScore } from "@/lib/queries/financial-health"
 import { getNetWorthSummary } from "@/lib/queries/net-worth"
+import { getLatestCompletedMonthSummary } from "@/lib/queries/monthly-review"
 import { DashboardBento } from "@/components/dashboard/dashboard-bento"
 import { serializeData } from "@/lib/utils"
 import { DashboardSkeleton } from "./loading"
@@ -39,6 +40,7 @@ async function DashboardContent() {
     healthScoreData,
     netWorthData,
     heatmapData,
+    latestMonthSummary,
   ] = await Promise.all([
     getPreferences(userId),
     getWallets(userId),
@@ -52,6 +54,7 @@ async function DashboardContent() {
     getFinancialHealthScore(userId),
     getNetWorthSummary(userId),
     getSpendingHeatmapData(userId, { timeframe: "trailing-12" }),
+    getLatestCompletedMonthSummary(userId),
   ])
 
   const targetCurrency = prefs?.defaultCurrency || "USD"
@@ -93,6 +96,7 @@ async function DashboardContent() {
       userName={session.user.name || "User"}
       scopeName={scope.isOrganization ? "Team" : "Personal"}
       isOrganization={scope.isOrganization}
+      latestMonthSummary={serializeData(latestMonthSummary)}
       wallets={serializeData(wallets)}
       categories={serializeData(categories)}
       contacts={serializeData(contacts)}

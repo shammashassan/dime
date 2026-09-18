@@ -4,8 +4,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   ItemGroup,
   Item,
-  ItemHeader,
-  ItemFooter,
 } from "@/components/ui/item"
 import { getBudgetPerformance } from "@/lib/queries/reports"
 import { getPreferences } from "@/lib/queries/preferences"
@@ -26,29 +24,29 @@ export async function BudgetProgressList({ userId, className }: BudgetProgressLi
   return (
     <Card className={cn("flex h-full flex-col border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0", className)}>
       {/* Top compact micro-label header matching top dashboard cards */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
             active budgets
           </span>
           {budgets.length > 0 && (
-            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground">
+            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground shrink-0">
               {budgets.length}
             </span>
           )}
         </div>
         <Link
           href="/budgets"
-          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap ml-auto"
         >
           <span>View all</span>
           <ArrowUpRight className="size-3" />
         </Link>
       </div>
 
-      <div className="p-4 flex-1">
+      <div className="p-3.5 sm:p-4 flex-1">
         {budgets.length > 0 ? (
-          <ScrollArea className="h-48 sm:h-[216px] pr-3.5">
+          <ScrollArea className="h-48 sm:h-[216px] pr-2">
             <ItemGroup className="gap-2">
               {budgets.map((b) => {
                 const percent = b.limit > 0 ? (b.spent / b.limit) * 100 : 0
@@ -61,29 +59,34 @@ export async function BudgetProgressList({ userId, className }: BudgetProgressLi
                     asChild
                     variant="outline"
                     size="xs"
-                    className="flex-col items-stretch p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors gap-1.5 cursor-pointer no-underline group"
+                    className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group flex-col items-stretch gap-1.5 w-full min-w-0 overflow-hidden"
                   >
-                    <Link href={href}>
-                      <ItemHeader className="text-xs font-semibold">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-                            {b.name}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground uppercase">
-                            {b.category}
-                          </span>
-                        </div>
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          <span className="font-semibold text-foreground">
-                            {formatCurrency(b.spent, targetCurrency)}
-                          </span>
-                          {" / "}
-                          <span>{formatCurrency(b.limit, targetCurrency)}</span>
+                    <Link href={href} className="flex flex-col w-full min-w-0 gap-1.5">
+                      {/* Line 1: Budget Name (left) and Category (right) */}
+                      <div className="flex items-center justify-between gap-1.5 min-w-0 w-full">
+                        <span className="text-xs font-bold text-foreground truncate min-w-0 flex-1 group-hover:text-primary transition-colors">
+                          {b.name}
                         </span>
-                      </ItemHeader>
+                        <span className="text-[9px] font-mono tracking-wider uppercase text-muted-foreground/70 shrink-0 ml-auto max-w-[90px] truncate">
+                          {b.category}
+                        </span>
+                      </div>
+
+                      {/* Line 2: Spent vs Limit amounts on their own dedicated line */}
+                      <div className="flex items-baseline justify-between gap-1.5 min-w-0 w-full text-xs tabular-nums">
+                        <span className="text-xs font-extrabold text-foreground">
+                          {formatCurrency(b.spent, targetCurrency)}
+                          <span className="text-[10px] font-normal text-muted-foreground/60"> spent</span>
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/70 shrink-0 ml-auto">
+                          of {formatCurrency(b.limit, targetCurrency)}
+                        </span>
+                      </div>
+
+                      {/* Line 3: Progress Bar */}
                       <Progress
                         value={Math.min(percent, 100)}
-                        className={`h-2.5 rounded-full ${
+                        className={`h-1.5 rounded-full ${
                           percent > 90
                             ? "[&>div]:bg-rose-500"
                             : percent >= 70
@@ -91,12 +94,20 @@ export async function BudgetProgressList({ userId, className }: BudgetProgressLi
                               : "[&>div]:bg-emerald-500"
                         }`}
                       />
-                      <ItemFooter className="text-[10px] text-muted-foreground font-medium">
-                        <span>{percent.toFixed(0)}% Used</span>
-                        {percent > 100 && (
-                          <span className="text-rose-500 font-bold">Over Budget!</span>
+
+                      {/* Line 4: % used and Over Budget / remaining status */}
+                      <div className="flex items-center justify-between gap-1.5 text-[10px] text-muted-foreground font-medium min-w-0 w-full">
+                        <span>{percent.toFixed(0)}% used</span>
+                        {percent > 100 ? (
+                          <span className="text-rose-500 font-bold text-[9px] uppercase tracking-wider shrink-0">
+                            Over Budget!
+                          </span>
+                        ) : (
+                          <span className="text-[9px] text-muted-foreground/60 tabular-nums shrink-0">
+                            {formatCurrency(Math.max(0, b.limit - b.spent), targetCurrency)} left
+                          </span>
                         )}
-                      </ItemFooter>
+                      </div>
                     </Link>
                   </Item>
                 )

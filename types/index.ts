@@ -1316,4 +1316,106 @@ export interface CoachOverviewData {
   targetCurrency: string
 }
 
+// ── Monthly Financial Review Domain Types ──
+
+export interface MonthlyReviewCategorySpend {
+  categoryId: string
+  categoryName: string
+  categoryIcon?: string
+  categoryColor?: string
+  amountCents: number
+  percentage: number
+  previousMonthAmountCents: number
+  deltaPercentage: number
+}
+
+export interface MonthlyReviewBudgetStatus {
+  budgetId: string
+  categoryName: string
+  budgetAmountCents: number
+  spentAmountCents: number
+  isOverBudget: boolean
+  overrunCents: number
+  percentageUsed: number
+}
+
+export interface MonthlyReviewGoalContribution {
+  goalId: string
+  goalName: string
+  contributedThisMonthCents: number
+  targetAmountCents: number
+  currentAmountCents: number
+  progressPercentage: number
+}
+
+export interface MonthlyReviewLoanPaydown {
+  loanId: string
+  loanName: string
+  principalPaidCents: number
+  remainingBalanceCents: number
+}
+
+export interface MonthlyReviewTransactionItem {
+  id: string
+  date: string
+  name: string
+  amountCents: number
+  currency: string
+  categoryName?: string
+  categoryColor?: string
+  walletName?: string
+}
+
+export interface MonthlyReviewSummaryBrief {
+  headline: string
+  summary: string
+  highlights: string[]
+  concerns: string[]
+  recommendations: string[]
+  nextMonthOutlook: string
+  isAiGenerated: boolean
+}
+
+export interface MonthlyReviewData {
+  monthKey: string // "YYYY-MM"
+  monthLabel: string // "August 2026"
+  targetCurrency: string
+  metrics: {
+    totalIncomeCents: number
+    totalExpenseCents: number
+    netSavingsCents: number
+    savingsRatePercentage: number
+    previousMonthIncomeCents: number
+    previousMonthExpenseCents: number
+    previousMonthSavingsRate: number
+    incomeDeltaPercentage: number
+    expenseDeltaPercentage: number
+    openingNetWorthCents: number
+    closingNetWorthCents: number
+    netWorthDeltaCents: number
+  }
+  categoryBreakdown: MonthlyReviewCategorySpend[]
+  budgetPerformance: MonthlyReviewBudgetStatus[]
+  topExpenses: MonthlyReviewTransactionItem[]
+  topIncomes: MonthlyReviewTransactionItem[]
+  goalContributions: MonthlyReviewGoalContribution[]
+  loanPaydowns: MonthlyReviewLoanPaydown[]
+  subscriptionChanges: {
+    activeCount: number
+    totalMonthlyCostCents: number
+  }
+  executiveBrief: MonthlyReviewSummaryBrief
+  availableMonths: { monthKey: string; label: string }[]
+}
+
+export interface LatestCompletedMonthSummary {
+  monthKey: string
+  monthLabel: string
+  savingsRatePercentage: number
+  netSavingsCents: number
+  targetCurrency: string
+  underBudgetCategoryCount: number
+  hasTransactions: boolean
+}
+
 

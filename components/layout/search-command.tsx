@@ -24,6 +24,7 @@ import {
   History,
   SlidersHorizontal,
   Compass,
+  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -61,6 +62,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Sparkles,
   TrendingUp,
   Compass,
+  FileText,
 }
 
 const QUICK_FILTER_CHIPS = [
@@ -174,6 +176,7 @@ export function SearchCommand() {
     { path: "/insights", label: "AI Spending Insights", icon: Sparkles },
     { path: "/coach", label: "Financial Coach", icon: Compass },
     { path: "/reports", label: "Reports & Analytics", icon: BarChart3 },
+    { path: "/reports?tab=review", label: "Monthly Review", icon: FileText },
     { path: "/categories", label: "Categories", icon: Tags },
     { path: "/settings", label: "Settings & Profile", icon: Cog },
   ]

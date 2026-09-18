@@ -7,8 +7,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   ItemGroup,
   Item,
-  ItemHeader,
-  ItemFooter,
 } from "@/components/ui/item"
 import { Goal } from "@/types"
 import { formatCurrency, cn } from "@/lib/utils"
@@ -40,27 +38,27 @@ export function ActiveGoalsCard({
         className
       )}
     >
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
             savings goals
           </span>
           {activeGoals.length > 0 && (
-            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground">
+            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground shrink-0">
               {activeGoals.length}
             </span>
           )}
         </div>
         <Link
           href="/goals"
-          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap ml-auto"
         >
           <span>View all</span>
           <ArrowUpRight className="size-3" />
         </Link>
       </div>
 
-      <div className="p-4 flex-1">
+      <div className="p-3.5 sm:p-4 flex-1">
         {activeGoals.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[168px] text-center text-muted-foreground text-sm gap-2">
             <div className="size-10 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground mb-1 shadow-xs">
@@ -79,7 +77,7 @@ export function ActiveGoalsCard({
             </Link>
           </div>
         ) : (
-          <ScrollArea className="h-48 sm:h-[216px] pr-3.5">
+          <ScrollArea className="h-48 sm:h-[216px] pr-2">
             <ItemGroup className="gap-2">
               {activeGoals.map((goal) => {
                 const current = goal.currentAmount || 0
@@ -99,25 +97,25 @@ export function ActiveGoalsCard({
                     asChild
                     variant="outline"
                     size="xs"
-                    className="flex-col items-stretch p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors gap-1.5 cursor-pointer no-underline group"
+                    className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group flex-col items-stretch gap-1.5 w-full min-w-0 overflow-hidden"
                   >
-                    <Link href={href}>
-                      <ItemHeader className="text-xs">
-                        <span className="font-semibold text-foreground truncate pr-2 group-hover:text-primary transition-colors">
+                    <Link href={href} className="flex flex-col w-full min-w-0 gap-1.5">
+                      <div className="flex items-center justify-between gap-1.5 min-w-0 w-full text-xs">
+                        <span className="font-semibold text-foreground truncate min-w-0 flex-1 group-hover:text-primary transition-colors">
                           {goal.name}
                         </span>
                         <Badge
                           variant="secondary"
-                          className="font-mono text-[10px] font-medium h-4.5 px-1.5 shrink-0"
+                          className="font-mono text-[10px] font-medium h-4.5 px-1.5 shrink-0 ml-auto"
                         >
                           {pct}%
                         </Badge>
-                      </ItemHeader>
+                      </div>
                       <Progress value={pct} className="h-1.5" />
-                      <ItemFooter className="text-[10px] text-muted-foreground tabular-nums">
+                      <div className="flex items-center justify-between gap-1.5 text-[10px] text-muted-foreground tabular-nums min-w-0 w-full">
                         <span>{formatCurrency(current, goalCurrency)}</span>
                         <span>Target {formatCurrency(target, goalCurrency)}</span>
-                      </ItemFooter>
+                      </div>
                     </Link>
                   </Item>
                 )

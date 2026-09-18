@@ -9,11 +9,8 @@ import {
   ItemGroup,
   Item,
   ItemMedia,
-  ItemContent,
-  ItemTitle,
-  ItemDescription,
-  ItemActions,
 } from "@/components/ui/item"
+import { CategoryIcon } from "@/components/categories/category-icon"
 import { CalendarDays, CreditCard, FileText, AlertTriangle, Clock, ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 
@@ -99,34 +96,34 @@ export async function UpcomingRecurring({ userId, className }: UpcomingRecurring
   return (
     <Card className={cn("flex h-full flex-col border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0", className)}>
       {/* Top compact micro-label header matching top dashboard cards */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
             upcoming recurring
           </span>
           {allUpcoming.length > 0 && (
-            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground">
+            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground shrink-0">
               {allUpcoming.length}
             </span>
           )}
         </div>
         <Link
           href="/recurring"
-          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap ml-auto"
         >
           <span>Manage</span>
           <ArrowUpRight className="size-3" />
         </Link>
       </div>
 
-      <div className="p-4 flex-1">
+      <div className="p-3.5 sm:p-4 flex-1">
         {allUpcoming.length > 0 ? (
-          <ScrollArea className="h-48 sm:h-[216px] pr-3.5">
+          <ScrollArea className="h-48 sm:h-[216px] pr-2">
             <ItemGroup className="gap-2">
               {allUpcoming.map((item) => {
                 const category = item.categoryId ? categoryMap.get(item.categoryId) : undefined
                 const accentColor = category?.color || "#94a3b8"
-                const Icon = item.kind === "subscription" ? CreditCard : FileText
+                const FallbackIcon = item.kind === "subscription" ? CreditCard : FileText
 
                 const targetId = item.ruleId || item.id
                 const href = targetId ? `/recurring/${targetId}` : "/recurring"
@@ -136,47 +133,56 @@ export async function UpcomingRecurring({ userId, className }: UpcomingRecurring
                     key={item.id}
                     asChild
                     variant="outline"
-                    size="sm"
-                    className="flex items-center justify-between p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors flex-nowrap cursor-pointer no-underline group"
+                    size="xs"
+                    className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group w-full min-w-0 overflow-hidden"
                   >
-                    <Link href={href}>
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <ItemMedia
-                          className="size-8.5 rounded-xl flex items-center justify-center shrink-0 border border-border/50"
-                          style={{
-                            backgroundColor: `${accentColor}15`,
-                            color: accentColor,
-                          }}
-                        >
-                          <Icon className="size-4" />
-                        </ItemMedia>
-                        <ItemContent className="min-w-0 gap-0">
-                          <ItemTitle className="text-xs font-bold text-foreground truncate max-w-[120px] sm:max-w-[150px] group-hover:text-primary transition-colors">
+                    <Link href={href} className="flex items-start gap-2.5 w-full min-w-0">
+                      <ItemMedia
+                        className="size-6 rounded-md flex items-center justify-center shrink-0 mt-0.5 border border-border/50"
+                        style={{
+                          backgroundColor: `${accentColor}15`,
+                          color: accentColor,
+                        }}
+                        title={category?.name}
+                      >
+                        {category?.icon ? (
+                          <CategoryIcon name={category.icon} className="size-3" fallback={FallbackIcon} />
+                        ) : (
+                          <FallbackIcon className="size-3" />
+                        )}
+                      </ItemMedia>
+
+                      <div className="flex flex-col min-w-0 flex-1 gap-1">
+                        {/* Row 1: Name (left) and Kind badge (right) */}
+                        <div className="flex items-center justify-between gap-1.5 min-w-0 w-full">
+                          <span className="text-xs font-bold text-foreground truncate min-w-0 flex-1 group-hover:text-primary transition-colors">
                             {item.name}
-                          </ItemTitle>
-                          <ItemDescription className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="rounded-full px-1.5 py-0 text-[8px] font-bold uppercase tracking-wider h-3.5 bg-muted/40 text-muted-foreground border-border/60 shrink-0 ml-auto"
+                          >
+                            {item.kind === "subscription" ? "Sub" : "Bill"}
+                          </Badge>
+                        </div>
+
+                        {/* Row 2: Amount placed below the name, with due date wrapping if tight */}
+                        <div className="flex items-center justify-between gap-x-2 gap-y-1 min-w-0 w-full flex-wrap">
+                          <span className="text-xs font-black text-foreground tabular-nums shrink-0">
+                            {formatCurrency(item.amount, item.currency)}
+                          </span>
+                          <div className="flex items-center gap-1 text-[10px] shrink-0 min-w-0">
                             {item.isOverdue ? (
                               <AlertTriangle className="size-3 text-rose-500 shrink-0" />
                             ) : (
                               <Clock className="size-3 text-muted-foreground/60 shrink-0" />
                             )}
-                            <span className={item.isOverdue ? "text-rose-500 font-semibold" : ""}>
+                            <span className={cn("truncate text-[10px]", item.isOverdue ? "text-rose-500 font-semibold" : "text-muted-foreground")}>
                               {getRelativeDateStr(item.date)}
                             </span>
-                          </ItemDescription>
-                        </ItemContent>
+                          </div>
+                        </div>
                       </div>
-                      <ItemActions className="flex flex-col items-end shrink-0 text-right gap-0">
-                        <p className="text-xs font-semibold text-foreground tabular-nums">
-                          {formatCurrency(item.amount, item.currency)}
-                        </p>
-                        <Badge
-                          variant="outline"
-                          className="rounded-full px-1.5 py-0 text-[8px] font-bold uppercase tracking-wider h-3.5 mt-1 bg-muted/40 text-muted-foreground border-border/60"
-                        >
-                          {item.kind}
-                        </Badge>
-                      </ItemActions>
                     </Link>
                   </Item>
                 )

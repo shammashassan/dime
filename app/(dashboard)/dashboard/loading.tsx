@@ -106,9 +106,46 @@ export function DashboardSkeleton() {
         </Card>
       </div>
 
+      {/* Row 3b: Spending Rhythm Activity Heatmap */}
+      <div className="w-full">
+        <Card className="border-border/50 bg-card shadow-xs rounded-2xl p-5 flex flex-col justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-border/30">
+            <div className="flex flex-col gap-1">
+              <Skeleton className="h-3 w-28 rounded" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-32 rounded" />
+                <Skeleton className="h-4 w-20 rounded-full" />
+              </div>
+            </div>
+            <Skeleton className="h-3 w-28 rounded" />
+          </div>
+          <div className="pt-3 flex flex-col gap-3">
+            <div className="h-[105px] w-full flex items-center justify-between gap-1 overflow-hidden py-1">
+              {[...Array(26)].map((_, i) => (
+                <div key={i} className="flex flex-col gap-1 flex-1">
+                  {[...Array(7)].map((_, j) => (
+                    <Skeleton key={j} className="h-2.5 w-full rounded-xs" />
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t border-border/20">
+              <Skeleton className="h-3 w-32 rounded" />
+              <div className="flex items-center gap-1">
+                <Skeleton className="size-2.5 rounded-xs" />
+                <Skeleton className="size-2.5 rounded-xs" />
+                <Skeleton className="size-2.5 rounded-xs" />
+                <Skeleton className="size-2.5 rounded-xs" />
+                <Skeleton className="size-2.5 rounded-xs" />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
       {/* Row 4: Health & Obligations Tier — Financial Health Gauge & Loan Action (1 : 2) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card className="rounded-2xl border-border/50 bg-card shadow-xs overflow-hidden h-[260px] flex flex-col justify-between p-0 py-0 gap-0 lg:col-span-1">
+        <Card className="rounded-2xl border-border/50 bg-card shadow-xs overflow-hidden h-[260px] flex flex-col justify-between p-0 py-0 gap-0 lg:col-span-1 order-2 lg:order-1">
           <div className="flex justify-between items-center px-5 py-3 border-b border-border/40">
             <div className="flex items-center gap-2">
               <Skeleton className="h-3 w-24 rounded" />
@@ -125,7 +162,7 @@ export function DashboardSkeleton() {
             <Skeleton className="h-4 w-16 rounded-full" />
           </div>
         </Card>
-        <Card className="lg:col-span-2 h-[260px] border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between">
+        <Card className="lg:col-span-2 h-[260px] border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between order-1 lg:order-2">
           <div className="flex justify-between items-center px-5 py-3 border-b border-border/40">
             <Skeleton className="h-3 w-28 rounded" />
             <Skeleton className="h-3 w-20 rounded" />
@@ -136,7 +173,12 @@ export function DashboardSkeleton() {
               <Skeleton className="h-14 rounded-lg" />
             </div>
             <div className="flex flex-col gap-3 border-t border-border/40 pt-2.5">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <Skeleton className="h-3.5 w-20 rounded" />
+                <Skeleton className="h-7 w-48 rounded-lg" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <Skeleton className="h-9 rounded-md" />
                 <Skeleton className="h-9 rounded-md" />
                 <Skeleton className="h-9 rounded-md" />
               </div>
@@ -146,92 +188,142 @@ export function DashboardSkeleton() {
         </Card>
       </div>
 
-      {/* Row 5: Intelligence & Goals Tier — AI Insights & Active Goals (2 : 1) */}
+      {/* Row 5: Intelligence Tier — AI Insights & AI Coach (2 : 1) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* AI Insights Skeleton (col-span-2) */}
         <Card className="rounded-2xl border-border/50 bg-card shadow-xs overflow-hidden h-full flex flex-col p-0 py-0 gap-0 lg:col-span-2">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
               <Skeleton className="h-3 w-32 rounded" />
-              <Skeleton className="h-4 w-16 rounded-full" />
+              <Skeleton className="h-4 w-6 rounded-full shrink-0" />
             </div>
-            <Skeleton className="h-3 w-16 rounded" />
+            <Skeleton className="h-3 w-16 rounded shrink-0 ml-auto" />
           </div>
           <div className="p-4 flex-1 flex flex-col gap-2">
-            <div className="flex items-center justify-between p-2.5 rounded-xl border border-border/30 bg-muted/20">
-              <div className="flex items-center gap-2.5">
-                <Skeleton className="size-8.5 rounded-xl shrink-0" />
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5">
-                    <Skeleton className="h-3.5 w-28 rounded" />
-                    <Skeleton className="h-3.5 w-12 rounded-full" />
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between p-2.5 rounded-xl border border-border/30 bg-muted/20">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <Skeleton className="size-8 rounded-xl shrink-0" />
+                  <div className="flex flex-col gap-1 min-w-0 flex-1 pr-1">
+                    <div className="flex items-center gap-1.5">
+                      <Skeleton className="h-3.5 w-36 rounded" />
+                      <Skeleton className="h-3.5 w-12 rounded-full" />
+                    </div>
+                    <Skeleton className="h-2.5 w-48 rounded" />
                   </div>
-                  <Skeleton className="h-2.5 w-36 rounded" />
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  <Skeleton className="h-3.5 w-16 rounded" />
+                  <Skeleton className="h-3.5 w-14 rounded-full" />
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <Skeleton className="h-3.5 w-14 rounded" />
-                <Skeleton className="h-3.5 w-10 rounded-full" />
-              </div>
-            </div>
-            <div className="flex items-center justify-between p-2.5 rounded-xl border border-border/30 bg-muted/20">
-              <div className="flex items-center gap-2.5">
-                <Skeleton className="size-8.5 rounded-xl shrink-0" />
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1.5">
-                    <Skeleton className="h-3.5 w-32 rounded" />
-                    <Skeleton className="h-3.5 w-14 rounded-full" />
-                  </div>
-                  <Skeleton className="h-2.5 w-40 rounded" />
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <Skeleton className="h-3.5 w-16 rounded" />
-                <Skeleton className="h-3.5 w-12 rounded-full" />
-              </div>
-            </div>
+            ))}
           </div>
         </Card>
-        <Card className="lg:col-span-1 border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between">
-          <div className="flex justify-between items-center px-5 py-3 border-b border-border/40">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-3 w-24 rounded" />
-              <Skeleton className="h-4 w-6 rounded-full" />
+
+        {/* Financial Coach Skeleton (col-span-1) */}
+        <Card className="rounded-2xl border-border/50 bg-card shadow-xs overflow-hidden h-full flex flex-col justify-between p-0 py-0 gap-0 lg:col-span-1">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <Skeleton className="h-3 w-28 rounded" />
+              <Skeleton className="h-4 w-6 rounded-full shrink-0" />
             </div>
-            <Skeleton className="h-3 w-16 rounded" />
+            <Skeleton className="h-3 w-16 rounded shrink-0 ml-auto" />
           </div>
-          <div className="p-4 flex-1 flex flex-col gap-2">
-            <Skeleton className="h-14 w-full rounded-xl" />
-            <Skeleton className="h-14 w-full rounded-xl" />
+          <div className="p-4 flex-1 flex flex-col justify-between gap-3">
+            <Skeleton className="h-12 w-full rounded-xl" />
+            <div className="grid grid-cols-2 gap-2">
+              <Skeleton className="h-14 rounded-xl" />
+              <Skeleton className="h-14 rounded-xl" />
+            </div>
+            <Skeleton className="h-12 w-full rounded-xl" />
           </div>
         </Card>
       </div>
 
-      {/* Row 6: Live Operations & Upcoming */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="h-[225px] border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between">
-          <div className="flex justify-between items-center px-5 py-3 border-b border-border/40">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-3 w-36 rounded" />
-              <Skeleton className="h-4 w-6 rounded-full" />
+      {/* Row 6: Tracking & Progress Tier — Savings Goals, Upcoming Recurring & Active Budgets (1 : 1 : 1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Active Goals Skeleton */}
+        <Card className="border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between h-full">
+          <div className="flex justify-between items-center px-5 py-3 border-b border-border/40 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <Skeleton className="h-3 w-24 rounded" />
+              <Skeleton className="h-4 w-6 rounded-full shrink-0" />
             </div>
-            <Skeleton className="h-3 w-14 rounded" />
+            <Skeleton className="h-3 w-16 rounded shrink-0 ml-auto" />
           </div>
-          <div className="flex flex-col gap-2 p-4 my-auto">
-            <Skeleton className="h-11 w-full rounded-xl" />
-            <Skeleton className="h-11 w-full rounded-xl" />
+          <div className="p-3.5 sm:p-4 flex-1 flex flex-col gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex flex-col gap-1.5 p-2.5 rounded-xl border border-border/30 bg-muted/20">
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-3.5 w-28 rounded" />
+                  <Skeleton className="h-4 w-10 rounded-full shrink-0" />
+                </div>
+                <Skeleton className="h-1.5 w-full rounded-full" />
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-2.5 w-16 rounded" />
+                  <Skeleton className="h-2.5 w-20 rounded" />
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
-        <Card className="h-[225px] border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between">
-          <div className="flex justify-between items-center px-5 py-3 border-b border-border/40">
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-3 w-28 rounded" />
-              <Skeleton className="h-4 w-6 rounded-full" />
+
+        {/* Upcoming Recurring Skeleton */}
+        <Card className="border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between h-full">
+          <div className="flex justify-between items-center px-5 py-3 border-b border-border/40 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <Skeleton className="h-3 w-32 rounded" />
+              <Skeleton className="h-4 w-6 rounded-full shrink-0" />
             </div>
-            <Skeleton className="h-3 w-14 rounded" />
+            <Skeleton className="h-3 w-14 rounded shrink-0 ml-auto" />
           </div>
-          <div className="flex flex-col gap-2.5 p-4 my-auto">
-            <Skeleton className="h-12 w-full rounded-xl" />
-            <Skeleton className="h-12 w-full rounded-xl" />
+          <div className="p-3.5 sm:p-4 flex-1 flex flex-col gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-xl border border-border/30 bg-muted/20">
+                <Skeleton className="size-6 rounded-md shrink-0 mt-0.5" />
+                <div className="flex flex-col min-w-0 flex-1 gap-1.5">
+                  <div className="flex items-center justify-between gap-1.5 min-w-0 w-full">
+                    <Skeleton className="h-3 w-28 rounded min-w-0 flex-1" />
+                    <Skeleton className="h-3.5 w-8 rounded-full shrink-0 ml-auto" />
+                  </div>
+                  <div className="flex items-center justify-between gap-2 min-w-0 w-full">
+                    <Skeleton className="h-3 w-14 rounded shrink-0" />
+                    <Skeleton className="h-2.5 w-16 rounded shrink-0" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Budget Progress Skeleton */}
+        <Card className="border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0 flex flex-col justify-between h-full">
+          <div className="flex justify-between items-center px-5 py-3 border-b border-border/40 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <Skeleton className="h-3 w-28 rounded" />
+              <Skeleton className="h-4 w-6 rounded-full shrink-0" />
+            </div>
+            <Skeleton className="h-3 w-14 rounded shrink-0 ml-auto" />
+          </div>
+          <div className="p-3.5 sm:p-4 flex-1 flex flex-col gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex flex-col gap-1.5 p-2.5 rounded-xl border border-border/30 bg-muted/20">
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-3 w-24 rounded" />
+                  <Skeleton className="h-2.5 w-14 rounded shrink-0 ml-auto" />
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-3 w-16 rounded" />
+                  <Skeleton className="h-2.5 w-16 rounded shrink-0 ml-auto" />
+                </div>
+                <Skeleton className="h-1.5 w-full rounded-full" />
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-2.5 w-12 rounded" />
+                  <Skeleton className="h-2.5 w-14 rounded shrink-0 ml-auto" />
+                </div>
+              </div>
+            ))}
           </div>
         </Card>
       </div>

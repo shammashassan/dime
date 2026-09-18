@@ -914,7 +914,9 @@ Integrations
 
 ---
 
-# 18. Financial Documents Vault
+# 18. Financial Documents Vault (Future — Requires Cloud Storage)
+
+> **Status**: **Deferred to Future Phase.** Dime operates entirely within free-tier infrastructure (MongoDB Atlas M0 with 512MB shared storage and Vercel serverless with 4.5MB request payload limits). Real-world document storage (PDF tax filings, scanned insurance policies, property deeds, warranty papers) requires dedicated S3/Cloudflare R2 object storage to prevent exhausting database storage caps. This feature is earmarked for when external cloud object storage is provisioned.
 
 Securely store financial documents.
 
@@ -1048,7 +1050,9 @@ Integrations
 
 ---
 
-# 20. Monthly Financial Review (New)
+# 20. Monthly Financial Review (Under Reports) — IN PROGRESS
+
+> **Status**: **In Progress.** Fully integrated into the **Reports & Analytics** hub (`/reports?tab=review`) to eliminate navigation bloat and prevent adding an 18th top-level item to the sidebar. Includes month-by-month selector, deterministic MoM calculation engine, on-demand Gemini AI retrospective executive synthesis, Kibo UI announcement banner on the Packed Bento Dashboard (1st–14th of each month with localStorage dismissal), print-ready PDF view, and smart Month/Year `⌘K` command palette jump targets.
 
 Generate an automatic monthly financial review.
 

@@ -47,7 +47,6 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false)
 
-  const effectiveContactId = contactId || contacts[0]?._id?.toString() || ""
   const currencySymbol = getCurrencySymbol(owedSummary.baseCurrency)
 
   const handleSubmit = (e: FormEvent) => {
@@ -57,12 +56,12 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
       toast.error("Please enter a valid loan amount")
       return
     }
-    if (!effectiveContactId) {
+    if (!contactId) {
       toast.error("Please select a contact")
       return
     }
 
-    const selectedContact = contacts.find((c) => c._id?.toString() === effectiveContactId)
+    const selectedContact = contacts.find((c) => c._id?.toString() === contactId)
     if (!selectedContact) {
       toast.error("Selected contact not found")
       return
@@ -73,7 +72,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
         const amountInCents = Math.round(numAmount * 100)
         const res = await createLoanAction({
           type,
-          contactId: effectiveContactId,
+          contactId,
           contactName: selectedContact.name,
           amount: amountInCents,
           currency: owedSummary.baseCurrency,
@@ -92,6 +91,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
             }
           )
           setAmount("")
+          setContactId("")
           setDueDate(undefined)
           router.refresh()
         } else {
@@ -111,13 +111,13 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
       )}
     >
       {/* Header with micro-label and deep link */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0 flex-1">
           lending & debts
         </span>
         <Link
           href="/loans"
-          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap ml-auto"
         >
           <span>View all loans</span>
           <ArrowUpRight className="size-3" />
@@ -203,7 +203,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
                 </Link>
               </div>
             ) : (
-              <Select value={effectiveContactId} onValueChange={setContactId} disabled={isPending}>
+              <Select value={contactId || undefined} onValueChange={setContactId} disabled={isPending}>
                 <SelectTrigger className="h-9 text-xs w-full" aria-label="Select contact">
                   <SelectValue placeholder="Select contact" />
                 </SelectTrigger>
@@ -316,7 +316,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
             <Button
               type="submit"
               size="sm"
-              disabled={isPending || !amount || !effectiveContactId || contacts.length === 0}
+              disabled={isPending || !amount || !contactId || contacts.length === 0}
               className="h-8.5 w-full sm:w-auto sm:min-w-[170px] sm:ml-auto gap-1.5 text-xs font-semibold cursor-pointer"
             >
               {isPending ? (

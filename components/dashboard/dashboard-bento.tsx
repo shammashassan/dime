@@ -16,13 +16,15 @@ import { UpcomingRecurring } from "./upcoming-recurring"
 import { BudgetProgressList } from "./budget-progress-list"
 import { RecentTransactions } from "./recent-transactions"
 import { SpendingHeatmapWidget } from "./spending-heatmap-widget"
+import { MonthlyReviewBanner } from "./monthly-review-banner"
 import { HeatmapDaySummary, HeatmapHabitStats } from "@/lib/calculations/heatmaps"
-import { Wallet, Category, Contact, Goal, DashboardFocusCounts, OwedSummaries, HealthTier, PillarId, PillarScore } from "@/types"
+import { Wallet, Category, Contact, Goal, DashboardFocusCounts, OwedSummaries, HealthTier, PillarId, PillarScore, LatestCompletedMonthSummary } from "@/types"
 
 export interface DashboardBentoProps {
   userName: string
   scopeName?: string
   isOrganization?: boolean
+  latestMonthSummary?: LatestCompletedMonthSummary
   wallets: Wallet[]
   categories: Category[]
   contacts: Contact[]
@@ -53,6 +55,7 @@ export function DashboardBento({
   userName,
   scopeName,
   isOrganization,
+  latestMonthSummary,
   wallets,
   categories,
   contacts,
@@ -78,6 +81,9 @@ export function DashboardBento({
     <BentoEntrance className="flex flex-col gap-6 w-full max-w-7xl mx-auto">
       {/* Header */}
       <DashboardHeader userName={userName} scopeName={scopeName} isOrganization={isOrganization} />
+
+      {/* Proactive Monthly Review Announcement Banner (1st–14th of month) */}
+      <MonthlyReviewBanner summary={latestMonthSummary} />
 
       {/* Row 0: Focus Badges */}
       <FinancialFocusStrip counts={focusCounts} />
@@ -140,21 +146,21 @@ export function DashboardBento({
         </div>
       </div>
 
-      {/* Row 5: Intelligence & Goals Tier — AI Coach, AI Insights & Active Goals (1 : 1 : 1) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-1">
-          <CoachWidget userId={userId} className="h-full" />
-        </div>
-        <div className="lg:col-span-1">
+      {/* Row 5: Intelligence Tier — AI Insights & AI Coach (2 : 1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <AIInsights userId={userId} className="h-full" />
         </div>
         <div className="lg:col-span-1">
-          <ActiveGoalsCard goals={goals} currency={targetCurrency} className="h-full" />
+          <CoachWidget userId={userId} className="h-full" />
         </div>
       </div>
 
-      {/* Row 6: Live Operations & Upcoming */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Row 6: Tracking & Progress Tier — Savings Goals, Upcoming Recurring & Active Budgets (1 : 1 : 1) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="bento-tile h-full">
+          <ActiveGoalsCard goals={goals} currency={targetCurrency} className="h-full" />
+        </div>
         <div className="bento-tile h-full">
           <UpcomingRecurring userId={userId} className="h-full" />
         </div>

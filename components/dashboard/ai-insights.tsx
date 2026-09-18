@@ -91,20 +91,20 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
       )}
     >
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
             actionable insights
           </span>
           {data.insights.length > 0 && (
-            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground">
-              {data.insights.length} {data.insights.length === 1 ? "signal" : "signals"}
+            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground shrink-0">
+              {data.insights.length}
             </span>
           )}
         </div>
         <Link
           href="/insights"
-          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap ml-auto"
         >
           <span>View hub</span>
           <ArrowUpRight className="size-3" />
@@ -114,7 +114,7 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
       {/* ── Content List ── */}
       <div className="p-4 flex-1">
         {topInsights.length > 0 ? (
-          <ScrollArea className="h-48 sm:h-[216px] pr-3.5">
+          <ScrollArea className="h-48 sm:h-[216px] pr-1.5">
             <ItemGroup className="gap-2">
               {topInsights.map((ins) => {
                 const Icon = CATEGORY_ICONS[ins.category] || Info
@@ -140,23 +140,23 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
                       <Item
                         asChild
                         variant="outline"
-                        size="sm"
-                        className="flex items-center justify-between p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors w-full min-w-0 cursor-pointer no-underline group overflow-hidden"
+                        size="xs"
+                        className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors w-full min-w-0 max-w-full cursor-pointer no-underline group overflow-hidden"
                       >
-                        <Link href={href} className="flex items-center justify-between w-full min-w-0 gap-2.5">
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <Link href={href} className="flex items-center justify-between w-full min-w-0 gap-2 overflow-hidden">
+                          <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                             <ItemMedia
                               className={cn(
-                                "size-8.5 rounded-xl flex items-center justify-center shrink-0 border border-border/50",
+                                "size-8 rounded-xl flex items-center justify-center shrink-0 border border-border/50",
                                 iconColor
                               )}
                             >
                               <Icon className="size-4" />
                             </ItemMedia>
-                            <ItemContent className="min-w-0 flex-1 gap-0">
+                            <ItemContent className="min-w-0 flex-1 gap-0 overflow-hidden">
                               <div className="flex items-center gap-1.5 min-w-0 w-full">
-                                <ItemTitle className="text-xs font-bold text-foreground truncate block min-w-0 shrink group-hover:text-primary transition-colors">
-                                  {cleanTitle}
+                                <ItemTitle className="text-xs font-bold text-foreground truncate min-w-0 flex-1 block w-auto max-w-full group-hover:text-primary transition-colors">
+                                  <span className="truncate block">{cleanTitle}</span>
                                 </ItemTitle>
                                 <Badge
                                   variant="outline"
@@ -173,13 +173,13 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
                               </ItemDescription>
                             </ItemContent>
                           </div>
-                          <ItemActions className="flex flex-col items-end shrink-0 text-right gap-0 ml-2">
-                            <p className="text-xs font-semibold text-foreground tabular-nums">
+                          <ItemActions className="flex flex-col items-end shrink-0 text-right gap-0.5 ml-1 max-w-[95px] sm:max-w-[125px]">
+                            <p className="text-xs font-semibold text-foreground tabular-nums truncate w-full text-right">
                               {ins.metricLabel || "Signal"}
                             </p>
                             <Badge
                               variant="outline"
-                              className="rounded-full px-1.5 py-0 text-[8px] font-bold uppercase tracking-wider h-3.5 mt-1 bg-muted/40 text-muted-foreground border-border/60"
+                              className="rounded-full px-1.5 py-0 text-[8px] font-bold uppercase tracking-wider h-3.5 bg-muted/40 text-muted-foreground border-border/60 truncate max-w-full"
                             >
                               {ins.category}
                             </Badge>

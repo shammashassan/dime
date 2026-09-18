@@ -29,6 +29,9 @@ import { ReportFilters } from "@/components/reports/report-filters"
 import { MonthlySummaryTable } from "@/components/reports/monthly-summary-table"
 import { ReportsNavTabs } from "@/components/reports/reports-nav-tabs"
 import { SpendingHeatmapView } from "@/components/reports/spending-heatmap-view"
+import { MonthlyReviewView } from "@/components/reports/monthly-review-view"
+import { MonthlyReviewFilters } from "@/components/reports/monthly-review-filters"
+import { getMonthlyReviewData } from "@/lib/queries/monthly-review"
 import { MetricCard } from "@/components/ui/metric-card"
 import { unstable_rethrow } from "next/navigation"
 import { BarChart3, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownRight } from "lucide-react"
@@ -40,6 +43,7 @@ async function ReportsContent({
 }: {
   searchParams: Promise<{
     tab?: string
+    month?: string
     monthsCount?: string
     categoryFrom?: string
     categoryTo?: string
@@ -53,60 +57,93 @@ async function ReportsContent({
   const userId = session.user.id
 
   const params = await searchParams
-  const activeTab = params.tab === "heatmap" ? "heatmap" : "overview"
+  const activeTab = params.tab === "review" ? "review" : params.tab === "heatmap" ? "heatmap" : "overview"
 
-  if (activeTab === "heatmap") {
-    try {
-      const [heatmapData, wallets, categories] = await Promise.all([
-        getSpendingHeatmapData(userId, {
-          metric: params.metric,
-          timeframe: params.timeframe,
-          walletId: params.walletId,
-          categoryId: params.categoryId,
-        }),
-        getWallets(userId),
-        getCategories(userId),
-      ])
-
-      return (
-        <div className="flex flex-col gap-7 w-full">
-          {/* Header Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
-              <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
-                <BarChart3 className="size-6" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Analyze spending patterns, habit streaks, and year-long financial activity heatmaps.
-                </p>
-              </div>
+  if (activeTab === "review") {
+    const reviewData = await getMonthlyReviewData(userId, params.month)
+    return (
+      <div className="flex flex-col gap-7 w-full">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
+            <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+              <BarChart3 className="size-6" />
             </div>
-
-            {/* Navigation Tabs */}
-            <div className="self-start lg:self-center shrink-0">
-              <Suspense fallback={null}>
-                <ReportsNavTabs />
-              </Suspense>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Analyze your income, expenses, category spending, and monthly financial reviews.
+              </p>
             </div>
           </div>
 
-          {/* Activity Heatmap View */}
-          <Suspense fallback={<ReportsSkeleton />}>
-            <SpendingHeatmapView
-              data={serializeData(heatmapData)}
-              wallets={serializeData(wallets)}
-              categories={serializeData(categories)}
-            />
-          </Suspense>
+          {/* Monthly Review Filters Component */}
+          <div className="self-start lg:self-center shrink-0">
+            <Suspense fallback={null}>
+              <MonthlyReviewFilters
+                availableMonths={reviewData.availableMonths}
+                currentMonth={reviewData.monthKey}
+              />
+            </Suspense>
+          </div>
         </div>
-      )
-    } catch (error) {
-      unstable_rethrow(error)
-      console.error("Failed to load spending heatmap:", error)
-      throw error
-    }
+
+        <MonthlyReviewView
+          data={serializeData(reviewData)}
+          navTabs={
+            <Suspense fallback={null}>
+              <ReportsNavTabs />
+            </Suspense>
+          }
+        />
+      </div>
+    )
+  }
+
+  if (activeTab === "heatmap") {
+    const [heatmapData, wallets, categories] = await Promise.all([
+      getSpendingHeatmapData(userId, {
+        metric: params.metric,
+        timeframe: params.timeframe,
+        walletId: params.walletId,
+        categoryId: params.categoryId,
+      }),
+      getWallets(userId),
+      getCategories(userId),
+    ])
+
+    return (
+      <div className="flex flex-col gap-7 w-full">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
+            <div className="p-3 bg-primary/10 text-primary rounded-2xl shrink-0 mt-0.5">
+              <BarChart3 className="size-6" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reports & Analytics</h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Analyze spending patterns, habit streaks, and year-long financial activity heatmaps.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Activity Heatmap View */}
+        <Suspense fallback={<ReportsSkeleton />}>
+          <SpendingHeatmapView
+            data={serializeData(heatmapData)}
+            wallets={serializeData(wallets)}
+            categories={serializeData(categories)}
+            navTabs={
+              <Suspense fallback={null}>
+                <ReportsNavTabs />
+              </Suspense>
+            }
+          />
+        </Suspense>
+      </div>
+    )
   }
 
   // Otherwise, load standard Overview & Trends tab
@@ -180,18 +217,13 @@ async function ReportsContent({
           </div>
         </div>
 
-        {/* Navigation Tabs + Global Date Filter Component */}
-        <div className="flex flex-col lg:items-end 2xl:flex-row 2xl:items-center gap-2.5 self-start lg:self-center shrink-0">
-          <div className="flex items-center">
-            <Suspense fallback={null}>
-              <ReportsNavTabs />
-            </Suspense>
-          </div>
+        {/* Global Date Filter Component */}
+        <div className="self-start lg:self-center shrink-0">
           <ReportFilters />
         </div>
       </div>
 
-      {/* MetricCards row */}
+      {/* MetricCards row with 3x2 balanced split */}
       <div className="flex flex-wrap gap-4">
         <MetricCard
           style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
@@ -228,6 +260,13 @@ async function ReportsContent({
           label="Avg Monthly Expense"
           value={formatCurrency((totalExpense / Math.max(1, monthsCount)) * 100, currency)}
         />
+      </div>
+
+      {/* Navigation Tabs — placed just below the metric cards */}
+      <div className="flex items-center">
+        <Suspense fallback={null}>
+          <ReportsNavTabs />
+        </Suspense>
       </div>
 
       {/* Bento grid of 6 charts */}

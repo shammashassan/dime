@@ -43,14 +43,16 @@ import {
 
 interface SpendingHeatmapViewProps {
   data: HeatmapViewModel
-  wallets: Array<{ _id: string | any; name: string; [key: string]: any }>
-  categories: Array<{ _id: string | any; name: string; [key: string]: any }>
+  wallets: Array<{ _id: string | { toString(): string }; name: string }>
+  categories: Array<{ _id: string | { toString(): string }; name: string }>
+  navTabs?: React.ReactNode
 }
 
 export function SpendingHeatmapView({
   data,
   wallets,
   categories,
+  navTabs,
 }: SpendingHeatmapViewProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -127,28 +129,24 @@ export function SpendingHeatmapView({
       {/* 1. Habit & Telemetry KPI Strip on top */}
       <div className="flex flex-wrap gap-4">
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 0.75rem))" }}
           icon={ShieldCheck}
           color="#10b981"
           label="Current No-Spend Streak"
           value={`${habits.currentNoSpendStreak} ${habits.currentNoSpendStreak === 1 ? "day" : "days"}`}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 0.75rem))" }}
           icon={Flame}
           color="#f59e0b"
           label="Longest No-Spend Streak"
           value={`${habits.longestNoSpendStreak} ${habits.longestNoSpendStreak === 1 ? "day" : "days"}`}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 0.75rem))" }}
           icon={TrendingDown}
           color="#8b5cf6"
           label="Daily Average Spend"
           value={formatCurrency(habits.dailyAverageSpend, data.currency)}
         />
         <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 0.75rem))" }}
           icon={CalendarDays}
           color="#3b82f6"
           label="Peak Spend Day"
@@ -160,7 +158,10 @@ export function SpendingHeatmapView({
         />
       </div>
 
-      {/* 2. Responsive Filters Card placed below KPI cards */}
+      {/* 2. Navigation Tabs placed just below the metric cards */}
+      {navTabs && <div className="flex items-center">{navTabs}</div>}
+
+      {/* 3. Responsive Filters Card placed below tabs */}
       <div className="p-4 rounded-2xl bg-card border border-border/60 shadow-xs">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
           {/* Metric Selector Dropdown */}
@@ -364,7 +365,7 @@ export function SpendingHeatmapView({
 
               <ContributionGraphFooter className="mt-4 px-1">
                 <ContributionGraphTotalCount>
-                  {({ totalCount, year }) => (
+                  {({ year }) => (
                     <div className="text-xs text-muted-foreground">
                       {habits.activeDaysCount} active days out of {habits.totalDays} days in {year}
                     </div>

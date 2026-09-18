@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
-import { BarChart3, CalendarDays } from "lucide-react"
+import { BarChart3, CalendarDays, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function ReportsNavTabs() {
@@ -10,14 +10,15 @@ export function ReportsNavTabs() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const currentTab = searchParams.get("tab") === "heatmap" ? "heatmap" : "overview"
+  const rawTab = searchParams.get("tab")
+  const currentTab = rawTab === "review" ? "review" : rawTab === "heatmap" ? "heatmap" : "overview"
 
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
-    if (value === "heatmap") {
-      params.set("tab", "heatmap")
-    } else {
+    if (value === "overview") {
       params.delete("tab")
+    } else {
+      params.set("tab", value)
     }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
@@ -47,6 +48,18 @@ export function ReportsNavTabs() {
       >
         <CalendarDays className="size-3.5 text-rose-500" />
         <span>Activity Heatmap</span>
+      </button>
+      <button
+        onClick={() => handleTabChange("review")}
+        className={cn(
+          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+          currentTab === "review"
+            ? "bg-background text-foreground shadow-xs font-semibold"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <FileText className="size-3.5 text-amber-500" />
+        <span>Monthly Review</span>
       </button>
     </div>
   )

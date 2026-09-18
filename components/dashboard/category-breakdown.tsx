@@ -112,18 +112,18 @@ export function CategoryBreakdown({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 whitespace-nowrap">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
             category breakdown
           </span>
-          <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground whitespace-nowrap">
+          <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground whitespace-nowrap shrink-0">
             This month
           </span>
         </div>
         <Link
           href="/reports"
-          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap ml-auto"
         >
           <span>View report</span>
           <ArrowUpRight className="size-3" />

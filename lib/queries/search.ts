@@ -182,6 +182,23 @@ const APP_PAGES: PageNavigationItem[] = [
     keywords: ["reports", "analytics", "charts", "trends", "spending trends", "breakdown"],
   },
   {
+    id: "page-monthly-review",
+    title: "Monthly Financial Review",
+    subtitle: "Month-by-month financial retrospective & wrapped summary",
+    url: "/reports?tab=review",
+    iconName: "FileText",
+    keywords: [
+      "monthly review",
+      "review",
+      "wrapped",
+      "month in review",
+      "financial review",
+      "monthly report",
+      "summary",
+      "retrospective",
+    ],
+  },
+  {
     id: "page-categories",
     title: "Categories",
     subtitle: "Transaction categories and tax classes",
@@ -325,6 +342,71 @@ export const searchEntities = cache(
           badge: { label: "Navigation", variant: "outline" },
         })
       })
+
+      // Dynamic Month & Year Review query matcher (e.g. "August Review", "August 2026 Review", "2026 Review")
+      const lowerQ = textQuery.toLowerCase()
+      const monthsMap: Record<string, { num: string; name: string }> = {
+        january: { num: "01", name: "January" },
+        jan: { num: "01", name: "January" },
+        february: { num: "02", name: "February" },
+        feb: { num: "02", name: "February" },
+        march: { num: "03", name: "March" },
+        mar: { num: "03", name: "March" },
+        april: { num: "04", name: "April" },
+        apr: { num: "04", name: "April" },
+        may: { num: "05", name: "May" },
+        june: { num: "06", name: "June" },
+        jun: { num: "06", name: "June" },
+        july: { num: "07", name: "July" },
+        jul: { num: "07", name: "July" },
+        august: { num: "08", name: "August" },
+        aug: { num: "08", name: "August" },
+        september: { num: "09", name: "September" },
+        sept: { num: "09", name: "September" },
+        sep: { num: "09", name: "September" },
+        october: { num: "10", name: "October" },
+        oct: { num: "10", name: "October" },
+        november: { num: "11", name: "November" },
+        nov: { num: "11", name: "November" },
+        december: { num: "12", name: "December" },
+        dec: { num: "12", name: "December" },
+      }
+
+      const yearMatch = lowerQ.match(/\b(202[0-9])\b/)
+      const currentYear = new Date().getFullYear()
+      const matchedYear = yearMatch ? yearMatch[1] : String(currentYear)
+
+      let matchedMonthInfo: { num: string; name: string } | null = null
+      for (const [mKey, mVal] of Object.entries(monthsMap)) {
+        if (new RegExp(`\\b${mKey}\\b`, "i").test(lowerQ)) {
+          matchedMonthInfo = mVal
+          break
+        }
+      }
+
+      if (
+        (lowerQ.includes("review") || lowerQ.includes("wrapped")) &&
+        (matchedMonthInfo || yearMatch)
+      ) {
+        const targetMonthNum = matchedMonthInfo
+          ? matchedMonthInfo.num
+          : String(Math.max(1, new Date().getMonth())).padStart(2, "0")
+        const monthKey = `${matchedYear}-${targetMonthNum}`
+        const monthTitle = matchedMonthInfo
+          ? `${matchedMonthInfo.name} ${matchedYear} Review`
+          : `${matchedYear} Monthly Review`
+
+        items.unshift({
+          id: `page-review-${monthKey}`,
+          entityType: "page",
+          title: monthTitle,
+          subtitle: `Open ${monthTitle} in Reports`,
+          url: `/reports?tab=review&month=${monthKey}`,
+          iconName: "FileText",
+          badge: { label: "Review", variant: "default" },
+        })
+        countsByEntity.page++
+      }
     }
 
     // Parallel entity queries

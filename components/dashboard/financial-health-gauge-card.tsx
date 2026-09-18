@@ -97,14 +97,14 @@ export function FinancialHealthGaugeCard({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
             financial health
           </span>
           <span
             className={cn(
-              "inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full border",
+              "inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full border shrink-0",
               currentTier.badgeClassName
             )}
           >
@@ -113,7 +113,7 @@ export function FinancialHealthGaugeCard({
         </div>
         <Link
           href="/health"
-          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0"
+          className="flex items-center gap-1 text-[11px] font-medium text-primary hover:underline shrink-0 whitespace-nowrap ml-auto"
         >
           <span>View hub</span>
           <ArrowUpRight className="size-3" />
