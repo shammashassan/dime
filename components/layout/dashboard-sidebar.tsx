@@ -28,18 +28,29 @@ import {
   Sparkles,
   History,
   Compass,
+  ChevronRight,
+  Bell,
 } from "lucide-react"
 import { SpaceSwitcher } from "@/components/layout/space-switcher"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
 import {
@@ -69,27 +80,78 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 
-const NAV_ITEMS = [
-  { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Transactions", href: "/transactions", icon: ArrowLeftRight },
-  { title: "Timeline", href: "/timeline", icon: History },
-  { title: "Wallets", href: "/wallets", icon: Wallet },
-  { title: "Investments", href: "/investments", icon: LineChart },
-  { title: "Net Worth", href: "/net-worth", icon: TrendingUp },
-  { title: "Planner", href: "/planner", icon: Calculator },
-  { title: "Calendar", href: "/calendar", icon: CalendarDays },
-  { title: "Health", href: "/health", icon: Activity },
-  { title: "Insights", href: "/insights", icon: Sparkles },
-  { title: "Coach", href: "/coach", icon: Compass },
-  { title: "Budgets", href: "/budgets", icon: PiggyBank },
-  { title: "Goals", href: "/goals", icon: Target },
-  { title: "Loans", href: "/loans", icon: HandCoins },
-  { title: "Contacts", href: "/contacts", icon: Users },
-  { title: "Shared Expenses", href: "/shared-expenses", icon: Users2 },
-  { title: "Recurring", href: "/recurring", icon: Repeat },
-  { title: "Reports", href: "/reports", icon: BarChart3 },
-  { title: "Categories", href: "/categories", icon: Tags },
+type NavSubItem = {
+  title: string
+  href: string
+}
+
+type NavItem = {
+  title: string
+  href?: string
+  icon: React.ComponentType<{ className?: string }>
+  items?: NavSubItem[]
+}
+
+export const NAV_MAIN: NavItem[] = [
+  {
+    title: "Overview",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Money",
+    icon: Wallet,
+    items: [
+      { title: "Transactions", href: "/transactions" },
+      { title: "Wallets", href: "/wallets" },
+      { title: "Investments", href: "/investments" },
+      { title: "Net Worth", href: "/net-worth" },
+    ],
+  },
+  {
+    title: "People",
+    icon: Users,
+    items: [
+      { title: "Contacts", href: "/contacts" },
+      { title: "Shared Expenses", href: "/shared-expenses" },
+      { title: "Loans", href: "/loans" },
+    ],
+  },
+  {
+    title: "Planning",
+    icon: CalendarDays,
+    items: [
+      { title: "Budgets", href: "/budgets" },
+      { title: "Goals", href: "/goals" },
+      { title: "Planner", href: "/planner" },
+      { title: "Calendar", href: "/calendar" },
+      { title: "Recurring", href: "/recurring" },
+    ],
+  },
+  {
+    title: "Insights",
+    icon: Sparkles,
+    items: [
+      { title: "Reports", href: "/reports" },
+      { title: "Health Score", href: "/health" },
+      { title: "AI Insights", href: "/insights" },
+      { title: "Financial Coach", href: "/coach" },
+    ],
+  },
+  {
+    title: "Organization",
+    icon: Tags,
+    items: [
+      { title: "Categories", href: "/categories" },
+    ],
+  },
 ]
+
+export const NAV_ITEMS = NAV_MAIN.flatMap((item) =>
+  item.items
+    ? item.items.map((sub) => ({ title: sub.title, href: sub.href, icon: item.icon }))
+    : [{ title: item.title, href: item.href!, icon: item.icon }]
+)
 
 type SidebarUser = {
   name?: string | null
@@ -106,42 +168,143 @@ function SidebarNav({
   onLinkClick: () => void
 }) {
   const pathname = usePathname()
+  const { state, setOpen } = useSidebar()
+  const isCollapsed = state === "collapsed"
+
+  const [openGroups, setOpenGroups] = React.useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    for (const item of NAV_MAIN) {
+      if (item.items) {
+        initial[item.title] = item.items.some((subItem) =>
+          subItem.href === "/dashboard"
+            ? pathname === "/dashboard"
+            : pathname.startsWith(subItem.href)
+        )
+      }
+    }
+    return initial
+  })
+
+  // Automatically expand group if user navigates to an item in a collapsed group
+  React.useEffect(() => {
+    for (const item of NAV_MAIN) {
+      if (item.items) {
+        const hasActive = item.items.some((subItem) =>
+          subItem.href === "/dashboard"
+            ? pathname === "/dashboard"
+            : pathname.startsWith(subItem.href)
+        )
+        if (hasActive && !openGroups[item.title]) {
+          setOpenGroups((prev) => ({ ...prev, [item.title]: true }))
+        }
+      }
+    }
+  }, [pathname])
 
   return (
     <>
-      <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
+      <SidebarGroup>
         <SidebarGroupLabel>Platform</SidebarGroupLabel>
-        <SidebarMenu>
-          {NAV_ITEMS.map((item) => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
+        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+          {NAV_MAIN.map((item) => {
+            const hasSubItems = Boolean(item.items && item.items.length > 0)
+
+            if (!hasSubItems && item.href) {
+              const isActive =
+                item.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname.startsWith(item.href)
+
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={isActive}
+                    className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
+                  >
+                    <Link href={item.href} onClick={onLinkClick}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            }
+
+            const isGroupActive = item.items?.some((subItem) =>
+              subItem.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(subItem.href)
+            )
+
+            const isOpen = isCollapsed ? false : (openGroups[item.title] ?? isGroupActive ?? false)
+
+            return (
+              <Collapsible
+                key={item.title}
                 asChild
-                tooltip={item.title}
-                isActive={
-                  item.href === "/dashboard"
-                    ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href)
-                }
+                open={isOpen}
+                onOpenChange={(open) => {
+                  setOpenGroups((prev) => ({ ...prev, [item.title]: open }))
+                }}
+                className="group/collapsible"
               >
-                <Link href={item.href} onClick={onLinkClick}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      isActive={isGroupActive}
+                      className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
+                      onClick={() => {
+                        if (isCollapsed) {
+                          setOpen(true)
+                          setOpenGroups((prev) => ({ ...prev, [item.title]: true }))
+                        }
+                      }}
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => {
+                        const isSubActive =
+                          subItem.href === "/dashboard"
+                            ? pathname === "/dashboard"
+                            : pathname.startsWith(subItem.href)
+
+                        return (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton asChild isActive={isSubActive}>
+                              <Link href={subItem.href} onClick={onLinkClick}>
+                                <span>{subItem.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        )
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroup>
 
       {isAdmin && (
-        <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
+        <SidebarGroup className="mt-auto">
           <SidebarGroupLabel>Admin</SidebarGroupLabel>
-          <SidebarMenu>
+          <SidebarMenu className="group-data-[collapsible=icon]:items-center">
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
                 tooltip="User Management"
                 isActive={pathname.startsWith("/admin")}
+                className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
               >
                 <Link href="/admin/users" onClick={onLinkClick}>
                   <Shield />
@@ -157,26 +320,97 @@ function SidebarNav({
 }
 
 function SidebarNavFallback({
+  isAdmin = false,
   onLinkClick,
 }: {
+  isAdmin?: boolean
   onLinkClick: () => void
 }) {
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:mt-2">
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
-      <SidebarMenu>
-        {NAV_ITEMS.map((item) => (
-          <SidebarMenuItem key={item.href}>
-            <SidebarMenuButton asChild tooltip={item.title} isActive={false}>
-              <Link href={item.href} onClick={onLinkClick}>
-                <item.icon />
-                <span>{item.title}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
+    <>
+      <SidebarGroup>
+        <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+          {NAV_MAIN.map((item) => {
+            const hasSubItems = Boolean(item.items && item.items.length > 0)
+
+            if (!hasSubItems && item.href) {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.title}
+                    isActive={false}
+                    className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
+                  >
+                    <Link href={item.href} onClick={onLinkClick}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            }
+
+            return (
+              <Collapsible
+                key={item.title}
+                asChild
+                defaultOpen={true}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild isActive={false}>
+                            <Link href={subItem.href} onClick={onLinkClick}>
+                              <span>{subItem.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )
+          })}
+        </SidebarMenu>
+      </SidebarGroup>
+
+      {isAdmin && (
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="User Management"
+                isActive={false}
+                className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
+              >
+                <Link href="/admin/users" onClick={onLinkClick}>
+                  <Shield />
+                  <span>User Management</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+      )}
+    </>
   )
 }
 
@@ -234,7 +468,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
 
       {/* ── Navigation ── */}
       <SidebarContent>
-        <React.Suspense fallback={<SidebarNavFallback onLinkClick={handleLinkClick} />}>
+        <React.Suspense fallback={<SidebarNavFallback isAdmin={isAdmin} onLinkClick={handleLinkClick} />}>
           <SidebarNav isAdmin={isAdmin} onLinkClick={handleLinkClick} />
         </React.Suspense>
       </SidebarContent>
@@ -285,6 +519,12 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
+                    <DropdownMenuItem asChild>
+                      <Link href="/notifications" onClick={handleLinkClick}>
+                        <Bell className="mr-2 h-4 w-4" />
+                        Notifications
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/settings" onClick={handleLinkClick}>
                         <Cog className="mr-2 h-4 w-4" />
