@@ -151,7 +151,7 @@ export function LandingSecurity() {
           >
             <Card
               ref={rightCardRef}
-              className="relative aspect-auto min-h-[380px] w-full max-w-md md:aspect-square rounded-[2.5rem]
+              className="relative aspect-auto min-h-95 w-full max-w-md md:aspect-square rounded-[2.5rem]
                 border border-border/50 bg-background shadow-2xl flex flex-col justify-center items-center
                 overflow-hidden transform-gpu"
               style={{ opacity: 0 }}

@@ -6,23 +6,23 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import {
   CheckCircle,
-  Scissors,
+  Sparkles,
+  TrendingUp,
   Handshake,
+  CalendarDays,
+  Activity,
   Repeat,
-  Target,
-  ArrowLeftRight,
-  BarChart3,
 } from "lucide-react"
 
 gsap.registerPlugin(ScrollTrigger)
 
 const dimeModules = [
-  { id: "split", title: "Transaction Splitting", desc: "Split transaction records into multiple categories & tags.", icon: Scissors },
-  { id: "loans", title: "Loans & Lending", desc: "Track personal lending, debts, and interest rates with contacts.", icon: Handshake },
-  { id: "recurring", title: "Recurring Platform", desc: "Manage recurring bills, subscriptions, and income schedules.", icon: Repeat },
-  { id: "goals", title: "Financial Goals", desc: "Define targets for savings or emergency funds and track progress.", icon: Target },
-  { id: "importer", title: "CSV / Bank Importer", desc: "Import transactions in bulk using our column mapping wizard.", icon: ArrowLeftRight },
-  { id: "reports", title: "Dynamic Reports", desc: "Inspect monthly trend lines, category breakdowns, and analytics.", icon: BarChart3 },
+  { id: "coach", title: "AI Financial Coach", desc: "Context-aware advisory analyzing runway, spending habits, and smart cuts.", icon: Sparkles },
+  { id: "investments", title: "Investment Portfolio", desc: "Track stocks, crypto, and real estate with live cost basis and returns.", icon: TrendingUp },
+  { id: "debts", title: "Group Debt Simplification", desc: "Splitwise-style debt simplification across shared spaces and group trips.", icon: Handshake },
+  { id: "cashflow", title: "Cash Flow Calendar", desc: "Day-by-day forward balance forecasting with bill due dates and paydays.", icon: CalendarDays },
+  { id: "health", title: "Financial Health Score", desc: "0–100 composite benchmark measuring liquidity, debt, and savings velocity.", icon: Activity },
+  { id: "subscriptions", title: "Subscription & Bill Radar", desc: "Automated renewal detection, trial tracking, and price surge alerts.", icon: Repeat },
 ]
 
 export function LandingWhy() {
@@ -86,11 +86,11 @@ export function LandingWhy() {
             </p>
             <div className="why-reveal-item grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               {[
-                "Isolated organization spaces",
+                "Group debt simplification",
+                "Cash flow calendar & forecast",
+                "AI financial coach & insights",
                 "Biometric passkey sign-ins",
-                "Advanced transaction splitting",
                 "Hourly exchange rate caching",
-                "Protected Cron automation logs",
                 "Self-ownership data export",
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">

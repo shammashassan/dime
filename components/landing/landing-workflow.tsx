@@ -12,20 +12,20 @@ const workflowSteps = [
   {
     step: "01",
     icon: <Inbox className="size-6 text-primary" />,
-    title: "Capture",
-    description: "Instantly intake transaction records from drag-and-drop receipt scans, bank CSV files, or immediate manual logging.",
+    title: "Capture & Ingest",
+    description: "Intake transactions effortlessly via Gemini AI receipt OCR, bank CSV imports, multi-currency accounts, or instant ⌘K quick logs.",
   },
   {
     step: "02",
     icon: <Cpu className="size-6 text-purple-500" />,
-    title: "Process",
-    description: "Gemini AI models automatically extract vendor details, classify categories, match exchange rates, and flag anomalies.",
+    title: "Automate & Settle",
+    description: "Execute custom IF/THEN automation rules, track subscription and bill renewals, split expenses, and simplify group debts.",
   },
   {
     step: "03",
     icon: <Layers className="size-6 text-indigo-500" />,
-    title: "Retrieve",
-    description: "Instantly build dashboard report views, inspect monthly trend vectors, and export sanitized net-worth audit histories.",
+    title: "Forecast & Grow",
+    description: "Visualize cash flow calendars, dynamic net worth trajectories, financial health benchmarks, and consult your AI Financial Coach.",
   },
 ]
 

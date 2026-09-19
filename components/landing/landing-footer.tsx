@@ -27,9 +27,7 @@ const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-function DynamicYear() {
-  return <>{new Date().getFullYear()}</>
-}
+import { CurrentYear } from "@/components/layout/current-year"
 
 export function LandingFooter() {
   return (
@@ -102,7 +100,7 @@ export function LandingFooter() {
 
         <div className="mt-12 pt-8 border-t border-border/20 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            © <React.Suspense fallback={<>2026</>}><DynamicYear /></React.Suspense> Dime Finance. All rights reserved. Self-owned workspace data.
+            © <CurrentYear /> Dime Finance. All rights reserved. Self-owned workspace data.
           </p>
         </div>
       </div>

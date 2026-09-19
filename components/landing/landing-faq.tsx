@@ -34,6 +34,14 @@ const faqItems = [
     answer: "Dime aggregates your balances across all accounts and assets, including cash, bank accounts, real estate, and personal loans (Loans & Lending tracker). It automatically records monthly valuation logs and displays your total net worth over time with a fully interactive historical trend chart."
   },
   {
+    question: "How does the Subscription & Bill Manager work?",
+    answer: "Dime separates recurring subscriptions (like Netflix, Spotify, or SaaS) from periodic bills (utilities, rent, or insurance). It tracks upcoming renewal dates, warns you before free trials end, highlights unexpected price increases, and projects their impact on your monthly cash flow."
+  },
+  {
+    question: "What are Group Debt Simplification and the AI Financial Coach?",
+    answer: "Group Debt Simplification automatically calculates the minimum number of direct payments needed to settle shared group expenses and trips (Splitwise-style). Meanwhile, the AI Financial Coach acts as an on-demand advisor, analyzing your spending velocity, recurring burn, and runway to answer questions and offer actionable optimizations."
+  },
+  {
     question: "How does the multi-currency system work?",
     answer: "Dime updates and caches exchange rates hourly. You can set individual currencies for each wallet, and Dime will automatically calculate conversions and display your total net worth in your preferred base currency."
   }

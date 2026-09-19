@@ -11,7 +11,7 @@ Dime is a secure, production-ready, full-stack personal finance tracker. It prov
 - **Emails**: Resend integration (with console.log fallback)
 
 ## Public URL
-https://dime-finance.vercel.app/
+https://dime-tracker.vercel.app/
 
 ## Features
 - **Public Landing Page**: Premium designed hero, feature bento, interactive conversion showcases, and security highlights.
@@ -26,7 +26,15 @@ https://dime-finance.vercel.app/
 - **Budgets**: Threshold alerts (0-100%), periods (daily, weekly, monthly, yearly), and visual progress bars.
 - **Recurring Platform**: Automated bill tracking, subscription alerts, and recurring income scheduling, integrated with system alerts and automated cron runner processing (`/api/cron/process-recurring`).
 - **Automation Rules Engine**: Define triggers based on merchant names, wallets, or transaction amounts to automatically categorize, tag, or split transactions as they arrive.
+- **Investments & Portfolio Tracking**: Multi-currency portfolio monitoring, holdings management, asset allocations, capital gains, dividend tracking, and watchlists (`/investments`).
 - **Net Worth Dashboard**: Real-time asset valuation tracker, historical net worth trend charts, asset class categorization, and sub-asset detail pages.
+- **Cash Flow Calendar**: Day-by-day cash balance trajectory, upcoming bills, subscriptions, and liquidity forecasting (`/calendar`).
+- **Financial Health Score**: Comprehensive financial wellness assessment, emergency savings runway, and debt-to-income ratio calculations (`/health`).
+- **Financial Planner & Scenarios**: Long-term future simulations, baseline projections, stress-testing finances, and life scenario modeling (`/planner`).
+- **Financial Coach**: Automated optimization strategies, debt payoff modeling, and contextual personal financial coaching (`/coach`).
+- **AI Spending Insights**: Automated anomaly detection, recurring subscription tracking, and intelligent spending optimization (`/insights`).
+- **Financial Timeline**: Chronological narrative feed of financial events, transactions, debt milestones, and goal accomplishments (`/timeline`).
+- **Search Hub**: Unified global search across transactions, accounts, budgets, goals, recurring platforms, and investment holdings (`/search`).
 - **Loans & Lending (Personal Lending)**: Manage debts, record loan principal payments and interest, link with contacts, and view status logs.
 - **Couples & Shared Budgeting (Spaces)**: Secure organization spaces with email invites, role-based controls, and clean separation between personal and shared financial contexts.
 - **Visual Reports**: Area trend, category breakdowns, day-of-week spend bars, net savings, and budget performance charts.
@@ -38,6 +46,7 @@ https://dime-finance.vercel.app/
 All `/api/*` endpoints (except public auth handlers) require verified user sessions:
 - `/api/auth/*` (Better Auth handlers)
 - `/api/cron/process-recurring` (Protected by `CRON_SECRET` header)
+- `/api/cron/process-loan-reminders` (Protected by `CRON_SECRET` header)
 
 ## Access Policy
 - Dashboard and admin routes require active, approved sessions.
@@ -65,18 +74,27 @@ Avoid:
 - `/2fa`
 - `/pending-approval`
 - `/accept-invitation`
-- `/dashboard`
-- `/transactions`
-- `/wallets`
-- `/budgets`
-- `/goals`
-- `/recurring`
-- `/reports`
-- `/categories`
-- `/settings`
 - `/admin`
+- `/budgets`
+- `/calendar`
+- `/categories`
+- `/coach`
+- `/contacts`
+- `/dashboard`
+- `/goals`
+- `/health`
+- `/insights`
+- `/investments`
 - `/loans`
 - `/net-worth`
-- `/contacts`
 - `/notifications`
+- `/planner`
+- `/recurring`
+- `/reports`
+- `/search`
+- `/settings`
+- `/shared-expenses`
+- `/timeline`
+- `/transactions`
+- `/wallets`
 - `/api/*`

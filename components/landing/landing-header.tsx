@@ -97,7 +97,7 @@ export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
             <ModeToggle />
             <Button asChild className="rounded-full shadow-md shadow-primary/20 cursor-pointer font-semibold">
               <Link href={session ? "/dashboard" : "/sign-in"}>
-                Open Workspace
+                {session ? "Open Workspace" : "Sign In"}
               </Link>
             </Button>
           </div>
@@ -142,7 +142,7 @@ export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
             <div className="mt-4 pt-2">
               <Button asChild size="lg" className="rounded-full cursor-pointer font-semibold w-full shadow-md shadow-primary/20">
                 <Link href={session ? "/dashboard" : "/sign-in"} onClick={() => setMobileMenuOpen(false)}>
-                  Open Workspace
+                  {session ? "Open Workspace" : "Sign In"}
                 </Link>
               </Button>
             </div>

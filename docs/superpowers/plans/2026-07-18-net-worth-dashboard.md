@@ -1032,7 +1032,7 @@ We will create and modify the following files:
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[480px]">
+        <DialogContent className="sm:max-w-120">
           <DialogHeader>
             <DialogTitle>{isEdit ? "Edit Asset or Liability" : "Add Asset or Liability"}</DialogTitle>
             <DialogDescription>
@@ -1229,7 +1229,7 @@ We will create and modify the following files:
 
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[400px]">
+        <DialogContent className="sm:max-w-100
           <DialogHeader>
             <DialogTitle>Log Valuation</DialogTitle>
             <DialogDescription>
@@ -1570,7 +1570,7 @@ We will create and modify the following files:
               </TabsList>
             </Tabs>
           </CardHeader>
-          <CardContent className="h-[300px] w-full pt-4">
+          <CardContent className="h-75 w-full pt-4">
             {filteredHistory.length > 0 ? (
               <ChartContainer config={chartConfig} className="h-full w-full">
                 <AreaChart data={filteredHistory.map(h => ({
@@ -1906,8 +1906,8 @@ We will create and modify the following files:
       <Suspense fallback={
         <div className="flex flex-col gap-6 w-full animate-pulse">
           <div className="h-14 w-64 bg-muted rounded-2xl" />
-          <div className="grid grid-cols-4 gap-4 h-[90px]" />
-          <div className="h-[380px] bg-muted rounded-2xl" />
+          <div className="grid grid-cols-4 gap-4 h-22.5" />
+          <div className="h-95 bg-muted rounded-2xl" />
         </div>
       }>
         <NetWorthDashboardContent />
@@ -2102,7 +2102,7 @@ We will create and modify the following files:
                 <Calendar className="mr-2 h-4 w-4" /> Log Valuation
               </Button>
             </CardHeader>
-            <CardContent className="h-[240px] w-full pt-4">
+            <CardContent className="h-60 w-full pt-4">
               {chartData.length > 0 ? (
                 <ChartContainer config={chartConfig} className="h-full w-full">
                   <LineChart data={chartData} margin={{ left: 12, right: 12 }}>
