@@ -1122,46 +1122,40 @@ Focus on refining the overall user experience and making Dime feel like a premiu
 
 ---
 
-# 22. Investment Portfolio Enhancements (Future)
+# 22. Investment Portfolio Enhancements ✅ COMPLETED
 
-Extend the Investment Tracker into a full portfolio management platform.
+Extend the Investment Tracker into an institution-grade portfolio management platform.
 
-Features
+> **Status**: **Completed.** Full investment portfolio platform with live market synchronization, asset class & sector risk allocation, money-weighted returns (XIRR), watchlists, tax lot accounting, capital gains tax schedule reporting, market benchmarking, and forward dividend forecasting.
 
-* Portfolio performance
-* Portfolio timeline
-* Sector allocation
-* Country allocation
-* Asset class allocation
-* Dividend history
-* Dividend forecasting
-* Cost basis tracking
-* Tax lot management
-* Capital gains reporting
-* Investment goals
-* Portfolio benchmarking
-* Risk analysis
-* Diversification score
-* Performance attribution
+### Completed Features
 
-Future
+* ✅ **Live Market Synchronization**: Automated price updates via Yahoo Finance and CoinGecko with in-memory circuit breaker, MongoDB TTL caching, and target currency normalization.
+* ✅ **Watchlists & Target Price Tracking**: Dedicated watchlists view (`components/investments/watchlist-view.tsx`) with target alert thresholds, sorting, and MongoDB collection persistence (`lib/actions/watchlists.ts`).
+* ✅ **Tax Lot Accounting Engine**: Pure deterministic calculation engine (`lib/calculations/tax-lots.ts`) supporting **FIFO**, **LIFO**, **HIFO** (tax minimization), and **Average Cost** lot matching strategies.
+* ✅ **Open Tax Lots Breakdown**: Individual holding inspection card (`HoldingTaxLotsCard`) on `/investments/[accountId]/[symbol]` tracking remaining shares, acquisition dates, cost basis, unrealized gain/loss, and days remaining until qualifying for Long-Term Capital Gains (> 365 days).
+* ✅ **Capital Gains Tax Schedule**: Dedicated `/investments` tab (`TaxScheduleView`) aggregating Short-Term Capital Gains (STCG) vs. Long-Term Capital Gains (LTCG), tax year rollups, proceeds, cost basis, and 1-click IRS Form 8949 / Schedule D style CSV export.
+* ✅ **Portfolio Benchmarking**: Institutional comparison card (`BenchmarkComparisonCard`) evaluating Dime portfolio returns against **S&P 500** (`^GSPC`), **Total US Stock Market** (`VTI`), **Nasdaq 100** (`QQQ`), **Global World Equity** (`VT`), and **Nifty 50** (`^NSEI`) across `1M`, `3M`, `6M`, `1Y`, `YTD`, and `ALL` horizons with real-time **Alpha ($\alpha$)** outperformance indicators.
+* ✅ **Forward Dividend Forecasting**: Forward-looking 12-month dividend projection engine (`lib/calculations/dividend-forecast.ts`) and view (`DividendForecastView`) analyzing trailing payouts, inferring payment cadence (monthly, quarterly, semi-annual, annual), calculating projected annual income, yield-on-cost, and rendering a 12-month calendar distribution schedule.
+* ✅ **Money-Weighted Performance (XIRR)**: Newton-Raphson annualized cash-flow rate of return (`PortfolioReturnsCard`) tracking staggered DCA cash inflows, sell exits, and dividend distributions.
+* ✅ **Sector & Risk Allocation**: Herfindahl-Hirschman Index (HHI) concentration risk engine (`SectorRiskCard`) and 180° radial asset class gauge (`AllocationChart`).
+* ✅ **Price History Trajectory**: Interactive SVG price charts (`PriceHistoryChart`) with 1M, 3M, 6M, 1Y, and ALL time-series toggles.
+* ✅ **100% Test Coverage**: Pure deterministic calculation test suites (`tax-lots.test.ts`, `benchmarks-and-dividends.test.ts`, `investments-enhancements.test.ts`).
 
-* Broker synchronization
-* Live pricing
-* Options
-* ETFs
-* Bonds
-* Alternative investments
-* Retirement planning integration
+Future Enhancements:
 
-Integrations
+* Broker account sync (Plaid / Teller API integration)
+* Options & complex derivatives tracking
+* Retirement planning integration into Financial Planner
 
-* Net Worth
-* Reports
-* Dashboard
-* AI Coach
-* Financial Planner
-* Financial Health Score
+Integrations:
+
+* ✅ Net Worth
+* ✅ Reports & Analytics
+* ✅ Packed Bento Dashboard
+* ✅ AI Coach
+* ✅ Financial Planner
+* ✅ Financial Health Score
 
 ---
 

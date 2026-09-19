@@ -122,22 +122,22 @@ export function ReviewSpendingBreakdown({
 
       <div className="p-4 flex-1">
         {activeData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-[216px] text-center text-muted-foreground text-sm gap-2">
+          <div className="flex flex-col items-center justify-center h-54 text-center text-muted-foreground text-sm gap-2">
             <div className="size-10 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground mb-1 shadow-xs">
               <PieChartIcon className="size-5" />
             </div>
             <p className="font-semibold text-foreground text-xs">No Categorized Expenses</p>
-            <p className="text-[11px] max-w-[200px] leading-normal text-muted-foreground">
+            <p className="text-[11px] max-w-50ing-normal text-muted-foreground">
               Zero expense transactions were categorized during this review period.
             </p>
           </div>
         ) : (
-          <div className="flex flex-col xl:flex-row items-center justify-between gap-4 h-full min-h-[216px]">
+          <div className="flex flex-col xl:flex-row items-center justify-between gap-4 h-full min-h-54">
             {/* Radial Arc Gauge (Centered on Top for < xl, Left for >= xl) */}
             <div className="w-full xl:w-[44%] flex items-center justify-center shrink-0">
               <ChartContainer
                 config={chartConfig}
-                className="w-full max-w-[280px] h-[130px] sm:h-[140px] mx-auto overflow-visible"
+                className="w-full max-w-70 h-32.5 sm:h-35 mx-auto overflow-visible"
               >
                 <PieChart margin={{ top: 0, bottom: 0, left: 8, right: 8 }}>
                   <Pie
@@ -197,7 +197,7 @@ export function ReviewSpendingBreakdown({
                           return (
                             <>
                               <div
-                                className="size-2.5 shrink-0 rounded-[2px]"
+                                className="size-2.5 shrink-0 rounded-xs"
                                 style={{ backgroundColor: color }}
                               />
                               <div className="flex flex-1 justify-between items-center leading-none gap-2">
@@ -218,7 +218,7 @@ export function ReviewSpendingBreakdown({
 
             {/* Category List with ScrollArea below on < xl, right on >= xl */}
             <div className="w-full xl:w-[56%] border-t xl:border-t-0 xl:border-l border-border/30 pt-3 xl:pt-0 xl:pl-4 flex flex-col justify-center min-w-0 flex-1">
-              <ScrollArea className="h-36 sm:h-40 xl:h-[216px] w-full pr-1 [&>div>div]:!block">
+              <ScrollArea className="h-36 sm:h-40 xl:h-54 w-full pr-1 [&>div>div]:block!">
                 <ItemGroup className="gap-1.5 w-full min-w-0">
                   {activeData.map((entry, index) => {
                     const isSelected = activeIndex === index

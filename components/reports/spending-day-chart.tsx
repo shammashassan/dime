@@ -1,27 +1,20 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
+import * as React from "react"
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { formatCurrency, cn } from "@/lib/utils"
 
-import { formatCurrency } from "@/lib/utils"
-
-interface SpendingDayChartProps {
+export interface SpendingDayChartProps {
   data: { day: string; amount: number }[]
   currency?: string
+  className?: string
 }
 
 const chartConfig = {
@@ -31,17 +24,37 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function SpendingDayChart({ data, currency = "USD" }: SpendingDayChartProps) {
+export function SpendingDayChart({
+  data = [],
+  currency = "USD",
+  className,
+}: SpendingDayChartProps) {
+  const hasData = data.some((d) => d.amount > 0)
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-bold">Spending by Day of Week</CardTitle>
-        <CardDescription>Aggregate expenses by weekday over the last 30 days</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {data.some((d) => d.amount > 0) ? (
-          <ChartContainer config={chartConfig}>
-            <BarChart accessibilityLayer data={data}>
+    <Card
+      className={cn(
+        "@container/card bento-tile flex h-full flex-col justify-between border-border/50 p-5 shadow-xs",
+        className
+      )}
+    >
+      {/* Micro-header */}
+      <div className="flex items-center justify-between pb-2 border-b border-border/30 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
+            spending rhythm
+          </span>
+          <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground whitespace-nowrap shrink-0">
+            7 days
+          </span>
+        </div>
+      </div>
+
+      {/* Chart Body */}
+      <div className="flex-1 min-w-0 pt-1">
+        {hasData ? (
+          <ChartContainer config={chartConfig} className="aspect-auto h-48 w-full">
+            <BarChart accessibilityLayer data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="day"
@@ -54,43 +67,35 @@ export function SpendingDayChart({ data, currency = "USD" }: SpendingDayChartPro
                 cursor={false}
                 content={
                   <ChartTooltipContent
-                    hideLabel
-                    formatter={(value, name, item) => (
-                      <>
-                        <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-[2px]"
-                          style={{
-                            backgroundColor: item.color || item.payload?.fill,
-                          }}
-                        />
-                        <div className="flex flex-1 justify-between items-center leading-none">
-                          <span className="text-muted-foreground">Spending:</span>
-                          <span className="font-mono font-bold text-foreground ml-2">
-                            {formatCurrency(Number(value) * 100, currency)}
-                          </span>
+                    indicator="dot"
+                    formatter={(value) => (
+                      <div className="flex flex-1 justify-between items-center leading-none gap-4">
+                        <div className="flex items-center gap-1.5">
+                          <div
+                            className="size-2.5 shrink-0 rounded-xs"
+                            style={{
+                              backgroundColor: "var(--chart-1)",
+                            }}
+                          />
+                          <span className="text-muted-foreground font-medium">Spending</span>
                         </div>
-                      </>
+                        <span className="font-mono font-bold text-foreground">
+                          {formatCurrency(Number(value) * 100, currency)}
+                        </span>
+                      </div>
                     )}
                   />
                 }
               />
-              <Bar dataKey="amount" fill="var(--color-amount)" radius={8} isAnimationActive={true} />
+              <Bar dataKey="amount" fill="var(--color-amount)" radius={[4, 4, 0, 0]} maxBarSize={32} />
             </BarChart>
           </ChartContainer>
         ) : (
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground text-sm">
-            No spending recorded in the last 30 days.
+          <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+            No spending recorded across days of week.
           </div>
         )}
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 leading-none font-medium">
-          Weekday spending breakdown <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing aggregate expenses for the last 30 days
-        </div>
-      </CardFooter>
+      </div>
     </Card>
   )
 }

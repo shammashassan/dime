@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import * as React from "react"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ArrowUp, ArrowDown, Download } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { ArrowUpDown, ArrowUp, ArrowDown, Download, FileSpreadsheet } from "lucide-react"
+import { formatCurrency, cn } from "@/lib/utils"
 
 interface TrendDataItem {
   month: string
@@ -12,22 +12,14 @@ interface TrendDataItem {
   expense: number
 }
 
-interface MonthlySummaryTableProps {
+export interface MonthlySummaryTableProps {
   data: TrendDataItem[]
   currency: string
+  className?: string
 }
 
 type SortKey = "month" | "income" | "expense" | "netSavings" | "savingsRate"
 type SortDir = "asc" | "desc"
-
-function formatVal(val: number, currency: string) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    notation: "compact",
-    maximumFractionDigits: 0,
-  }).format(val)
-}
 
 const monthMap: Record<string, number> = {
   Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
@@ -44,11 +36,11 @@ function parseMonthYear(monthStr: string): number {
   return year * 12 + month
 }
 
-export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>("month")
-  const [sortDir, setSortDir] = useState<SortDir>("asc")
+export function MonthlySummaryTable({ data, currency, className }: MonthlySummaryTableProps) {
+  const [sortKey, setSortKey] = React.useState<SortKey>("month")
+  const [sortDir, setSortDir] = React.useState<SortDir>("desc")
 
-  const rows = useMemo(() => {
+  const rows = React.useMemo(() => {
     return data.map((item) => {
       const netSavings = item.income - item.expense
       const savingsRate = item.income > 0 ? (netSavings / item.income) * 100 : 0
@@ -56,7 +48,7 @@ export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps
     })
   }, [data])
 
-  const sorted = useMemo(() => {
+  const sorted = React.useMemo(() => {
     return [...rows].sort((a, b) => {
       let cmp = 0
       if (sortKey === "month") {
@@ -73,7 +65,7 @@ export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps
       setSortDir((prev) => (prev === "asc" ? "desc" : "asc"))
     } else {
       setSortKey(key)
-      setSortDir("asc")
+      setSortDir("desc")
     }
   }
 
@@ -91,23 +83,23 @@ export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `monthly-summary-${new Date().toISOString().split("T")[0]}.csv`
+    a.download = `monthly-ledger-${new Date().toISOString().split("T")[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
 
   const SortIcon = ({ col }: { col: SortKey }) => {
-    if (sortKey !== col) return <ArrowUpDown className="size-3.5 text-muted-foreground/50 ml-1" />
-    if (sortDir === "asc") return <ArrowUp className="size-3.5 text-primary ml-1" />
-    return <ArrowDown className="size-3.5 text-primary ml-1" />
+    if (sortKey !== col) return <ArrowUpDown className="size-3 text-muted-foreground/40 ml-1" />
+    if (sortDir === "asc") return <ArrowUp className="size-3 text-primary ml-1" />
+    return <ArrowDown className="size-3 text-primary ml-1" />
   }
 
-  const headerBtn = (label: string, col: SortKey, className?: string) => (
+  const headerBtn = (label: string, col: SortKey, alignment: string = "") => (
     <button
       onClick={() => handleSort(col)}
       className={cn(
-        "flex items-center gap-0.5 text-xs uppercase tracking-wider font-semibold text-muted-foreground hover:text-foreground transition-colors",
-        className
+        "flex items-center gap-0.5 text-[11px] uppercase tracking-wider font-semibold font-mono text-muted-foreground hover:text-foreground transition-colors cursor-pointer",
+        alignment
       )}
     >
       {label}
@@ -115,8 +107,8 @@ export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps
     </button>
   )
 
-  // Totals row
-  const totals = useMemo(() => {
+  // Cumulative totals
+  const totals = React.useMemo(() => {
     const totalIncome = rows.reduce((s, r) => s + r.income, 0)
     const totalExpense = rows.reduce((s, r) => s + r.expense, 0)
     const totalNet = totalIncome - totalExpense
@@ -125,45 +117,62 @@ export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps
   }, [rows])
 
   return (
-    <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div>
-          <CardTitle className="text-lg font-bold">Monthly Performance Summary</CardTitle>
-          <CardDescription>
-            Month-by-month income, expenses, net savings, and savings rate
-          </CardDescription>
+    <Card
+      className={cn(
+        "bento-tile flex flex-col justify-between border-border/50 bg-card shadow-xs rounded-2xl overflow-hidden p-0 py-0 gap-0",
+        className
+      )}
+    >
+      {/* Micro-header */}
+      <div className="flex items-center justify-between px-5 py-3 border-b border-border/40 gap-3">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
+            historical // ledger
+          </span>
+          {data.length > 0 && (
+            <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground whitespace-nowrap shrink-0">
+              {data.length}m
+            </span>
+          )}
         </div>
+
         <Button
           variant="outline"
           size="sm"
           onClick={handleExportCSV}
-          className="self-start rounded-xl border-border/40 flex items-center gap-1.5 text-xs font-semibold"
+          className="self-start sm:self-center h-8 rounded-xl border-border/40 flex items-center gap-1.5 text-xs font-semibold"
         >
           <Download className="size-3.5" />
           Export CSV
         </Button>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border/40 bg-muted/30">
+      </div>
+
+      {/* Table Body */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="border-b border-border/40 bg-muted/20">
+            <tr>
+              <th className="text-left px-5 py-3">{headerBtn("Month", "month")}</th>
+              <th className="text-right px-5 py-3">{headerBtn("Income", "income", "ml-auto")}</th>
+              <th className="text-right px-5 py-3">{headerBtn("Expenses", "expense", "ml-auto")}</th>
+              <th className="text-right px-5 py-3">{headerBtn("Net Savings", "netSavings", "ml-auto")}</th>
+              <th className="text-right px-5 py-3">{headerBtn("Savings Rate", "savingsRate", "ml-auto")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.length === 0 ? (
               <tr>
-                <th className="text-left px-4 py-3">{headerBtn("Month", "month")}</th>
-                <th className="text-right px-4 py-3">{headerBtn("Income", "income", "ml-auto")}</th>
-                <th className="text-right px-4 py-3">{headerBtn("Expenses", "expense", "ml-auto")}</th>
-                <th className="text-right px-4 py-3">{headerBtn("Net Savings", "netSavings", "ml-auto")}</th>
-                <th className="text-right px-4 py-3">{headerBtn("Rate", "savingsRate", "ml-auto")}</th>
+                <td colSpan={5} className="h-28 text-center text-muted-foreground text-xs">
+                  <div className="flex flex-col items-center justify-center gap-1">
+                    <FileSpreadsheet className="size-5 text-muted-foreground/50" />
+                    <span>No data available for the selected timeframe.</span>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {sorted.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="h-24 text-center text-muted-foreground text-xs">
-                    No data available for the selected period.
-                  </td>
-                </tr>
-              ) : (
-                sorted.map((row, idx) => (
+            ) : (
+              sorted.map((row, idx) => {
+                const isNetPositive = row.netSavings >= 0
+                return (
                   <tr
                     key={row.month}
                     className={cn(
@@ -171,83 +180,88 @@ export function MonthlySummaryTable({ data, currency }: MonthlySummaryTableProps
                       idx % 2 === 0 ? "bg-card" : "bg-muted/10"
                     )}
                   >
-                    <td className="px-4 py-3 font-semibold text-foreground text-xs">{row.month}</td>
-                    <td className="px-4 py-3 text-right text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                      {formatVal(row.income, currency)}
+                    <td className="px-5 py-3 font-semibold text-foreground text-xs font-mono">
+                      {row.month}
                     </td>
-                    <td className="px-4 py-3 text-right text-xs font-medium text-rose-600 dark:text-rose-400">
-                      {formatVal(row.expense, currency)}
+                    <td className="px-5 py-3 text-right text-xs font-medium font-mono text-emerald-600 dark:text-emerald-400">
+                      {formatCurrency(row.income * 100, currency)}
+                    </td>
+                    <td className="px-5 py-3 text-right text-xs font-medium font-mono text-rose-600 dark:text-rose-400">
+                      {formatCurrency(row.expense * 100, currency)}
                     </td>
                     <td
                       className={cn(
-                        "px-4 py-3 text-right text-xs font-bold",
-                        row.netSavings >= 0
+                        "px-5 py-3 text-right text-xs font-semibold font-mono",
+                        isNetPositive
                           ? "text-emerald-600 dark:text-emerald-400"
                           : "text-rose-600 dark:text-rose-400"
                       )}
                     >
-                      {row.netSavings >= 0 ? "+" : ""}
-                      {formatVal(row.netSavings, currency)}
+                      {isNetPositive ? "+" : ""}
+                      {formatCurrency(row.netSavings * 100, currency)}
                     </td>
-                    <td className="px-4 py-3 text-right text-xs">
+                    <td className="px-5 py-3 text-right text-xs">
                       <span
                         className={cn(
-                          "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold",
+                          "inline-flex items-center justify-end font-mono font-bold text-xs",
                           row.savingsRate >= 20
-                            ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                            ? "text-emerald-600 dark:text-emerald-400"
                             : row.savingsRate > 0
-                              ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                              : "bg-rose-500/10 text-rose-700 dark:text-rose-400"
+                              ? "text-blue-600 dark:text-blue-400"
+                              : "text-rose-600 dark:text-rose-400"
                         )}
                       >
                         {row.savingsRate.toFixed(1)}%
                       </span>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-            {sorted.length > 0 && (
-              <tfoot className="border-t border-border/40 bg-muted/20">
-                <tr>
-                  <td className="px-4 py-3 text-xs font-bold text-foreground uppercase tracking-wider">Total</td>
-                  <td className="px-4 py-3 text-right text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatVal(totals.totalIncome, currency)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-xs font-bold text-rose-600 dark:text-rose-400">
-                    {formatVal(totals.totalExpense, currency)}
-                  </td>
-                  <td
+                )
+              })
+            )}
+          </tbody>
+
+          {/* Cumulative Totals Footer */}
+          {rows.length > 0 && (
+            <tfoot className="border-t-2 border-border/50 bg-muted/40 font-mono text-xs font-bold">
+              <tr>
+                <td className="px-5 py-3 uppercase tracking-wider text-muted-foreground text-[11px]">
+                  Cumulative ({rows.length} mo)
+                </td>
+                <td className="px-5 py-3 text-right text-emerald-600 dark:text-emerald-400">
+                  {formatCurrency(totals.totalIncome * 100, currency)}
+                </td>
+                <td className="px-5 py-3 text-right text-rose-600 dark:text-rose-400">
+                  {formatCurrency(totals.totalExpense * 100, currency)}
+                </td>
+                <td
+                  className={cn(
+                    "px-5 py-3 text-right",
+                    totals.totalNet >= 0
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-rose-600 dark:text-rose-400"
+                  )}
+                >
+                  {totals.totalNet >= 0 ? "+" : ""}
+                  {formatCurrency(totals.totalNet * 100, currency)}
+                </td>
+                <td className="px-5 py-3 text-right">
+                  <span
                     className={cn(
-                      "px-4 py-3 text-right text-xs font-bold",
-                      totals.totalNet >= 0
+                      totals.totalRate >= 20
                         ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-600 dark:text-rose-400"
+                        : totals.totalRate > 0
+                          ? "text-blue-600 dark:text-blue-400"
+                          : "text-rose-600 dark:text-rose-400"
                     )}
                   >
-                    {totals.totalNet >= 0 ? "+" : ""}
-                    {formatVal(totals.totalNet, currency)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-xs">
-                    <span
-                      className={cn(
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold",
-                        totals.totalRate >= 20
-                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                          : totals.totalRate > 0
-                            ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                            : "bg-rose-500/10 text-rose-700 dark:text-rose-400"
-                      )}
-                    >
-                      {totals.totalRate.toFixed(1)}%
-                    </span>
-                  </td>
-                </tr>
-              </tfoot>
-            )}
-          </table>
-        </div>
-      </CardContent>
+                    {totals.totalRate.toFixed(1)}% avg
+                  </span>
+                </td>
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
     </Card>
   )
 }

@@ -8,26 +8,25 @@ export const metadata: Metadata = {
 import { requireApprovedUser } from "@/lib/auth-guard"
 import {
   getIncomeExpenseTrend,
+  getDailyIncomeExpenseTrend,
   getCategoryBreakdown,
   getSpendingByDayOfWeek,
   getWalletBalanceHistory,
   getMonthlyNetSavings,
   getBudgetPerformance,
+  getCommitmentBurden,
+  getCapitalAllocation,
 } from "@/lib/queries/reports"
 import { getSpendingHeatmapData } from "@/lib/queries/heatmaps"
 import { getWallets } from "@/lib/queries/wallets"
 import { getCategories } from "@/lib/queries/categories"
 import { getPreferences } from "@/lib/queries/preferences"
-import { formatCurrency, serializeData } from "@/lib/utils"
-import { IncomeExpenseTrendChart } from "@/components/reports/income-expense-trend-chart"
-import { CategoryBreakdownChart } from "@/components/reports/category-breakdown-chart"
-import { SpendingDayChart } from "@/components/reports/spending-day-chart"
-import { NetWorthHistoryChart } from "@/components/reports/net-worth-history-chart"
-import { NetSavingsChart } from "@/components/reports/net-savings-chart"
-import { BudgetPerformanceChart } from "@/components/reports/budget-performance-chart"
+import { serializeData } from "@/lib/utils"
 import { ReportFilters } from "@/components/reports/report-filters"
-import { MonthlySummaryTable } from "@/components/reports/monthly-summary-table"
 import { ReportsNavTabs } from "@/components/reports/reports-nav-tabs"
+import { ReportsOverviewView } from "@/components/reports/reports-overview-view"
+import type { CommitmentBurdenData } from "@/components/reports/commitment-burden-chart"
+import type { CapitalAllocationData } from "@/components/reports/capital-allocation-chart"
 import { SpendingHeatmapView } from "@/components/reports/spending-heatmap-view"
 import { MonthlyReviewView } from "@/components/reports/monthly-review-view"
 import { MonthlyReviewFilters } from "@/components/reports/monthly-review-filters"
@@ -36,9 +35,8 @@ import { QuarterlyReviewView } from "@/components/reports/quarterly-review-view"
 import { AnnualReviewView } from "@/components/reports/annual-review-view"
 import { PeriodReviewFilters } from "@/components/reports/period-review-filters"
 import { getQuarterlyReviewData, getAnnualReviewData } from "@/lib/queries/annual-review"
-import { MetricCard } from "@/components/ui/metric-card"
 import { unstable_rethrow } from "next/navigation"
-import { BarChart3, TrendingDown, Wallet, Percent, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { BarChart3 } from "lucide-react"
 
 import { ReportsSkeleton } from "./loading"
 
@@ -266,46 +264,53 @@ async function ReportsContent({
   let trendData: { month: string; income: number; expense: number }[] = []
   let breakdownData: { category: string; value: number; color: string; icon: string }[] = []
   let spendingDayData: { day: string; amount: number }[] = []
-  let walletHistoryData: { month: string; netWorth: number; totalAssets: number; totalLiabilities: number }[] = []
+  let walletHistoryData: { date?: string; month?: string; netWorth: number; totalAssets: number; totalLiabilities: number }[] = []
   let savingsData: { month: string; savings: number }[] = []
+  let dailyTrendData: { date: string; income: number; expense: number }[] = []
   let budgetPerformanceData: { name: string; category: string; limit: number; spent: number }[] = []
+  let commitmentBurdenData: CommitmentBurdenData = { fixed: 0, discretionary: 0, total: 0, fixedPercentage: 0, activeRulesCount: 0 }
+  let capitalAllocationData: CapitalAllocationData = { items: [], totalGoals: 0, totalDebt: 0, totalAllocated: 0 }
   let currency = "USD"
 
   try {
     const [
       fetchedTrend,
+      fetchedDailyTrend,
       fetchedBreakdown,
       fetchedSpendingDay,
       fetchedWalletHistory,
       fetchedSavings,
       fetchedBudgetPerf,
+      fetchedCommitmentBurden,
+      fetchedCapitalAllocation,
       prefs,
     ] = await Promise.all([
       getIncomeExpenseTrend(userId, monthsCount),
+      getDailyIncomeExpenseTrend(userId, monthsCount * 30, categoryFrom, categoryTo),
       getCategoryBreakdown(userId, categoryFrom, categoryTo),
       getSpendingByDayOfWeek(userId),
       getWalletBalanceHistory(userId, monthsCount),
-      getMonthlyNetSavings(userId),
+      getMonthlyNetSavings(userId, monthsCount),
       getBudgetPerformance(userId),
+      getCommitmentBurden(userId, monthsCount, categoryFrom, categoryTo),
+      getCapitalAllocation(userId, monthsCount, categoryFrom, categoryTo),
       getPreferences(userId),
     ])
 
     trendData = fetchedTrend
+    dailyTrendData = fetchedDailyTrend
     breakdownData = fetchedBreakdown
     spendingDayData = fetchedSpendingDay
     walletHistoryData = fetchedWalletHistory
     savingsData = fetchedSavings
     budgetPerformanceData = fetchedBudgetPerf
+    commitmentBurdenData = fetchedCommitmentBurden
+    capitalAllocationData = fetchedCapitalAllocation
     currency = prefs?.defaultCurrency || "USD"
   } catch (error) {
     unstable_rethrow(error)
     console.error("Failed to load reports data:", error)
   }
-
-  const totalIncome = trendData.reduce((sum, item) => sum + item.income, 0)
-  const totalExpense = trendData.reduce((sum, item) => sum + item.expense, 0)
-  const netSavings = totalIncome - totalExpense
-  const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0
 
   return (
     <div className="flex flex-col gap-7 w-full">
@@ -329,66 +334,25 @@ async function ReportsContent({
         </div>
       </div>
 
-      {/* MetricCards row with 3x2 balanced split */}
-      <div className="flex flex-wrap gap-4">
-        <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
-          icon={ArrowUpRight}
-          color="#10b981"
-          label="Total Income"
-          value={formatCurrency(totalIncome * 100, currency)}
-        />
-        <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
-          icon={ArrowDownRight}
-          color="#f43f5e"
-          label="Total Expenses"
-          value={formatCurrency(totalExpense * 100, currency)}
-        />
-        <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
-          icon={Wallet}
-          color="#8b5cf6"
-          label="Net Savings"
-          value={formatCurrency(netSavings * 100, currency)}
-        />
-        <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
-          icon={Percent}
-          color="#3b82f6"
-          label="Savings Rate"
-          value={`${savingsRate.toFixed(1)}%`}
-        />
-        <MetricCard
-          style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(33.33% - 1rem))" }}
-          icon={TrendingDown}
-          color="#f59e0b"
-          label="Avg Monthly Expense"
-          value={formatCurrency((totalExpense / Math.max(1, monthsCount)) * 100, currency)}
-        />
-      </div>
-
-      {/* Navigation Tabs — placed just below the metric cards */}
-      <div className="flex items-center">
-        <Suspense fallback={null}>
-          <ReportsNavTabs />
-        </Suspense>
-      </div>
-
-      {/* Bento grid of 6 charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <IncomeExpenseTrendChart data={trendData} monthsCount={monthsCount} currency={currency} />
-        <CategoryBreakdownChart data={breakdownData} currency={currency} />
-        <SpendingDayChart data={spendingDayData} currency={currency} />
-        <NetWorthHistoryChart data={walletHistoryData} monthsCount={monthsCount} currency={currency} />
-        <NetSavingsChart data={savingsData} currency={currency} />
-        <BudgetPerformanceChart data={budgetPerformanceData} currency={currency} />
-      </div>
-
-      {/* Monthly Performance Summary Table */}
-      {trendData.length > 0 && (
-        <MonthlySummaryTable data={trendData} currency={currency} />
-      )}
+      {/* Reports Overview Bento View */}
+      <ReportsOverviewView
+        trendData={trendData}
+        dailyTrendData={dailyTrendData}
+        breakdownData={breakdownData}
+        spendingDayData={spendingDayData}
+        walletHistoryData={walletHistoryData}
+        savingsData={savingsData}
+        budgetPerformanceData={budgetPerformanceData}
+        commitmentBurdenData={serializeData(commitmentBurdenData)}
+        capitalAllocationData={serializeData(capitalAllocationData)}
+        monthsCount={monthsCount}
+        currency={currency}
+        navTabs={
+          <Suspense fallback={null}>
+            <ReportsNavTabs />
+          </Suspense>
+        }
+      />
     </div>
   )
 }

@@ -489,3 +489,10 @@ export function calculatePortfolioRisk(holdings: InvestmentHolding[]): Portfolio
     singleAssetRisk,
   }
 }
+
+// ─── Re-exports for Portfolio Enhancements ───────────────────────────────────
+
+export * from "./tax-lots"
+export * from "./benchmarks"
+export * from "./dividend-forecast"
+

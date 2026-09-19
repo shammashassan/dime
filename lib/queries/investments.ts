@@ -96,6 +96,45 @@ export const getPortfolioHoldings = cache(async (): Promise<InvestmentHolding[]>
   return deriveHoldingState(allTransactions, latestPrices, walletCurrencyMap)
 })
 
+export const getAllInvestmentTransactions = cache(async (): Promise<InvestmentTransaction[]> => {
+  const scope = await getFinancialScope()
+  const transactionsColl = await getCollection<InvestmentTransaction>("investment_transactions")
+
+  const txs = await transactionsColl
+    .find({ ...getScopeFilter(scope) })
+    .sort({ date: -1, createdAt: -1 })
+    .toArray()
+
+  if (txs.length === 0) {
+    return []
+  }
+
+  const walletsColl = await getCollection<Wallet>("wallets")
+  const walletIds = Array.from(new Set(txs.map((t) => t.walletId))).filter(Boolean)
+  const objectIds = walletIds
+    .filter((id) => ObjectId.isValid(id))
+    .map((id) => new ObjectId(id))
+
+  const wallets = objectIds.length > 0
+    ? await walletsColl
+        .find({ _id: { $in: objectIds } })
+        .project<Pick<Wallet, "_id" | "currency">>({ _id: 1, currency: 1 })
+        .toArray()
+    : []
+
+  const walletCurrencyMap = new Map<string, string>()
+  for (const w of wallets) {
+    if (w.currency) {
+      walletCurrencyMap.set(w._id.toString(), w.currency)
+    }
+  }
+
+  return txs.map((t) => ({
+    ...t,
+    currency: t.currency || walletCurrencyMap.get(t.walletId) || "USD",
+  }))
+})
+
 export const getRecentInvestmentTransactions = cache(async (limit: number = 10): Promise<InvestmentTransaction[]> => {
   const scope = await getFinancialScope()
   const transactionsColl = await getCollection<InvestmentTransaction>("investment_transactions")

@@ -17,10 +17,17 @@ import { InvestmentPerformanceCard } from "./overview/investment-performance-car
 import { TopPerformersCard } from "./overview/top-performers-card"
 import { WatchlistView } from "./watchlist-view"
 import { SyncPricesButton } from "./sync-prices-button"
+import {
+  BenchmarkComparisonCard,
+  BenchmarkSummaryCards,
+  type Timeframe,
+} from "./overview/benchmark-comparison-card"
+import { TaxScheduleView, TaxSummaryCards } from "./tax-schedule-view"
+import { DividendForecastView, DividendSummaryCards } from "./dividend-forecast-view"
+import type { BenchmarkSymbol, CostBasisMethod } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
@@ -41,6 +48,9 @@ import {
   TrendingUp,
   Coins,
   Bookmark,
+  Scale,
+  Compass,
+  Calendar,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Watchlist, WatchlistItem } from "@/types"
@@ -64,10 +74,15 @@ export function InvestmentsView({
   currency,
   watchlists = [],
 }: InvestmentsViewProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "accounts" | "holdings" | "watchlists">("overview")
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "benchmarks" | "tax" | "dividends" | "accounts" | "holdings" | "watchlists"
+  >("overview")
   const [search, setSearch] = useState("")
   const [addWalletOpen, setAddWalletOpen] = useState(false)
   const [addTxOpen, setAddTxOpen] = useState(false)
+  const [taxMethod, setTaxMethod] = useState<CostBasisMethod>("fifo")
+  const [benchmarkId, setBenchmarkId] = useState<BenchmarkSymbol>("^GSPC")
+  const [benchmarkTimeframe, setBenchmarkTimeframe] = useState<Timeframe>("1Y")
 
   const filteredHoldings = holdings.filter(
     (h) =>
@@ -120,77 +135,125 @@ export function InvestmentsView({
         </div>
       </div>
 
-      {/* ── Metric Summary Row ── */}
-      <PortfolioSummary data={portfolioData} currency={currency} />
+      {/* ── Contextual Top MetricCards (Always above Tabs across all tabs) ── */}
+      {(activeTab === "overview" ||
+        activeTab === "accounts" ||
+        activeTab === "holdings" ||
+        activeTab === "watchlists") && (
+        <PortfolioSummary data={portfolioData} currency={currency} />
+      )}
+      {activeTab === "benchmarks" && (
+        <BenchmarkSummaryCards
+          holdings={holdings}
+          transactions={transactions}
+          benchmarkId={benchmarkId}
+          timeframe={benchmarkTimeframe}
+        />
+      )}
+      {activeTab === "tax" && (
+        <TaxSummaryCards
+          transactions={transactions}
+          currency={currency}
+          method={taxMethod}
+          setMethod={setTaxMethod}
+        />
+      )}
+      {activeTab === "dividends" && (
+        <DividendSummaryCards
+          holdings={holdings}
+          transactions={transactions}
+          currency={currency}
+        />
+      )}
 
-      {/* ── Tab Selector & Search ── */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
-        {/* Desktop Tabs */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-              activeTab === "overview"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab("accounts")}
-            className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-              activeTab === "accounts"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Brokerage Accounts ({accounts.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("holdings")}
-            className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-              activeTab === "holdings"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Holdings &amp; Assets ({holdings.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("watchlists")}
-            className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-              activeTab === "watchlists"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Watchlists ({watchlists.length})
-          </button>
+      {/* ── Tab Selector & Search (Matching Insights page layout) ── */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-start sm:items-center justify-between w-full min-w-0">
+        {/* Scrollable Tab Bar */}
+        <div className="w-full sm:w-auto min-w-0 rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
+          <div className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0">
+            <button
+              onClick={() => setActiveTab("overview")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "overview"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab("benchmarks")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "benchmarks"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Benchmarks
+            </button>
+            <button
+              onClick={() => setActiveTab("tax")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "tax"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Tax &amp; Capital Gains
+            </button>
+            <button
+              onClick={() => setActiveTab("dividends")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "dividends"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Dividend Forecast
+            </button>
+            <button
+              onClick={() => setActiveTab("accounts")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "accounts"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Accounts ({accounts.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("holdings")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "holdings"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Holdings ({holdings.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("watchlists")}
+              className={cn(
+                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
+                activeTab === "watchlists"
+                  ? "bg-background text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Watchlists ({watchlists.length})
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Select */}
-        <div className="sm:hidden w-full">
-          <Select value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-            <SelectTrigger className="w-full border-border/40 bg-card h-10 rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-popover border border-border/40 rounded-xl">
-              <SelectItem value="overview">Overview</SelectItem>
-              <SelectItem value="accounts">Brokerage Accounts ({accounts.length})</SelectItem>
-              <SelectItem value="holdings">Holdings &amp; Assets ({holdings.length})</SelectItem>
-              <SelectItem value="watchlists">Watchlists ({watchlists.length})</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Search */}
-        {activeTab !== "overview" && activeTab !== "watchlists" && (
-          <div className="w-full sm:w-72 min-w-0 flex-1 sm:flex-initial sm:max-w-xs justify-end">
+        {/* Search Bar */}
+        {(activeTab === "accounts" || activeTab === "holdings") && (
+          <div className="w-full sm:w-72 shrink-0">
             <InputGroup className="rounded-xl border-border/40 bg-card">
               <Search className="size-4 text-muted-foreground ml-3" />
               <InputGroupInput
@@ -258,6 +321,31 @@ export function InvestmentsView({
           <div className="md:col-span-2 lg:col-span-1">
             <RecentTransactionsCard transactions={transactions} currency={currency} />
           </div>
+        </div>
+      ) : activeTab === "benchmarks" ? (
+        <div className="space-y-4">
+          <BenchmarkComparisonCard
+            holdings={holdings}
+            transactions={transactions}
+            benchmarkId={benchmarkId}
+            onBenchmarkChange={setBenchmarkId}
+            timeframe={benchmarkTimeframe}
+            onTimeframeChange={setBenchmarkTimeframe}
+          />
+        </div>
+      ) : activeTab === "tax" ? (
+        <div className="space-y-4">
+          <TaxScheduleView
+            transactions={transactions}
+            holdings={holdings}
+            currency={currency}
+            method={taxMethod}
+            onMethodChange={setTaxMethod}
+          />
+        </div>
+      ) : activeTab === "dividends" ? (
+        <div className="space-y-4">
+          <DividendForecastView holdings={holdings} transactions={transactions} currency={currency} />
         </div>
       ) : activeTab === "accounts" ? (
         <div className="space-y-4">

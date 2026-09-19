@@ -1551,3 +1551,125 @@ export interface MarketPriceResult {
   source: "yahoo" | "coingecko" | "metals" | "cached" | "fallback"
   fetchedAt: Date
 }
+
+// ─── Tax Lot & Capital Gains Types ──────────────────────────────────────────
+
+export type CostBasisMethod = "fifo" | "lifo" | "hifo" | "average_cost"
+
+export interface TaxLot {
+  id: string
+  buyTransactionId: string
+  date: Date
+  symbol: string
+  walletId: string
+  quantity: number
+  remainingQuantity: number
+  price: number // per share (in cents)
+  fees: number
+  totalCostBasis: number // in cents for original quantity
+  remainingCostBasis: number // in cents for remainingQuantity
+  status: "open" | "partially_closed" | "closed"
+}
+
+export interface RealizedTaxEvent {
+  id: string
+  symbol: string
+  walletId: string
+  sellTransactionId: string
+  buyDate: Date
+  sellDate: Date
+  quantity: number
+  buyPrice: number // in cents
+  sellPrice: number // in cents
+  proceedsCents: number
+  costBasisCents: number
+  realizedGainCents: number
+  holdingPeriodDays: number
+  term: "short_term" | "long_term" // > 365 days = long_term
+  costBasisMethod: CostBasisMethod
+}
+
+export interface TaxScheduleSummary {
+  taxYear: number // 0 = all years
+  costBasisMethod: CostBasisMethod
+  totalProceedsCents: number
+  totalCostBasisCents: number
+  netRealizedGainCents: number
+  shortTerm: {
+    proceedsCents: number
+    costBasisCents: number
+    netGainCents: number
+    gainCents: number
+    lossCents: number
+  }
+  longTerm: {
+    proceedsCents: number
+    costBasisCents: number
+    netGainCents: number
+    gainCents: number
+    lossCents: number
+  }
+  bySymbol: Array<{
+    symbol: string
+    shortTermGainCents: number
+    longTermGainCents: number
+    netGainCents: number
+    eventsCount: number
+  }>
+  events: RealizedTaxEvent[]
+  availableTaxYears: number[]
+}
+
+// ─── Portfolio Benchmarking Types ───────────────────────────────────────────
+
+export type BenchmarkSymbol = "^GSPC" | "VTI" | "QQQ" | "VT" | "^NSEI"
+
+export interface BenchmarkInfo {
+  id: BenchmarkSymbol
+  name: string
+  category: string
+  description: string
+}
+
+export interface BenchmarkComparison {
+  benchmarkId: BenchmarkSymbol
+  benchmarkName: string
+  timeframe: "1M" | "3M" | "6M" | "1Y" | "YTD" | "ALL"
+  portfolioReturnPct: number
+  benchmarkReturnPct: number
+  alphaPct: number // portfolioReturnPct - benchmarkReturnPct
+  isOutperforming: boolean
+  availableBenchmarks: BenchmarkInfo[]
+}
+
+// ─── Dividend Forecasting Types ─────────────────────────────────────────────
+
+export interface DividendForecastItem {
+  symbol: string
+  name?: string
+  assetType: string
+  walletId: string
+  quantity: number
+  currentPriceCents: number
+  currentValueCents: number
+  trailingAnnualDividendPerShare: number // in cents
+  projectedAnnualYieldPct: number
+  projectedAnnualIncomeCents: number
+  frequency: "monthly" | "quarterly" | "semi_annual" | "annual"
+  lastPaymentDate?: Date
+  nextEstimatedPaymentDate?: Date
+}
+
+export interface DividendForecastSummary {
+  projectedAnnualIncomeCents: number
+  currentPortfolioValueCents: number
+  projectedYieldOnCostPct: number | null
+  projectedYieldOnValuePct: number | null
+  monthlyDistribution: Array<{
+    monthKey: string // "YYYY-MM"
+    monthLabel: string // "Oct 2026"
+    projectedIncomeCents: number
+  }>
+  holdings: DividendForecastItem[]
+}
+

@@ -24,7 +24,9 @@ import {
   HoldingDiagnosticsCard,
   HoldingPositionSizingCard,
   HoldingDividendsCard,
+  HoldingPriceRangeCard,
 } from "@/components/investments/holding-details-cards"
+import { HoldingTaxLotsCard } from "@/components/investments/holding-tax-lots-card"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -187,6 +189,11 @@ async function HoldingDetailContent({
             transactions={serializedTx}
             currency={currency}
           />
+          <HoldingPriceRangeCard
+            holding={serializedHolding}
+            priceHistory={serializedPriceHistory}
+            currency={currency}
+          />
           <HoldingDividendsCard
             holding={serializedHolding}
             transactions={serializedTx}
@@ -206,7 +213,7 @@ async function HoldingDetailContent({
           />
 
           {/* Transaction Ledger Card */}
-          <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden bg-card flex-1 flex flex-col min-w-0">
+          <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden bg-card flex-1 flex flex-col min-w-0 min-h-[220px]">
             {/* Header */}
             <div className="px-4 py-2.5 border-b border-border/30 flex items-center justify-between gap-2 shrink-0">
               <div className="flex items-center gap-2">
@@ -284,6 +291,14 @@ async function HoldingDetailContent({
               </div>
             )}
           </div>
+
+          {/* Open Tax Lots Card */}
+          <HoldingTaxLotsCard
+            holding={serializedHolding}
+            transactions={serializedTx}
+            currency={currency}
+            className="flex-1 min-h-[220px]"
+          />
         </div>
       </div>
     </div>

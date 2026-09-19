@@ -33,67 +33,69 @@ export function ReportsNavTabs() {
   }
 
   return (
-    <div className="flex items-center rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs overflow-x-auto max-w-full">
-      <button
-        onClick={() => handleTabChange("overview")}
-        className={cn(
-          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-          currentTab === "overview"
-            ? "bg-background text-foreground shadow-xs font-semibold"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        <BarChart3 className="size-3.5 text-primary" />
-        <span>Overview & Trends</span>
-      </button>
-      <button
-        onClick={() => handleTabChange("heatmap")}
-        className={cn(
-          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-          currentTab === "heatmap"
-            ? "bg-background text-foreground shadow-xs font-semibold"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        <CalendarDays className="size-3.5 text-rose-500" />
-        <span>Activity Heatmap</span>
-      </button>
-      <button
-        onClick={() => handleTabChange("review")}
-        className={cn(
-          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-          currentTab === "review"
-            ? "bg-background text-foreground shadow-xs font-semibold"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        <FileText className="size-3.5 text-amber-500" />
-        <span>Monthly Review</span>
-      </button>
-      <button
-        onClick={() => handleTabChange("quarterly")}
-        className={cn(
-          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-          currentTab === "quarterly"
-            ? "bg-background text-foreground shadow-xs font-semibold"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        <ClipboardList className="size-3.5 text-violet-500" />
-        <span>Quarterly Review</span>
-      </button>
-      <button
-        onClick={() => handleTabChange("annual")}
-        className={cn(
-          "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-          currentTab === "annual"
-            ? "bg-background text-foreground shadow-xs font-semibold"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        <Calendar className="size-3.5 text-blue-500" />
-        <span>Annual Review</span>
-      </button>
+    <div className="w-full sm:w-auto min-w-0 rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
+      <div className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0">
+        <button
+          onClick={() => handleTabChange("overview")}
+          className={cn(
+            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
+            currentTab === "overview"
+              ? "bg-background text-foreground shadow-xs font-semibold"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <BarChart3 className="size-3.5 text-primary" />
+          <span>Overview & Trends</span>
+        </button>
+        <button
+          onClick={() => handleTabChange("heatmap")}
+          className={cn(
+            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
+            currentTab === "heatmap"
+              ? "bg-background text-foreground shadow-xs font-semibold"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <CalendarDays className="size-3.5 text-rose-500" />
+          <span>Activity Heatmap</span>
+        </button>
+        <button
+          onClick={() => handleTabChange("review")}
+          className={cn(
+            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
+            currentTab === "review"
+              ? "bg-background text-foreground shadow-xs font-semibold"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <FileText className="size-3.5 text-amber-500" />
+          <span>Monthly Review</span>
+        </button>
+        <button
+          onClick={() => handleTabChange("quarterly")}
+          className={cn(
+            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
+            currentTab === "quarterly"
+              ? "bg-background text-foreground shadow-xs font-semibold"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <ClipboardList className="size-3.5 text-violet-500" />
+          <span>Quarterly Review</span>
+        </button>
+        <button
+          onClick={() => handleTabChange("annual")}
+          className={cn(
+            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
+            currentTab === "annual"
+              ? "bg-background text-foreground shadow-xs font-semibold"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Calendar className="size-3.5 text-blue-500" />
+          <span>Annual Review</span>
+        </button>
+      </div>
     </div>
   )
 }

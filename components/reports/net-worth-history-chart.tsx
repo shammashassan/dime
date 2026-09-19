@@ -1,15 +1,8 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
+import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import {
   ChartContainer,
   ChartLegend,
@@ -18,16 +11,19 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { formatCurrency, cn } from "@/lib/utils"
 
-import { formatCurrency } from "@/lib/utils"
-
-interface NetWorthHistoryChartProps {
-  data: { month: string; netWorth: number; totalAssets: number; totalLiabilities: number }[]
-  monthsCount: number
+export interface NetWorthHistoryChartProps {
+  data: { date?: string; month?: string; netWorth: number; totalAssets: number; totalLiabilities: number }[]
   currency?: string
+  className?: string
 }
 
 const chartConfig = {
+  netWorth: {
+    label: "Net Worth",
+    color: "var(--chart-1)",
+  },
   totalAssets: {
     label: "Total Assets",
     color: "var(--chart-2)",
@@ -36,121 +32,124 @@ const chartConfig = {
     label: "Total Liabilities",
     color: "var(--chart-5)",
   },
-  netWorth: {
-    label: "Net Worth",
-    color: "var(--chart-1)",
-  },
 } satisfies ChartConfig
 
-export function NetWorthHistoryChart({ data, monthsCount, currency = "USD" }: NetWorthHistoryChartProps) {
+export function NetWorthHistoryChart({
+  data = [],
+  currency = "USD",
+  className,
+}: NetWorthHistoryChartProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-bold">Net Worth History</CardTitle>
-        <CardDescription>
-          Assets, liabilities, and net worth trend over the last {monthsCount} {monthsCount === 1 ? "month" : "months"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card
+      className={cn(
+        "@container/card bento-tile flex h-full flex-col justify-between border-border/50 p-5 shadow-xs",
+        className
+      )}
+    >
+      {/* Micro-header */}
+      <div className="flex flex-col gap-0.5 pb-2 border-b border-border/30">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60">
+          wealth trajectory
+        </span>
+        <h3 className="text-sm font-semibold tracking-tight text-foreground">
+          Net Worth Timeline
+        </h3>
+      </div>
+
+      {/* Chart Body */}
+      <div className="flex-1 min-w-0 pt-1">
         {data.length > 0 ? (
-          <ChartContainer config={chartConfig}>
-            <AreaChart
-              accessibilityLayer
-              data={data}
-              margin={{ left: 12, right: 12 }}
-            >
+          <ChartContainer config={chartConfig} className="aspect-auto h-48 w-full">
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <defs>
-                <linearGradient id="fillTotalAssets" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="fillNetWorthReport" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--color-netWorth)" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="var(--color-netWorth)" stopOpacity={0.1} />
+                </linearGradient>
+                <linearGradient id="fillAssetsReport" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--color-totalAssets)" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="var(--color-totalAssets)" stopOpacity={0.1} />
                 </linearGradient>
-                <linearGradient id="fillTotalLiabilities" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id="fillLiabilitiesReport" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="var(--color-totalLiabilities)" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="var(--color-totalLiabilities)" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id="fillNetWorth" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-netWorth)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-netWorth)" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} />
               <XAxis
-                dataKey="month"
+                dataKey="date"
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickFormatter={(value) => value.slice(0, 3)}
+                minTickGap={32}
+                tickFormatter={(value) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                }}
               />
               <ChartTooltip
                 cursor={false}
                 content={
                   <ChartTooltipContent
+                    labelFormatter={(value) => {
+                      return new Date(String(value)).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    }}
                     indicator="dot"
-                    formatter={(value, name, item) => (
-                      <>
-                        <div
-                          className="h-2.5 w-2.5 shrink-0 rounded-xs"
-                          style={{
-                            backgroundColor: item.color || item.payload?.fill,
-                          }}
-                        />
-                        <div className="flex flex-1 justify-between items-center leading-none">
-                          <span className="text-muted-foreground">
-                            {name === "netWorth" ? "Net Worth" : name === "totalAssets" ? "Total Assets" : "Total Liabilities"}:
-                          </span>
-                          <span className="font-mono font-bold text-foreground ml-2">
+                    formatter={(value, name, item) => {
+                      const label = chartConfig[name as keyof typeof chartConfig]?.label || String(name)
+                      const indicatorColor = item.color || `var(--color-${name})`
+                      return (
+                        <div className="flex flex-1 justify-between items-center leading-none gap-4">
+                          <div className="flex items-center gap-1.5">
+                            <div
+                              className="h-2.5 w-2.5 shrink-0 rounded-xs"
+                              style={{ backgroundColor: indicatorColor }}
+                            />
+                            <span className="text-muted-foreground font-medium">{label}</span>
+                          </div>
+                          <span className="font-mono font-bold text-foreground">
                             {formatCurrency(Number(value) * 100, currency)}
                           </span>
                         </div>
-                      </>
-                    )}
+                      )
+                    }}
                   />
                 }
               />
               <Area
                 dataKey="totalAssets"
                 type="monotone"
-                fill="url(#fillTotalAssets)"
+                fill="url(#fillAssetsReport)"
                 stroke="var(--color-totalAssets)"
-                isAnimationActive={true}
               />
               <Area
                 dataKey="totalLiabilities"
                 type="monotone"
-                fill="url(#fillTotalLiabilities)"
+                fill="url(#fillLiabilitiesReport)"
                 stroke="var(--color-totalLiabilities)"
-                isAnimationActive={true}
               />
               <Area
                 dataKey="netWorth"
                 type="monotone"
-                fill="url(#fillNetWorth)"
+                fill="url(#fillNetWorthReport)"
                 stroke="var(--color-netWorth)"
-                isAnimationActive={true}
               />
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>
         ) : (
-          <div className="flex items-center justify-center h-75 text-muted-foreground text-sm">
-            No net worth trend data available.
+          <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+            No net worth timeline data available.
           </div>
         )}
-      </CardContent>
-      {data.length > 0 && (
-        <CardFooter>
-          <div className="flex w-full items-start gap-2 text-sm">
-            <div className="grid gap-2">
-              <div className="flex items-center gap-2 leading-none font-medium">
-                Tracking your total net worth <TrendingUp className="h-4 w-4" />
-              </div>
-              <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                Last {monthsCount} {monthsCount === 1 ? "month" : "months"}
-              </div>
-            </div>
-          </div>
-        </CardFooter>
-      )}
+      </div>
     </Card>
   )
 }

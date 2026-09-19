@@ -17,6 +17,8 @@ export interface MetricCardProps extends React.ComponentProps<"div"> {
   asChild?: boolean
   href?: string
   showChevron?: boolean
+  active?: boolean
+  badge?: React.ReactNode
 }
 
 export function MetricCard({
@@ -31,14 +33,17 @@ export function MetricCard({
   asChild = false,
   href,
   showChevron,
+  active,
+  badge,
   children,
   ...props
 }: MetricCardProps) {
-  const isInteractive = Boolean(asChild || href || props.onClick)
-  const hasChevron = showChevron ?? isInteractive
+  const isInteractive = Boolean(asChild || href || props.onClick || active !== undefined)
+  const hasChevron = showChevron ?? (active !== undefined ? false : isInteractive)
 
   const cardClassName = cn(
     "group/card group relative flex flex-col py-0 gap-0 overflow-hidden rounded-2xl border border-border/50 bg-card text-card-foreground ring-1 ring-foreground/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex-1 min-w-[200px]",
+    active && "border-primary bg-primary/[0.03] dark:bg-primary/[0.06] shadow-md -translate-y-0.5",
     isInteractive && "cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
     className
   )
@@ -66,11 +71,16 @@ export function MetricCard({
           </div>
         )}
         <div className="min-w-0 flex-1">
-          {label && (
-            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 truncate">
-              {label}
-            </div>
-          )}
+          <div className="flex items-center justify-between gap-1.5">
+            {label && (
+              <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/80 truncate">
+                {label}
+              </div>
+            )}
+            {badge && (
+              <div className="shrink-0">{badge}</div>
+            )}
+          </div>
           {value !== undefined && (
             <div className={cn("text-xl font-black tabular-nums leading-tight truncate", valueClassName)}>
               {value}

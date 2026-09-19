@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { buildHoldingReturn, calculateDividendSummary } from "@/lib/calculations/investments"
-import type { InvestmentHolding, InvestmentTransaction, Wallet } from "@/types"
+import type { InvestmentHolding, InvestmentTransaction, Wallet, PriceHistoryPoint } from "@/types"
 import { Progress } from "@/components/ui/progress"
 import {
   Info,
@@ -23,6 +23,7 @@ import {
   ExternalLink,
   PieChart,
   Scale,
+  BarChart2,
 } from "lucide-react"
 
 interface HoldingPositionDetailsCardProps {
@@ -67,7 +68,7 @@ export function HoldingPositionDetailsCard({
       </div>
 
       {/* Grid Content */}
-      <div className="p-3.5 grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
+      <div className="p-4 grid grid-cols-2 gap-x-4 gap-y-3 text-xs">
         {/* Brokerage Account */}
         <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider flex items-center gap-1">
@@ -212,11 +213,11 @@ export function HoldingDiagnosticsCard({
       </div>
 
       {/* Body */}
-      <div className="p-3.5 flex flex-col gap-2.5">
+      <div className="p-4 flex flex-col gap-3">
         {/* Metric Summary Grid: compact 2-col capsules with proper padding */}
         <div className="grid grid-cols-2 gap-2">
           {/* XIRR Annualized Return */}
-          <div className="rounded-xl border border-border/30 bg-muted/20 px-2.5 py-1.5 flex items-center justify-between min-w-0">
+          <div className="rounded-xl border border-border/30 bg-muted/20 px-2.5 py-2 flex items-center justify-between min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
               {xirrPct !== null && xirrPct >= 0 ? (
                 <TrendingUp className="size-3 text-emerald-500 shrink-0" />
@@ -237,7 +238,7 @@ export function HoldingDiagnosticsCard({
           </div>
 
           {/* Simple ROI */}
-          <div className="rounded-xl border border-border/30 bg-muted/20 px-2.5 py-1.5 flex items-center justify-between min-w-0">
+          <div className="rounded-xl border border-border/30 bg-muted/20 px-2.5 py-2 flex items-center justify-between min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
               {simpleReturnPct >= 0 ? (
                 <ArrowUpRight className="size-3 text-emerald-500 shrink-0" />
@@ -260,7 +261,7 @@ export function HoldingDiagnosticsCard({
         </div>
 
         {/* Detailed diagnostic stats */}
-        <div className="space-y-1.5 pt-1 border-t border-border/30 text-xs">
+        <div className="space-y-2 pt-1 border-t border-border/30 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground font-medium">Break-Even</span>
             <span className="font-mono font-bold text-foreground tabular-nums text-xs">
@@ -381,10 +382,10 @@ export function HoldingPositionSizingCard({
       </div>
 
       {/* Body */}
-      <div className="p-3.5 flex flex-col gap-2.5">
+      <div className="p-4 flex flex-col gap-3">
         {/* Progress bars: Portfolio Weight & Account Weight */}
-        <div className="space-y-2">
-          <div className="space-y-1">
+        <div className="space-y-2.5">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-[10px] text-muted-foreground font-medium flex items-center gap-1">
                 <Scale className="size-2.5 text-muted-foreground/70" /> Portfolio Weight
@@ -396,7 +397,7 @@ export function HoldingPositionSizingCard({
             <Progress value={Math.min(100, Math.max(2, portfolioWeight))} className="h-1.5" />
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[170px]" title={`Share in ${wallet.name}`}>
                 In {wallet.name}
@@ -410,7 +411,7 @@ export function HoldingPositionSizingCard({
         </div>
 
         {/* Capital Flows Grid */}
-        <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+        <div className="pt-2 border-t border-border/30 grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
           <div className="flex flex-col gap-0.5 min-w-0">
             <span className="text-[9px] uppercase font-bold text-muted-foreground/70 tracking-wider">
               Net Invested
@@ -528,6 +529,158 @@ export function HoldingDividendsCard({
             </span>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+interface HoldingPriceRangeCardProps {
+  holding: InvestmentHolding
+  priceHistory: PriceHistoryPoint[]
+  currency: string
+}
+
+export function HoldingPriceRangeCard({
+  holding,
+  priceHistory,
+  currency,
+}: HoldingPriceRangeCardProps) {
+  const stats = useMemo(() => {
+    const prices = priceHistory.map((p) => p.price).filter((p) => p > 0)
+
+    if (prices.length === 0) {
+      return {
+        low: holding.currentPrice,
+        high: holding.currentPrice,
+        avg: holding.currentPrice,
+        first: holding.currentPrice,
+        positionPct: 50,
+        changeFromFirst: 0,
+        changeFromFirstPct: 0,
+        distFromHigh: 0,
+        distFromHighPct: 0,
+        distFromLow: 0,
+        distFromLowPct: 0,
+      }
+    }
+
+    const low = Math.min(...prices)
+    const high = Math.max(...prices)
+    const avg = prices.reduce((s, p) => s + p, 0) / prices.length
+    const first = prices[0]
+    const current = holding.currentPrice
+    const range = high - low
+
+    const positionPct = range > 0 ? ((current - low) / range) * 100 : 50
+    const changeFromFirst = current - first
+    const changeFromFirstPct = first > 0 ? (changeFromFirst / first) * 100 : 0
+    const distFromHigh = current - high
+    const distFromHighPct = high > 0 ? (distFromHigh / high) * 100 : 0
+    const distFromLow = current - low
+    const distFromLowPct = low > 0 ? (distFromLow / low) * 100 : 0
+
+    return {
+      low,
+      high,
+      avg,
+      first,
+      positionPct: Math.min(100, Math.max(0, positionPct)),
+      changeFromFirst,
+      changeFromFirstPct,
+      distFromHigh,
+      distFromHighPct,
+      distFromLow,
+      distFromLowPct,
+    }
+  }, [priceHistory, holding.currentPrice])
+
+  const isUp = stats.changeFromFirst >= 0
+  const periodLabel = priceHistory.length > 0 ? "52-Week" : "Current"
+
+  return (
+    <div className="rounded-2xl border border-border/40 shadow-sm overflow-hidden bg-card flex flex-col">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-border/30 flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <BarChart2 className="size-3.5 text-muted-foreground shrink-0" />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+            {periodLabel} Price Range
+          </span>
+        </div>
+        <Badge
+          variant="outline"
+          className={`rounded-md font-bold text-[9px] uppercase tracking-wider px-2 py-0.5 shrink-0 text-nowrap ${
+            isUp
+              ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+              : "border-rose-500/30 text-rose-600 dark:text-rose-400 bg-rose-500/10"
+          }`}
+        >
+          {isUp ? "+" : ""}{stats.changeFromFirstPct.toFixed(1)}%
+        </Badge>
+      </div>
+
+      {/* Body */}
+      <div className="p-4 flex flex-col gap-3.5">
+        {/* Range bar */}
+        <div className="flex flex-col gap-2">
+          {/* Low / High labels */}
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
+            <span>52W Low</span>
+            <span>52W High</span>
+          </div>
+
+          {/* Track with current price marker */}
+          <div className="relative h-2">
+            <div className="absolute inset-0 rounded-full bg-muted/60" />
+            {/* Filled portion up to current price */}
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-primary/70"
+              style={{ width: `${stats.positionPct}%` }}
+            />
+            {/* Current price dot */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 size-3.5 rounded-full bg-primary border-2 border-background shadow-sm"
+              style={{
+                left: `clamp(0%, calc(${stats.positionPct}% - 7px), calc(100% - 14px))`,
+              }}
+            />
+          </div>
+
+          {/* Price values */}
+          <div className="flex items-center justify-between text-[10px] font-mono font-bold">
+            <span className="text-muted-foreground">{formatCurrency(stats.low, currency)}</span>
+            <span className="text-foreground text-xs">{formatCurrency(holding.currentPrice, currency)}</span>
+            <span className="text-muted-foreground">{formatCurrency(stats.high, currency)}</span>
+          </div>
+        </div>
+
+        {/* Supplementary stats */}
+        <div className="space-y-2 pt-0.5 border-t border-border/30 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-medium">Period Average</span>
+            <span className="font-mono font-bold text-foreground tabular-nums text-xs">
+              {formatCurrency(stats.avg, currency)}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-medium">From 52W High</span>
+            <span
+              className={`font-mono font-bold text-xs tabular-nums ${
+                stats.distFromHighPct >= 0
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-rose-600 dark:text-rose-400"
+              }`}
+            >
+              {stats.distFromHighPct >= 0 ? "+" : ""}{stats.distFromHighPct.toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-medium">From 52W Low</span>
+            <span className="font-mono font-bold text-xs tabular-nums text-emerald-600 dark:text-emerald-400 tabular-nums">
+              +{stats.distFromLowPct.toFixed(1)}%
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   )

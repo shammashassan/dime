@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 import { requireApprovedUser } from "@/lib/auth-guard"
 import {
   getPortfolioHoldings,
-  getRecentInvestmentTransactions,
+  getAllInvestmentTransactions,
   getDividendTransactions,
   getWatchlists,
 } from "@/lib/queries/investments"
@@ -32,7 +32,7 @@ async function InvestmentsContent() {
     holdings,
     allWallets,
     baseCurrency,
-    recentTransactions,
+    allTransactions,
     dividendTransactions,
     watchlists,
   ] = await Promise.all([
@@ -41,7 +41,7 @@ async function InvestmentsContent() {
       c.find({ type: "investment", ...getScopeFilter(scope) }).toArray()
     ),
     getActiveBaseCurrency(),
-    getRecentInvestmentTransactions(50),
+    getAllInvestmentTransactions(),
     getDividendTransactions(session.user.id),
     getWatchlists(session.user.id),
   ])
@@ -64,9 +64,9 @@ async function InvestmentsContent() {
     }
   })
 
-  // Merge recent transactions and dividend transactions without duplicates
+  // Merge transactions without duplicates
   const txMap = new Map<string, any>()
-  for (const t of recentTransactions) txMap.set(t._id.toString(), t)
+  for (const t of allTransactions) txMap.set(t._id.toString(), t)
   for (const t of dividendTransactions) txMap.set(t._id.toString(), t)
   const mergedTransactions = Array.from(txMap.values())
 

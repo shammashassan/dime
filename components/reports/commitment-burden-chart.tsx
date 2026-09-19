@@ -3,7 +3,6 @@
 import * as React from "react"
 import { Cell, Pie, PieChart } from "recharts"
 import { Card } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   ChartContainer,
   ChartTooltip,
@@ -12,60 +11,65 @@ import {
 } from "@/components/ui/chart"
 import { formatCurrency, cn } from "@/lib/utils"
 
-const getSafeKey = (name: string) => `cat-${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`
+export interface CommitmentBurdenItem {
+  name: string
+  value: number
+  color: string
+}
 
-export interface CategoryBreakdownChartProps {
-  data: { category: string; value: number; color: string; icon: string }[]
+export interface CommitmentBurdenData {
+  fixed: number
+  discretionary: number
+  total: number
+  fixedPercentage: number
+  activeRulesCount: number
+  recurringItems?: CommitmentBurdenItem[]
+}
+
+export interface CommitmentBurdenChartProps {
+  data: CommitmentBurdenData
   currency?: string
   className?: string
 }
 
-export function CategoryBreakdownChart({
+const chartConfig = {
+  fixed: {
+    label: "Fixed Commitments",
+    color: "var(--chart-1)",
+  },
+  discretionary: {
+    label: "Discretionary",
+    color: "var(--chart-2)",
+  },
+} satisfies ChartConfig
+
+export function CommitmentBurdenChart({
   data,
   currency = "USD",
   className,
-}: CategoryBreakdownChartProps) {
-  const [hoveredCategory, setHoveredCategory] = React.useState<string | null>(null)
+}: CommitmentBurdenChartProps) {
+  const [hoveredSlice, setHoveredSlice] = React.useState<string | null>(null)
 
-  const totalExpense = React.useMemo(() => {
-    return data.reduce((sum, d) => sum + (d.value || 0), 0)
-  }, [data])
+  const fixedPct = data.total > 0 ? (data.fixed / data.total) * 100 : 0
+  const discPct = data.total > 0 ? (data.discretionary / data.total) * 100 : 0
 
-  const sortedData = React.useMemo(() => {
-    return [...data]
-      .filter((d) => d.value > 0)
-      .sort((a, b) => b.value - a.value)
-  }, [data])
-
-  // Capped at top 5 + "Others" aggregation for pie chart readability
   const pieData = React.useMemo(() => {
-    if (sortedData.length === 0) return []
-
-    let items = sortedData
-    if (sortedData.length > 5) {
-      const top5 = sortedData.slice(0, 5)
-      const othersVal = sortedData.slice(5).reduce((sum, d) => sum + d.value, 0)
-      items = [
-        ...top5,
-        {
-          category: "Others",
-          value: othersVal,
-          color: "var(--muted-foreground)",
-          icon: "HelpCircle",
-        },
-      ]
-    }
-
-    return items
-  }, [sortedData])
-
-  const chartConfig = React.useMemo(() => {
-    return pieData.reduce((acc, item) => {
-      const safeKey = getSafeKey(item.category)
-      acc[safeKey] = { label: item.category, color: item.color }
-      return acc
-    }, {} as ChartConfig)
-  }, [pieData])
+    if (data.total === 0) return []
+    return [
+      {
+        name: "Fixed Commitments",
+        key: "fixed",
+        value: data.fixed,
+        color: "var(--chart-1)",
+      },
+      {
+        name: "Discretionary",
+        key: "discretionary",
+        value: data.discretionary,
+        color: "var(--chart-2)",
+      },
+    ].filter((d) => d.value > 0)
+  }, [data])
 
   return (
     <Card
@@ -78,22 +82,22 @@ export function CategoryBreakdownChart({
       <div className="flex items-center justify-between pb-2 border-b border-border/30 gap-2 shrink-0">
         <div className="flex items-center gap-1.5 min-w-0 flex-1">
           <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground/60 truncate min-w-0">
-            category distribution
+            commitment burden
           </span>
-          {sortedData.length > 0 && (
+          {data.activeRulesCount > 0 && (
             <span className="inline-flex items-center justify-center px-1.5 py-0.2 text-[9px] font-mono font-bold rounded-full bg-muted text-muted-foreground whitespace-nowrap shrink-0">
-              {sortedData.length}
+              {data.activeRulesCount} active
             </span>
           )}
         </div>
         <span className="text-[11px] font-mono text-muted-foreground shrink-0">
-          {formatCurrency(totalExpense * 100, currency)}
+          {formatCurrency(data.total * 100, currency)}
         </span>
       </div>
 
       {/* Body */}
       <div className="flex-1 flex flex-col justify-between min-h-0 pt-1">
-        {sortedData.length === 0 ? (
+        {pieData.length === 0 ? (
           <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
             No expense transactions recorded.
           </div>
@@ -109,7 +113,7 @@ export function CategoryBreakdownChart({
                   <Pie
                     data={pieData}
                     dataKey="value"
-                    nameKey="category"
+                    nameKey="name"
                     cx="50%"
                     cy="95%"
                     startAngle={180}
@@ -121,17 +125,14 @@ export function CategoryBreakdownChart({
                     minAngle={4}
                     stroke="var(--card)"
                     strokeWidth={2}
-                    onMouseEnter={(_, index) => setHoveredCategory(pieData[index]?.category || null)}
-                    onMouseLeave={() => setHoveredCategory(null)}
+                    onMouseEnter={(_, index) => setHoveredSlice(pieData[index]?.key || null)}
+                    onMouseLeave={() => setHoveredSlice(null)}
                   >
                     {pieData.map((entry) => {
-                      const isHighlighted =
-                        hoveredCategory === null ||
-                        hoveredCategory === entry.category ||
-                        (entry.category === "Others" && !pieData.slice(0, 5).some(p => p.category === hoveredCategory))
+                      const isHighlighted = hoveredSlice === null || hoveredSlice === entry.key
                       return (
                         <Cell
-                          key={entry.category}
+                          key={entry.key}
                           fill={entry.color}
                           style={{
                             opacity: isHighlighted ? 1 : 0.35,
@@ -148,7 +149,7 @@ export function CategoryBreakdownChart({
                       dy="-8"
                       className="fill-foreground text-xs font-extrabold tabular-nums tracking-tight font-mono"
                     >
-                      {formatCurrency(totalExpense * 100, currency)}
+                      {formatCurrency(data.total * 100, currency)}
                     </tspan>
                     <tspan
                       x="50%"
@@ -164,7 +165,7 @@ export function CategoryBreakdownChart({
                       <ChartTooltipContent
                         hideLabel
                         formatter={(value, name, item) => {
-                          const categoryName = String(name)
+                          const label = String(name)
                           const color = item.payload?.color || item.color || item.payload?.fill
                           return (
                             <div className="flex flex-1 justify-between items-center leading-none gap-4">
@@ -173,7 +174,7 @@ export function CategoryBreakdownChart({
                                   className="size-2.5 shrink-0 rounded-[2px]"
                                   style={{ backgroundColor: color }}
                                 />
-                                <span className="text-muted-foreground font-medium">{categoryName}</span>
+                                <span className="text-muted-foreground font-medium">{label}</span>
                               </div>
                               <span className="font-mono font-bold text-foreground">
                                 {formatCurrency(Number(value) * 100, currency)}
@@ -188,46 +189,60 @@ export function CategoryBreakdownChart({
               </ChartContainer>
             </div>
 
-            {/* List of categories inside ScrollArea with constrained height */}
-            <ScrollArea className="h-[95px] pr-2 w-full pt-2 border-t border-border/30">
-              <div className="flex flex-col gap-0.5">
-                {sortedData.map((entry) => {
-                  const pct = totalExpense > 0 ? (entry.value / totalExpense) * 100 : 0
-                  const isHovered =
-                    hoveredCategory === entry.category ||
-                    (hoveredCategory === "Others" && !pieData.slice(0, 5).some(p => p.category === entry.category))
-                  return (
-                    <div
-                      key={entry.category}
-                      className={cn(
-                        "flex items-center justify-between gap-2.5 px-2 py-1 rounded-lg transition-colors cursor-default text-xs",
-                        isHovered ? "bg-muted" : "hover:bg-muted/50"
-                      )}
-                      onMouseEnter={() => setHoveredCategory(entry.category)}
-                      onMouseLeave={() => setHoveredCategory(null)}
-                    >
-                      <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span
-                          className="size-2 rounded-full shrink-0"
-                          style={{ backgroundColor: entry.color }}
-                        />
-                        <span className="font-medium truncate text-foreground text-[11px]">
-                          {entry.category}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 font-mono text-[11px]">
-                        <span className="text-muted-foreground text-[10px]">
-                          {pct.toFixed(0)}%
-                        </span>
-                        <span className="font-semibold text-foreground">
-                          {formatCurrency(entry.value * 100, currency)}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
+            {/* Responsive 2-column stat cards */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/30">
+              {/* Fixed */}
+              <div
+                className={cn(
+                  "flex flex-col p-2 rounded-lg transition-colors border border-border/40 bg-muted/20 cursor-default min-w-0",
+                  hoveredSlice === "fixed" ? "bg-muted border-border" : "hover:bg-muted/40"
+                )}
+                onMouseEnter={() => setHoveredSlice("fixed")}
+                onMouseLeave={() => setHoveredSlice(null)}
+              >
+                <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                  <span className="size-2 rounded-full shrink-0 bg-[var(--chart-1)]" />
+                  <span className="text-[11px] font-medium text-muted-foreground truncate">
+                    Fixed
+                  </span>
+                  <span className="text-[10px] text-muted-foreground/70 font-mono ml-auto shrink-0">
+                    {fixedPct.toFixed(0)}%
+                  </span>
+                </div>
+                <span className="font-mono text-xs sm:text-sm font-semibold text-foreground truncate">
+                  {formatCurrency(data.fixed * 100, currency)}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">
+                  {data.activeRulesCount} active rule{data.activeRulesCount === 1 ? "" : "s"}
+                </span>
               </div>
-            </ScrollArea>
+
+              {/* Discretionary */}
+              <div
+                className={cn(
+                  "flex flex-col p-2 rounded-lg transition-colors border border-border/40 bg-muted/20 cursor-default min-w-0",
+                  hoveredSlice === "discretionary" ? "bg-muted border-border" : "hover:bg-muted/40"
+                )}
+                onMouseEnter={() => setHoveredSlice("discretionary")}
+                onMouseLeave={() => setHoveredSlice(null)}
+              >
+                <div className="flex items-center gap-1.5 mb-1 min-w-0">
+                  <span className="size-2 rounded-full shrink-0 bg-[var(--chart-2)]" />
+                  <span className="text-[11px] font-medium text-muted-foreground truncate">
+                    Discretionary
+                  </span>
+                  <span className="text-[10px] text-muted-foreground/70 font-mono ml-auto shrink-0">
+                    {discPct.toFixed(0)}%
+                  </span>
+                </div>
+                <span className="font-mono text-xs sm:text-sm font-semibold text-foreground truncate">
+                  {formatCurrency(data.discretionary * 100, currency)}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">
+                  Variable outflow
+                </span>
+              </div>
+            </div>
           </div>
         )}
       </div>

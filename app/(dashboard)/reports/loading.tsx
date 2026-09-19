@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export function ReportsSkeleton() {
   return (
-    <div className="flex flex-col gap-7 w-full">
+    <div className="flex flex-col gap-6 w-full">
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-start gap-3.5 min-w-0 max-w-2xl">
@@ -14,35 +14,42 @@ export function ReportsSkeleton() {
         </div>
 
         {/* Global Filter Component Skeleton */}
-        <div className="flex flex-col lg:items-end 2xl:flex-row 2xl:items-center gap-2.5 self-start lg:self-center shrink-0">
-          <Skeleton className="h-10 w-64 rounded-2xl" />
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-44 rounded-xl" />
-            <Skeleton className="h-10 w-32 rounded-xl" />
-          </div>
+        <div className="flex items-center gap-2.5 self-start lg:self-center shrink-0">
+          <Skeleton className="h-10 w-48 rounded-xl" />
+          <Skeleton className="h-10 w-36 rounded-xl" />
         </div>
       </div>
 
-      {/* MetricCards row */}
-      <div className="flex flex-wrap gap-4">
-        {[...Array(4)].map((_, i) => (
+      {/* MetricCards row: 5 items */}
+      <div className="flex flex-wrap gap-4 w-full">
+        {[...Array(5)].map((_, i) => (
           <Skeleton
             key={i}
-            className="h-[90px] flex-1 min-w-[200px] rounded-2xl"
-            style={{ minWidth: "clamp(200px, calc((1024px - 100%) * 9999), calc(25% - 0.75rem))" }}
+            className="h-[74px] flex-1 min-w-[200px] rounded-2xl"
           />
         ))}
       </div>
 
-      {/* Bento grid of 6 charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <Skeleton key={i} className="h-[380px] w-full rounded-2xl" />
-        ))}
-      </div>
+      {/* Nav Tabs Skeleton */}
+      <Skeleton className="h-9 w-80 rounded-2xl" />
 
-      {/* Monthly Summary Table Skeleton */}
-      <Skeleton className="h-72 w-full rounded-2xl" />
+      {/* 3-Column Asymmetric Bento Grid Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch w-full">
+        {/* Tier 1: 2 : 1 */}
+        <Skeleton className="lg:col-span-2 h-[340px] rounded-2xl" />
+        <Skeleton className="lg:col-span-1 h-[340px] rounded-2xl" />
+
+        {/* Tier 2: 2 : 1 */}
+        <Skeleton className="lg:col-span-2 h-[340px] rounded-2xl" />
+        <Skeleton className="lg:col-span-1 h-[340px] rounded-2xl" />
+
+        {/* Tier 3: 1 : 2 */}
+        <Skeleton className="lg:col-span-1 h-[340px] rounded-2xl" />
+        <Skeleton className="lg:col-span-2 h-[340px] rounded-2xl" />
+
+        {/* Tier 4: Ledger Table (3 cols full width) */}
+        <Skeleton className="col-span-1 md:col-span-2 lg:col-span-3 h-[300px] rounded-2xl" />
+      </div>
     </div>
   )
 }
