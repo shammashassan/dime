@@ -1040,32 +1040,36 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                           required
                         />
                       </Field>
-                      <Field>
+                      <Field data-invalid={newPassword.length > 0 && newPassword.length < 8 ? true : undefined}>
                         <FieldLabel htmlFor="new-pw">New Password</FieldLabel>
                         <Input
                           id="new-pw"
                           type="password"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
+                          aria-invalid={newPassword.length > 0 && newPassword.length < 8}
                           className="rounded-xl border-border/40 focus-visible:ring-primary"
                           required
                         />
-                        {newPassword.length > 0 && newPassword.length < 8 && (
-                          <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters</p>
+                        {newPassword.length > 0 && newPassword.length < 8 ? (
+                          <FieldError>Must be at least 8 characters</FieldError>
+                        ) : (
+                          <FieldDescription>Minimum 8 characters</FieldDescription>
                         )}
                       </Field>
-                      <Field>
+                      <Field data-invalid={confirmPassword.length > 0 && newPassword !== confirmPassword ? true : undefined}>
                         <FieldLabel htmlFor="confirm-pw">Confirm New Password</FieldLabel>
                         <Input
                           id="confirm-pw"
                           type="password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
+                          aria-invalid={confirmPassword.length > 0 && newPassword !== confirmPassword}
                           className="rounded-xl border-border/40 focus-visible:ring-primary"
                           required
                         />
                         {confirmPassword.length > 0 && newPassword !== confirmPassword && (
-                          <p className="text-xs text-rose-500 mt-1">Passwords do not match</p>
+                          <FieldError>Passwords do not match</FieldError>
                         )}
                       </Field>
                     </FieldGroup>
