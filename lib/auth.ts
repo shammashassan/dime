@@ -31,7 +31,7 @@ export const auth = betterAuth({
     revokeSessionsOnPasswordReset: true,
     resetPasswordTokenExpiresIn: 60 * 30,
     sendResetPassword: async ({ user, url }) => {
-      void sendEmail({
+      await sendEmail({
         to: user.email,
         subject: "Reset your Dime password",
         html: getPasswordResetEmailHtml(url, user.name || undefined),
