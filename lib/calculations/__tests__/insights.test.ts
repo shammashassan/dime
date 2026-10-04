@@ -998,7 +998,7 @@ describe("AI Spending Insights Calculation Engine", () => {
         assert.equal(briefing.summary, expectedAiResponse.summary)
         assert.equal(briefing.focalAdvice, expectedAiResponse.focalAdvice)
 
-        assert.ok(requestedUrl.includes("gemini-1.5-flash:generateContent"))
+        assert.ok(requestedUrl.includes("gemini-flash-latest:generateContent"))
         assert.ok(requestedUrl.includes("key=valid-test-key"))
         assert.ok(requestedBody.includes("You are Dime's Chief Financial Analyst"))
       } finally {
