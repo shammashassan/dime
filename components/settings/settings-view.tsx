@@ -801,14 +801,14 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
         <div className="flex-1 w-full">
           {/* PROFILE DETAILS */}
           <TabsContent value="profile" className="outline-none">
-            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">Profile Details</CardTitle>
-                <CardDescription>
-                  Modify the display name and user handle for your Dime profile.
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleUpdateProfile}>
+            <form onSubmit={handleUpdateProfile}>
+              <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold">Profile Details</CardTitle>
+                  <CardDescription>
+                    Modify the display name and user handle for your Dime profile.
+                  </CardDescription>
+                </CardHeader>
                 <CardContent className="space-y-5">
                   {profileMessage && (
                     <Alert className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl">
@@ -864,14 +864,13 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                   <Button
                     type="submit"
                     disabled={isPending || !isProfileDirty}
-                    className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95 shadow-md shadow-primary/10"
                   >
                     {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                     Save Changes
                   </Button>
                 </CardFooter>
-              </form>
-            </Card>
+              </Card>
+            </form>
           </TabsContent>
 
           {/* SECURITY & LOGIN */}
@@ -932,7 +931,6 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                     <Button
                       type="submit"
                       disabled={isPending || securityLoading || (hasCredentials && !twoFactorPassword.trim())}
-                      className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95"
                     >
                       {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                       Enable 2FA
@@ -952,8 +950,9 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                   </CardDescription>
                 </div>
                 <Button
+                  size="sm"
                   onClick={() => setShowAddPasskey(true)}
-                  className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95 flex items-center gap-1.5 text-xs py-1.5 px-3 h-auto"
+                  className="gap-1.5"
                 >
                   <Key className="size-3.5" />
                   Add Passkey
@@ -1000,14 +999,14 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
             {/* Change Password Card */}
             {hasCredentials && (
-              <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold">Change Password</CardTitle>
-                  <CardDescription>
-                    Update the credentials used to log in to your account.
-                  </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleChangePassword}>
+              <form onSubmit={handleChangePassword}>
+                <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold">Change Password</CardTitle>
+                    <CardDescription>
+                      Update the credentials used to log in to your account.
+                    </CardDescription>
+                  </CardHeader>
                   <CardContent className="space-y-4">
                     {passwordError && (
                       <Alert className="bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl">
@@ -1083,14 +1082,13 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                         newPassword !== confirmPassword ||
                         newPassword.length < 8
                       }
-                      className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95 shadow-md"
                     >
                       {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                       Update Password
                     </Button>
                   </CardFooter>
-                </form>
-              </Card>
+                </Card>
+              </form>
             )}
 
             {/* Active Sessions Card */}
@@ -1105,8 +1103,9 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                 {sessions.length > 1 && (
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={handleRevokeOtherSessions}
-                    className="rounded-xl border-border/40 text-xs py-1.5 px-3 h-auto hover:bg-rose-500/10 hover:text-rose-500"
+                    className="hover:bg-destructive/10 hover:text-destructive"
                     disabled={isPending}
                   >
                     Revoke Other Sessions
@@ -1162,14 +1161,14 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
           {/* PREFERENCES */}
           <TabsContent value="preferences" className="outline-none">
-            <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">App Preferences</CardTitle>
-                <CardDescription>
-                  Configure defaults and layouts to align with your logging workflow.
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleUpdatePreferences}>
+            <form onSubmit={handleUpdatePreferences}>
+              <Card className="border border-border/40 shadow-md rounded-2xl overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold">App Preferences</CardTitle>
+                  <CardDescription>
+                    Configure defaults and layouts to align with your logging workflow.
+                  </CardDescription>
+                </CardHeader>
                 <CardContent className="space-y-5">
                   {prefMessage && (
                     <Alert className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl">
@@ -1241,14 +1240,13 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                   <Button
                     type="submit"
                     disabled={isPending || !isPreferencesDirty}
-                    className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95 shadow-md"
                   >
                     {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                     Save Preferences
                   </Button>
                 </CardFooter>
-              </form>
-            </Card>
+              </Card>
+            </form>
           </TabsContent>
 
           <TabsContent value="rules" className="outline-none" data-slot="tabs-content">
@@ -1350,7 +1348,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                   <Button
                     variant="outline"
                     onClick={handleExportCSV}
-                    className="rounded-xl border-border/40 flex items-center gap-1.5"
+                    className="gap-1.5"
                   >
                     <Download className="size-4" />
                     Export CSV (Transactions Only)
@@ -1358,7 +1356,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                   <Button
                     variant="outline"
                     onClick={handleExportJSON}
-                    className="rounded-xl border-border/40 flex items-center gap-1.5"
+                    className="gap-1.5"
                   >
                     <Download className="size-4" />
                     Export JSON (Complete Dump)
@@ -1388,7 +1386,6 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                 <Button
                   variant="destructive"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="rounded-xl font-bold bg-destructive text-destructive-foreground hover:bg-destructive/95"
                 >
                   Delete My Account
                 </Button>
@@ -1480,14 +1477,14 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                     type="button"
                     variant="ghost"
                     onClick={() => setShowTotpEnrollment(false)}
-                    className="rounded-xl w-full sm:w-auto"
+                    className="w-full sm:w-auto"
                   >
                     Close
                   </Button>
                   <Button
                     type="submit"
                     disabled={isPending}
-                    className="rounded-xl w-full sm:w-auto bg-primary text-primary-foreground font-bold hover:bg-primary/95"
+                    className="w-full sm:w-auto"
                   >
                     {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                     Confirm Code
@@ -1545,14 +1542,13 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                 type="button"
                 variant="ghost"
                 onClick={() => setShowDisable2FA(false)}
-                className="rounded-xl"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
+                variant="destructive"
                 disabled={isPending || securityLoading || (hasCredentials && !disablePassword.trim())}
-                className="rounded-xl bg-destructive text-destructive-foreground font-bold hover:bg-destructive/95"
               >
                 {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                 Deactivate 2FA
@@ -1597,14 +1593,13 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                 type="button"
                 variant="ghost"
                 onClick={() => setShowAddPasskey(false)}
-                className="rounded-xl"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isPending}
-                className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95 flex items-center gap-1"
+                className="gap-1"
               >
                 {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
                 Register Key

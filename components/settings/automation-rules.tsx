@@ -505,7 +505,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
               Configure triggers, conditions, and actions to automatically categorize, route, and flag transactions.
             </CardDescription>
           </div>
-          <Button onClick={handleOpenCreateDialog} size="sm" className="shadow-md bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold">
+          <Button onClick={handleOpenCreateDialog} size="sm">
             <Plus className="size-4 mr-1" />
             Create Rule
           </Button>
