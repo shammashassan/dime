@@ -860,7 +860,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                     </Field>
                   </FieldGroup>
                 </CardContent>
-                <CardFooter className="border-t border-border/10 bg-muted/10 px-6 py-4 flex justify-end">
+                <CardFooter className="justify-end">
                   <Button
                     type="submit"
                     disabled={isPending || !isProfileDirty}
@@ -1071,7 +1071,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                       </Field>
                     </FieldGroup>
                   </CardContent>
-                  <CardFooter className="border-t border-border/10 bg-muted/10 px-6 py-4 flex justify-end">
+                  <CardFooter className="justify-end">
                     <Button
                       type="submit"
                       disabled={
@@ -1237,7 +1237,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                     </Field>
                   </FieldGroup>
                 </CardContent>
-                <CardFooter className="border-t border-border/10 bg-muted/10 px-6 py-4 flex justify-end">
+                <CardFooter className="justify-end">
                   <Button
                     type="submit"
                     disabled={isPending || !isPreferencesDirty}

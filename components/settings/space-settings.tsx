@@ -581,7 +581,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
             </FieldGroup>
           </CardContent>
           {canManageSettings && (
-            <CardFooter className="justify-end border-t">
+            <CardFooter className="justify-end">
               <Button type="submit" disabled={isUpdatingSettings}>
                 {isUpdatingSettings && <Loader2 className="animate-spin" data-icon="inline-start" />}
                 Save Changes

@@ -75,36 +75,44 @@ export function ReceiptScannerModal({
     fileInputRef.current?.click()
   }
 
-  const handleScan = async () => {
+  const handleScan = () => {
     if (!file) return
 
     setIsScanning(true)
-    const reader = new FileReader()
 
-    reader.onload = async () => {
-      try {
-        const base64Image = reader.result as string
-        const res = await scanReceiptAction(base64Image, file.name)
-        if (res.success && res.data) {
-          setScannedData(res.data)
-          toast.success("Receipt scanned successfully!")
-        } else {
-          toast.error("Failed to parse receipt data")
+    const scanPromise = new Promise((resolve, reject) => {
+      const reader = new FileReader()
+
+      reader.onload = async () => {
+        try {
+          const base64Image = reader.result as string
+          const res = await scanReceiptAction(base64Image)
+          if (res.success && res.data) {
+            setScannedData(res.data)
+            resolve(res.data)
+          } else {
+            reject(new Error(res.error || "Google Gemini API key is not set."))
+          }
+        } catch (err: unknown) {
+          reject(err instanceof Error ? err : new Error("An error occurred during scanning"))
+        } finally {
+          setIsScanning(false)
         }
-      } catch (err) {
-        console.error(err)
-        toast.error("An error occurred during scanning")
-      } finally {
-        setIsScanning(false)
       }
-    }
 
-    reader.onerror = () => {
-      toast.error("Failed to read receipt file")
-      setIsScanning(false)
-    }
+      reader.onerror = () => {
+        setIsScanning(false)
+        reject(new Error("Failed to read receipt file"))
+      }
 
-    reader.readAsDataURL(file)
+      reader.readAsDataURL(file)
+    })
+
+    toast.promise(scanPromise, {
+      loading: "Scanning receipt with Gemini AI...",
+      success: "Receipt scanned successfully!",
+      error: (err: unknown) => (err instanceof Error ? err.message : "Google Gemini API key is not set."),
+    })
   }
 
   const handleApply = () => {

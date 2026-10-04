@@ -588,7 +588,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                           {template.description}
                         </CardDescription>
                       </CardHeader>
-                      <CardFooter className="p-4 pt-2 border-t border-border/20 mt-3 flex justify-between items-center">
+                      <CardFooter className="justify-between">
                         <span className="text-[10px] text-muted-foreground flex gap-1 font-semibold">
                           Triggers: {template.triggers.slice(0, 2).join(", ")}
                         </span>
@@ -778,8 +778,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                       </CardContent>
 
                       {/* Footer */}
-                      <Separator className="bg-border/20" />
-                      <CardFooter className="px-4 py-2.5 flex items-center justify-between bg-muted/20 mt-auto shrink-0">
+                      <CardFooter className="justify-between mt-auto">
                         <div className="text-[10px] text-muted-foreground font-semibold flex items-center gap-2">
                           <span>Matches: <strong className="text-foreground">{rule.executionCount || 0}</strong></span>
                         </div>

@@ -642,136 +642,78 @@ async function applyRulesToScannedData(data: {
   }
 }
 
-export async function scanReceiptAction(base64Image: string, filename: string) {
+export async function scanReceiptAction(base64Image: string) {
   const session = await requireApprovedUser()
   const scope = await getFinancialScope()
+
+  if (!process.env.GEMINI_API_KEY) {
+    return {
+      success: false,
+      error: "Google Gemini API key is not configured. Please set GEMINI_API_KEY in your environment.",
+    }
+  }
+
   const prefs = await getPreferences(session.user.id)
   const defaultCurrency = (prefs?.defaultCurrency || "USD").toUpperCase()
 
-  // Delay helper to simulate network/processing time
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
-  const lowerName = filename.toLowerCase()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let rawData: any = null
-
-  // Case 1: Check for Gemini API key
-  if (process.env.GEMINI_API_KEY) {
-    try {
-      // Clean base64 header if present
-      const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "")
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `Analyze this receipt image and return a JSON object. The JSON must contain these exact fields: merchant (string), amount (integer in cents, e.g. 10.50 is 1050), date (ISO date string YYYY-MM-DD), categoryName (string matching one of: Food & Dining, Transport, Housing, Utilities, Healthcare, Entertainment, Shopping, Education, Travel, Personal Care, Subscriptions, Other), currency (3-letter ISO code e.g. USD, EUR, INR), and description (string). The user's preferred default currency is ${defaultCurrency}. If currency cannot be determined from the receipt, use ${defaultCurrency}. Return ONLY raw JSON, do not wrap in markdown code blocks.`,
+  try {
+    // Clean base64 header if present
+    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "")
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `Analyze this receipt image and return a JSON object. The JSON must contain these exact fields: merchant (string), amount (integer in cents, e.g. 10.50 is 1050), date (ISO date string YYYY-MM-DD), categoryName (string matching one of: Food & Dining, Transport, Housing, Utilities, Healthcare, Entertainment, Shopping, Education, Travel, Personal Care, Subscriptions, Other), currency (3-letter ISO code e.g. USD, EUR, INR), and description (string). The user's preferred default currency is ${defaultCurrency}. If currency cannot be determined from the receipt, use ${defaultCurrency}. Return ONLY raw JSON, do not wrap in markdown code blocks.`,
+                },
+                {
+                  inlineData: {
+                    mimeType: "image/jpeg",
+                    data: base64Data,
                   },
-                  {
-                    inlineData: {
-                      mimeType: "image/jpeg",
-                      data: base64Data,
-                    },
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              responseMimeType: "application/json",
+                },
+              ],
             },
-          }),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.statusText}`)
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+          },
+        }),
       }
+    )
 
-      const result = await response.json()
-      const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text
-      if (textResponse) {
-        const parsed = JSON.parse(textResponse.trim())
-        rawData = {
-          merchant: parsed.merchant || "Unknown Merchant",
-          amount: typeof parsed.amount === "number" ? parsed.amount : 0,
-          date: parsed.date ? new Date(parsed.date) : new Date(),
-          categoryName: parsed.categoryName || "Other",
-          currency: (parsed.currency || defaultCurrency).toUpperCase(),
-          description: parsed.description || "AI Scanned Receipt",
-        }
-      }
-    } catch (err) {
-      console.error("AI Receipt Scan error, falling back to simulation:", err)
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.statusText}`)
     }
-  }
 
-  // Case 2: Simulation fallback (highly interactive and deterministic for testing)
-  if (!rawData) {
-    await delay(1800) // Simulate processing time
-
-    if (lowerName.includes("coffee") || lowerName.includes("starbucks")) {
-      rawData = {
-        merchant: "Starbucks Coffee",
-        amount: defaultCurrency === "INR" ? 35000 : 1450,
-        date: new Date(),
-        categoryName: "Food & Dining",
-        currency: defaultCurrency,
-        description: "Caramel Macchiato & Croissant",
-      }
-    } else if (lowerName.includes("grocery") || lowerName.includes("walmart") || lowerName.includes("food")) {
-      rawData = {
-        merchant: defaultCurrency === "INR" ? "Reliance Fresh" : "Walmart Supercenter",
-        amount: defaultCurrency === "INR" ? 245000 : 8420,
-        date: new Date(),
-        categoryName: "Food & Dining",
-        currency: defaultCurrency,
-        description: "Weekly Household Groceries",
-      }
-    } else if (lowerName.includes("flight") || lowerName.includes("delta") || lowerName.includes("travel")) {
-      rawData = {
-        merchant: defaultCurrency === "INR" ? "Air India" : "Delta Air Lines",
-        amount: defaultCurrency === "INR" ? 850000 : 35000,
-        date: new Date(),
-        categoryName: "Travel",
-        currency: defaultCurrency,
-        description: defaultCurrency === "INR" ? "Flight Ticket DEL to BOM" : "Flight Ticket NYC to LAX",
-      }
-    } else if (lowerName.includes("netflix") || lowerName.includes("subscription")) {
-      rawData = {
-        merchant: "Netflix Inc.",
-        amount: defaultCurrency === "INR" ? 64900 : 1549,
-        date: new Date(),
-        categoryName: "Subscriptions",
-        currency: defaultCurrency,
-        description: "Premium Streaming Subscription",
-      }
-    } else {
-      // Random generic fallback
-      const randomAmount = defaultCurrency === "INR"
-        ? Math.round((Math.random() * 800 + 150)) * 100
-        : Math.round((Math.random() * 45 + 5) * 100)
-      rawData = {
-        merchant: "Local Retailer Store",
-        amount: randomAmount,
-        date: new Date(),
-        categoryName: "Shopping",
-        currency: defaultCurrency,
-        description: "Miscellaneous retail purchase",
-      }
+    const result = await response.json()
+    const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text
+    if (!textResponse) {
+      return { success: false, error: "Empty response received from Gemini" }
     }
-  }
 
-  if (rawData) {
+    const parsed = JSON.parse(textResponse.trim())
+    const rawData = {
+      merchant: parsed.merchant || "Unknown Merchant",
+      amount: typeof parsed.amount === "number" ? parsed.amount : 0,
+      date: parsed.date ? new Date(parsed.date) : new Date(),
+      categoryName: parsed.categoryName || "Other",
+      currency: (parsed.currency || defaultCurrency).toUpperCase(),
+      description: parsed.description || "AI Scanned Receipt",
+    }
+
     const finalData = await applyRulesToScannedData(rawData, scope)
     return { success: true, data: finalData }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Failed to process receipt with Gemini"
+    console.error("AI Receipt Scan error:", err)
+    return { success: false, error: message }
   }
-
-  return { success: false, error: "Failed to parse receipt data" }
 }
 
 export interface ImportedTransactionInput {
