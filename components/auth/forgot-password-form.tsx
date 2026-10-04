@@ -78,7 +78,7 @@ export function ForgotPasswordForm() {
               </Field>
             </FieldGroup>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading || !email.trim()}>
               {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
               Send Reset Link
             </Button>

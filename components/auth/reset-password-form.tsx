@@ -86,6 +86,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
                   required
                   disabled={loading}
                 />
+                {password.length > 0 && password.length < 8 && (
+                  <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters</p>
+                )}
               </Field>
               <Field>
                 <FieldLabel htmlFor="confirm-new-password">Confirm Password</FieldLabel>
@@ -98,10 +101,17 @@ export function ResetPasswordForm({ token }: { token: string }) {
                   required
                   disabled={loading}
                 />
+                {confirmPassword.length > 0 && password !== confirmPassword && (
+                  <p className="text-xs text-rose-500 mt-1">Passwords do not match</p>
+                )}
               </Field>
             </FieldGroup>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || !password.trim() || !confirmPassword.trim() || password !== confirmPassword || password.length < 8}
+            >
               {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
               Reset Password
             </Button>

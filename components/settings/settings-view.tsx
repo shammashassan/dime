@@ -908,7 +908,16 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                   <form onSubmit={handleStart2FAEnrollment} className="space-y-4 max-w-sm">
                     {hasCredentials && (
                       <Field>
-                        <FieldLabel htmlFor="2fa-setup-password">Confirm Password to Setup 2FA</FieldLabel>
+                        <div className="flex items-center justify-between">
+                          <FieldLabel htmlFor="2fa-setup-password">Confirm Password to Setup 2FA</FieldLabel>
+                          <a
+                            href="/forgot-password"
+                            className="text-xs text-primary hover:underline"
+                            tabIndex={-1}
+                          >
+                            Forgot password?
+                          </a>
+                        </div>
                         <Input
                           id="2fa-setup-password"
                           type="password"
@@ -922,7 +931,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                     )}
                     <Button
                       type="submit"
-                      disabled={isPending}
+                      disabled={isPending || securityLoading || (hasCredentials && !twoFactorPassword.trim())}
                       className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95"
                     >
                       {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -1013,7 +1022,16 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
                     <FieldGroup>
                       <Field>
-                        <FieldLabel htmlFor="current-pw">Current Password</FieldLabel>
+                        <div className="flex items-center justify-between">
+                          <FieldLabel htmlFor="current-pw">Current Password</FieldLabel>
+                          <a
+                            href="/forgot-password"
+                            className="text-xs text-primary hover:underline"
+                            tabIndex={-1}
+                          >
+                            Forgot password?
+                          </a>
+                        </div>
                         <Input
                           id="current-pw"
                           type="password"
@@ -1033,6 +1051,9 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                           className="rounded-xl border-border/40 focus-visible:ring-primary"
                           required
                         />
+                        {newPassword.length > 0 && newPassword.length < 8 && (
+                          <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters</p>
+                        )}
                       </Field>
                       <Field>
                         <FieldLabel htmlFor="confirm-pw">Confirm New Password</FieldLabel>
@@ -1044,13 +1065,24 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                           className="rounded-xl border-border/40 focus-visible:ring-primary"
                           required
                         />
+                        {confirmPassword.length > 0 && newPassword !== confirmPassword && (
+                          <p className="text-xs text-rose-500 mt-1">Passwords do not match</p>
+                        )}
                       </Field>
                     </FieldGroup>
                   </CardContent>
                   <CardFooter className="border-t border-border/10 bg-muted/10 px-6 py-4 flex justify-end">
                     <Button
                       type="submit"
-                      disabled={isPending || securityLoading}
+                      disabled={
+                        isPending ||
+                        securityLoading ||
+                        !currentPassword.trim() ||
+                        !newPassword.trim() ||
+                        !confirmPassword.trim() ||
+                        newPassword !== confirmPassword ||
+                        newPassword.length < 8
+                      }
                       className="rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/95 shadow-md"
                     >
                       {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -1486,7 +1518,16 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
             {hasCredentials && (
               <Field>
-                <FieldLabel htmlFor="disable-2fa-pw">Password</FieldLabel>
+                <div className="flex items-center justify-between">
+                  <FieldLabel htmlFor="disable-2fa-pw">Password</FieldLabel>
+                  <a
+                    href="/forgot-password"
+                    className="text-xs text-primary hover:underline"
+                    tabIndex={-1}
+                  >
+                    Forgot password?
+                  </a>
+                </div>
                 <Input
                   id="disable-2fa-pw"
                   type="password"
@@ -1510,7 +1551,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
               </Button>
               <Button
                 type="submit"
-                disabled={isPending || securityLoading}
+                disabled={isPending || securityLoading || (hasCredentials && !disablePassword.trim())}
                 className="rounded-xl bg-destructive text-destructive-foreground font-bold hover:bg-destructive/95"
               >
                 {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}

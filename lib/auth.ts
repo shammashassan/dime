@@ -10,6 +10,7 @@ import { organization } from "better-auth/plugins"
 import { ac, roles } from "@/lib/access"
 import { db } from "@/lib/db/client"
 import { sendEmail } from "@/lib/email"
+import { getPasswordResetEmailHtml } from "@/lib/email-templates"
 import { initDatabase } from "@/lib/db/indexes"
 import { APIError } from "better-auth/api"
 import { ObjectId } from "mongodb"
@@ -30,7 +31,11 @@ export const auth = betterAuth({
     revokeSessionsOnPasswordReset: true,
     resetPasswordTokenExpiresIn: 60 * 30,
     sendResetPassword: async ({ user, url }) => {
-      void sendEmail({ to: user.email, subject: "Reset your Dime password", html: `<a href="${url}">Reset Password</a>` })
+      void sendEmail({
+        to: user.email,
+        subject: "Reset your Dime password",
+        html: getPasswordResetEmailHtml(url, user.name || undefined),
+      })
     },
   },
 
