@@ -658,7 +658,9 @@ export async function scanReceiptAction(base64Image: string) {
 
   try {
     // Clean base64 header if present
-    const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "")
+    const mimeMatch = base64Image.match(/^data:(image\/[\w.+-]+);base64,/)
+    const mimeType = mimeMatch?.[1] ?? "image/jpeg"
+    const base64Data = base64Image.replace(/^data:image\/[\w.+-]+;base64,/, "")
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -673,7 +675,7 @@ export async function scanReceiptAction(base64Image: string) {
                 },
                 {
                   inlineData: {
-                    mimeType: "image/jpeg",
+                    mimeType,
                     data: base64Data,
                   },
                 },
@@ -688,6 +690,8 @@ export async function scanReceiptAction(base64Image: string) {
     )
 
     if (!response.ok) {
+      const body = await response.text().catch(() => "")
+      console.error("Gemini API error body:", response.status, body)
       throw new Error(`Gemini API error: ${response.statusText}`)
     }
 
