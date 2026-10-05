@@ -168,7 +168,7 @@ export function NotificationMenu() {
           className="rounded-full"
         >
           {unreadCount > 0 ? (
-            <BellDot className="size-4.5 text-foreground" aria-hidden="true" />
+            <BellDot className="size-4.5 text-foreground [&_circle]:fill-primary [&_circle]:stroke-primary" aria-hidden="true" />
           ) : (
             <BellIcon className="size-4.5 text-muted-foreground" aria-hidden="true" />
           )}
