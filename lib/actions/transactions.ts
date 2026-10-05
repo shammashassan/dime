@@ -661,8 +661,9 @@ export async function scanReceiptAction(base64Image: string) {
     const mimeMatch = base64Image.match(/^data:(image\/[\w.+-]+);base64,/)
     const mimeType = mimeMatch?.[1] ?? "image/jpeg"
     const base64Data = base64Image.replace(/^data:image\/[\w.+-]+;base64,/, "")
+    const model = process.env.GEMINI_MODEL || "gemini-flash-lite-latest"
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
