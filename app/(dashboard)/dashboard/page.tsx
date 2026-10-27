@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getFinancialScope } from "@/lib/scope"
 import { getPreferences } from "@/lib/queries/preferences"
@@ -15,14 +14,13 @@ import { getNetWorthSummary } from "@/lib/queries/net-worth"
 import { getLatestCompletedMonthSummary } from "@/lib/queries/monthly-review"
 import { DashboardBento } from "@/components/dashboard/dashboard-bento"
 import { serializeData } from "@/lib/utils"
-import { DashboardSkeleton } from "./loading"
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "High-density overview of your finances, cash flow, and financial health.",
 }
 
-async function DashboardContent() {
+export default async function DashboardPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
   const scope = await getFinancialScope()
@@ -118,13 +116,5 @@ async function DashboardContent() {
       targetCurrency={targetCurrency}
       defaultWalletId={prefs?.defaultWalletId}
     />
-  )
-}
-
-export default function DashboardPage() {
-  return (
-    <Suspense fallback={<DashboardSkeleton />}>
-      <DashboardContent />
-    </Suspense>
   )
 }

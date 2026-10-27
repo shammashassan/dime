@@ -202,7 +202,7 @@ export interface User {
   banReason?: string
   banExpires?: Date
   twoFactorEnabled?: boolean
-  approved: boolean
+
 }
 
 export interface Session {

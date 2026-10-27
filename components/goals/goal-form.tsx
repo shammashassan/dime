@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { goalSchema, GoalInput } from "@/lib/validations/goal.schema"
 import { Goal } from "@/types"
 import { createGoal, updateGoal } from "@/lib/actions/goals"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import {
   Dialog,
   DialogContent,

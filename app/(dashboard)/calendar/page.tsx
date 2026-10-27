@@ -1,4 +1,3 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCashFlowCalendarData } from "@/lib/queries/cash-flow-calendar"
@@ -18,7 +17,7 @@ interface CalendarPageProps {
   }>
 }
 
-async function CalendarPageContent({ searchParams }: CalendarPageProps) {
+export default async function CalendarPage({ searchParams }: CalendarPageProps) {
   const session = await requireApprovedUser()
   const { month, mode } = await searchParams
 
@@ -29,12 +28,4 @@ async function CalendarPageContent({ searchParams }: CalendarPageProps) {
 
   const serialized = serializeData(data)
   return <CalendarClient data={serialized} initialMode={mode} />
-}
-
-export default async function CalendarPage(props: CalendarPageProps) {
-  return (
-    <Suspense fallback={<CalendarLoading />}>
-      <CalendarPageContent {...props} />
-    </Suspense>
-  )
 }

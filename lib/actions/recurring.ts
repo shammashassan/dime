@@ -71,7 +71,7 @@ export async function createRecurringRule(input: RecurringRuleInput) {
 
   updateTag("recurring")
   revalidatePath("/recurring")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true, id: result.insertedId.toString() }
 }
 
@@ -145,7 +145,7 @@ export async function updateRecurringRule(id: string, input: RecurringRuleInput)
 
   updateTag("recurring")
   revalidatePath("/recurring")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true }
 }
 
@@ -174,7 +174,7 @@ export async function deleteRecurringRule(id: string) {
 
   updateTag("recurring")
   revalidatePath("/recurring")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true }
 }
 
@@ -288,7 +288,7 @@ export async function processRecurringRuleNow(id: string) {
   updateTag("wallets")
   revalidatePath("/recurring")
   revalidatePath("/transactions")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true, processedCount: generated ? 1 : 0 }
 }
 
@@ -329,7 +329,7 @@ export async function toggleRecurringRuleActive(id: string) {
 
   updateTag("recurring")
   revalidatePath("/recurring")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true, isActive: nextState }
 }
 

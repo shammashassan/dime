@@ -18,7 +18,6 @@ https://dime-tracker.vercel.app/
 - **Lightweight Policy Pages**: Clean, responsive privacy and terms documentation outlining private database ownership.
 - **Multi-Method Authentication**: Support for secure login, username registration, Magic Link passwordless sign-ins, and biometric/PIN Passkeys.
 - **Two-Factor Authentication**: Optional TOTP (Authenticator apps), Email OTP, and encrypted backup codes.
-- **Admin approval queue**: All signups default to `approved: false` and must be approved via the admin dashboard before accessing protected app routes.
 - **Dashboard Overview**: Net worth aggregation, monthly cashflow summary, interactive spending trend charts (area/pie), active budget progress trackers, and recent transaction list.
 - **Transactions Management**: Complete CRUD, advanced search parameters (type, wallet, category, date, amount, tags), bulk actions, CSV export, and parallel route modals for transaction details. Includes automatic source-to-destination transfer linking.
 - **Transaction Splitting**: Divide single transactions into multiple distinct parts with custom categories, tags, and amounts.
@@ -40,7 +39,7 @@ https://dime-tracker.vercel.app/
 - **Visual Reports**: Area trend, category breakdowns, day-of-week spend bars, net savings, and budget performance charts.
 - **Category Control**: System defaults (Food, Transport, Salary, etc.), user-defined categories, and category merging (migrates transactions to target category before deletion).
 - **Settings**: Profile configuration, active session management, security dashboard, preferences, JSON/CSV data export, and full account deletion.
-- **Admin Portal**: User status overview, pending approval logs (single/bulk actions), user banning, demotions/promotions, and secure user impersonation.
+- **Admin Portal**: User status overview, user banning, demotions/promotions, and secure user impersonation.
 
 ## API
 All `/api/*` endpoints (except public auth handlers) require verified user sessions:
@@ -49,7 +48,7 @@ All `/api/*` endpoints (except public auth handlers) require verified user sessi
 - `/api/cron/process-loan-reminders` (Protected by `CRON_SECRET` header)
 
 ## Access Policy
-- Dashboard and admin routes require active, approved sessions.
+- Dashboard and admin routes require active authenticated sessions.
 - Do not crawl authenticated/dashboard pages or administrative tables.
 - Do not perform automated request loops against `/api/*`.
 
@@ -72,7 +71,7 @@ Avoid:
 - `/reset-password`
 - `/verify-email`
 - `/2fa`
-- `/pending-approval`
+
 - `/accept-invitation`
 - `/admin`
 - `/budgets`

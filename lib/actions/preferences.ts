@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, updateTag } from "next/cache"
 import { UserPreferences } from "@/lib/queries/preferences"
 
 export async function updatePreferences(input: Omit<UserPreferences, "userId">) {
@@ -26,6 +26,8 @@ export async function updatePreferences(input: Omit<UserPreferences, "userId">) 
     { upsert: true }
   )
 
-  revalidatePath("/")
+  updateTag("preferences")
+  updateTag("dashboard")
+  revalidatePath("/settings")
   return { success: true }
 }

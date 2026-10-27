@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { Wallet } from "@/types"
 import { formatCurrency } from "@/lib/utils"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"

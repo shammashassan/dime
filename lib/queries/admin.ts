@@ -11,7 +11,6 @@ export interface AdminUser {
   banned?: boolean
   banReason?: string
   banExpires?: any
-  approved: boolean
   createdAt: Date
   image?: string
 }
@@ -19,16 +18,14 @@ export interface AdminUser {
 export const getAdminStats = cache(async () => {
   const usersColl = await getCollection<AdminUser>("user")
 
-  const [totalApproved, pendingApproval, banned, admins] = await Promise.all([
-    usersColl.countDocuments({ approved: true, $or: [{ banned: false }, { banned: { $exists: false } }] }),
-    usersColl.countDocuments({ approved: false, $or: [{ banned: false }, { banned: { $exists: false } }] }),
+  const [totalActive, banned, admins] = await Promise.all([
+    usersColl.countDocuments({ $or: [{ banned: false }, { banned: { $exists: false } }] }),
     usersColl.countDocuments({ banned: true }),
     usersColl.countDocuments({ role: "admin" }),
   ])
 
   return {
-    totalApproved,
-    pendingApproval,
+    totalActive,
     banned,
     admins,
   }

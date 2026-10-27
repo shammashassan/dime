@@ -65,7 +65,7 @@ import {
   BarChart3,
 } from "lucide-react"
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 interface SharedExpenseDetailsProps {
   expense: SharedExpense

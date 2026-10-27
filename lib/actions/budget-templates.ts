@@ -199,7 +199,7 @@ export async function applyBudgetTemplateAction(input: ApplyTemplateInput) {
   updateTag("budgets")
   updateTag("categories")
   revalidatePath("/budgets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true, appliedCount }
 }
@@ -293,7 +293,7 @@ export async function saveCurrentBudgetsAsTemplateAction(input: SaveCurrentBudge
 
   updateTag("budgets")
   revalidatePath("/budgets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true, id: result.insertedId.toString() }
 }
@@ -334,7 +334,7 @@ export async function deleteCustomTemplateAction(templateId: string) {
 
   updateTag("budgets")
   revalidatePath("/budgets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true }
 }

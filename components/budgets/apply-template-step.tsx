@@ -20,7 +20,7 @@ import {
   Plus,
   Minus,
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 

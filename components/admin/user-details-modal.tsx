@@ -20,7 +20,7 @@ import {
   Ban,
   AlertCircle,
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 interface UserDetailsModalProps {
   user: AdminUser | null
@@ -133,21 +133,7 @@ export function UserDetailsModal({
                   {user.role}
                 </Badge>
 
-                {user.approved ? (
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] font-bold rounded-full text-emerald-600 border-emerald-500/20 bg-emerald-500/10 dark:text-emerald-400 shrink-0"
-                  >
-                    <CheckCircle2 className="size-3 mr-1" /> Approved
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="text-[10px] font-bold rounded-full text-amber-600 border-amber-500/20 bg-amber-500/10 dark:text-amber-400 shrink-0"
-                  >
-                    <Clock className="size-3 mr-1" /> Pending Review
-                  </Badge>
-                )}
+                
 
                 {user.banned ? (
                   <Badge
@@ -208,9 +194,9 @@ export function UserDetailsModal({
               <span className="capitalize">{user.role}</span>
             </InfoRow>
 
-            <InfoRow icon={user.approved ? CheckCircle2 : Clock} label="Approval Status">
-              <span className={user.approved ? "text-emerald-500" : "text-amber-500"}>
-                {user.approved ? "Approved" : "Pending Review"}
+            <InfoRow icon={user.banned ? Ban : CheckCircle2} label="Status">
+              <span className={user.banned ? "text-destructive" : "text-emerald-500"}>
+                {user.banned ? "Banned" : "Active"}
               </span>
             </InfoRow>
 
@@ -239,17 +225,7 @@ export function UserDetailsModal({
           )}
 
           {/* Conditional Pending Alert */}
-          {!user.approved && !user.banned && (
-            <div className="flex items-start gap-2.5 p-3.5 rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400">
-              <AlertCircle className="size-4 shrink-0 mt-0.5" />
-              <div className="flex flex-col gap-0.5 text-xs">
-                <span className="font-bold">Pending Approval</span>
-                <span className="text-muted-foreground dark:text-amber-400/80">
-                  This user account is waiting for administrative review before receiving full platform access.
-                </span>
-              </div>
-            </div>
-          )}
+          
 
           {/* Quick Actions Footer (Only if actions provided and not viewing self) */}
           {!isSelf && (onSetRole || onBanClick || onUnban || onRevokeSessions || onDeleteClick) && (

@@ -55,7 +55,7 @@ import {
 } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 
 interface ContactsViewProps {

@@ -12,7 +12,7 @@ import { InputGroup, InputGroupInput, InputGroupTextarea } from "@/components/ui
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Loader2, UserPlus, Pencil, Users } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),

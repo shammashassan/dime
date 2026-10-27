@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Recurring & Subscriptions",
@@ -11,15 +10,13 @@ import { getCategories } from "@/lib/queries/categories"
 import { getWallets } from "@/lib/queries/wallets"
 import { getBillInstances } from "@/lib/queries/bills"
 import { RecurringView } from "@/components/recurring/recurring-view"
-import { Skeleton } from "@/components/ui/skeleton"
 import { unstable_rethrow } from "next/navigation"
 import { serializeData } from "@/lib/utils"
 
 
 
-import { RecurringSkeleton } from "./loading"
 
-async function RecurringContent() {
+export default async function RecurringPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -51,13 +48,5 @@ async function RecurringContent() {
       wallets={serializeData(wallets)}
       billInstances={serializeData(billInstances)}
     />
-  )
-}
-
-export default async function RecurringPage() {
-  return (
-    <Suspense fallback={<RecurringSkeleton />}>
-      <RecurringContent />
-    </Suspense>
   )
 }

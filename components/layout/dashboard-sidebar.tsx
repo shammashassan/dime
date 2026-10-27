@@ -78,7 +78,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 type NavSubItem = {
   title: string
@@ -498,7 +498,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
-                  className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                  className="w-(--anchor-width) min-w-56 rounded-lg"
                   side={isMobile ? "bottom" : "right"}
                   align="end"
                   sideOffset={4}

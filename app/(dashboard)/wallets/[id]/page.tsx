@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Wallet Details",
@@ -11,17 +10,15 @@ import { getWalletById, getSingleWalletBalanceDailyHistory } from "@/lib/queries
 import { getFilteredTransactions } from "@/lib/queries/transactions"
 import { getCategories } from "@/lib/queries/categories"
 import { WalletDetails } from "@/components/wallets/wallet-details"
-import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
 import { unstable_rethrow } from "next/navigation"
 
-import { WalletDetailSkeleton } from "./loading"
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function WalletDetailContent({ params }: PageProps) {
+export default async function WalletDetailPage({ params }: PageProps) {
   const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
@@ -64,13 +61,5 @@ async function WalletDetailContent({ params }: PageProps) {
       categories={serializeData(categories)}
       isOwner={isOwner}
     />
-  )
-}
-
-export default function WalletDetailPage(props: PageProps) {
-  return (
-    <Suspense fallback={<WalletDetailSkeleton />}>
-      <WalletDetailContent {...props} />
-    </Suspense>
   )
 }

@@ -36,7 +36,7 @@ import {
   CreditCard,
   Loader2,
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { deleteCalendarPlanAction } from "@/lib/actions/calendar"
 
 interface CalendarDaySheetProps {

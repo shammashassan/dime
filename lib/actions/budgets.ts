@@ -53,7 +53,7 @@ export async function createBudget(input: BudgetInput) {
 
   updateTag("budgets")
   revalidatePath("/budgets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true, id: result.insertedId.toString() }
 }
 
@@ -102,7 +102,7 @@ export async function updateBudget(id: string, input: BudgetInput) {
 
   updateTag("budgets")
   revalidatePath("/budgets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true }
 }
 
@@ -131,6 +131,6 @@ export async function deleteBudget(id: string) {
 
   updateTag("budgets")
   revalidatePath("/budgets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true }
 }

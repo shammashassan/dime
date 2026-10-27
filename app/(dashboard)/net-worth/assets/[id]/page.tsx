@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Asset Details",
@@ -15,9 +14,8 @@ import {
   calculateAssetValuationMetrics,
   generateAssetValuationBriefing,
 } from "@/lib/calculations/asset-valuation"
-import { AssetDetailSkeleton } from "./loading"
 
-async function AssetDetailContent({
+export default async function AssetDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -46,15 +44,5 @@ async function AssetDetailContent({
       valuationMetrics={serializeData(metrics)}
       valuationBriefing={serializeData(briefing)}
     />
-  )
-}
-
-export default function AssetDetailPage(props: {
-  params: Promise<{ id: string }>
-}) {
-  return (
-    <Suspense fallback={<AssetDetailSkeleton />}>
-      <AssetDetailContent {...props} />
-    </Suspense>
   )
 }

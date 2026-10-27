@@ -68,7 +68,7 @@ import {
 import { format, differenceInDays } from "date-fns"
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
 import Link from "next/link"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { authClient } from "@/lib/auth-client"
 
 interface LoanDetailsProps {

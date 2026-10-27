@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Budgets",
@@ -16,9 +15,8 @@ import { BudgetsView } from "@/components/budgets/budgets-view"
 import { unstable_rethrow } from "next/navigation"
 import { serializeData } from "@/lib/utils"
 
-import { BudgetsSkeleton } from "./loading"
 
-async function BudgetsContent() {
+export default async function BudgetsPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -62,13 +60,5 @@ async function BudgetsContent() {
       templates={serializeData(templates)}
       recommendation={serializeData(recommendation)}
     />
-  )
-}
-
-export default async function BudgetsPage() {
-  return (
-    <Suspense fallback={<BudgetsSkeleton />}>
-      <BudgetsContent />
-    </Suspense>
   )
 }

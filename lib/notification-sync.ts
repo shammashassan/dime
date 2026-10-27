@@ -359,7 +359,7 @@ export async function syncUserAlerts(userId: string) {
     if (notificationsCreated > 0) {
       updateTag("notifications")
       revalidatePath("/notifications")
-      revalidatePath("/", "layout")
+
     }
 
     return { success: true, notificationsCreated }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Categories",
@@ -8,15 +7,13 @@ export const metadata: Metadata = {
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCategories } from "@/lib/queries/categories"
 import { CategoriesView } from "@/components/categories/categories-view"
-import { Skeleton } from "@/components/ui/skeleton"
 import { unstable_rethrow } from "next/navigation"
 
 import { serializeData } from "@/lib/utils"
 
 
-import { CategoriesSkeleton } from "./loading"
 
-async function CategoriesContent() {
+export default async function CategoriesPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -30,12 +27,4 @@ async function CategoriesContent() {
   }
 
   return <CategoriesView categories={serializeData(categories)} />
-}
-
-export default async function CategoriesPage() {
-  return (
-    <Suspense fallback={<CategoriesSkeleton />}>
-      <CategoriesContent />
-    </Suspense>
-  )
 }

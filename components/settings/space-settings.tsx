@@ -30,7 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { Loader2, Plus, Trash2, Building, LogOut, ShieldAlert, Search, User, ChevronDown } from "lucide-react"
 
 interface SpaceSettingsProps {
@@ -649,7 +649,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                                 )}
                               </InputGroup>
                             </PopoverAnchor>
-                            <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-(--radix-popover-trigger-width) max-w-sm">
+                            <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-(--anchor-width) max-w-sm">
                               {searchingUser ? (
                                 <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
                                   <Loader2 className="animate-spin text-primary" />

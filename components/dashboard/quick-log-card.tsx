@@ -4,7 +4,7 @@ import { useState, useTransition, FormEvent } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { PlusCircle, Loader2, ArrowRight } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"

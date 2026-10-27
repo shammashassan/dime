@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -16,7 +15,7 @@ import { SettingsView } from "@/components/settings/settings-view"
 import { serializeData } from "@/lib/utils"
 import SettingsLoading from "./loading"
 
-async function SettingsContent() {
+export default async function SettingsPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
   const activeOrgId = session.session.activeOrganizationId || null
@@ -59,13 +58,5 @@ async function SettingsContent() {
       orgSettings={serializeData(orgSettings)}
       activeOrgId={activeOrgId}
     />
-  )
-}
-
-export default async function SettingsPage() {
-  return (
-    <Suspense fallback={<SettingsLoading />}>
-      <SettingsContent />
-    </Suspense>
   )
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Financial Planner",
@@ -11,7 +10,7 @@ import { PlannerClient } from "@/components/planner/planner-client"
 import { serializeData } from "@/lib/utils"
 import PlannerLoading from "./loading"
 
-async function PlannerContent() {
+export default async function PlannerPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -28,13 +27,5 @@ async function PlannerContent() {
       baseline={serializedBaseline}
       savedScenarios={serializedScenarios}
     />
-  )
-}
-
-export default async function PlannerPage() {
-  return (
-    <Suspense fallback={<PlannerLoading />}>
-      <PlannerContent />
-    </Suspense>
   )
 }

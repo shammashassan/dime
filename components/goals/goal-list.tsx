@@ -8,7 +8,7 @@ import { GoalFormDialog } from "./goal-form"
 import { Button } from "@/components/ui/button"
 import { Plus, Target, Sparkles, Loader2, Trash2, Search, Activity, Trophy } from "lucide-react"
 import { deleteGoal } from "@/lib/actions/goals"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn, formatCurrency } from "@/lib/utils"
 import {

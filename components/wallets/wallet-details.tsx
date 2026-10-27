@@ -69,7 +69,7 @@ import {
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
 import Link from "next/link"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 const iconMap: Record<string, React.ElementType> = {
     Landmark,

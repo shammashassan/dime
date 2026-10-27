@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react"
 import { scanReceiptAction } from "@/lib/actions/transactions"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import {
   Dialog,
   DialogContent,

@@ -1,6 +1,5 @@
 import * as React from "react"
 import Link from "next/link"
-import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -108,16 +107,13 @@ export function MetricCard({
     const childProps = child.props as { children?: React.ReactNode; className?: string; style?: React.CSSProperties }
     const childContent = childProps.children !== undefined ? childProps.children : defaultContent
 
-    return (
-      <Slot
-        data-slot="metric-card"
-        className={cardClassName}
-        style={mergedStyle}
-        {...props}
-      >
-        {React.cloneElement(child, {}, childContent)}
-      </Slot>
-    )
+    return React.cloneElement(child as React.ReactElement<any>, {
+      "data-slot": "metric-card",
+      className: cn(cardClassName, childProps.className),
+      style: { ...mergedStyle, ...childProps.style },
+      ...props,
+      children: childContent,
+    })
   }
 
   if (href) {
@@ -145,4 +141,3 @@ export function MetricCard({
     </Card>
   )
 }
-

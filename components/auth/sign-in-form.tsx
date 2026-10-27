@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { Eye, EyeClosed, Loader2, Key, Mail } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 
@@ -46,7 +46,7 @@ export function SignInForm() {
     const error = params.get("error")
     if (error) {
       if (error === "PENDING_APPROVAL" || error === "unable_to_create_session") {
-        window.location.href = "/pending-approval"
+        window.location.href = "/dashboard"
         return
       }
       if (error === "account_not_linked") {
@@ -91,32 +91,8 @@ export function SignInForm() {
     return fallback
   }
 
-  const isPendingApprovalError = (err: unknown, message = getAuthErrorMessage(err)) => {
-    const authError = err && typeof err === "object"
-      ? err as {
-          error?: { code?: unknown }
-          code?: unknown
-          message?: unknown
-        }
-      : null
-
-    return (
-      message.includes("PENDING_APPROVAL") ||
-      authError?.error?.code === "PENDING_APPROVAL" ||
-      authError?.code === "PENDING_APPROVAL" ||
-      authError?.message === "PENDING_APPROVAL"
-    )
-  }
-
   const handleToastError = (err: unknown, fallback?: string) => {
-    const errMsg = getAuthErrorMessage(err, fallback)
-
-    if (isPendingApprovalError(err, errMsg)) {
-      window.location.href = "/pending-approval"
-      return "Your account is pending admin approval"
-    }
-
-    return errMsg
+    return getAuthErrorMessage(err, fallback)
   }
 
   const handleSignIn = async (e: React.FormEvent) => {

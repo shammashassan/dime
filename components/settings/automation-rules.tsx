@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useTransition } from "react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import {
   Zap, Plus, Trash2, Play, Check, AlertCircle, ArrowRight,
   HelpCircle, Edit2, Loader2, Sparkles, CheckSquare, X, Edit, Eye

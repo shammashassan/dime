@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react"
 import { Wallet, Category } from "@/types"
 import { importTransactionsAction } from "@/lib/actions/transactions"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import {
   Dialog,
   DialogContent,

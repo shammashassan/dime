@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Transactions",
@@ -11,12 +10,10 @@ import { getCategories } from "@/lib/queries/categories"
 import { getFilteredTransactions, getFilteredTransactionsCount } from "@/lib/queries/transactions"
 import { getPreferences } from "@/lib/queries/preferences"
 import { TransactionsView } from "@/components/transactions/transactions-view"
-import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
 
-import { TransactionsSkeleton } from "./loading"
 
-async function TransactionsContent({
+export default async function TransactionsPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -94,28 +91,5 @@ async function TransactionsContent({
       defaultWalletId={preferences?.defaultWalletId}
       defaultCurrency={preferences?.defaultCurrency || wallets[0]?.currency || "USD"}
     />
-  )
-}
-
-export default async function TransactionsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    search?: string
-    type?: string
-    wallets?: string
-    categories?: string
-    minAmount?: string
-    maxAmount?: string
-    from?: string
-    to?: string
-    page?: string
-    pageSize?: string
-  }>
-}) {
-  return (
-    <Suspense fallback={<TransactionsSkeleton />}>
-      <TransactionsContent searchParams={searchParams} />
-    </Suspense>
   )
 }

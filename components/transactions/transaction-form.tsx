@@ -19,7 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2, Sparkles, Trash2, Plus, ArrowDownRight, ArrowUpRight, ArrowLeftRight, Zap, SlidersHorizontal } from "lucide-react"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { ReceiptScannerModal } from "@/components/transactions/receipt-scanner-modal"
 import { generateSplitId, validateSplits } from "@/lib/split-utils"
 import { cn } from "@/lib/utils"

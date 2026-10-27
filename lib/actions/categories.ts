@@ -59,7 +59,7 @@ export async function createCategory(input: CategoryInput) {
 
   updateTag("categories")
   revalidatePath("/categories")
-  revalidatePath("/")
+  updateTag("dashboard")
   return { success: true, id: result.insertedId.toString() }
 }
 
@@ -103,7 +103,7 @@ export async function updateCategory(id: string, input: CategoryInput) {
 
   updateTag("categories")
   revalidatePath("/categories")
-  revalidatePath("/")
+  updateTag("dashboard")
   return { success: true }
 }
 
@@ -132,7 +132,7 @@ export async function deleteCategory(id: string) {
 
   updateTag("categories")
   revalidatePath("/categories")
-  revalidatePath("/")
+  updateTag("dashboard")
   return { success: true }
 }
 
@@ -188,7 +188,7 @@ export async function mergeCategory(sourceId: string, targetId: string) {
   updateTag("transactions")
   revalidatePath("/categories")
   revalidatePath("/transactions")
-  revalidatePath("/")
+  updateTag("dashboard")
   
   return { success: true, affectedCount: result.modifiedCount }
 }

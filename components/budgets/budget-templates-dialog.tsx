@@ -27,7 +27,7 @@ import {
   BookmarkPlus,
   Loader2,
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { useRouter } from "next/navigation"
 
 interface BudgetTemplatesDialogProps {

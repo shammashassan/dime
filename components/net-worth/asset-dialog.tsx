@@ -38,7 +38,7 @@ import {
   TrendingDown,
 } from "lucide-react"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { TickerSearchCombobox } from "@/components/investments/ticker-search-combobox"
 

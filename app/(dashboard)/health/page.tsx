@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Financial Health",
@@ -11,7 +10,7 @@ import { HealthClient } from "@/components/health/health-client"
 import { serializeData } from "@/lib/utils"
 import HealthLoading from "./loading"
 
-async function HealthPageContent() {
+export default async function HealthPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -19,12 +18,4 @@ async function HealthPageContent() {
   const serializedData = serializeData(healthData)
 
   return <HealthClient data={serializedData} />
-}
-
-export default async function HealthPage() {
-  return (
-    <Suspense fallback={<HealthLoading />}>
-      <HealthPageContent />
-    </Suspense>
-  )
 }

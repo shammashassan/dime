@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Recurring Rule Details",
@@ -13,16 +12,14 @@ import { getBillInstancesByRuleId } from "@/lib/queries/bills"
 import { getWallets } from "@/lib/queries/wallets"
 import { getCategories } from "@/lib/queries/categories"
 import { serializeData } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 import { RecurringDetails } from "@/components/recurring/recurring-details"
 
-import { RecurringDetailSkeleton } from "./loading"
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function RecurringDetailContent({ params }: PageProps) {
+export default async function RecurringDetailPage({ params }: PageProps) {
   const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
@@ -52,13 +49,5 @@ async function RecurringDetailContent({ params }: PageProps) {
       wallets={serializeData(wallets)}
       categories={serializeData(categories)}
     />
-  )
-}
-
-export default function RecurringDetailPage(props: PageProps) {
-  return (
-    <Suspense fallback={<RecurringDetailSkeleton />}>
-      <RecurringDetailContent {...props} />
-    </Suspense>
   )
 }

@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2, Repeat, CreditCard, FileText, ArrowDownRight, ArrowUpRight } from "lucide-react"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 
 const clientRuleSchema = z

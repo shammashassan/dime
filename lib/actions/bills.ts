@@ -60,7 +60,7 @@ export async function markBillAsPaid(billId: string, actualAmount: number, walle
   revalidatePath("/recurring")
   revalidatePath(`/recurring/${bill.ruleId}`)
   revalidatePath("/transactions")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true }
 }
@@ -89,7 +89,7 @@ export async function deleteBillInstance(billId: string) {
   updateTag("recurring")
   revalidatePath("/recurring")
   revalidatePath(`/recurring/${bill.ruleId}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true }
 }
@@ -116,7 +116,7 @@ export async function skipBillInstance(billId: string) {
   updateTag("recurring")
   revalidatePath("/recurring")
   revalidatePath(`/recurring/${bill.ruleId}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true }
 }

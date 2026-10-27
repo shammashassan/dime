@@ -61,7 +61,7 @@ import {
 import { format, differenceInDays } from "date-fns"
 import Link from "next/link"
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 const GOAL_ICONS: Record<string, React.ComponentType<any>> = {
     Target,

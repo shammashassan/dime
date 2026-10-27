@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Net Worth",
@@ -18,12 +17,10 @@ import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { serializeData } from "@/lib/utils"
 import { subMonths, startOfMonth, eachDayOfInterval, startOfDay } from "date-fns"
 import { NetWorthOverview } from "@/components/net-worth/net-worth-overview"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Wallet, Loan, LoanRepayment, Asset } from "@/types"
 
-import { NetWorthSkeleton } from "./loading"
 
-async function NetWorthContent() {
+export default async function NetWorthPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
   const scope = await getFinancialScope()
@@ -110,13 +107,5 @@ async function NetWorthContent() {
       historyData={serializedHistory}
       assets={serialized.assets}
     />
-  )
-}
-
-export default async function NetWorthPage() {
-  return (
-    <Suspense fallback={<NetWorthSkeleton />}>
-      <NetWorthContent />
-    </Suspense>
   )
 }

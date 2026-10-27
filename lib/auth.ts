@@ -54,10 +54,7 @@ export const auth = betterAuth({
   },
 
   user: {
-    additionalFields: {
-      approved: { type: "boolean", defaultValue: false, required: false },
-    },
-    deleteUser: { enabled: true },
+        deleteUser: { enabled: true },
     changeEmail: { enabled: true },
   },
 
@@ -129,14 +126,6 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before: async (user) => {
-          return {
-            data: {
-              ...user,
-              approved: false,
-            },
-          }
-        },
         after: async (user) => {
           try {
             const admins = await db.collection("user").find({
@@ -146,9 +135,9 @@ export const auth = betterAuth({
               const notifications = admins.map((admin) => ({
                 userId: (admin._id ? admin._id.toString() : admin.id) as string,
                 title: "New User Registration",
-                message: `${user.name || user.email || 'A new user'} has registered and is pending approval.`,
+                message: `${user.name || user.email || 'A new user'} has registered.`,
                 type: "system",
-                link: "/admin/users?tab=pending",
+                link: "/admin/users",
                 createdAt: new Date(),
                 updatedAt: new Date(),
               }))
@@ -167,9 +156,9 @@ export const auth = betterAuth({
             ? { $or: [{ _id: new ObjectId(session.userId) }, { id: session.userId }] }
             : { id: session.userId }
           const user = await db.collection("user").findOne(query)
-          if (user && !user.approved) {
+          if (user && user.banned) {
             throw new APIError("UNAUTHORIZED", {
-              message: "PENDING_APPROVAL",
+              message: "BANNED_USER",
             })
           }
         },

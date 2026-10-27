@@ -28,7 +28,7 @@ import { UserDetailsModal } from "./user-details-modal"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { MoreHorizontal, Shield, User, Ban, ShieldAlert, Key, Trash2, Eye } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 interface UserActionsMenuProps {
   user: AdminUser

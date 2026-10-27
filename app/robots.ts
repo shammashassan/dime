@@ -16,7 +16,7 @@ export default function robots(): MetadataRoute.Robots {
           "/reset-password",
           "/verify-email",
           "/2fa",
-          "/pending-approval",
+
           "/accept-invitation",
           "/admin",
           "/budgets",

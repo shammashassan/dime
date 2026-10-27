@@ -20,7 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CalendarIcon, Loader2, Plus, Users, HandCoins, Mail, Phone, Percent, Info, ArrowUpRight, ArrowDownLeft } from "lucide-react"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { cn, formatCurrency } from "@/lib/utils"
 
 const clientLoanSchema = z.object({
@@ -317,7 +317,7 @@ export function LoanDialog({
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent
-                      className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0 border border-border/40 shadow-lg"
+                      className="w-(--anchor-width) min-w-[280px] p-0 border border-border/40 shadow-lg"
                       align="start"
                       onWheel={(e) => e.stopPropagation()}
                       onTouchStart={(e) => e.stopPropagation()}

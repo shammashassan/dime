@@ -16,7 +16,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { CalendarIcon, Loader2, Landmark, Coins, HandCoins } from "lucide-react"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { formatCurrency } from "@/lib/utils"
 
 interface RepaymentDialogProps {

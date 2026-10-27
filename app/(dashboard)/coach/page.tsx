@@ -1,4 +1,3 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCoachOverviewData } from "@/lib/queries/coach"
@@ -11,18 +10,10 @@ export const metadata: Metadata = {
   description: "Automated optimization strategies, debt payoff modeling, and personal financial coaching.",
 }
 
-async function CoachPageContent() {
+export default async function CoachPage() {
   const session = await requireApprovedUser()
   const data = await getCoachOverviewData(session.user.id)
   const serializedData = serializeData(data)
 
   return <CoachClient data={serializedData} userName={session.user.name} />
-}
-
-export default async function CoachPage() {
-  return (
-    <Suspense fallback={<CoachLoading />}>
-      <CoachPageContent />
-    </Suspense>
-  )
 }

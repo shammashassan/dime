@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Contact Profile",
@@ -14,15 +13,13 @@ import { getContactById, getLoansByContact, getActiveBaseCurrency, getContactBal
 import { ContactDetails } from "@/components/contacts/contact-details"
 import { unstable_rethrow } from "next/navigation"
 import { serializeData } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 
-import { ContactDetailSkeleton } from "./loading"
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function ContactDetailContent({ params }: PageProps) {
+export default async function ContactDetailPage({ params }: PageProps) {
   const { id } = await params
   await requireApprovedUser()
   const scope = await getFinancialScope()
@@ -81,13 +78,5 @@ async function ContactDetailContent({ params }: PageProps) {
       sharedExpenses={serializeData(sharedExpenses)}
       sharedSettlements={serializeData(sharedSettlements)}
     />
-  )
-}
-
-export default function ContactDetailPage(props: PageProps) {
-  return (
-    <Suspense fallback={<ContactDetailSkeleton />}>
-      <ContactDetailContent {...props} />
-    </Suspense>
   )
 }

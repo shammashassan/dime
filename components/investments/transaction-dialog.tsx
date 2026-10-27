@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { Loader2, Plus, TrendingUp, CalendarIcon } from "lucide-react"
 import { TickerSearchCombobox } from "@/components/investments/ticker-search-combobox"
 

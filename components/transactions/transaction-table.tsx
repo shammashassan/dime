@@ -36,7 +36,7 @@ import {
 import { Transaction, Category, Wallet } from "@/types"
 import { deleteTransaction, bulkDeleteTransactions } from "@/lib/actions/transactions"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import {
   ArrowUpRight,
   ArrowDownRight,

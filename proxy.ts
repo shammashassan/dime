@@ -34,7 +34,6 @@ export async function proxy(request: NextRequest) {
     pathname === "/reset-password" ||
     pathname === "/verify-email" ||
     pathname === "/magic-link" ||
-    pathname === "/pending-approval" ||
     pathname === "/privacy" ||
     pathname === "/terms"
 
@@ -55,19 +54,11 @@ export async function proxy(request: NextRequest) {
   }
 
   // Session exists, handle redirects
-  const user = session.user as { approved?: boolean; role?: string }
-  const approved = user.approved
+  const user = session.user as { role?: string; banned?: boolean }
   const role = user.role
 
-  if (!approved) {
-    if (pathname !== "/pending-approval" && !pathname.startsWith("/api/auth")) {
-      return NextResponse.redirect(new URL("/pending-approval", request.url))
-    }
-    return NextResponse.next()
-  }
-
-  // Approved user
-  if (pathname === "/" || pathname === "/pending-approval" || pathname === "/sign-in" || pathname === "/sign-up") {
+  // Authenticated user accessing landing or auth pages goes straight to /dashboard
+  if (pathname === "/" || pathname === "/sign-in" || pathname === "/sign-up") {
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 

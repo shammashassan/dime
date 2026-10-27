@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import SharedExpenseDetailLoading from "./loading"
 
@@ -13,7 +12,7 @@ import { sharedExpensesCollection, sharedSettlementsCollection, contactsCollecti
 import { SharedExpenseDetails } from "@/components/shared-expenses/shared-expense-details"
 import { ObjectId } from "mongodb"
 
-async function SharedExpenseDetailsContent({
+export default async function SharedExpenseDetailsPage({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -78,15 +77,5 @@ async function SharedExpenseDetailsContent({
       contacts={contacts}
       wallets={wallets}
     />
-  )
-}
-
-export default function SharedExpenseDetailsPage(props: {
-  params: Promise<{ id: string }>
-}) {
-  return (
-    <Suspense fallback={<SharedExpenseDetailLoading />}>
-      <SharedExpenseDetailsContent {...props} />
-    </Suspense>
   )
 }

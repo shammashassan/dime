@@ -123,7 +123,7 @@ export async function initDatabase() {
 
     // 5. Create indexes for user lookup
     const users = db.collection("user")
-    await users.createIndex({ approved: 1, role: 1 })
+    await users.createIndex({ role: 1, banned: 1 })
 
     // 6. Create indexes for AI spending insight user states
     const userInsightStates = db.collection("user_insight_states")

@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Loan Details",
@@ -11,15 +10,13 @@ import { getLoanById, getLoanRepayments, getContacts } from "@/lib/queries/loans
 import { getWallets } from "@/lib/queries/wallets"
 import { LoanDetails } from "@/components/loans/loan-details"
 import { serializeData } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 
-import { LoanDetailSkeleton } from "./loading"
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function LoanDetailContent({ params }: PageProps) {
+export default async function LoanDetailPage({ params }: PageProps) {
   const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
@@ -43,13 +40,5 @@ async function LoanDetailContent({ params }: PageProps) {
       wallets={serializeData(wallets)}
       contacts={serializeData(contacts)}
     />
-  )
-}
-
-export default function LoanDetailPage(props: PageProps) {
-  return (
-    <Suspense fallback={<LoanDetailSkeleton />}>
-      <LoanDetailContent {...props} />
-    </Suspense>
   )
 }

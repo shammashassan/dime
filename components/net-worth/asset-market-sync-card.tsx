@@ -11,7 +11,7 @@ import { Globe, RefreshCw } from "lucide-react"
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
 import { syncAssetMarketPriceAction } from "@/lib/actions/assets"
 import { TickerSearchCombobox } from "@/components/investments/ticker-search-combobox"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 interface AssetMarketSyncCardProps {
   asset: Asset

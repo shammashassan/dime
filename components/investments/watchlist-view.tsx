@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Bookmark, Plus, Trash2, Tag, Target, Loader2, Sparkles } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import {
   createWatchlistAction,
   deleteWatchlistAction,

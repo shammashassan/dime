@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Wallets & Accounts",
@@ -11,11 +10,9 @@ import { getPreferences } from "@/lib/queries/preferences"
 import { getExchangeRates } from "@/lib/currency"
 import { WalletsView } from "@/components/wallets/wallets-view"
 import { serializeData } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 
-import { WalletsSkeleton } from "./loading"
 
-async function WalletsContent() {
+export default async function WalletsPage() {
   const session = await requireApprovedUser()
   const userId = session.user.id
 
@@ -33,13 +30,5 @@ async function WalletsContent() {
       baseCurrency={baseCurrency}
       exchangeRates={exchangeRates}
     />
-  )
-}
-
-export default async function WalletsPage() {
-  return (
-    <Suspense fallback={<WalletsSkeleton />}>
-      <WalletsContent />
-    </Suspense>
   )
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Investments",
@@ -20,11 +19,9 @@ import { getCurrencyConverter } from "@/lib/currency"
 import { buildPortfolioViewModel, buildAccountViewModel } from "@/lib/calculations/investments"
 import { InvestmentsView } from "@/components/investments/investments-view"
 import { serializeData } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 
-import { InvestmentsSkeleton } from "./loading"
 
-async function InvestmentsContent() {
+export default async function InvestmentsPage() {
   const session = await requireApprovedUser()
   const scope = await getFinancialScope()
 
@@ -94,12 +91,3 @@ async function InvestmentsContent() {
     />
   )
 }
-
-export default async function InvestmentsPage() {
-  return (
-    <Suspense fallback={<InvestmentsSkeleton />}>
-      <InvestmentsContent />
-    </Suspense>
-  )
-}
-

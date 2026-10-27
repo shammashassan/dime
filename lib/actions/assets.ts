@@ -73,7 +73,8 @@ export async function createAsset(input: AssetInput) {
     updateTag("assets")
     updateTag("asset_valuations")
     revalidatePath("/net-worth")
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return { success: true, id: assetId }
   } catch (err: any) {
@@ -138,7 +139,8 @@ export async function updateAsset(id: string, input: AssetInput) {
     updateTag("asset_valuations")
     revalidatePath("/net-worth")
     revalidatePath(`/net-worth/assets/${id}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return { success: true }
   } catch (err: any) {
@@ -173,7 +175,8 @@ export async function archiveAsset(id: string) {
     updateTag("assets")
     revalidatePath("/net-worth")
     revalidatePath(`/net-worth/assets/${id}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return { success: true }
   } catch (err: any) {
@@ -208,7 +211,8 @@ export async function unarchiveAsset(id: string) {
     updateTag("assets")
     revalidatePath("/net-worth")
     revalidatePath(`/net-worth/assets/${id}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return { success: true }
   } catch (err: any) {
@@ -239,7 +243,8 @@ export async function deleteAsset(id: string) {
     updateTag("assets")
     updateTag("asset_valuations")
     revalidatePath("/net-worth")
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return { success: true }
   } catch (err: any) {
@@ -297,7 +302,8 @@ export async function addAssetValuation(input: AssetValuationInput) {
     updateTag("asset_valuations")
     revalidatePath("/net-worth")
     revalidatePath(`/net-worth/assets/${validated.assetId}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return { success: true }
   } catch (err: any) {
@@ -348,7 +354,8 @@ export async function deleteAssetValuation(valuationId: string) {
     updateTag("asset_valuations")
     revalidatePath("/net-worth")
     revalidatePath(`/net-worth/assets/${valuation.assetId}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return { success: true }
   } catch (err: any) {
@@ -419,7 +426,8 @@ export async function syncAssetMarketPriceAction(params: {
     updateTag("net-worth")
     revalidatePath("/net-worth")
     revalidatePath(`/net-worth/assets/${params.assetId}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
+    updateTag("net-worth")
 
     return {
       success: true,

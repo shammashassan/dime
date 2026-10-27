@@ -17,7 +17,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2, Sun, CalendarRange, CalendarDays } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 const clientBudgetSchema = z
   .object({

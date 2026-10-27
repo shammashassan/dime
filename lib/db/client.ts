@@ -17,8 +17,8 @@ const uri = process.env.MONGODB_URI
  * - socketTimeoutMS: 45000 (ensure sockets are closed if server stops responding)
  */
 const options = {
-  maxPoolSize: 5,
-  minPoolSize: 0,
+  maxPoolSize: parseInt(process.env.MONGODB_MAX_POOL_SIZE || "5", 10),
+  minPoolSize: parseInt(process.env.MONGODB_MIN_POOL_SIZE || "0", 10),
   maxIdleTimeMS: 30000,
   serverSelectionTimeoutMS: 15000,
   connectTimeoutMS: 15000,
@@ -138,10 +138,8 @@ export const clientPromise: Promise<MongoClient> = new Proxy({} as Promise<Mongo
 
 export const getDb = cache(async (): Promise<Db> => {
   const connectedClient = await clientPromise
-  const database = connectedClient.db()
-  const { initDatabase } = await import("./indexes")
-  await initDatabase()
-  return database
+  import("./indexes").then(({ initDatabase }) => initDatabase()).catch(() => {})
+  return connectedClient.db()
 })
 
 export default clientPromise

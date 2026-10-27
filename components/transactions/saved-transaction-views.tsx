@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { getCurrencySymbol } from "@/lib/utils"
 
 export interface SavedViewItem {

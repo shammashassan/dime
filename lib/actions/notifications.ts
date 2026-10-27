@@ -14,8 +14,8 @@ export async function getNotificationsAction() {
     const session = await requireApprovedUser()
 
     // Sync any time-based alerts (loans, subscriptions, bills, budgets) for active user
-    await syncUserAlerts(session.user.id).catch((err) => {
-      console.error("Failed to sync alerts:", err)
+    void syncUserAlerts(session.user.id).catch((err) => {
+      console.error("Failed to sync alerts in background:", err)
     })
 
     const items = await notificationsCollection
@@ -62,7 +62,7 @@ export async function markNotificationReadAction(id: string) {
 
     updateTag("notifications")
     revalidatePath("/notifications")
-    revalidatePath("/", "layout")
+
     return { success: true, data: res.modifiedCount > 0 }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "An error occurred"
@@ -85,7 +85,7 @@ export async function markAllNotificationsReadAction() {
 
     updateTag("notifications")
     revalidatePath("/notifications")
-    revalidatePath("/", "layout")
+
     return { success: true, modifiedCount: res.modifiedCount }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "An error occurred"
@@ -106,7 +106,7 @@ export async function archiveNotificationAction(id: string) {
 
     updateTag("notifications")
     revalidatePath("/notifications")
-    revalidatePath("/", "layout")
+
     return { success: true, data: res.modifiedCount > 0 }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "An error occurred"
@@ -127,7 +127,7 @@ export async function deleteNotificationAction(id: string) {
 
     updateTag("notifications")
     revalidatePath("/notifications")
-    revalidatePath("/", "layout")
+
     return { success: true, data: res.modifiedCount > 0 }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "An error occurred"
@@ -164,7 +164,7 @@ export async function createNotification({
   const res = await notificationsCollection.insertOne(doc as unknown as Notification)
   updateTag("notifications")
   revalidatePath("/notifications")
-  revalidatePath("/", "layout")
+
   return { ...doc, _id: res.insertedId.toString() }
 }
 
@@ -203,7 +203,7 @@ export async function createNotificationForAdmins({
     await notificationsCollection.insertMany(notifications as unknown as Notification[])
     updateTag("notifications")
     revalidatePath("/notifications")
-    revalidatePath("/", "layout")
+
     return { success: true, count: notifications.length }
   } catch (err) {
     console.error("Failed to notify admins:", err)

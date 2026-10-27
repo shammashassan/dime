@@ -13,7 +13,7 @@ import {
   groupEventsByDateBracket,
   calculateTimelineStats,
 } from "@/lib/calculations/timeline"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import type { DateRange } from "react-day-picker"
 import { format, parseISO } from "date-fns"
 

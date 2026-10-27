@@ -1,42 +1,85 @@
 import { cache } from "react"
+import { cacheLife, cacheTag } from "next/cache"
 import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { Wallet, Transaction } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { endOfMonth, subMonths, startOfMonth, format, endOfDay, subDays, startOfDay } from "date-fns"
 
-export const getWallets = cache(async (userId: string): Promise<Wallet[]> => {
-  const scope = await getFinancialScope()
-  const filter = getScopeFilter(scope)
+async function fetchWallets(userId: string, orgId?: string | null): Promise<Wallet[]> {
+  "use cache"
+  cacheTag("wallets", `wallets-${userId}`)
+  cacheLife("minutes")
+
+  const filter = orgId
+    ? { organizationId: orgId }
+    : {
+        userId,
+        $or: [{ organizationId: null }, { organizationId: { $exists: false } }],
+      }
   const walletsColl = await getCollection<Wallet>("wallets")
 
-  return walletsColl.find({
-    ...filter,
-    isArchived: false
-  }).sort({ name: 1 }).toArray()
+  return walletsColl
+    .find({
+      ...filter,
+      isArchived: false,
+    })
+    .sort({ name: 1 })
+    .toArray()
+}
+
+export const getWallets = cache(async (userId: string): Promise<Wallet[]> => {
+  const scope = await getFinancialScope()
+  return fetchWallets(userId, scope.organizationId)
 })
 
-export const getAllWalletsIncludingArchived = cache(async (userId: string): Promise<Wallet[]> => {
-  const scope = await getFinancialScope()
-  const filter = getScopeFilter(scope)
+async function fetchAllWalletsIncludingArchived(userId: string, orgId?: string | null): Promise<Wallet[]> {
+  "use cache"
+  cacheTag("wallets", `wallets-${userId}`)
+  cacheLife("minutes")
+
+  const filter = orgId
+    ? { organizationId: orgId }
+    : {
+        userId,
+        $or: [{ organizationId: null }, { organizationId: { $exists: false } }],
+      }
   const walletsColl = await getCollection<Wallet>("wallets")
 
   return walletsColl.find(filter).sort({ isArchived: 1, name: 1 }).toArray()
+}
+
+export const getAllWalletsIncludingArchived = cache(async (userId: string): Promise<Wallet[]> => {
+  const scope = await getFinancialScope()
+  return fetchAllWalletsIncludingArchived(userId, scope.organizationId)
 })
 
-export const getWalletById = cache(async (userId: string, walletId: string): Promise<Wallet | null> => {
+async function fetchWalletById(userId: string, walletId: string, orgId?: string | null): Promise<Wallet | null> {
+  "use cache"
+  cacheTag("wallets", `wallets-${userId}`)
+  cacheLife("minutes")
+
   try {
-    const scope = await getFinancialScope()
-    const filter = getScopeFilter(scope)
+    const filter = orgId
+      ? { organizationId: orgId }
+      : {
+          userId,
+          $or: [{ organizationId: null }, { organizationId: { $exists: false } }],
+        }
     const walletsColl = await getCollection<Wallet>("wallets")
 
     return walletsColl.findOne({
       _id: new ObjectId(walletId),
-      ...filter
+      ...filter,
     })
   } catch {
     return null
   }
+}
+
+export const getWalletById = cache(async (userId: string, walletId: string): Promise<Wallet | null> => {
+  const scope = await getFinancialScope()
+  return fetchWalletById(userId, walletId, scope.organizationId)
 })
 
 export const getSingleWalletBalanceHistory = cache(async (userId: string, walletId: string, monthsCount: number = 6) => {
@@ -144,4 +187,3 @@ export const getSingleWalletBalanceDailyHistory = cache(async (userId: string, w
     balance: (recordedBalances[dayEnd.getTime().toString()] || 0) / 100,
   }))
 })
-

@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { syncMarketPricesAction } from "@/lib/actions/market-prices"
 
 interface SyncPricesButtonProps {

@@ -45,7 +45,7 @@ import {
   User,
   Trash2,
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { askCoachAction, clearCoachChatAction } from "@/lib/actions/coach"
 import type { SerializedCoachMessage } from "@/types"

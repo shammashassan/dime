@@ -1,21 +1,22 @@
-import { auth }      from "@/lib/auth"
-import { headers }   from "next/headers"
-import { redirect }  from "next/navigation"
+import { cache } from "react"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 
-export async function requireAuth() {
-  const session = await auth.api.getSession({ headers: await headers() })
+export const getCachedSession = cache(async () => {
+  return await auth.api.getSession({ headers: await headers() })
+})
+
+export const requireAuth = cache(async () => {
+  const session = await getCachedSession()
   if (!session) redirect("/sign-in")
   return session
-}
+})
 
-export async function requireApprovedUser() {
-  const session = await requireAuth()
-  if (!(session.user as any).approved) redirect("/pending-approval")
-  return session
-}
+export const requireApprovedUser = requireAuth
 
-export async function requireAdmin() {
+export const requireAdmin = cache(async () => {
   const session = await requireApprovedUser()
   if (session.user.role !== "admin") redirect("/")
   return session
-}
+})

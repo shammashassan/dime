@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { formatDate } from "@/lib/utils"
 import { Search, ShieldAlert, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { UserDetailsModal } from "./user-details-modal"
 
 interface BannedTableProps {

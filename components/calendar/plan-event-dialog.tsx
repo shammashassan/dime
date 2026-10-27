@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/popover"
 import { Calendar as CalendarIcon, Sparkles } from "lucide-react"
 import { format, parseISO } from "date-fns"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { createCalendarPlanAction } from "@/lib/actions/calendar"
 
 interface PlanEventDialogProps {

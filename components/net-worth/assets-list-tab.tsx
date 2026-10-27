@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { Asset } from "@/types"
 import { formatCurrency, cn } from "@/lib/utils"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"

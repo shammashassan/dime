@@ -1,8 +1,9 @@
 import * as React from "react"
+import { mergeProps } from "@base-ui/react/merge-props"
+import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
-import { Slot } from "@radix-ui/react-slot"
+import { cn } from "cn"
 
-import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
@@ -34,7 +35,7 @@ function ItemSeparator({
 }
 
 const itemVariants = cva(
-  "group/item flex w-full flex-wrap items-center rounded-lg border text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-muted",
+  "group/item flex w-full flex-wrap items-center rounded-2xl border text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-muted",
   {
     variants: {
       variant: {
@@ -43,9 +44,9 @@ const itemVariants = cva(
         muted: "border-transparent bg-muted/50",
       },
       size: {
-        default: "gap-2.5 px-3 py-2.5",
-        sm: "gap-2.5 px-3 py-2.5",
-        xs: "gap-2 px-2.5 py-2 in-data-[slot=dropdown-menu-content]:p-0",
+        default: "gap-3.5 px-4 py-3.5",
+        sm: "gap-3.5 px-3.5 py-3",
+        xs: "gap-2.5 px-3 py-2.5 in-data-[slot=dropdown-menu-content]:p-0",
       },
     },
     defaultVariants: {
@@ -60,19 +61,32 @@ function Item({
   variant = "default",
   size = "default",
   asChild = false,
+  render,
+  children,
   ...props
-}: React.ComponentProps<"div"> &
-  VariantProps<typeof itemVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "div"
-  return (
-    <Comp
-      data-slot="item"
-      data-variant={variant}
-      data-size={size}
-      className={cn(itemVariants({ variant, size, className }))}
-      {...props}
-    />
-  )
+}: useRender.ComponentProps<"div"> &
+  VariantProps<typeof itemVariants> & {
+    asChild?: boolean
+  }) {
+  const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
+  const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
+
+  return useRender({
+    defaultTagName: "div",
+    props: mergeProps<"div">(
+      {
+        className: cn(itemVariants({ variant, size, className })),
+        children: resolvedChildren,
+      },
+      props
+    ),
+    render: resolvedRender,
+    state: {
+      slot: "item",
+      variant,
+      size,
+    },
+  })
 }
 
 const itemMediaVariants = cva(
@@ -83,7 +97,7 @@ const itemMediaVariants = cva(
         default: "bg-transparent",
         icon: "[&_svg:not([class*='size-'])]:size-4",
         image:
-          "size-10 overflow-hidden rounded-sm group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 [&_img]:size-full [&_img]:object-cover",
+          "size-10 overflow-hidden rounded-lg group-data-[size=sm]/item:size-8 group-data-[size=xs]/item:size-6 group-data-[size=xs]/item:rounded-md [&_img]:size-full [&_img]:object-cover",
       },
     },
     defaultVariants: {
@@ -112,7 +126,7 @@ function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-content"
       className={cn(
-        "flex flex-1 flex-col gap-1 group-data-[size=xs]/item:gap-0 [&+[data-slot=item-content]]:flex-none",
+        "flex flex-1 flex-col gap-1 group-data-[size=xs]/item:gap-0.5",
         className
       )}
       {...props}
@@ -125,7 +139,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-title"
       className={cn(
-        "line-clamp-1 flex w-fit items-center gap-2 text-sm leading-snug font-medium underline-offset-4",
+        "flex w-full items-center gap-2 font-medium leading-none group-data-[size=xs]/item:text-xs",
         className
       )}
       {...props}
@@ -138,7 +152,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="item-description"
       className={cn(
-        "line-clamp-2 text-left text-sm leading-normal font-normal text-muted-foreground group-data-[size=xs]/item:text-xs [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
+        "text-muted-foreground text-xs leading-normal group-data-[size=xs]/item:text-[0.8rem]",
         className
       )}
       {...props}
@@ -156,14 +170,21 @@ function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+function ItemAction({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="item-action"
+      className={cn("flex items-center", className)}
+      {...props}
+    />
+  )
+}
+
 function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="item-header"
-      className={cn(
-        "flex basis-full items-center justify-between gap-2",
-        className
-      )}
+      className={cn("flex basis-full items-center justify-between gap-2", className)}
       {...props}
     />
   )
@@ -173,10 +194,7 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="item-footer"
-      className={cn(
-        "flex basis-full items-center justify-between gap-2",
-        className
-      )}
+      className={cn("flex basis-full items-center justify-between gap-2", className)}
       {...props}
     />
   )
@@ -184,13 +202,14 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Item,
-  ItemMedia,
-  ItemContent,
+  ItemAction,
   ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
   ItemGroup,
+  ItemHeader,
+  ItemMedia,
   ItemSeparator,
   ItemTitle,
-  ItemDescription,
-  ItemHeader,
-  ItemFooter,
 }

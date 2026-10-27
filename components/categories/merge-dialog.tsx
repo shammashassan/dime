@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
 import { Loader2, AlertTriangle, ArrowRightLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 interface MergeDialogProps {
   sourceCategory: Category

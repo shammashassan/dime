@@ -23,7 +23,7 @@ import {
   HandCoins,
   Loader2,
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 const clientWalletSchema = z.object({
   name: z.string().min(1, "Name is required").max(50, "Name must be 50 characters or less"),

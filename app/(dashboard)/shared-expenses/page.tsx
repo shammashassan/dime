@@ -1,10 +1,8 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { getSharedExpensesOverviewAction } from "@/lib/actions/shared-expenses"
 import { SharedExpensesClient } from "@/components/shared-expenses/shared-expenses-client"
 import { getCollection, walletsCollection } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { SharedExpensesSkeleton } from "./loading"
 
 export const metadata: Metadata = {
   title: "Shared Expenses",
@@ -15,7 +13,7 @@ interface SharedExpensesPageProps {
   searchParams: Promise<{ contactId?: string }>
 }
 
-async function SharedExpensesContent({
+export default async function SharedExpensesPage({
   searchParams,
 }: SharedExpensesPageProps) {
   const { contactId } = await searchParams
@@ -39,13 +37,5 @@ async function SharedExpensesContent({
       currentUserId={overviewData.currentUserId}
       currentUserName={overviewData.currentUserName}
     />
-  )
-}
-
-export default function SharedExpensesPage(props: SharedExpensesPageProps) {
-  return (
-    <Suspense fallback={<SharedExpensesSkeleton />}>
-      <SharedExpensesContent {...props} />
-    </Suspense>
   )
 }

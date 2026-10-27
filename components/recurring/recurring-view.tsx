@@ -53,7 +53,7 @@ import {
   TrendingUp, TrendingDown, Play, Pause, Ban, CreditCard, FileText, Search,
   PiggyBank, ArrowDownRight, AlertTriangle, CheckCircle2, Clock, CalendarDays, MoreVertical, type LucideIcon
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { CategoryIcon } from "../categories/category-icon"
 
 interface RecurringViewProps {

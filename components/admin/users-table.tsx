@@ -113,13 +113,9 @@ export function UsersTable({ users, currentUserRole, currentUserId }: UsersTable
                           <Badge variant="destructive" className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0">
                             Banned
                           </Badge>
-                        ) : u.approved ? (
-                          <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 text-emerald-500 border-emerald-500/20 bg-emerald-500/5">
-                            Approved
-                          </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 text-amber-500 border-amber-500/20 bg-amber-500/5">
-                            Pending Review
+                          <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 text-emerald-500 border-emerald-500/20 bg-emerald-500/5">
+                            Active
                           </Badge>
                         )}
                       </TableCell>

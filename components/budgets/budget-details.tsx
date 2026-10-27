@@ -56,7 +56,7 @@ import {
 import { format } from "date-fns"
 import Link from "next/link"
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 interface BudgetTransaction {
     _id: string

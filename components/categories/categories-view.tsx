@@ -42,7 +42,7 @@ import {
 } from "lucide-react"
 import { CategoryIcon } from "./category-icon"
 import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 
 interface CategoriesViewProps {
   categories: Category[]

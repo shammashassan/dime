@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { searchEntities } from "@/lib/queries/search"
 import { getSavedSearchesAction } from "@/lib/actions/search"
@@ -19,7 +18,7 @@ interface SearchPageProps {
   }>
 }
 
-async function SearchContent({
+export default async function SearchPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; entity?: string }>
@@ -40,13 +39,5 @@ async function SearchContent({
       initialResults={serializeData(results)}
       initialSavedSearches={serializeData(savedSearches)}
     />
-  )
-}
-
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  return (
-    <Suspense fallback={<SearchLoading />}>
-      <SearchContent searchParams={searchParams} />
-    </Suspense>
   )
 }

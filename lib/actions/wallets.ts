@@ -87,7 +87,7 @@ export async function createWallet(input: WalletInput) {
 
   updateTag("wallets")
   revalidatePath("/wallets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true, id: result.insertedId.toString() }
 }
 
@@ -172,7 +172,7 @@ export async function updateWallet(id: string, input: WalletInput) {
   updateTag("wallets")
   revalidatePath("/wallets")
   revalidatePath(`/wallets/${id}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true }
 }
 
@@ -214,7 +214,7 @@ export async function toggleArchiveWallet(id: string) {
   updateTag("wallets")
   revalidatePath("/wallets")
   revalidatePath(`/wallets/${id}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true, isArchived: nextState }
 }
 
@@ -259,7 +259,7 @@ export async function deleteWallet(id: string) {
   updateTag("wallets")
   updateTag("transactions")
   revalidatePath("/wallets")
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true }
 }
 

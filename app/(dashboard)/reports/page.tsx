@@ -22,6 +22,7 @@ import { getWallets } from "@/lib/queries/wallets"
 import { getCategories } from "@/lib/queries/categories"
 import { getPreferences } from "@/lib/queries/preferences"
 import { serializeData } from "@/lib/utils"
+import { ReportsSkeleton } from "./loading"
 import { ReportFilters } from "@/components/reports/report-filters"
 import { ReportsNavTabs } from "@/components/reports/reports-nav-tabs"
 import { ReportsOverviewView } from "@/components/reports/reports-overview-view"
@@ -38,9 +39,8 @@ import { getQuarterlyReviewData, getAnnualReviewData } from "@/lib/queries/annua
 import { unstable_rethrow } from "next/navigation"
 import { BarChart3 } from "lucide-react"
 
-import { ReportsSkeleton } from "./loading"
 
-async function ReportsContent({
+export default async function ReportsPage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -354,29 +354,5 @@ async function ReportsContent({
         }
       />
     </div>
-  )
-}
-
-export default async function ReportsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    tab?: string
-    month?: string
-    year?: string
-    quarter?: string
-    monthsCount?: string
-    categoryFrom?: string
-    categoryTo?: string
-    metric?: "expense" | "income" | "net" | "count"
-    timeframe?: string
-    walletId?: string
-    categoryId?: string
-  }>
-}) {
-  return (
-    <Suspense fallback={<ReportsSkeleton />}>
-      <ReportsContent searchParams={searchParams} />
-    </Suspense>
   )
 }

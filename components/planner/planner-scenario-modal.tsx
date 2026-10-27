@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { InputGroup, InputGroupInput, InputGroupTextarea } from "@/components/ui/input-group"
 import { Sparkles, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { createPlannerScenario } from "@/lib/actions/planner"
 import { PlannerScenario } from "@/types"
 

@@ -25,7 +25,7 @@ import {
   Sparkles,
   Wallet as WalletIcon
 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { GoalFormDialog } from "./goal-form"
 import { GoalContributionDialog } from "./goal-contribution-dialog"
 import { cn } from "@/lib/utils"

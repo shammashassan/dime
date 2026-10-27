@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import HoldingDetailLoading from "./loading"
 
 export const metadata: Metadata = {
@@ -49,7 +48,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-async function HoldingDetailContent({
+export default async function HoldingDetailPage({
   params,
 }: {
   params: Promise<{ accountId: string; symbol: string }>
@@ -302,15 +301,5 @@ async function HoldingDetailContent({
         </div>
       </div>
     </div>
-  )
-}
-
-export default function HoldingDetailPage(props: {
-  params: Promise<{ accountId: string; symbol: string }>
-}) {
-  return (
-    <Suspense fallback={<HoldingDetailLoading />}>
-      <HoldingDetailContent {...props} />
-    </Suspense>
   )
 }

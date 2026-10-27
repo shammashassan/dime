@@ -229,8 +229,7 @@ export default function PrivacyPolicy() {
                   <strong className="text-foreground">Encryption:</strong> Data in transit is secured using TLS 1.3. Production MongoDB database clusters enforce encryption-at-rest (AES-256).
                 </li>
                 <li>
-                  <strong className="text-foreground">Approval Queues:</strong> Public sign-ups are held in a secure pending queue until approved by an authorized administrator, preventing unauthorized workspace creation.
-                </li>
+                                  </li>
                 <li>
                   <strong className="text-foreground">Two-Factor Authentication:</strong> We support both Time-Based One-Time Passwords (TOTP) and hardware FIDO2 passkeys for account protection.
                 </li>

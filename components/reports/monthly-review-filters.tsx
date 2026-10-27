@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Calendar, Sparkles, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { refreshAiMonthlyReviewAction } from "@/lib/actions/monthly-review"
 
 export interface MonthlyReviewFiltersProps {

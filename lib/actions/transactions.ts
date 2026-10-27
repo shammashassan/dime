@@ -170,7 +170,7 @@ export async function createTransaction(input: TransactionInput) {
     updateTag("automation-rules")
     revalidatePath("/transactions")
     revalidatePath(`/wallets/${finalWalletId}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
 
     if (tx.type === "expense") {
       await syncUserAlerts(scope.userId).catch((err) => console.error("Failed to run budget alert check:", err))
@@ -254,7 +254,7 @@ export async function createTransaction(input: TransactionInput) {
     revalidatePath("/transactions")
     revalidatePath(`/wallets/${validated.walletId}`)
     revalidatePath(`/wallets/${validated.targetWalletId}`)
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
     return { success: true, id: debitOid.toString() }
   }
   } catch (error: any) {
@@ -361,7 +361,7 @@ export async function deleteTransaction(id: string) {
   updateTag("wallets")
   revalidatePath("/transactions")
   revalidatePath(`/wallets/${tx.walletId}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
   return { success: true }
 }
 
@@ -564,7 +564,7 @@ export async function updateTransaction(id: string, input: TransactionInput) {
   if (validated.walletId !== tx.walletId) {
     revalidatePath(`/wallets/${validated.walletId}`)
   }
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   if (validated.type === "expense" || tx.type === "expense") {
     await syncUserAlerts(scope.userId).catch((err) => console.error("Failed to run budget alert check:", err))
@@ -911,7 +911,7 @@ export async function importTransactionsAction(walletId: string, transactionsLis
   updateTag("automation-rules")
   revalidatePath("/transactions")
   revalidatePath(`/wallets/${walletId}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true, count: documentsToInsert.length }
 }
@@ -1055,7 +1055,7 @@ export async function bulkDeleteTransactions(ids: string[]) {
     updateTag("wallets")
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
 
     return { success: true, count: txs.length }
   } catch (error: any) {
@@ -1238,7 +1238,7 @@ export async function bulkUpdateTransactionWallet(ids: string[], targetWalletId:
     updateTag("wallets")
     revalidatePath("/transactions")
     revalidatePath("/dashboard")
-    revalidatePath("/", "layout")
+    updateTag("dashboard")
 
     return { success: true, count: txs.length }
   } catch (error: any) {

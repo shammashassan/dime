@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import TransactionDetailLoading from "./loading"
 
@@ -18,7 +17,7 @@ import Link from "next/link"
 import { Wallet } from "@/types"
 import { serializeData } from "@/lib/utils"
 
-async function TransactionDetailContent({
+export default async function TransactionDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
@@ -90,14 +89,3 @@ async function TransactionDetailContent({
     </div>
   )
 }
-
-export default function TransactionDetailPage(props: {
-  params: Promise<{ id: string }>
-}) {
-  return (
-    <Suspense fallback={<TransactionDetailLoading />}>
-      <TransactionDetailContent {...props} />
-    </Suspense>
-  )
-}
-

@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+
 import { Eye, EyeClosed, Loader2 } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 
@@ -30,7 +30,7 @@ export function SignUpForm() {
     const error = params.get("error")
     if (error) {
       if (error === "PENDING_APPROVAL" || error === "unable_to_create_session") {
-        window.location.href = "/pending-approval"
+        window.location.href = "/dashboard"
         return
       }
       if (error === "account_not_linked") {
@@ -90,7 +90,7 @@ export function SignUpForm() {
         name: name.trim(),
         password,
         username: username.trim() || undefined,
-        callbackURL: "/pending-approval",
+        callbackURL: "/dashboard",
       })
 
       if (resError) {
@@ -99,7 +99,7 @@ export function SignUpForm() {
 
       if (data) {
         // Redirection should happen automatically on success via callbackURL, but let's force it to make sure we land on pending-approval.
-        window.location.href = "/pending-approval"
+        window.location.href = "/dashboard"
       }
     })().finally(() => {
       setLoading(false)
@@ -107,7 +107,7 @@ export function SignUpForm() {
 
     toast.promise(signUpPromise, {
       loading: "Creating your account...",
-      success: "Account created. Redirecting for approval",
+      success: "Account created successfully!",
       error: (err) => getAuthErrorMessage(err, "An error occurred during signup"),
     })
   }
@@ -116,7 +116,7 @@ export function SignUpForm() {
     const googlePromise = (async () => {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: `${window.location.origin}/pending-approval`,
+        callbackURL: `${window.location.origin}/dashboard`,
         errorCallbackURL: "/sign-up",
       })
     })()
@@ -140,11 +140,7 @@ export function SignUpForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <Alert className="border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400">
-          <AlertDescription>
-            After signing up, your account requires admin approval before you can access the dashboard.
-          </AlertDescription>
-        </Alert>
+        
 
         <form onSubmit={handleSignUp} className="flex flex-col gap-4">
           <FieldGroup className="flex flex-col gap-4">

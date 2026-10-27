@@ -22,9 +22,8 @@ import { formatCurrency, serializeData } from "@/lib/utils"
 import { ChevronLeft, TrendingUp, Coins, ArrowUpRight, ArrowDownRight, Layers } from "lucide-react"
 import Link from "next/link"
 
-import { AccountDetailSkeleton } from "./loading"
 
-async function AccountDetailContent({
+export default async function AccountDetailPage({
   params,
 }: {
   params: Promise<{ accountId: string }>
@@ -128,14 +127,3 @@ async function AccountDetailContent({
     </div>
   )
 }
-
-export default function AccountDetailPage(props: {
-  params: Promise<{ accountId: string }>
-}) {
-  return (
-    <Suspense fallback={<AccountDetailSkeleton />}>
-      <AccountDetailContent {...props} />
-    </Suspense>
-  )
-}
-

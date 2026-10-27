@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useNotifications } from "./notifications-provider";
 import { EmptyMuted } from "@/components/notifications/notification-menu";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";

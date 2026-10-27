@@ -1,7 +1,8 @@
 import * as React from "react"
+import { mergeProps } from "@base-ui/react/merge-props"
+import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
-import { Slot } from "radix-ui"
 
 import { Button } from "@/components/ui/button"
 
@@ -161,21 +162,24 @@ function AttachmentAction({
 function AttachmentTrigger({
   className,
   asChild = false,
+  render,
   type,
   ...props
-}: React.ComponentProps<"button"> & {
+}: useRender.ComponentProps<"button"> & {
   asChild?: boolean
 }) {
-  const Comp = asChild ? Slot.Root : "button"
-
-  return (
-    <Comp
-      data-slot="attachment-trigger"
-      type={asChild ? undefined : (type ?? "button")}
-      className={cn("absolute inset-0 z-10 outline-none", className)}
-      {...props}
-    />
-  )
+  return useRender({
+    defaultTagName: "button",
+    props: mergeProps<"button">(
+      {
+        type: type ?? "button",
+        className: cn("absolute inset-0 z-10 outline-none", className),
+      },
+      props
+    ),
+    render: render ?? (asChild && React.isValidElement(props.children) ? (props.children as React.ReactElement<any>) : undefined),
+    state: { slot: "attachment-trigger" },
+  })
 }
 
 function AttachmentGroup({ className, ...props }: React.ComponentProps<"div">) {

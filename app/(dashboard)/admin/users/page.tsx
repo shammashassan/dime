@@ -1,19 +1,18 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
-import { Users, Shield } from "lucide-react"
+import { Shield } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "User Management",
-  description: "Manage system users, approve registrations, update roles, and review account permissions.",
+  description: "Manage system users, active accounts, update roles, and review account permissions.",
 }
+
 import { requireAdmin } from "@/lib/auth-guard"
 import { getAdminUsers } from "@/lib/queries/admin"
 import { AdminStats } from "@/components/admin/admin-stats"
 import { UsersTable } from "@/components/admin/users-table"
-import { PendingTable } from "@/components/admin/pending-table"
 import { BannedTable } from "@/components/admin/banned-table"
 import { AdminUsersTabs } from "@/components/admin/admin-users-tabs"
-import { Skeleton } from "@/components/ui/skeleton"
 import { serializeData } from "@/lib/utils"
 
 import { StatsSkeleton, TableSkeleton } from "./loading"
@@ -31,7 +30,7 @@ export default async function AdminUsersPage({
   const currentUserRole = session.user.role || "user"
 
   const users = serializeData(rawUsers)
-  const approvedUsers = users.filter((u: any) => u.approved)
+  const activeUsers = users.filter((u: any) => !u.banned)
   const adminUsers = users.filter((u: any) => u.role === "admin")
 
   return (
@@ -45,7 +44,7 @@ export default async function AdminUsersPage({
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground">User Management</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Manage registered users, review sign-up approvals, roles, and access permissions.
+              Manage registered users, active accounts, roles, and access permissions.
             </p>
           </div>
         </div>
@@ -58,19 +57,14 @@ export default async function AdminUsersPage({
 
       {/* Tabs list */}
       <AdminUsersTabs
-        defaultTab={tab}
-        allTab={
+        defaultTab={tab || "active"}
+        activeTab={
           <Suspense fallback={<TableSkeleton />}>
             <UsersTable
-              users={approvedUsers}
+              users={activeUsers}
               currentUserRole={currentUserRole}
               currentUserId={currentUserId}
             />
-          </Suspense>
-        }
-        pendingTab={
-          <Suspense fallback={<TableSkeleton />}>
-            <PendingTable users={users} />
           </Suspense>
         }
         bannedTab={
@@ -82,6 +76,15 @@ export default async function AdminUsersPage({
           <Suspense fallback={<TableSkeleton />}>
             <UsersTable
               users={adminUsers}
+              currentUserRole={currentUserRole}
+              currentUserId={currentUserId}
+            />
+          </Suspense>
+        }
+        allTab={
+          <Suspense fallback={<TableSkeleton />}>
+            <UsersTable
+              users={users}
               currentUserRole={currentUserRole}
               currentUserId={currentUserId}
             />

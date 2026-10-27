@@ -55,7 +55,7 @@ import {
 import { formatCurrency, formatDate, cn } from "@/lib/utils"
 import { format } from "date-fns"
 import Link from "next/link"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import { WalletDetailChart } from "@/components/wallets/wallet-detail-chart"
 
 interface ContactDetailsProps {

@@ -230,7 +230,7 @@ export async function createLoan(input: LoanInput) {
   revalidatePath("/loans")
   revalidatePath("/transactions")
   revalidatePath(`/wallets/${validated.walletId}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true, id: loanOid.toString() }
 }
@@ -399,7 +399,7 @@ export async function updateLoan(id: string, input: LoanInput) {
   if (walletChanged) {
     revalidatePath(`/wallets/${existing.walletId}`)
   }
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true }
 }
@@ -464,7 +464,7 @@ async function deleteLoanInternal(id: string, scope: any) {
   revalidatePath("/loans")
   revalidatePath("/transactions")
   revalidatePath(`/wallets/${loan.walletId}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true }
 }
@@ -561,7 +561,7 @@ export async function createRepayment(input: RepaymentInput) {
   revalidatePath(`/loans/${validated.loanId}`)
   revalidatePath("/transactions")
   revalidatePath(`/wallets/${validated.walletId}`)
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true, id: repayment._id.toString() }
 }
@@ -611,7 +611,7 @@ export async function deleteRepayment(repaymentId: string) {
   if (repTx) {
     revalidatePath(`/wallets/${repTx.walletId}`)
   }
-  revalidatePath("/", "layout")
+  updateTag("dashboard")
 
   return { success: true }
 }

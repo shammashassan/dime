@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Budget Details",
@@ -12,15 +11,13 @@ import { getCategories } from "@/lib/queries/categories"
 import { getWallets } from "@/lib/queries/wallets"
 import { BudgetDetails } from "@/components/budgets/budget-details"
 import { serializeData } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 
-import { BudgetDetailSkeleton } from "./loading"
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-async function BudgetDetailContent({ params }: PageProps) {
+export default async function BudgetDetailPage({ params }: PageProps) {
   const { id } = await params
   const session = await requireApprovedUser()
   const userId = session.user.id
@@ -51,13 +48,5 @@ async function BudgetDetailContent({ params }: PageProps) {
       categories={serializeData(expenseCategories)}
       wallets={serializeData(wallets)}
     />
-  )
-}
-
-export default function BudgetDetailPage(props: PageProps) {
-  return (
-    <Suspense fallback={<BudgetDetailSkeleton />}>
-      <BudgetDetailContent {...props} />
-    </Suspense>
   )
 }

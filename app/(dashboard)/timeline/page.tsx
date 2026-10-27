@@ -1,4 +1,3 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getTimelineData } from "@/lib/queries/timeline"
@@ -21,7 +20,7 @@ interface TimelinePageProps {
   }>
 }
 
-async function TimelinePageContent({
+export default async function TimelinePage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -42,12 +41,4 @@ async function TimelinePageContent({
   })
 
   return <TimelineClient initialData={serializeData(data)} />
-}
-
-export default async function TimelinePage(props: TimelinePageProps) {
-  return (
-    <Suspense fallback={<TimelineLoading />}>
-      <TimelinePageContent searchParams={props.searchParams} />
-    </Suspense>
-  )
 }

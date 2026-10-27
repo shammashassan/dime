@@ -5,7 +5,7 @@ import { Goal, Wallet } from "@/types"
 import { formatCurrency } from "@/lib/utils"
 import { contributeToGoal } from "@/lib/actions/goals"
 import { refreshNotifications } from "@/components/notifications/notifications-provider"
-import { toast } from "sonner"
+import { toast } from "@/components/ui/toast"
 import {
   Dialog,
   DialogContent,
