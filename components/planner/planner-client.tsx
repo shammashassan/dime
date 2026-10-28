@@ -129,13 +129,13 @@ export function PlannerClient({ baseline, savedScenarios }: PlannerClientProps) 
     setActiveScenario(DEFAULT_SCENARIO)
     setSelectedScenarioId("baseline")
     setActiveScenarioName("Baseline (Status Quo)")
-    toast.info("Reset to baseline values.")
+    toast.add({ title: "Reset to baseline values.", type: "info" })
   }
 
   const handleDeleteScenario = async (id: string) => {
     try {
       await deletePlannerScenario(id)
-      toast.success("Scenario deleted successfully.")
+      toast.add({ title: "Scenario deleted successfully.", type: "success" })
       if (selectedScenarioId === id) {
         handleSelectScenario("baseline")
       }
@@ -143,7 +143,7 @@ export function PlannerClient({ baseline, savedScenarios }: PlannerClientProps) 
         router.refresh()
       })
     } catch (err: any) {
-      toast.error(err.message || "Failed to delete scenario.")
+      toast.add({ title: err.message || "Failed to delete scenario.", type: "error" })
     } finally {
       setDeletingId(null)
     }

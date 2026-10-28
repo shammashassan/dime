@@ -144,14 +144,14 @@ export function GoalDetails({ goal, contributions, wallets }: GoalDetailsProps) 
         try {
             const res = await deleteGoal(goal._id.toString())
             if (res && !res.success) {
-                toast.error(res.error || "Failed to delete goal")
+                toast.add({ title: res.error || "Failed to delete goal", type: "error" })
                 return
             }
-            toast.success("Goal deleted successfully")
+            toast.add({ title: "Goal deleted successfully", type: "success" })
             router.push("/goals")
         } catch (err) {
             console.error(err)
-            toast.error("Failed to delete goal")
+            toast.add({ title: "Failed to delete goal", type: "error" })
         } finally {
             setIsDeleting(false)
         }

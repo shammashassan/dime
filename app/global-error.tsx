@@ -15,13 +15,29 @@ import {
 export default function GlobalError({
   error,
   reset,
+  retry,
 }: {
   error: Error & { digest?: string }
-  reset: () => void
+  reset?: () => void
+  retry?: () => void
 }) {
+  const [isPending, startTransition] = React.useTransition()
+
   React.useEffect(() => {
     console.error("Root global error occurred:", error)
   }, [error])
+
+  const handleRetry = () => {
+    startTransition(() => {
+      if (retry) {
+        retry()
+      } else if (reset) {
+        reset()
+      } else {
+        window.location.reload()
+      }
+    })
+  }
 
   return (
     <html lang="en" className="dark">
@@ -37,6 +53,16 @@ export default function GlobalError({
             <EmptyDescription className="text-sm text-muted-foreground leading-relaxed">
               A critical error interrupted the root application layout. You can attempt to reload the session or restart navigation.
             </EmptyDescription>
+
+            {process.env.NODE_ENV === "development" && error?.message && (
+              <div className="mt-2 text-left w-full rounded-xl border border-destructive/20 bg-destructive/5 p-3 text-xs font-mono text-destructive">
+                <span className="font-semibold block text-[10px] uppercase tracking-wider mb-1 text-destructive/70">
+                  Diagnostics (Dev Only)
+                </span>
+                <p className="break-all select-all leading-snug">{error.message}</p>
+              </div>
+            )}
+
             {error?.digest && (
               <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-border/60 bg-muted/40 text-[11px] font-mono text-muted-foreground">
                 <span>Incident Ref:</span>
@@ -48,11 +74,12 @@ export default function GlobalError({
             <Button
               variant="default"
               size="sm"
-              onClick={() => reset()}
+              onClick={handleRetry}
+              disabled={isPending}
               className="rounded-xl font-bold gap-1.5"
             >
-              <RotateCcw data-icon="inline-start" className="size-4" />
-              Reload Application
+              <RotateCcw data-icon="inline-start" className={isPending ? "size-4 animate-spin" : "size-4"} />
+              {isPending ? "Reloading..." : "Reload Application"}
             </Button>
             <Button
               variant="outline"

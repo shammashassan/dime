@@ -88,7 +88,7 @@ function NotificationIcon({
   return (
     <ItemMedia className="mt-0.5">
       <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg", bgClass, colorClass)}>
-        <Icon className={cn("size-3.5", colorClass, "[&_*]:!text-inherit [&_*]:!stroke-current")} />
+        <Icon className={cn("size-3.5", colorClass, "**:text-inherit! **:stroke-current!")} />
       </div>
     </ItemMedia>
   );
@@ -103,7 +103,7 @@ export function EmptyMuted({ onRefresh }: { onRefresh?: () => void }) {
           <BellIcon />
         </EmptyMedia>
         <EmptyTitle>No Notifications</EmptyTitle>
-        <EmptyDescription className="max-w-[200px] text-pretty">
+        <EmptyDescription className="max-w-50 text-pretty">
           You&apos;re all caught up. New notifications will appear here.
         </EmptyDescription>
       </EmptyHeader>
@@ -161,17 +161,17 @@ export function NotificationMenu() {
   return (
     <DropdownMenu onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger render={<Button
-          aria-label={unreadCount > 0 ? `Open notifications (${unreadCount} unread)` : "Open notifications"}
-          size="icon"
-          variant="ghost"
-          className="rounded-full"
-        >
-          {unreadCount > 0 ? (
-            <BellDot className="size-4.5 text-foreground [&_circle]:fill-primary [&_circle]:stroke-primary" aria-hidden="true" />
-          ) : (
-            <BellIcon className="size-4.5 text-muted-foreground" aria-hidden="true" />
-          )}
-        </Button>} />
+        aria-label={unreadCount > 0 ? `Open notifications (${unreadCount} unread)` : "Open notifications"}
+        size="icon"
+        variant="ghost"
+        className="rounded-full"
+      >
+        {unreadCount > 0 ? (
+          <BellDot aria-hidden="true" />
+        ) : (
+          <BellIcon aria-hidden="true" />
+        )}
+      </Button>} />
 
       <DropdownMenuContent className="w-80 rounded-2xl shadow-xl border border-border/40 bg-popover z-50" align="end">
         {/* Header */}
@@ -194,7 +194,7 @@ export function NotificationMenu() {
         {!hasNotifications ? (
           <EmptyMuted onRefresh={fetchNotifications} />
         ) : (
-          <ScrollArea className="h-[300px]">
+          <ScrollArea className="h-75">
             <DropdownMenuGroup className="p-1 flex flex-col gap-1">
               {notifications.slice(0, 5).map((notification) => {
                 const hasLink = !!notification.link;
@@ -203,53 +203,53 @@ export function NotificationMenu() {
                 if (hasLink) {
                   return (
                     <DropdownMenuItem key={idStr} className={cn(
-                        "cursor-pointer rounded-xl transition-colors",
-                        !notification.readAt ? "bg-muted/80 hover:bg-muted" : "hover:bg-muted/50"
-                      )} render={<Link
-                        href={notification.link!}
-                        onClick={(e) => {
-                          if (!notification.readAt) {
-                            e.preventDefault();
-                            handleNotificationClick(idStr).then(() => {
-                              router.push(notification.link!);
-                            });
-                          }
-                        }}
-                      >
-                        <Item size="xs" className="w-full">
-                          <NotificationIcon
-                            image={notification.image}
-                            title={notification.title}
-                            type={notification.type}
-                          />
+                      "cursor-pointer rounded-xl transition-colors",
+                      !notification.readAt ? "bg-muted/80 hover:bg-muted" : "hover:bg-muted/50"
+                    )} render={<Link
+                      href={notification.link!}
+                      onClick={(e) => {
+                        if (!notification.readAt) {
+                          e.preventDefault();
+                          handleNotificationClick(idStr).then(() => {
+                            router.push(notification.link!);
+                          });
+                        }
+                      }}
+                    >
+                      <Item size="xs" className="w-full">
+                        <NotificationIcon
+                          image={notification.image}
+                          title={notification.title}
+                          type={notification.type}
+                        />
 
-                          <ItemContent className="gap-0.5">
-                            <ItemTitle className={cn(!notification.readAt ? "font-semibold text-foreground" : "font-medium text-muted-foreground/80")}>
-                              {notification.title}
-                            </ItemTitle>
-                            <ItemDescription
-                              className={cn(
-                                "leading-normal",
-                                !notification.readAt
-                                  ? "text-muted-foreground"
-                                  : "text-muted-foreground/60"
-                              )}
-                            >
-                              {notification.message}
-                            </ItemDescription>
-                            <span
-                              className={cn(
-                                "text-[10px] mt-1 block leading-none",
-                                !notification.readAt
-                                  ? "text-muted-foreground/60"
-                                  : "text-muted-foreground/40"
-                              )}
-                            >
-                              {getRelativeTime(notification.createdAt)}
-                            </span>
-                          </ItemContent>
-                        </Item>
-                      </Link>} />
+                        <ItemContent className="gap-0.5">
+                          <ItemTitle className={cn(!notification.readAt ? "font-semibold text-foreground" : "font-medium text-muted-foreground/80")}>
+                            {notification.title}
+                          </ItemTitle>
+                          <ItemDescription
+                            className={cn(
+                              "leading-normal",
+                              !notification.readAt
+                                ? "text-muted-foreground"
+                                : "text-muted-foreground/60"
+                            )}
+                          >
+                            {notification.message}
+                          </ItemDescription>
+                          <span
+                            className={cn(
+                              "text-[10px] mt-1 block leading-none",
+                              !notification.readAt
+                                ? "text-muted-foreground/60"
+                                : "text-muted-foreground/40"
+                            )}
+                          >
+                            {getRelativeTime(notification.createdAt)}
+                          </span>
+                        </ItemContent>
+                      </Item>
+                    </Link>} />
                   );
                 }
 

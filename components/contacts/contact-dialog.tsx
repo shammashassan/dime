@@ -83,7 +83,7 @@ export function ContactDialog({
           setError((result as any).error || "Failed to update contact")
           return
         }
-        toast.success("Contact updated successfully")
+        toast.add({ title: "Contact updated successfully", type: "success" })
         if (onSuccess) {
           onSuccess(initialContact._id.toString(), data.name)
         }
@@ -93,7 +93,7 @@ export function ContactDialog({
           setError((result as any).error || "Failed to create contact")
           return
         }
-        toast.success("Contact created successfully")
+        toast.add({ title: "Contact created successfully", type: "success" })
         if (onSuccess && (result as any).contactId) {
           onSuccess((result as any).contactId, data.name)
         }

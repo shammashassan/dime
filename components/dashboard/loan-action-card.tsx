@@ -53,17 +53,17 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
     e.preventDefault()
     const numAmount = parseFloat(amount)
     if (!amount || isNaN(numAmount) || numAmount <= 0) {
-      toast.error("Please enter a valid loan amount")
+      toast.add({ title: "Please enter a valid loan amount", type: "error" })
       return
     }
     if (!contactId) {
-      toast.error("Please select a contact")
+      toast.add({ title: "Please select a contact", type: "error" })
       return
     }
 
     const selectedContact = contacts.find((c) => c._id?.toString() === contactId)
     if (!selectedContact) {
-      toast.error("Selected contact not found")
+      toast.add({ title: "Selected contact not found", type: "error" })
       return
     }
 
@@ -81,24 +81,23 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
         })
 
         if (res.success) {
-          toast.success(
-            `Recorded ${type === "lent" ? "loan to" : "borrowing from"} ${selectedContact.name}!`,
-            {
-              action: {
-                label: "View",
-                onClick: () => router.push("/loans"),
-              },
-            }
-          )
+          toast.add({
+            title: `Recorded ${type === "lent" ? "loan to" : "borrowing from"} ${selectedContact.name}!`,
+            type: "success",
+            actionProps: {
+              children: "View",
+              onClick: () => router.push("/loans"),
+            },
+          })
           setAmount("")
           setContactId("")
           setDueDate(undefined)
           router.refresh()
         } else {
-          toast.error(res.error || "Failed to record loan")
+          toast.add({ title: res.error || "Failed to record loan", type: "error" })
         }
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to record loan")
+        toast.add({ title: err instanceof Error ? err.message : "Failed to record loan", type: "error" })
       }
     })
   }

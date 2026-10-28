@@ -27,9 +27,9 @@ export function CoachOverviewCard({ initialBrief }: CoachOverviewCardProps) {
       const res = await refreshAiBriefingAction()
       if (res.success && res.brief) {
         setBrief(res.brief)
-        toast.success("AI coaching analysis refreshed")
+        toast.add({ title: "AI coaching analysis refreshed", type: "success" })
       } else {
-        toast.error(res.error || "Failed to generate AI analysis")
+        toast.add({ title: res.error || "Failed to generate AI analysis", type: "error" })
       }
     })
   }

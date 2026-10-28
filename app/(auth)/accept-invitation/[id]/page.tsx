@@ -109,9 +109,9 @@ function AcceptInvitationContent({ params }: AcceptInvitationPageProps) {
         invitationId: id,
       })
       if (error) {
-        toast.error(error.message || "Failed to accept invitation")
+        toast.add({ title: error.message || "Failed to accept invitation", type: "error" })
       } else {
-        toast.success(`Joined ${invitation.organizationName} successfully!`)
+        toast.add({ title: `Joined ${invitation.organizationName} successfully!`, type: "success" })
         // Notify inviter
         if (invitation.inviterId) {
           await createNotification({
@@ -131,7 +131,7 @@ function AcceptInvitationContent({ params }: AcceptInvitationPageProps) {
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     } finally {
       setIsAccepting(false)
     }
@@ -145,9 +145,9 @@ function AcceptInvitationContent({ params }: AcceptInvitationPageProps) {
         invitationId: id,
       })
       if (error) {
-        toast.error(error.message || "Failed to decline invitation")
+        toast.add({ title: error.message || "Failed to decline invitation", type: "error" })
       } else {
-        toast.info("Invitation declined")
+        toast.add({ title: "Invitation declined", type: "info" })
         // Notify inviter
         if (invitation.inviterId) {
           await createNotification({
@@ -162,7 +162,7 @@ function AcceptInvitationContent({ params }: AcceptInvitationPageProps) {
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     } finally {
       setIsDeclining(false)
     }
@@ -173,7 +173,7 @@ function AcceptInvitationContent({ params }: AcceptInvitationPageProps) {
       await authClient.signOut()
       window.location.href = `/sign-in?callbackUrl=/accept-invitation/${id}`
     } catch {
-      toast.error("Failed to sign out")
+      toast.add({ title: "Failed to sign out", type: "error" })
     }
   }
 

@@ -108,7 +108,7 @@ export function NotificationsContent({ initialNotifications }: NotificationsCont
     const unreadList = notifications.filter((n) => !n.readAt);
     if (unreadList.length === 0) return;
     await markAllAsRead();
-    toast.success("All notifications marked as read");
+    toast.add({ title: "All notifications marked as read", type: "success" });
   };
 
   const groupNotifications = (list: Notification[]) => {

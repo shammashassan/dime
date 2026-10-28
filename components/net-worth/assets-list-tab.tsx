@@ -111,14 +111,14 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
           : await archiveAsset(id)
 
         if (result.success) {
-          toast.success(isCurrentlyArchived ? "Item restored" : "Item archived")
+          toast.add({ title: isCurrentlyArchived ? "Item restored" : "Item archived", type: "success" })
           router.refresh()
         } else {
-          toast.error(result.error || "Failed to update item status")
+          toast.add({ title: result.error || "Failed to update item status", type: "error" })
         }
       } catch (err) {
         console.error(err)
-        toast.error("An unexpected error occurred")
+        toast.add({ title: "An unexpected error occurred", type: "error" })
       }
     })
   }
@@ -128,15 +128,15 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
       try {
         const result = await deleteAsset(id)
         if (result.success) {
-          toast.success("Item deleted successfully")
+          toast.add({ title: "Item deleted successfully", type: "success" })
           setDeletingAssetId(null)
           router.refresh()
         } else {
-          toast.error(result.error || "Failed to delete item")
+          toast.add({ title: result.error || "Failed to delete item", type: "error" })
         }
       } catch (err) {
         console.error(err)
-        toast.error("An unexpected error occurred")
+        toast.add({ title: "An unexpected error occurred", type: "error" })
       }
     })
   }

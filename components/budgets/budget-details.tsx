@@ -120,14 +120,14 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
         try {
             const res = await deleteBudget(budget._id.toString())
             if (res && !res.success) {
-                toast.error(res.error || "Failed to delete budget")
+                toast.add({ title: res.error || "Failed to delete budget", type: "error" })
                 return
             }
-            toast.success("Budget deleted successfully")
+            toast.add({ title: "Budget deleted successfully", type: "success" })
             router.push("/budgets")
         } catch (err) {
             console.error(err)
-            toast.error("Failed to delete budget")
+            toast.add({ title: "Failed to delete budget", type: "error" })
         } finally {
             setIsDeleting(false)
         }

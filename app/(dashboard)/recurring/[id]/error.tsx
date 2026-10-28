@@ -1,6 +1,6 @@
 "use client"
 
-import { RouteError } from "@/components/ui/route-error"
+import { RouteError } from "@/components/shared/route-error"
 
 export default function RecurringDetailError({
   error,

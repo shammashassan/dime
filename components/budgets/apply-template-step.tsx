@@ -84,7 +84,7 @@ export function ApplyTemplateStep({
 
   const handleApply = async () => {
     if (totalAmountCents <= 0) {
-      toast.error("Please enter a valid monthly budget amount.")
+      toast.add({ title: "Please enter a valid monthly budget amount.", type: "error" })
       return
     }
 

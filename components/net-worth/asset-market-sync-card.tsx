@@ -58,7 +58,7 @@ export function AssetMarketSyncCard({
 
   const handleSync = () => {
     if (!symbol.trim()) {
-      toast.error("Please provide a market ticker symbol (e.g. GC=F, BTC, AAPL)")
+      toast.add({ title: "Please provide a market ticker symbol (e.g. GC=F, BTC, AAPL)", type: "error" })
       return
     }
 
@@ -72,15 +72,13 @@ export function AssetMarketSyncCard({
         })
 
         if (res.success && res.newValueCents !== undefined) {
-          toast.success(
-            `Valuation updated to ${formatCurrency(res.newValueCents, asset.currency)} (${res.symbol})`
-          )
+          toast.add({ title: `Valuation updated to ${formatCurrency(res.newValueCents, asset.currency)} (${res.symbol})`, type: "success" })
           setIsConfiguring(false)
         } else {
-          toast.error(res.error || "Failed to sync market quote")
+          toast.add({ title: res.error || "Failed to sync market quote", type: "error" })
         }
       } catch (err: any) {
-        toast.error(err.message || "An unexpected error occurred")
+        toast.add({ title: err.message || "An unexpected error occurred", type: "error" })
       }
     })
   }

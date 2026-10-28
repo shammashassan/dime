@@ -93,10 +93,11 @@ export function InsightsClient({ data }: InsightsClientProps) {
     setInsights((prev) => prev.filter((i) => i.id !== id))
     setDismissedCount((prev) => prev + 1)
 
-    toast("Insight dismissed", {
+    toast.add({
+      title: "Insight dismissed",
       description: target.title,
-      action: {
-        label: "Undo",
+      actionProps: {
+        children: "Undo",
         onClick: () => {
           setInsights((prev) => [...prev, target].sort((a, b) => b.score - a.score))
           setDismissedCount((prev) => Math.max(0, prev - 1))
@@ -105,7 +106,7 @@ export function InsightsClient({ data }: InsightsClientProps) {
             if (!res?.success) {
               setInsights((prev) => prev.filter((i) => i.id !== id))
               setDismissedCount((prev) => prev + 1)
-              toast.error(res?.error || "Failed to undo dismissal")
+              toast.add({ title: res?.error || "Failed to undo dismissal", type: "error" })
             }
           })
         },
@@ -117,7 +118,7 @@ export function InsightsClient({ data }: InsightsClientProps) {
       if (!res?.success) {
         setInsights((prev) => [...prev, target].sort((a, b) => b.score - a.score))
         setDismissedCount((prev) => Math.max(0, prev - 1))
-        toast.error(res?.error || "Failed to dismiss insight")
+        toast.add({ title: res?.error || "Failed to dismiss insight", type: "error" })
       }
     })
   }
@@ -127,7 +128,9 @@ export function InsightsClient({ data }: InsightsClientProps) {
       prev.map((i) => (i.id === id ? { ...i, isBookmarked: !current } : i))
     )
 
-    toast(current ? "Bookmark removed" : "Insight bookmarked")
+    toast.add({
+      title: current ? "Bookmark removed" : "Insight bookmarked",
+    })
 
     startTransition(async () => {
       const res = await toggleBookmarkInsightAction(id, current)
@@ -135,7 +138,7 @@ export function InsightsClient({ data }: InsightsClientProps) {
         setInsights((prev) =>
           prev.map((i) => (i.id === id ? { ...i, isBookmarked: current } : i))
         )
-        toast.error(res?.error || "Failed to update bookmark")
+        toast.add({ title: res?.error || "Failed to update bookmark", type: "error" })
       }
     })
   }
@@ -145,10 +148,10 @@ export function InsightsClient({ data }: InsightsClientProps) {
       const res = await restoreAllDismissedInsightsAction()
       if (res?.success) {
         setDismissedCount(0)
-        toast.success("Restored all previously dismissed insights")
+        toast.add({ title: "Restored all previously dismissed insights", type: "success" })
         router.refresh()
       } else {
-        toast.error(res?.error || "Failed to restore insights")
+        toast.add({ title: res?.error || "Failed to restore insights", type: "error" })
       }
     })
   }

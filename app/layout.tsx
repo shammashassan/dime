@@ -68,7 +68,7 @@ export default function RootLayout({
             <Suspense fallback={null}>
               {modal}
             </Suspense>
-            <Toaster position="top-right" />
+            <Toaster />
           </TooltipProvider>
         </ThemeProvider>
       </body>

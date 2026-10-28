@@ -61,15 +61,15 @@ export function WatchlistView({ watchlists }: WatchlistViewProps) {
     try {
       const res = await createWatchlistAction({ name: newWatchlistName.trim() })
       if (res.success) {
-        toast.success(`Created watchlist "${newWatchlistName.trim()}"`)
+        toast.add({ title: `Created watchlist "${newWatchlistName.trim()}"`, type: "success" })
         setNewWatchlistName("")
         setIsCreateOpen(false)
         router.refresh()
       } else {
-        toast.error(res.error || "Failed to create watchlist")
+        toast.add({ title: res.error || "Failed to create watchlist", type: "error" })
       }
     } catch {
-      toast.error("An error occurred while creating watchlist")
+      toast.add({ title: "An error occurred while creating watchlist", type: "error" })
     } finally {
       setIsCreating(false)
     }
@@ -81,13 +81,13 @@ export function WatchlistView({ watchlists }: WatchlistViewProps) {
     try {
       const res = await deleteWatchlistAction(watchlistId)
       if (res.success) {
-        toast.success(`Deleted watchlist "${name}"`)
+        toast.add({ title: `Deleted watchlist "${name}"`, type: "success" })
         router.refresh()
       } else {
-        toast.error(res.error || "Failed to delete watchlist")
+        toast.add({ title: res.error || "Failed to delete watchlist", type: "error" })
       }
     } catch {
-      toast.error("Failed to delete watchlist")
+      toast.add({ title: "Failed to delete watchlist", type: "error" })
     }
   }
 
@@ -107,7 +107,7 @@ export function WatchlistView({ watchlists }: WatchlistViewProps) {
       })
 
       if (res.success) {
-        toast.success(`Added ${itemSymbol.toUpperCase()} to watchlist`)
+        toast.add({ title: `Added ${itemSymbol.toUpperCase()} to watchlist`, type: "success" })
         setItemSymbol("")
         setItemName("")
         setItemAssetType("stock")
@@ -116,10 +116,10 @@ export function WatchlistView({ watchlists }: WatchlistViewProps) {
         setActiveWatchlistId(null)
         router.refresh()
       } else {
-        toast.error(res.error || "Failed to add symbol to watchlist")
+        toast.add({ title: res.error || "Failed to add symbol to watchlist", type: "error" })
       }
     } catch {
-      toast.error("Failed to add symbol")
+      toast.add({ title: "Failed to add symbol", type: "error" })
     } finally {
       setIsAddingItem(false)
     }
@@ -129,13 +129,13 @@ export function WatchlistView({ watchlists }: WatchlistViewProps) {
     try {
       const res = await removeWatchlistItemAction(itemId)
       if (res.success) {
-        toast.success(`Removed ${symbol} from watchlist`)
+        toast.add({ title: `Removed ${symbol} from watchlist`, type: "success" })
         router.refresh()
       } else {
-        toast.error(res.error || "Failed to remove item")
+        toast.add({ title: res.error || "Failed to remove item", type: "error" })
       }
     } catch {
-      toast.error("Failed to remove item")
+      toast.add({ title: "Failed to remove item", type: "error" })
     }
   }
 

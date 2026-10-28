@@ -278,15 +278,15 @@ export function AssetDetails({
       try {
         const result = await deleteAsset(asset._id.toString())
         if (result.success) {
-          toast.success("Item deleted successfully")
+          toast.add({ title: "Item deleted successfully", type: "success" })
           router.push("/net-worth")
           router.refresh()
         } else {
-          toast.error(result.error || "Failed to delete item")
+          toast.add({ title: result.error || "Failed to delete item", type: "error" })
         }
       } catch (err) {
         console.error(err)
-        toast.error("An unexpected error occurred")
+        toast.add({ title: "An unexpected error occurred", type: "error" })
       }
     })
   }
@@ -296,14 +296,14 @@ export function AssetDetails({
       try {
         const result = await deleteAssetValuation(valId)
         if (result.success) {
-          toast.success("Valuation deleted")
+          toast.add({ title: "Valuation deleted", type: "success" })
           router.refresh()
         } else {
-          toast.error(result.error || "Failed to delete valuation")
+          toast.add({ title: result.error || "Failed to delete valuation", type: "error" })
         }
       } catch (err) {
         console.error(err)
-        toast.error("An unexpected error occurred")
+        toast.add({ title: "An unexpected error occurred", type: "error" })
       }
     })
   }

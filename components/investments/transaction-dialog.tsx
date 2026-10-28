@@ -73,21 +73,21 @@ export function TransactionDialog({
 
   const onSubmit = async (data: InvestmentTransactionInput) => {
     if (!data.walletId) {
-      toast.error("Please select a brokerage account")
+      toast.add({ title: "Please select a brokerage account", type: "error" })
       return
     }
     setIsSubmitting(true)
     try {
       const res = await recordTransaction(data)
       if (res.success) {
-        toast.success("Transaction recorded successfully")
+        toast.add({ title: "Transaction recorded successfully", type: "success" })
         reset()
         setOpen(false)
       } else {
-        toast.error("Failed to record transaction")
+        toast.add({ title: "Failed to record transaction", type: "error" })
       }
     } catch (e) {
-      toast.error("An error occurred")
+      toast.add({ title: "An error occurred", type: "error" })
     } finally {
       setIsSubmitting(false)
     }

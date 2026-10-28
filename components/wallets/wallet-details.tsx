@@ -165,14 +165,14 @@ export function WalletDetails({
         try {
             const res = await deleteWallet(wallet._id.toString())
             if (res && !res.success) {
-                toast.error(res.error || "Failed to delete wallet")
+                toast.add({ title: res.error || "Failed to delete wallet", type: "error" })
                 return
             }
-            toast.success("Wallet deleted")
+            toast.add({ title: "Wallet deleted", type: "success" })
             router.push("/wallets")
         } catch (err) {
             console.error(err)
-            toast.error("Failed to delete wallet")
+            toast.add({ title: "Failed to delete wallet", type: "error" })
         } finally {
             setIsDeleting(false)
         }

@@ -29,6 +29,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -230,12 +231,13 @@ export function SearchCommand() {
         title="Universal Search"
         description="Search transactions, accounts, budgets, goals, recurring rules, and navigation."
       >
-        <CommandInput
-          value={query}
-          onValueChange={setQuery}
-          placeholder="Type a command, search term, or operator..."
-        />
-        <CommandList>
+        <Command className="rounded-none border-none p-0">
+          <CommandInput
+            value={query}
+            onValueChange={setQuery}
+            placeholder="Type a command, search term, or operator..."
+          />
+          <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
 
           {/* EMPTY STATE: Recent searches, operator shortcuts, and navigation */}
@@ -474,6 +476,7 @@ export function SearchCommand() {
             </>
           )}
         </CommandList>
+        </Command>
       </CommandDialog>
     </>
   )

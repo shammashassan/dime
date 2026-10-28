@@ -284,13 +284,13 @@ export function SavedTransactionViews({ defaultCurrency = "USD" }: SavedTransact
     saveViewsToStorage(updated)
     setViewName("")
     setManageModalOpen(false)
-    toast.success(`Saved view "${trimmed}" created`)
+    toast.add({ title: `Saved view "${trimmed}" created`, type: "success" })
   }
 
   const handleDeleteCustomView = (id: string) => {
     const updated = savedViews.filter((v) => v.id !== id)
     saveViewsToStorage(updated)
-    toast.success("Saved view removed")
+    toast.add({ title: "Saved view removed", type: "success" })
   }
 
   return (

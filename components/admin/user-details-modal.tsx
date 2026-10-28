@@ -59,7 +59,7 @@ export function UserDetailsModal({
     if (!user.id) return
     navigator.clipboard.writeText(user.id)
     setCopiedId(true)
-    toast.success("User ID copied to clipboard")
+    toast.add({ title: "User ID copied to clipboard", type: "success" })
     setTimeout(() => setCopiedId(false), 2000)
   }
 

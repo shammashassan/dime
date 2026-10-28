@@ -156,7 +156,7 @@ export function TimelineClient({ initialData }: TimelineClientProps) {
   // Export handlers
   const handleExport = (exportFormat: "json" | "csv") => {
     if (filteredEvents.length === 0) {
-      toast.error("No events to export")
+      toast.add({ title: "No events to export", type: "error" })
       return
     }
 
@@ -209,9 +209,9 @@ export function TimelineClient({ initialData }: TimelineClientProps) {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success(`Exported ${filteredEvents.length} events as ${exportFormat.toUpperCase()}`)
+      toast.add({ title: `Exported ${filteredEvents.length} events as ${exportFormat.toUpperCase()}`, type: "success" })
     } catch {
-      toast.error("Failed to export timeline events")
+      toast.add({ title: "Failed to export timeline events", type: "error" })
     }
   }
 

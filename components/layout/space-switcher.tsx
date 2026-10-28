@@ -54,7 +54,7 @@ export function SpaceSwitcher() {
       })
       window.location.reload()
     } catch {
-      toast.error("Failed to switch workspace")
+      toast.add({ title: "Failed to switch workspace", type: "error" })
     }
   }
 
@@ -70,9 +70,9 @@ export function SpaceSwitcher() {
       })
 
       if (error) {
-        toast.error(error.message || "Failed to create space")
+        toast.add({ title: error.message || "Failed to create space", type: "error" })
       } else if (data) {
-        toast.success("Space created successfully")
+        toast.add({ title: "Space created successfully", type: "success" })
         setDialogOpen(false)
         setNewOrgName("")
         // Trigger switch and reload
@@ -83,7 +83,7 @@ export function SpaceSwitcher() {
         window.location.reload()
       }
     } catch {
-      toast.error("An error occurred while creating space")
+      toast.add({ title: "An error occurred while creating space", type: "error" })
     } finally {
       setIsSubmitting(false)
     }

@@ -95,7 +95,7 @@ export function SearchResultsView({
       const newUrl = trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : "/search"
       window.history.replaceState(null, "", newUrl)
     } catch (err) {
-      toast.error("Failed to run search query")
+      toast.add({ title: "Failed to run search query", type: "error" })
       console.error(err)
     } finally {
       setLoading(false)
@@ -128,12 +128,12 @@ export function SearchResultsView({
       const res = await deleteSavedSearchAction(id)
       if (res.success) {
         setSavedSearches((prev) => prev.filter((s) => s.id !== id))
-        toast.success(`Removed saved search "${name}"`)
+        toast.add({ title: `Removed saved search "${name}"`, type: "success" })
       } else {
-        toast.error(res.error || "Failed to delete saved search")
+        toast.add({ title: res.error || "Failed to delete saved search", type: "error" })
       }
     } catch {
-      toast.error("Failed to delete saved search")
+      toast.add({ title: "Failed to delete saved search", type: "error" })
     }
   }
 

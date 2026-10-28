@@ -34,11 +34,11 @@ export function SignUpForm() {
         return
       }
       if (error === "account_not_linked") {
-        toast.error("This email is already registered. Please sign in instead.")
+        toast.add({ title: "This email is already registered. Please sign in instead.", type: "error" })
       } else if (error === "access_denied") {
-        toast.error("Google sign-up was cancelled.")
+        toast.add({ title: "Google sign-up was cancelled.", type: "error" })
       } else {
-        toast.error(`Authentication error: ${error.replace(/_/g, " ")}`)
+        toast.add({ title: `Authentication error: ${error.replace(/_/g, " ")}`, type: "error" })
       }
       window.history.replaceState({}, "", window.location.pathname)
     }
@@ -80,7 +80,7 @@ export function SignUpForm() {
 
     if (password !== confirmPassword) {
       setLoading(false)
-      toast.error("Passwords do not match")
+      toast.add({ title: "Passwords do not match", type: "error" })
       return
     }
 

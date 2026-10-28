@@ -177,7 +177,7 @@ export function TransactionForm({
       setValue("currency", matchedWallet.currency, { shouldDirty: true })
     }
 
-    toast.success("Autofilled form from receipt!")
+    toast.add({ title: "Autofilled form from receipt!", type: "success" })
   }
 
   // Attempt to pre-resolve source and target wallets if counterpart transaction is in local list

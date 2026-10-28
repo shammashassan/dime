@@ -97,7 +97,7 @@ export function ValuationDialog({
         return
       }
 
-      toast.success("Valuation recorded successfully")
+      toast.add({ title: "Valuation recorded successfully", type: "success" })
       setOpen(false)
       if (onSuccess) onSuccess()
       router.refresh()

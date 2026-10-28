@@ -127,9 +127,9 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
         invitationId: id,
       })
       if (error) {
-        toast.error(error.message || "Failed to accept invitation")
+        toast.add({ title: error.message || "Failed to accept invitation", type: "error" })
       } else {
-        toast.success(`Joined ${orgName} successfully!`)
+        toast.add({ title: `Joined ${orgName} successfully!`, type: "success" })
         await fetchUserInvitations()
         window.dispatchEvent(new Event("workspace-switch-start"))
         await authClient.organization.setActive({
@@ -139,7 +139,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
       }
     } catch (err) {
       console.error("Failed to accept invite", err)
-      toast.error("An error occurred while accepting the invitation")
+      toast.add({ title: "An error occurred while accepting the invitation", type: "error" })
     } finally {
       setAcceptingInviteId(null)
     }
@@ -152,14 +152,14 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
         invitationId: id,
       })
       if (error) {
-        toast.error(error.message || "Failed to decline invitation")
+        toast.add({ title: error.message || "Failed to decline invitation", type: "error" })
       } else {
-        toast.info("Invitation declined")
+        toast.add({ title: "Invitation declined", type: "info" })
         await fetchUserInvitations()
       }
     } catch (err) {
       console.error("Failed to decline invite", err)
-      toast.error("An error occurred while declining the invitation")
+      toast.add({ title: "An error occurred while declining the invitation", type: "error" })
     } finally {
       setDecliningInviteId(null)
     }
@@ -653,10 +653,10 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
       document.body.appendChild(downloadAnchor)
       downloadAnchor.click()
       downloadAnchor.remove()
-      toast.success("JSON data export initiated")
+      toast.add({ title: "JSON data export initiated", type: "success" })
     } catch (err) {
       console.error("Export JSON failed:", err)
-      toast.error("Failed to export JSON data")
+      toast.add({ title: "Failed to export JSON data", type: "error" })
     }
   }
 
@@ -694,10 +694,10 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
       document.body.appendChild(downloadAnchor)
       downloadAnchor.click()
       downloadAnchor.remove()
-      toast.success("CSV transaction export initiated")
+      toast.add({ title: "CSV transaction export initiated", type: "success" })
     } catch (err) {
       console.error("Export CSV failed:", err)
-      toast.error("Failed to export CSV transactions")
+      toast.add({ title: "Failed to export CSV transactions", type: "error" })
     }
   }
 

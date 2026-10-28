@@ -74,11 +74,11 @@ export function QuickLogCard({
     e.preventDefault()
     const numAmount = parseFloat(amount)
     if (!amount || isNaN(numAmount) || numAmount <= 0) {
-      toast.error("Please enter a valid amount")
+      toast.add({ title: "Please enter a valid amount", type: "error" })
       return
     }
     if (!effectiveWalletId) {
-      toast.error("Please select a wallet")
+      toast.add({ title: "Please select a wallet", type: "error" })
       return
     }
 
@@ -98,9 +98,11 @@ export function QuickLogCard({
         })
 
         if (res.success) {
-          toast.success(`${type === "income" ? "Income" : "Expense"} logged successfully!`, {
-            action: {
-              label: "View",
+          toast.add({
+            title: `${type === "income" ? "Income" : "Expense"} logged successfully!`,
+            type: "success",
+            actionProps: {
+              children: "View",
               onClick: () => router.push("/transactions"),
             },
           })
@@ -108,10 +110,10 @@ export function QuickLogCard({
           setDescription("")
           router.refresh()
         } else {
-          toast.error(res.error || "Failed to log transaction")
+          toast.add({ title: res.error || "Failed to log transaction", type: "error" })
         }
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to log transaction")
+        toast.add({ title: err instanceof Error ? err.message : "Failed to log transaction", type: "error" })
       }
     })
   }

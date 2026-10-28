@@ -27,15 +27,15 @@ export function SyncPricesButton({
           if (res.updatedCount > 0) {
             const syms = (res as any).symbols
             const label = syms && syms.length > 0 ? syms.join(", ") : `${res.updatedCount} holdings`
-            toast.success(`Updated market prices for ${label}`)
+            toast.add({ title: `Updated market prices for ${label}`, type: "success" })
           } else {
-            toast.info("Prices are already up to date or no live quotes were found")
+            toast.add({ title: "Prices are already up to date or no live quotes were found", type: "info" })
           }
         } else {
-          toast.error(res.error || "Failed to sync market prices")
+          toast.add({ title: res.error || "Failed to sync market prices", type: "error" })
         }
       } catch {
-        toast.error("An unexpected error occurred while syncing market prices")
+        toast.add({ title: "An unexpected error occurred while syncing market prices", type: "error" })
       }
     })
   }

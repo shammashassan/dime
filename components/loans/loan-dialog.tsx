@@ -283,7 +283,7 @@ export function LoanDialog({
                       ...prev,
                       { _id: contactId, name: contactName } as any
                     ])
-                    toast.success(`Selected newly created contact: ${contactName}`)
+                    toast.add({ title: `Selected newly created contact: ${contactName}`, type: "success" })
                   }}
                   trigger={
                     <button

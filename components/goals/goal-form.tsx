@@ -122,23 +122,23 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
       if (isEditing && goal) {
         res = await updateGoal(goal._id.toString(), payload)
         if (res && res.success) {
-          toast.success(`Goal "${data.name}" updated successfully`)
+          toast.add({ title: `Goal "${data.name}" updated successfully`, type: "success" })
           onOpenChange(false)
         } else {
-          toast.error(res?.error || "Failed to update goal")
+          toast.add({ title: res?.error || "Failed to update goal", type: "error" })
         }
       } else {
         res = await createGoal(payload)
         if (res && res.success) {
-          toast.success(`Goal "${data.name}" created successfully`)
+          toast.add({ title: `Goal "${data.name}" created successfully`, type: "success" })
           onOpenChange(false)
         } else {
-          toast.error(res?.error || "Failed to create goal")
+          toast.add({ title: res?.error || "Failed to create goal", type: "error" })
         }
       }
     } catch (err) {
       console.error(err)
-      toast.error("An error occurred during submission")
+      toast.add({ title: "An error occurred during submission", type: "error" })
     } finally {
       setIsSubmitting(false)
     }

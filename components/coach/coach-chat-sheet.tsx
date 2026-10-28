@@ -102,7 +102,7 @@ export function CoachChatSheet({
         }
         setMessages((prev) => [...prev, coachReply])
       } else {
-        toast.error(res.error || "Failed to receive response from Coach")
+        toast.add({ title: res.error || "Failed to receive response from Coach", type: "error" })
       }
     })
   }
@@ -113,9 +113,9 @@ export function CoachChatSheet({
       if (res.success) {
         setMessages([])
         setIsClearDialogOpen(false)
-        toast.success("Chat history cleared")
+        toast.add({ title: "Chat history cleared", type: "success" })
       } else {
-        toast.error(res.error || "Failed to clear chat")
+        toast.add({ title: res.error || "Failed to clear chat", type: "error" })
       }
     })
   }

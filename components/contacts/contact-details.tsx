@@ -293,14 +293,14 @@ export function ContactDetails({
     try {
       const result = await deleteContact(contact._id.toString())
       if (result && !result.success) {
-        toast.error((result as { error?: string }).error || "Failed to delete contact")
+        toast.add({ title: (result as { error?: string }).error || "Failed to delete contact", type: "error" })
         return
       }
-      toast.success("Contact deleted successfully")
+      toast.add({ title: "Contact deleted successfully", type: "success" })
       router.push("/contacts")
     } catch (err) {
       console.error(err)
-      toast.error("Failed to delete contact")
+      toast.add({ title: "Failed to delete contact", type: "error" })
     } finally {
       setIsDeleting(false)
     }
@@ -311,16 +311,16 @@ export function ContactDetails({
     try {
       const result = await deleteLoan(loanId)
       if (result && !result.success) {
-        toast.error((result as { error?: string }).error || "Failed to delete loan")
+        toast.add({ title: (result as { error?: string }).error || "Failed to delete loan", type: "error" })
         return
       }
-      toast.success("Loan deleted")
+      toast.add({ title: "Loan deleted", type: "success" })
       setLocalLoans((prev) => prev.filter((l) => l._id.toString() !== loanId))
       setLocalRepayments((prev) => prev.filter((r) => r.loanId !== loanId))
       router.refresh()
     } catch (err) {
       console.error(err)
-      toast.error("Failed to delete loan")
+      toast.add({ title: "Failed to delete loan", type: "error" })
     } finally {
       setDeletingEventId(null)
     }
@@ -331,15 +331,15 @@ export function ContactDetails({
     try {
       const result = await deleteRepayment(repaymentId)
       if (result && !result.success) {
-        toast.error((result as { error?: string }).error || "Failed to delete repayment")
+        toast.add({ title: (result as { error?: string }).error || "Failed to delete repayment", type: "error" })
         return
       }
-      toast.success("Repayment deleted")
+      toast.add({ title: "Repayment deleted", type: "success" })
       setLocalRepayments((prev) => prev.filter((r) => r._id.toString() !== repaymentId))
       router.refresh()
     } catch (err) {
       console.error(err)
-      toast.error("Failed to delete repayment")
+      toast.add({ title: "Failed to delete repayment", type: "error" })
     } finally {
       setDeletingEventId(null)
     }

@@ -407,7 +407,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
         window.location.href = "/sign-in"
       }
     } catch {
-      toast.error("Failed to sign out")
+      toast.add({ title: "Failed to sign out", type: "error" })
     } finally {
       setIsSigningOut(false)
     }

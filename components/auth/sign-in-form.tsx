@@ -50,11 +50,11 @@ export function SignInForm() {
         return
       }
       if (error === "account_not_linked") {
-        toast.error("This email is already associated with another login method. Please sign in with your email & password.")
+        toast.add({ title: "This email is already associated with another login method. Please sign in with your email & password.", type: "error" })
       } else if (error === "access_denied") {
-        toast.error("Google sign-in was cancelled.")
+        toast.add({ title: "Google sign-in was cancelled.", type: "error" })
       } else {
-        toast.error(`Authentication error: ${error.replace(/_/g, " ")}`)
+        toast.add({ title: `Authentication error: ${error.replace(/_/g, " ")}`, type: "error" })
       }
       window.history.replaceState({}, "", window.location.pathname)
     }

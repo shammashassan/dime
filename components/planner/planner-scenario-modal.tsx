@@ -36,7 +36,7 @@ export function PlannerScenarioModal({
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) {
-      toast.error("Scenario name is required.")
+      toast.add({ title: "Scenario name is required.", type: "error" })
       return
     }
 
@@ -56,13 +56,13 @@ export function PlannerScenarioModal({
         horizonMonths: currentScenario.horizonMonths ?? 12,
       })
 
-      toast.success(`Scenario "${name}" saved successfully!`)
+      toast.add({ title: `Scenario "${name}" saved successfully!`, type: "success" })
       setName("")
       setDescription("")
       onOpenChange(false)
       onSavedSuccess()
     } catch (err: any) {
-      toast.error(err.message || "Failed to save scenario.")
+      toast.add({ title: err.message || "Failed to save scenario.", type: "error" })
     } finally {
       setLoading(false)
     }

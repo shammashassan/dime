@@ -32,13 +32,13 @@ export function PriceUpdateDialog({ holdingId, currentPrice, trigger }: PriceUpd
     try {
       const res = await recordPriceSnapshot(holdingId, price)
       if (res.success) {
-        toast.success("Price updated successfully")
+        toast.add({ title: "Price updated successfully", type: "success" })
         setOpen(false)
       } else {
-        toast.error("Failed to update price")
+        toast.add({ title: "Failed to update price", type: "error" })
       }
     } catch (e) {
-      toast.error("An error occurred")
+      toast.add({ title: "An error occurred", type: "error" })
     } finally {
       setIsSubmitting(false)
     }

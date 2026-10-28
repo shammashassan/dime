@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:smoke": "node scripts/smoke-test.mjs",
     "check:metadata": "node scripts/check-metadata.mjs",
     "db:setup": "node scripts/init-indexes.js"
   },

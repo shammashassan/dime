@@ -92,7 +92,7 @@ export function CSVImportModal({
     // Basic CSV Line parser (handles quoted commas)
     const lines = text.split(/\r?\n/).filter(line => line.trim() !== "")
     if (lines.length === 0) {
-      toast.error("CSV file is empty")
+      toast.add({ title: "CSV file is empty", type: "error" })
       return
     }
 
@@ -135,7 +135,7 @@ export function CSVImportModal({
 
   const handleNextToPreview = () => {
     if (!targetWalletId || !dateCol || !amountCol || !descCol) {
-      toast.error("Please fill in all required mappings and select a wallet")
+      toast.add({ title: "Please fill in all required mappings and select a wallet", type: "error" })
       return
     }
 
@@ -194,7 +194,7 @@ export function CSVImportModal({
   const handleImport = async () => {
     const importItems = parsedTransactions.filter(t => t.selected)
     if (importItems.length === 0) {
-      toast.error("No transactions selected for import")
+      toast.add({ title: "No transactions selected for import", type: "error" })
       return
     }
 
@@ -202,15 +202,15 @@ export function CSVImportModal({
     try {
       const res = await importTransactionsAction(targetWalletId, importItems)
       if (res.success) {
-        toast.success(`Imported ${res.count} transactions successfully!`)
+        toast.add({ title: `Imported ${res.count} transactions successfully!`, type: "success" })
         onOpenChange(false)
         resetState()
       } else {
-        toast.error("Failed to import transactions")
+        toast.add({ title: "Failed to import transactions", type: "error" })
       }
     } catch (err: any) {
       console.error(err)
-      toast.error(err.message || "An error occurred during import")
+      toast.add({ title: err.message || "An error occurred during import", type: "error" })
     } finally {
       setIsImporting(false)
     }

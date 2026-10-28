@@ -263,11 +263,11 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       )
 
       await Promise.all(promises)
-      toast.success("Workspace preferences saved successfully")
+      toast.add({ title: "Workspace preferences saved successfully", type: "success" })
       await refetchActiveOrg()
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     } finally {
       setIsUpdatingSettings(false)
     }
@@ -276,7 +276,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
   const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!resolvedUser || !activeOrgId) {
-      toast.error("Please search and select a valid user first")
+      toast.add({ title: "Please search and select a valid user first", type: "error" })
       return
     }
 
@@ -287,9 +287,9 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         role: inviteRole as "admin" | "member" | "owner",
       })
       if (error) {
-        toast.error(error.message || "Failed to send invitation")
+        toast.add({ title: error.message || "Failed to send invitation", type: "error" })
       } else {
-        toast.success(`Invitation sent successfully to @${resolvedUser.username}`)
+        toast.add({ title: `Invitation sent successfully to @${resolvedUser.username}`, type: "success" })
         // Create in-app notification for the invited user
         await createNotification({
           userId: resolvedUser.id,
@@ -306,7 +306,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     } finally {
       setIsInviting(false)
     }
@@ -318,14 +318,14 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         invitationId: inviteId,
       })
       if (error) {
-        toast.error(error.message || "Failed to cancel invitation")
+        toast.add({ title: error.message || "Failed to cancel invitation", type: "error" })
       } else {
-        toast.success("Invitation canceled")
+        toast.add({ title: "Invitation canceled", type: "success" })
         await fetchMembersAndInvitations()
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     }
   }
 
@@ -336,9 +336,9 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         memberIdOrEmail: memberId,
       })
       if (error) {
-        toast.error(error.message || "Failed to remove member")
+        toast.add({ title: error.message || "Failed to remove member", type: "error" })
       } else {
-        toast.success("Member removed successfully")
+        toast.add({ title: "Member removed successfully", type: "success" })
         if (targetMember?.userId) {
           await createNotification({
             userId: targetMember.userId,
@@ -352,7 +352,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     }
   }
 
@@ -364,9 +364,9 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         role: role as "admin" | "member" | "owner",
       })
       if (error) {
-        toast.error(error.message || "Failed to update member role")
+        toast.add({ title: error.message || "Failed to update member role", type: "error" })
       } else {
-        toast.success(`Role updated to ${role}`)
+        toast.add({ title: `Role updated to ${role}`, type: "success" })
         if (targetMember?.userId) {
           await createNotification({
             userId: targetMember.userId,
@@ -380,7 +380,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     }
   }
 
@@ -399,7 +399,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       })
 
       if (errorPromote) {
-        toast.error(errorPromote.message || "Failed to promote target member to owner")
+        toast.add({ title: errorPromote.message || "Failed to promote target member to owner", type: "error" })
         return
       }
 
@@ -409,17 +409,17 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
           role: "admin",
         })
         if (errorDemote) {
-          toast.warning("Promoted new owner, but failed to demote current user. Please review memberships.")
+          toast.add({ title: "Promoted new owner, but failed to demote current user. Please review memberships.", type: "warning" })
         }
       }
 
-      toast.success("Ownership transferred successfully")
+      toast.add({ title: "Ownership transferred successfully", type: "success" })
       setTransferConfirmText("")
       setTransferTargetId("")
       await fetchMembersAndInvitations()
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Failed to transfer ownership"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     } finally {
       setIsTransferring(false)
     }
@@ -433,9 +433,9 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         organizationId: activeOrgId,
       })
       if (error) {
-        toast.error(error.message || "Failed to leave space")
+        toast.add({ title: error.message || "Failed to leave space", type: "error" })
       } else {
-        toast.success("Left the space successfully")
+        toast.add({ title: "Left the space successfully", type: "success" })
         window.dispatchEvent(new Event("workspace-switch-start"))
         await authClient.organization.setActive({
           organizationId: null,
@@ -444,7 +444,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     } finally {
       setIsLeaving(false)
     }
@@ -458,9 +458,9 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         organizationId: activeOrgId,
       })
       if (error) {
-        toast.error(error.message || "Failed to delete space")
+        toast.add({ title: error.message || "Failed to delete space", type: "error" })
       } else {
-        toast.success("Space deleted successfully")
+        toast.add({ title: "Space deleted successfully", type: "success" })
         window.dispatchEvent(new Event("workspace-switch-start"))
         await authClient.organization.setActive({
           organizationId: null,
@@ -469,7 +469,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "An error occurred"
-      toast.error(errMsg)
+      toast.add({ title: errMsg, type: "error" })
     } finally {
       setIsDeleting(false)
     }

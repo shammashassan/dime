@@ -81,9 +81,9 @@ export function CalendarDaySheet({
     try {
       setDeletingId(id)
       await deleteCalendarPlanAction(id)
-      toast.success("Planned event removed")
+      toast.add({ title: "Planned event removed", type: "success" })
     } catch {
-      toast.error("Failed to delete event")
+      toast.add({ title: "Failed to delete event", type: "error" })
     } finally {
       setDeletingId(null)
     }

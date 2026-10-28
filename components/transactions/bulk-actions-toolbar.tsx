@@ -90,15 +90,15 @@ export function BulkActionsToolbar({
       try {
         const res = await bulkAddTransactionTags(selectedIds, pendingTags)
         if (res.success) {
-          toast.success(`Tags added to ${res.count} transactions`)
+          toast.add({ title: `Tags added to ${res.count} transactions`, type: "success" })
           setTagsOpen(false)
           setPendingTags([])
           onSuccess()
         } else {
-          toast.error(res.error || "Failed to add tags")
+          toast.add({ title: res.error || "Failed to add tags", type: "error" })
         }
       } catch (err: any) {
-        toast.error(err.message || "Failed to add tags")
+        toast.add({ title: err.message || "Failed to add tags", type: "error" })
       }
     })
   }
@@ -108,14 +108,14 @@ export function BulkActionsToolbar({
       try {
         const res = await bulkUpdateTransactionCategory(selectedIds, categoryId)
         if (res.success) {
-          toast.success(`Category updated for ${res.count} transactions`)
+          toast.add({ title: `Category updated for ${res.count} transactions`, type: "success" })
           setCategoryOpen(false)
           onSuccess()
         } else {
-          toast.error(res.error || "Failed to update category")
+          toast.add({ title: res.error || "Failed to update category", type: "error" })
         }
       } catch (err: any) {
-        toast.error(err.message || "Failed to update category")
+        toast.add({ title: err.message || "Failed to update category", type: "error" })
       }
     })
   }
@@ -125,14 +125,14 @@ export function BulkActionsToolbar({
       try {
         const res = await bulkUpdateTransactionWallet(selectedIds, walletId)
         if (res.success) {
-          toast.success(`Moved ${res.count} transactions to wallet`)
+          toast.add({ title: `Moved ${res.count} transactions to wallet`, type: "success" })
           setWalletOpen(false)
           onSuccess()
         } else {
-          toast.error(res.error || "Failed to move transactions")
+          toast.add({ title: res.error || "Failed to move transactions", type: "error" })
         }
       } catch (err: any) {
-        toast.error(err.message || "Failed to move transactions")
+        toast.add({ title: err.message || "Failed to move transactions", type: "error" })
       }
     })
   }
@@ -142,15 +142,15 @@ export function BulkActionsToolbar({
       try {
         const res = await bulkDeleteTransactions(selectedIds)
         if (res.success) {
-          toast.success(`Deleted ${res.count} transactions`)
+          toast.add({ title: `Deleted ${res.count} transactions`, type: "success" })
           setDeleteDialogOpen(false)
           onClearSelection()
           onSuccess()
         } else {
-          toast.error(res.error || "Failed to delete transactions")
+          toast.add({ title: res.error || "Failed to delete transactions", type: "error" })
         }
       } catch (err: any) {
-        toast.error(err.message || "Failed to delete transactions")
+        toast.add({ title: err.message || "Failed to delete transactions", type: "error" })
       }
     })
   }

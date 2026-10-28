@@ -81,13 +81,13 @@ export function GoalContributionDialog({
       )
 
       if (res.success) {
-        toast.success(`Contributed ${formatCurrency(amountInCents, selectedWallet!.currency)} to "${goal.name}"`)
+        toast.add({ title: `Contributed ${formatCurrency(amountInCents, selectedWallet!.currency)} to "${goal.name}"`, type: "success" })
         setAmount("")
         setSelectedWalletId("")
         onOpenChange(false)
         refreshNotifications()
       } else {
-        toast.error("Failed to make contribution")
+        toast.add({ title: "Failed to make contribution", type: "error" })
       }
     } catch (err: any) {
       console.error(err)

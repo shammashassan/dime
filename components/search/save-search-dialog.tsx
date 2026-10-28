@@ -43,7 +43,7 @@ export function SaveSearchDialog({
     e.preventDefault()
     const trimmedName = name.trim()
     if (!trimmedName) {
-      toast.error("Please enter a name for this saved search")
+      toast.add({ title: "Please enter a name for this saved search", type: "error" })
       return
     }
 
@@ -55,7 +55,7 @@ export function SaveSearchDialog({
       })
 
       if (res.success && res.id) {
-        toast.success(`Saved search "${trimmedName}" created`)
+        toast.add({ title: `Saved search "${trimmedName}" created`, type: "success" })
         if (onSaved) {
           onSaved({
             id: res.id,
@@ -67,10 +67,10 @@ export function SaveSearchDialog({
         }
         onOpenChange(false)
       } else {
-        toast.error(res.error || "Failed to save search")
+        toast.add({ title: res.error || "Failed to save search", type: "error" })
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to save search")
+      toast.add({ title: err instanceof Error ? err.message : "Failed to save search", type: "error" })
     } finally {
       setLoading(false)
     }

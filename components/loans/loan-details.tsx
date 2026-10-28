@@ -230,7 +230,7 @@ export function LoanDetails({
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
     setCopiedText(label)
-    toast.success(`Copied ${label} template`)
+    toast.add({ title: `Copied ${label} template`, type: "success" })
     setTimeout(() => setCopiedText(null), 2000)
   }
 
@@ -265,7 +265,7 @@ export function LoanDetails({
 
   const handleSendEmail = (type: "mailto" | "gmail") => {
     if (!matchedContact?.email) {
-      toast.error("No email on file for this contact")
+      toast.add({ title: "No email on file for this contact", type: "error" })
       return
     }
 
@@ -285,7 +285,7 @@ export function LoanDetails({
 
   const handleSend = () => {
     if (!sendLink) {
-      toast.error(msgChannel === "email" ? "No email on file for this contact" : "No phone number on file for this contact")
+      toast.add({ title: msgChannel === "email" ? "No email on file for this contact" : "No phone number on file for this contact", type: "error" })
       return
     }
     window.open(sendLink, "_blank")
@@ -296,14 +296,14 @@ export function LoanDetails({
     try {
       const result = await deleteLoan(loan._id.toString())
       if (result && !result.success) {
-        toast.error((result as any).error || "Failed to delete loan")
+        toast.add({ title: (result as any).error || "Failed to delete loan", type: "error" })
         return
       }
-      toast.success("Loan deleted successfully")
+      toast.add({ title: "Loan deleted successfully", type: "success" })
       router.push("/loans")
     } catch (err) {
       console.error(err)
-      toast.error("Failed to delete loan")
+      toast.add({ title: "Failed to delete loan", type: "error" })
     } finally {
       setIsDeleting(false)
     }
@@ -315,14 +315,14 @@ export function LoanDetails({
     try {
       const result = await deleteLoan(loan._id.toString())
       if (result && !result.success) {
-        toast.error((result as any).error || "Failed to delete loan")
+        toast.add({ title: (result as any).error || "Failed to delete loan", type: "error" })
         return
       }
-      toast.success("Loan deleted successfully")
+      toast.add({ title: "Loan deleted successfully", type: "success" })
       router.push("/loans")
     } catch (err) {
       console.error(err)
-      toast.error("Failed to delete loan")
+      toast.add({ title: "Failed to delete loan", type: "error" })
     } finally {
       setIsDeletingLoanFromTimeline(false)
     }
@@ -332,15 +332,15 @@ export function LoanDetails({
     try {
       const result = await deleteRepayment(repId)
       if (result && !result.success) {
-        toast.error(result.error || "Failed to delete repayment")
+        toast.add({ title: result.error || "Failed to delete repayment", type: "error" })
         return
       }
-      toast.success("Repayment deleted")
+      toast.add({ title: "Repayment deleted", type: "success" })
       setLocalRepayments((prev) => prev.filter((r) => r._id.toString() !== repId))
       router.refresh()
     } catch (err) {
       console.error(err)
-      toast.error("Failed to delete repayment")
+      toast.add({ title: "Failed to delete repayment", type: "error" })
     }
   }
 

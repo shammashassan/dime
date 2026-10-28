@@ -72,13 +72,13 @@ export function PlanEventDialog({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim() || !amount) {
-      toast.error("Please provide a title and valid amount")
+      toast.add({ title: "Please provide a title and valid amount", type: "error" })
       return
     }
 
     const parsedAmount = Math.round(parseFloat(amount) * 100)
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      toast.error("Amount must be greater than zero")
+      toast.add({ title: "Amount must be greater than zero", type: "error" })
       return
     }
 
@@ -95,13 +95,13 @@ export function PlanEventDialog({
         notes: notes.trim() || undefined,
       })
 
-      toast.success("Planned event added to calendar")
+      toast.add({ title: "Planned event added to calendar", type: "success" })
       onOpenChange(false)
       setTitle("")
       setAmount("")
       setNotes("")
     } catch (err: any) {
-      toast.error(err?.message || "Failed to add planned event")
+      toast.add({ title: err?.message || "Failed to add planned event", type: "error" })
     } finally {
       setLoading(false)
     }

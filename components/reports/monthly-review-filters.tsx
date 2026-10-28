@@ -48,12 +48,12 @@ export function MonthlyReviewFilters({
             })
           )
         }
-        toast.success("Executive review refreshed with Gemini AI analysis")
+        toast.add({ title: "Executive review refreshed with Gemini AI analysis", type: "success" })
       } else {
-        toast.error(res.error || "Failed to generate AI review")
+        toast.add({ title: res.error || "Failed to generate AI review", type: "error" })
       }
     } catch {
-      toast.error("An unexpected error occurred while refreshing AI analysis")
+      toast.add({ title: "An unexpected error occurred while refreshing AI analysis", type: "error" })
     } finally {
       setIsAiLoading(false)
     }

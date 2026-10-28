@@ -190,10 +190,10 @@ export function SharedExpenseDetails({
     setIsDeleting(true)
     try {
       await deleteSharedExpenseAction(expense._id.toString())
-      toast.success("Shared expense deleted")
+      toast.add({ title: "Shared expense deleted", type: "success" })
       router.push("/shared-expenses")
     } catch (err: any) {
-      toast.error(err.message || "Failed to delete shared expense")
+      toast.add({ title: err.message || "Failed to delete shared expense", type: "error" })
     } finally {
       setIsDeleting(false)
     }

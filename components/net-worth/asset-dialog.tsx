@@ -181,14 +181,14 @@ export function AssetDialog({
           setError(result.error || "Failed to update item")
           return
         }
-        toast.success("Item updated successfully")
+        toast.add({ title: "Item updated successfully", type: "success" })
       } else {
         const result = await createAsset(submissionData)
         if (!result.success) {
           setError(result.error || "Failed to create item")
           return
         }
-        toast.success("Item created successfully")
+        toast.add({ title: "Item created successfully", type: "success" })
       }
       setOpen(false)
       if (onSuccess) onSuccess()

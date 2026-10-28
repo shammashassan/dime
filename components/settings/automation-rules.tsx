@@ -115,11 +115,11 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
       if (res.success) {
         setRules(res.rules as any || [])
       } else {
-        toast.error("Failed to load automation rules.")
+        toast.add({ title: "Failed to load automation rules.", type: "error" })
       }
     } catch (err) {
       console.error(err)
-      toast.error("An error occurred loading rules.")
+      toast.add({ title: "An error occurred loading rules.", type: "error" })
     } finally {
       setIsLoadingRules(false)
     }
@@ -135,12 +135,12 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
         if (res.success) {
           setJobStatus(res)
           if (res.status === "completed") {
-            toast.success("Retroactive application job completed successfully!")
+            toast.add({ title: "Retroactive application job completed successfully!", type: "success" })
             clearInterval(interval)
             setActiveJobId(null)
             loadRules() // Reload counts
           } else if (res.status === "failed") {
-            toast.error(`Retroactive job failed: ${res.error}`)
+            toast.add({ title: `Retroactive job failed: ${res.error}`, type: "error" })
             clearInterval(interval)
             setActiveJobId(null)
           }
@@ -192,7 +192,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
   const handleSaveRule = async (e: React.FormEvent) => {
     e.preventDefault()
     if (conditions.length === 0 || actions.length === 0) {
-      toast.error("Rules must contain at least one condition and one action.")
+      toast.add({ title: "Rules must contain at least one condition and one action.", type: "error" })
       return
     }
 
@@ -225,16 +225,16 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
         }
 
         if (res.success) {
-          toast.success(editingRule ? "Rule updated successfully!" : "Rule created successfully!")
+          toast.add({ title: editingRule ? "Rule updated successfully!" : "Rule created successfully!", type: "success" })
           setIsDialogOpen(false)
           resetForm()
           loadRules()
         } else {
-          toast.error("Failed to save rule.")
+          toast.add({ title: "Failed to save rule.", type: "error" })
         }
       } catch (err: any) {
         console.error(err)
-        toast.error(err.message || "An error occurred.")
+        toast.add({ title: err.message || "An error occurred.", type: "error" })
       }
     })
   }
@@ -245,15 +245,15 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
     try {
       const res = await deleteAutomationRuleAction(deletingRuleId)
       if (res.success) {
-        toast.success("Rule deleted successfully.")
+        toast.add({ title: "Rule deleted successfully.", type: "success" })
         setDeletingRuleId(null)
         loadRules()
       } else {
-        toast.error("Failed to delete rule.")
+        toast.add({ title: "Failed to delete rule.", type: "error" })
       }
     } catch (err) {
       console.error(err)
-      toast.error("An error occurred.")
+      toast.add({ title: "An error occurred.", type: "error" })
     } finally {
       setIsDeletingRule(false)
     }
@@ -264,12 +264,12 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
     try {
       const res = await toggleAutomationRuleAction(id, newStatus)
       if (res.success) {
-        toast.success(`Rule ${newStatus === "active" ? "enabled" : "disabled"} successfully.`)
+        toast.add({ title: `Rule ${newStatus === "active" ? "enabled" : "disabled"} successfully.`, type: "success" })
         loadRules()
       }
     } catch (err) {
       console.error(err)
-      toast.error("Failed to toggle rule status.")
+      toast.add({ title: "Failed to toggle rule status.", type: "error" })
     }
   }
 
@@ -277,11 +277,11 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
     try {
       const res = await installTemplateAction(key)
       if (res.success) {
-        toast.success("Rule template installed successfully!")
+        toast.add({ title: "Rule template installed successfully!", type: "success" })
         loadRules()
       }
     } catch (err: any) {
-      toast.error(err.message || "Failed to install template.")
+      toast.add({ title: err.message || "Failed to install template.", type: "error" })
     }
   }
 
@@ -321,7 +321,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
       }
     } catch (err) {
       console.error(err)
-      toast.error("Failed to load dry-run preview.")
+      toast.add({ title: "Failed to load dry-run preview.", type: "error" })
     } finally {
       setIsPreviewLoading(false)
     }
@@ -336,11 +336,11 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
         setIsJobProgressModalOpen(true)
         setIsPreviewOpen(false)
       } else {
-        toast.error(res.error || "Failed to start retroactive job.")
+        toast.add({ title: res.error || "Failed to start retroactive job.", type: "error" })
       }
     } catch (err) {
       console.error(err)
-      toast.error("Failed to start retroactive job.")
+      toast.add({ title: "Failed to start retroactive job.", type: "error" })
     }
   }
 
@@ -430,7 +430,7 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
       if (triggers.length > 1) {
         setTriggers(triggers.filter(t => t !== trig))
       } else {
-        toast.warning("At least one trigger context is required.")
+        toast.add({ title: "At least one trigger context is required.", type: "warning" })
       }
     } else {
       setTriggers([...triggers, trig])
