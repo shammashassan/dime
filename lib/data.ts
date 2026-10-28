@@ -1,3 +1,3 @@
-export * from "./data/budget-templates"
-export * from "./data/automation-templates"
-export * from "./data/shortcuts-config"
+export * from "./constants/budget-templates"
+export * from "./constants/automation-templates"
+export * from "./constants/shortcuts-config"

@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SUPPORTED_CURRENCIES } from "@/lib/currency"
+import { SUPPORTED_CURRENCIES } from "@/lib/currencies"
 import { Sparkles, Upload, FileText, CheckCircle, RefreshCw } from "lucide-react"
 
 export interface ScannedReceiptData {
