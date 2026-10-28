@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { FileQuestion, Home, LayoutDashboard } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
 import {
   Empty,
   EmptyHeader,
@@ -31,18 +32,20 @@ export default function NotFound() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex flex-row gap-3 pt-3">
-          <Button variant="default" size="sm" asChild className="rounded-xl font-bold gap-1.5">
-            <Link href="/dashboard">
-              <LayoutDashboard className="size-4" />
-              Dashboard
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" asChild className="rounded-xl font-bold gap-1.5 border-border/60">
-            <Link href="/">
-              <Home className="size-4" />
-              Home
-            </Link>
-          </Button>
+          <Link
+            href="/dashboard"
+            className={cn(buttonVariants({ variant: "default", size: "sm" }), "rounded-xl font-bold gap-1.5")}
+          >
+            <LayoutDashboard className="size-4" />
+            Dashboard
+          </Link>
+          <Link
+            href="/"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }), "rounded-xl font-bold gap-1.5 border-border/60")}
+          >
+            <Home className="size-4" />
+            Home
+          </Link>
         </EmptyContent>
       </Empty>
     </div>

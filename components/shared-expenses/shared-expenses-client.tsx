@@ -243,7 +243,7 @@ export function SharedExpensesClient({
 
         {/* Mobile Filter (visible on smaller screens) */}
         <div className="sm:hidden w-full">
-          <Select value={activeTab} onValueChange={(v: string) => setActiveTab(v as any)}>
+          <Select value={activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
             <SelectTrigger className="w-full border-border/40 bg-card h-10">
               <SelectValue />
             </SelectTrigger>

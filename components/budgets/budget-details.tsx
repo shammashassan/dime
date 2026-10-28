@@ -175,15 +175,13 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
                         <Edit className="size-4" />
                     </Button>
                     <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button
+                        <AlertDialogTrigger render={<Button
                                 variant="outline"
                                 size="icon"
                                 className="size-10 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500"
                             >
                                 <Trash2 className="size-4" />
-                            </Button>
-                        </AlertDialogTrigger>
+                            </Button>} />
                         <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
                             <AlertDialogHeader>
                                 <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
@@ -281,11 +279,10 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
                     </span>
                 </div>
 
-                <Progress
+                <Progress style={{ ['--progress-background' as any]: barColor }}
                     value={Math.min(percent, 100)}
-                    indicatorStyle={{ backgroundColor: barColor }}
-                    className="h-2.5 bg-muted/60"
-                />
+                    className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2.5 bg-muted/60"
+                 />
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                     <div className="flex flex-col gap-0.5 rounded-xl border border-border/30 bg-muted/20 px-3 py-2.5">
@@ -436,15 +433,13 @@ export function BudgetDetails({ budget, transactions, categories, wallets }: Bud
                                                     </span>
                                                     <div className="size-6 flex items-center justify-center shrink-0">
                                                         <AlertDialog>
-                                                            <AlertDialogTrigger asChild>
-                                                                <button
+                                                            <AlertDialogTrigger render={<button
                                                                     type="button"
                                                                     aria-label="Delete transaction"
                                                                     className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                                                 >
                                                                     <Trash2 className="size-3.5" />
-                                                                </button>
-                                                            </AlertDialogTrigger>
+                                                                </button>} />
                                                             <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
                                                                 <AlertDialogHeader>
                                                                     <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">

@@ -3,7 +3,8 @@ import React from "react"
 import Link from "next/link"
 import { ArrowLeft, ShieldCheck, Lock, Database, EyeOff, Sparkles, FileText, CheckCircle2 } from "lucide-react"
 import { LogoMark } from "@/components/brand/logo-mark"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
 import { Card, CardContent } from "@/components/ui/card"
 import { CurrentYear } from "@/components/layout/current-year"
 
@@ -45,12 +46,13 @@ export default function PrivacyPolicy() {
               </Link>
             </div>
           </div>
-          <Button asChild variant="ghost" size="sm" className="gap-2 text-xs font-semibold">
-            <Link href="/">
-              <ArrowLeft className="size-3.5" />
-              Back to Home
-            </Link>
-          </Button>
+          <Link
+            href="/"
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-2 text-xs font-semibold")}
+          >
+            <ArrowLeft className="size-3.5" />
+            Back to Home
+          </Link>
         </div>
       </header>
 
@@ -78,7 +80,7 @@ export default function PrivacyPolicy() {
       {/* Main Content Layout */}
       <main className="mx-auto max-w-5xl px-6 py-12 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          
+
           {/* Sticky Navigation Sidebar */}
           <aside className="lg:col-span-4">
             <div className="sticky top-24 space-y-6">
@@ -131,7 +133,7 @@ export default function PrivacyPolicy() {
 
           {/* Legal Prose Content */}
           <div className="lg:col-span-8 space-y-12 text-sm text-muted-foreground leading-relaxed">
-            
+
             {/* Section 1 */}
             <section id="philosophy" className="scroll-mt-24 space-y-3">
               <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
@@ -229,7 +231,7 @@ export default function PrivacyPolicy() {
                   <strong className="text-foreground">Encryption:</strong> Data in transit is secured using TLS 1.3. Production MongoDB database clusters enforce encryption-at-rest (AES-256).
                 </li>
                 <li>
-                                  </li>
+                </li>
                 <li>
                   <strong className="text-foreground">Two-Factor Authentication:</strong> We support both Time-Based One-Time Passwords (TOTP) and hardware FIDO2 passkeys for account protection.
                 </li>

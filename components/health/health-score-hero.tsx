@@ -3,7 +3,7 @@
 import * as React from "react"
 import { HealthTier, PillarScore, PillarId } from "@/types"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   Card,
   CardContent,

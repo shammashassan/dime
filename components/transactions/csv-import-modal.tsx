@@ -266,7 +266,7 @@ export function CSVImportModal({
               {/* Target Wallet */}
               <Field>
                 <FieldLabel>Import Into Wallet</FieldLabel>
-                <Select value={targetWalletId} onValueChange={setTargetWalletId}>
+                <Select value={targetWalletId} onValueChange={(val) => { if (val) setTargetWalletId(val) }}>
                   <SelectTrigger className="rounded-xl">
                     <SelectValue placeholder="Select target wallet" />
                   </SelectTrigger>
@@ -290,7 +290,7 @@ export function CSVImportModal({
               <div className="grid grid-cols-2 gap-4">
                 <Field>
                   <FieldLabel>Date Column</FieldLabel>
-                  <Select value={dateCol} onValueChange={setDateCol}>
+                  <Select value={dateCol} onValueChange={(val) => { if (val) setDateCol(val) }}>
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="Choose column" />
                     </SelectTrigger>
@@ -303,7 +303,7 @@ export function CSVImportModal({
                 {/* Amount Mapping */}
                 <Field>
                   <FieldLabel>Amount Column</FieldLabel>
-                  <Select value={amountCol} onValueChange={setAmountCol}>
+                  <Select value={amountCol} onValueChange={(val) => { if (val) setAmountCol(val) }}>
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="Choose column" />
                     </SelectTrigger>
@@ -318,7 +318,7 @@ export function CSVImportModal({
               <div className="grid grid-cols-2 gap-4">
                 <Field>
                   <FieldLabel>Description Column</FieldLabel>
-                  <Select value={descCol} onValueChange={setDescCol}>
+                  <Select value={descCol} onValueChange={(val) => { if (val) setDescCol(val) }}>
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="Choose column" />
                     </SelectTrigger>
@@ -331,7 +331,7 @@ export function CSVImportModal({
                 {/* Category Mapping */}
                 <Field>
                   <FieldLabel>Category (Optional)</FieldLabel>
-                  <Select value={categoryCol} onValueChange={setCategoryCol}>
+                  <Select value={categoryCol} onValueChange={(val) => { if (val) setCategoryCol(val) }}>
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="None / Default Other" />
                     </SelectTrigger>

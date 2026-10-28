@@ -7,7 +7,7 @@ import { PlusCircle, Loader2, ArrowRight } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
 import {
@@ -26,8 +26,8 @@ import {
 import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group"
 import { Wallet, Category } from "@/types"
 import { createTransaction } from "@/lib/actions/transactions"
-import { getCurrencySymbol } from "@/lib/denomination"
-import { cn } from "@/lib/utils"
+import { getCurrencySymbol } from "@/lib/calculations/denomination"
+import { cn } from "cn"
 
 export interface QuickLogCardProps {
   wallets: Wallet[]
@@ -156,18 +156,18 @@ export function QuickLogCard({
           </div>
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 cursor-pointer"
-                asChild
+            <TooltipTrigger render={
+              <Link
+                href="/transactions"
+                aria-label="View all transactions"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon-xs" }),
+                  "size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 cursor-pointer"
+                )}
               >
-                <Link href="/transactions" aria-label="View all transactions">
-                  <ArrowRight className="size-3.5" />
-                </Link>
-              </Button>
-            </TooltipTrigger>
+                <ArrowRight className="size-3.5" />
+              </Link>
+            } />
             <TooltipContent side="top">
               <span>View all transactions</span>
             </TooltipContent>
@@ -195,7 +195,7 @@ export function QuickLogCard({
 
           {/* Wallet Dropdown with clean truncation & currency only in dropdown */}
           <div className="min-w-0">
-            <Select value={effectiveWalletId} onValueChange={setWalletId} disabled={isPending}>
+            <Select value={effectiveWalletId} onValueChange={(val) => { if (val) setWalletId(val) }} disabled={isPending}>
               <SelectTrigger
                 className="h-9 w-full min-w-0 text-xs truncate [&>span]:truncate [&>span]:min-w-0"
                 aria-label="Select wallet"

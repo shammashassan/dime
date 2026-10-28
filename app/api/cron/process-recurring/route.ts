@@ -3,9 +3,9 @@ import { getCollection } from "@/lib/db/collections"
 import { RecurringRule, Transaction, Wallet, AutomationRule, BillInstance } from "@/types"
 import { ObjectId } from "mongodb"
 import { calculateNextDueDate } from "@/lib/utils"
-import { executeAutomationRules } from "@/lib/automation-engine"
+import { executeAutomationRules } from "@/lib/services/automation-engine"
 import { convertCurrency } from "@/lib/currency"
-import { generateSplitId } from "@/lib/split-utils"
+import { generateSplitId } from "@/lib/calculations/split-utils"
 import { createNotification } from "@/lib/actions/notifications"
 
 export async function POST(request: Request) {

@@ -412,11 +412,9 @@ export function LoanDetails({
             }
           />
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="icon" className="size-10 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
+            <AlertDialogTrigger render={<Button variant="outline" size="icon" className="size-10 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
                 <Trash2 className="size-4" />
-              </Button>
-            </AlertDialogTrigger>
+              </Button>} />
             <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
               <AlertDialogHeader>
                 <AlertDialogMedia>
@@ -489,11 +487,10 @@ export function LoanDetails({
           </span>
         </div>
 
-        <Progress
+        <Progress style={{ ['--progress-background' as any]: progress >= 100 ? "#10b981" : "var(--primary)" }}
           value={progress}
-          indicatorStyle={{ backgroundColor: progress >= 100 ? "#10b981" : "var(--primary)" }}
-          className="h-2.5 bg-muted/60"
-        />
+          className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2.5 bg-muted/60"
+         />
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
           <div className="flex flex-col gap-0.5 rounded-xl border border-border/30 bg-muted/20 px-3 py-2.5">
@@ -562,11 +559,9 @@ export function LoanDetails({
                     <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
                       Accrued: <span className="font-bold text-foreground">{formatCurrency(estimatedInterest, loan.currency)}</span>
                       <Popover>
-                        <PopoverTrigger asChild>
-                          <button type="button" className="text-muted-foreground hover:text-foreground">
+                        <PopoverTrigger render={<button type="button" className="text-muted-foreground hover:text-foreground">
                             <Info className="size-3" />
-                          </button>
-                        </PopoverTrigger>
+                          </button>} />
                         <PopoverContent className="p-3 text-xs w-60 border border-border/40 shadow-lg" align="end">
                           Simple interest estimated based on principal and elapsed days since start. For record-keeping only — not auto-added to balance.
                         </PopoverContent>
@@ -781,15 +776,13 @@ export function LoanDetails({
                         <div className="size-6 flex items-center justify-center shrink-0">
                           {event.type === "repayment" && event.repaymentId && (
                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <button
+                              <AlertDialogTrigger render={<button
                                   type="button"
                                   aria-label="Delete repayment"
                                   className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <Trash2 className="size-3.5" />
-                                </button>
-                              </AlertDialogTrigger>
+                                </button>} />
                               <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
                                 <AlertDialogHeader>
                                   <AlertDialogMedia>
@@ -816,15 +809,13 @@ export function LoanDetails({
 
                           {event.type === "created" && hasLink && (
                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <button
+                              <AlertDialogTrigger render={<button
                                   type="button"
                                   aria-label="Delete loan record"
                                   className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <Trash2 className="size-3.5" />
-                                </button>
-                              </AlertDialogTrigger>
+                                </button>} />
                               <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
                                 <AlertDialogHeader>
                                   <AlertDialogMedia>

@@ -40,10 +40,8 @@ export function TopAssetsCard({ viewModel }: { viewModel: NetWorthOverviewViewMo
               {topAssets.map((asset) => {
                 const Icon = iconsMap[asset.icon] || Layers
                 return (
-                  <HoverCard key={asset.id} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item asChild className="cursor-pointer px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl">
-                        <Link href={asset.href || "#"}>
+                  <HoverCard key={asset.id}>
+                    <HoverCardTrigger render={<Item className="cursor-pointer px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl" render={<Link href={asset.href || "#"} />}>
                           <ItemMedia className="size-8 rounded-xl border bg-emerald-500/10 border-emerald-500/20 text-emerald-500">
                             <Icon className="size-3.5" />
                           </ItemMedia>
@@ -63,9 +61,7 @@ export function TopAssetsCard({ viewModel }: { viewModel: NetWorthOverviewViewMo
                               {asset.percentage}% of portfolio
                             </span>
                           </ItemActions>
-                        </Link>
-                      </Item>
-                    </HoverCardTrigger>
+                        </Item>} />
                     <HoverCardContent className="w-56 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                       <div className="flex items-center gap-2 mb-1.5">
                         <div className="size-6 rounded-lg border bg-emerald-500/10 border-emerald-500/20 text-emerald-500 flex items-center justify-center">

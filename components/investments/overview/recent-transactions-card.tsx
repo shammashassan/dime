@@ -59,10 +59,8 @@ export function RecentTransactionsCard({ transactions = [], currency }: RecentTr
                 const href = `/investments/${tx.walletId}/${tx.symbol}`
 
                 return (
-                  <HoverCard key={tx._id.toString()} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item asChild className="cursor-pointer px-2.5 py-1.5 hover:bg-muted/60 transition-colors rounded-xl">
-                        <Link href={href}>
+                  <HoverCard key={tx._id.toString()}>
+                    <HoverCardTrigger render={<Item className="cursor-pointer px-2.5 py-1.5 hover:bg-muted/60 transition-colors rounded-xl" render={<Link href={href} />}>
                           <ItemMedia className="size-7 rounded-lg border bg-muted/60 text-foreground font-black text-[9px] uppercase flex items-center justify-center">
                             {isBuy ? (
                               <ArrowDownLeft className="size-3 text-emerald-500" />
@@ -93,9 +91,7 @@ export function RecentTransactionsCard({ transactions = [], currency }: RecentTr
                               {tx.assetType}
                             </span>
                           </ItemActions>
-                        </Link>
-                      </Item>
-                    </HoverCardTrigger>
+                        </Item>} />
                     <HoverCardContent className="w-60 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                       <div className="flex items-center gap-2 mb-1.5">
                         <div className="size-6 rounded-lg border bg-muted/50 flex items-center justify-center font-bold text-[10px] uppercase">

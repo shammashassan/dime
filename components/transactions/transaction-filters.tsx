@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { DateRange } from "react-day-picker"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { SavedTransactionViews } from "./saved-transaction-views"
 
 interface TransactionFiltersProps {
@@ -88,9 +88,9 @@ export function TransactionFilters({
   const toParam = searchParams.get("to")
   const dateRange: DateRange | undefined = fromParam
     ? {
-        from: new Date(fromParam),
-        to: toParam ? new Date(toParam) : undefined,
-      }
+      from: new Date(fromParam),
+      to: toParam ? new Date(toParam) : undefined,
+    }
     : undefined
 
   // Count active secondary filters
@@ -266,7 +266,7 @@ export function TransactionFilters({
 
         {/* Type Select */}
         <div className="w-full sm:w-36">
-          <Select value={type} onValueChange={handleTypeChange}>
+          <Select value={type} onValueChange={(val) => { if (val) handleTypeChange(val) }}>
             <SelectTrigger className="w-full h-9">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
@@ -303,7 +303,7 @@ export function TransactionFilters({
 
         {/* Category Select */}
         <div className="w-full sm:w-44">
-          <Select value={category} onValueChange={handleCategoryChange}>
+          <Select value={category} onValueChange={(val) => { if (val) handleCategoryChange(val) }}>
             <SelectTrigger className="w-full h-9">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
@@ -330,8 +330,7 @@ export function TransactionFilters({
         </div>
 
         {/* Collapsible Trigger for More Filters (Icon-only) */}
-        <CollapsibleTrigger asChild>
-          <Button
+        <CollapsibleTrigger render={<Button
             variant="outline"
             size="icon"
             className={cn(
@@ -348,8 +347,7 @@ export function TransactionFilters({
                 {secondaryFilterCount}
               </span>
             )}
-          </Button>
-        </CollapsibleTrigger>
+          </Button>} />
 
         {/* Clear Button (Icon-only) */}
         {hasActiveFilters && (
@@ -378,7 +376,7 @@ export function TransactionFilters({
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Wallet Select */}
           <div className="w-full sm:w-44">
-            <Select value={wallet} onValueChange={handleWalletChange}>
+            <Select value={wallet} onValueChange={(val) => { if (val) handleWalletChange(val) }}>
               <SelectTrigger className="w-full h-9">
                 <SelectValue placeholder="All Wallets" />
               </SelectTrigger>
@@ -401,8 +399,7 @@ export function TransactionFilters({
           {/* Date Range Picker */}
           <div className="w-full sm:w-auto">
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
+              <PopoverTrigger render={<Button
                   variant="outline"
                   className={cn(
                     "w-full h-9 font-medium gap-2 text-muted-foreground justify-start",
@@ -421,8 +418,7 @@ export function TransactionFilters({
                   ) : (
                     <span>Pick a date range</span>
                   )}
-                </Button>
-              </PopoverTrigger>
+                </Button>} />
               <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                 <div className="p-1">
                   <Calendar
@@ -473,7 +469,7 @@ export function TransactionFilters({
 
           {/* Status Select */}
           <div className="w-full sm:w-40">
-            <Select value={statusFilter} onValueChange={handleStatusChange}>
+            <Select value={statusFilter} onValueChange={(val) => { if (val) handleStatusChange(val) }}>
               <SelectTrigger className="w-full h-9">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>

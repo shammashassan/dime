@@ -11,7 +11,7 @@ import {
 import { Kbd } from "@/components/ui/kbd"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Command, Keyboard } from "lucide-react"
-import { SHORTCUTS, ShortcutItem } from "@/lib/shortcuts-config"
+import { SHORTCUTS, type ShortcutItem } from "@/lib/data"
 
 interface KeyboardShortcutsDialogProps {
   open?: boolean

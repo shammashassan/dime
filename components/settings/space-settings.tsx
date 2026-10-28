@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { lookupUserByUsername } from "@/lib/actions/user"
 import { createNotification } from "@/lib/actions/notifications"
-import { Popover, PopoverContent, PopoverAnchor, PopoverHeader, PopoverTitle, PopoverDescription } from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger, PopoverHeader, PopoverTitle, PopoverDescription } from "@/components/ui/popover"
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupButton } from "@/components/ui/input-group"
 import {
   AlertDialog,
@@ -540,7 +540,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                   <FieldLabel htmlFor="currency">Base Currency</FieldLabel>
                   <Select
                     value={baseCurrency}
-                    onValueChange={(val) => setBaseCurrency(val)}
+                    onValueChange={(val) => { if (val) setBaseCurrency(val) }}
                     disabled={!canManageSettings || isUpdatingSettings}
                   >
                     <SelectTrigger>
@@ -602,14 +602,12 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
         <CardContent className="space-y-6">
           {canInvite && (
             <Collapsible className="rounded-xl border border-border/30 bg-muted/5 p-4 space-y-2">
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full flex items-center justify-between group/collapsible">
+              <CollapsibleTrigger render={<Button variant="ghost" className="w-full flex items-center justify-between group/collapsible">
                   <span className="flex items-center gap-2">
                     <Plus data-icon="inline-start" /> Invite Collaborator
                   </span>
                   <ChevronDown className="inline-end transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                </Button>
-              </CollapsibleTrigger>
+                </Button>} />
               <CollapsibleContent className="pt-4">
                 <form onSubmit={handleInviteMember}>
                   <FieldGroup>
@@ -618,7 +616,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                         <FieldLabel htmlFor="invite-username">Username</FieldLabel>
                         <FieldContent>
                           <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
-                            <PopoverAnchor asChild>
+                            <PopoverTrigger render={<div className="w-full" />} nativeButton={false}>
                               <InputGroup>
                                 <InputGroupAddon align="inline-start">
                                   <Search />
@@ -648,7 +646,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                                   </InputGroupAddon>
                                 )}
                               </InputGroup>
-                            </PopoverAnchor>
+                            </PopoverTrigger>
                             <PopoverContent side="top" align="center" sideOffset={6} className="w-[calc(100vw-2rem)] sm:w-(--anchor-width) max-w-sm">
                               {searchingUser ? (
                                 <div className="flex items-center justify-center py-4 gap-2 text-muted-foreground">
@@ -777,15 +775,13 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                           <TableCell className="text-right">
                             {member.userId !== currentUserId && (
                               <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button
+                                <AlertDialogTrigger render={<Button
                                     variant="ghost"
                                     size="icon"
                                     className="h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg"
                                   >
                                     <Trash2 className="size-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
+                                  </Button>} />
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Remove Space Member?</AlertDialogTitle>
@@ -886,7 +882,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
               <form onSubmit={handleTransferOwnership} className="flex flex-col sm:flex-row gap-4 items-end max-w-2xl">
                 <div className="flex-1 w-full space-y-1.5">
                   <Label htmlFor="transfer-member" className="text-xs">New Owner</Label>
-                  <Select value={transferTargetId} onValueChange={setTransferTargetId} disabled={isTransferring}>
+                  <Select value={transferTargetId} onValueChange={(val) => { if (val) setTransferTargetId(val) }} disabled={isTransferring}>
                     <SelectTrigger className="rounded-xl border border-border/40">
                       <SelectValue placeholder="Select new owner" />
                     </SelectTrigger>
@@ -936,11 +932,9 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                 </p>
               </div>
               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button disabled={isLeaving} variant="outline" className="rounded-xl text-rose-500 border-rose-500/20 hover:bg-rose-500/5 hover:text-rose-600 font-bold">
+                <AlertDialogTrigger render={<Button disabled={isLeaving} variant="outline" className="rounded-xl text-rose-500 border-rose-500/20 hover:bg-rose-500/5 hover:text-rose-600 font-bold">
                     <LogOut className="mr-2 size-4" /> Leave Space
-                  </Button>
-                </AlertDialogTrigger>
+                  </Button>} />
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Leave Workspace Space?</AlertDialogTitle>
@@ -969,11 +963,9 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                 </p>
               </div>
               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button disabled={isDeleting} variant="destructive" className="rounded-xl font-bold">
+                <AlertDialogTrigger render={<Button disabled={isDeleting} variant="destructive" className="rounded-xl font-bold">
                     <Trash2 className="mr-2 size-4" /> Delete Space
-                  </Button>
-                </AlertDialogTrigger>
+                  </Button>} />
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Delete Shared Workspace Space?</AlertDialogTitle>

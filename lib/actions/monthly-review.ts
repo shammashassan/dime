@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { requireApprovedUser } from "@/lib/auth-guard"
-import { refreshAiReviewSchema, RefreshAiReviewInput } from "@/lib/validations/monthly-review.schema"
+import { refreshAiReviewSchema, RefreshAiReviewInput } from "@/lib/schemas/monthly-review.schema"
 import { getMonthlyReviewData } from "@/lib/queries/monthly-review"
 import { generateAiReviewBrief } from "@/lib/calculations/monthly-review"
 import type { MonthlyReviewSummaryBrief } from "@/types"

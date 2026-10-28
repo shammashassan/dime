@@ -10,7 +10,7 @@ import { RepaymentDialog } from "./repayment-dialog"
 import { deleteLoan } from "@/lib/actions/loans"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -330,7 +330,7 @@ export function LoansList({
 
         {/* Mobile Filter (visible on smaller screens) */}
         <div className="sm:hidden w-full">
-          <Select value={activeTab} onValueChange={handleTabChange}>
+          <Select value={activeTab} onValueChange={(val) => { if (val) handleTabChange(val) }}>
             <SelectTrigger className="w-full border-border/40 bg-card h-10">
               <SelectValue placeholder={tabNames[activeTab]} />
             </SelectTrigger>
@@ -443,8 +443,7 @@ export function LoansList({
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>
+                      <TooltipTrigger render={<span>
                           <LoanDialog
                             wallets={wallets}
                             contacts={contacts}
@@ -455,23 +454,20 @@ export function LoansList({
                               </Button>
                             }
                           />
-                        </span>
-                      </TooltipTrigger>
+                        </span>} />
                       <TooltipContent side="top" className="rounded-xl font-medium">
                         Edit loan
                       </TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
+                      <TooltipTrigger render={<Button
                           variant="ghost" size="icon"
                           className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
                           onClick={() => setDeletingLoanId(loan._id.toString())}
                         >
                           <Trash2 className="size-3.5" />
-                        </Button>
-                      </TooltipTrigger>
+                        </Button>} />
                       <TooltipContent side="top" className="rounded-xl font-medium">
                         Delete loan
                       </TooltipContent>
@@ -499,11 +495,10 @@ export function LoansList({
 
                   {/* Progress Bar */}
                   <div>
-                    <Progress
+                    <Progress style={{ ['--progress-background' as any]: progress >= 100 ? "#10b981" : "var(--primary)" }}
                       value={progress}
-                      indicatorStyle={{ backgroundColor: progress >= 100 ? "#10b981" : "var(--primary)" }}
-                      className="h-2 bg-muted/60"
-                    />
+                      className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/60"
+                     />
                     <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
                       <span>{formatCurrency(loan.amount - loan.remainingAmount, loan.currency)} repaid</span>
                       <span>Principal: {formatCurrency(loan.amount, loan.currency)}</span>
@@ -535,16 +530,7 @@ export function LoansList({
                       />
                     ) : null}
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      asChild
-                      className="h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
-                    >
-                      <Link href={`/loans/${loan._id.toString()}`}>
-                        Details
-                      </Link>
-                    </Button>
+                    <Link href={`/loans/${loan._id.toString()}`} className={cn(buttonVariants({ size: "sm", variant: "outline" }), "h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0")}>Details</Link>
                   </div>
                 </CardFooter>
               </Card>

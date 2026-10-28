@@ -56,6 +56,8 @@ import {
   RotateCcw,
   FilterX,
   FileSpreadsheet,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react"
 import { BulkActionsToolbar } from "./bulk-actions-toolbar"
 import Link from "next/link"
@@ -70,12 +72,11 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationFirst,
+  PaginationLink,
   PaginationPrevious,
   PaginationNext,
-  PaginationLast,
 } from "@/components/ui/pagination"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface TransactionTableProps {
   transactions: Transaction[]
@@ -544,19 +545,15 @@ export function TransactionTable({
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="size-8 p-0" disabled={isPending}>
+                            <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="size-8 p-0" disabled={isPending}>
                                 <span className="sr-only">Open menu</span>
                                 <MoreHorizontal className="size-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
+                              </Button>} />
                             <DropdownMenuContent align="end" className="w-40 bg-popover border border-border/40 shadow-md">
                               <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
-                              <DropdownMenuItem asChild className="gap-2 text-xs">
-                                <Link href={`/transactions/${tx._id.toString()}`}>
+                              <DropdownMenuItem className="gap-2 text-xs" render={<Link href={`/transactions/${tx._id.toString()}`}>
                                   <Eye className="size-3.5" /> View Details
-                                </Link>
-                              </DropdownMenuItem>
+                                </Link>} />
                               <DropdownMenuItem onClick={() => onEditClick(tx)} className="gap-2 text-xs">
                                 <Edit className="size-3.5" /> Edit Details
                               </DropdownMenuItem>
@@ -588,7 +585,7 @@ export function TransactionTable({
                 <p className="whitespace-nowrap font-medium text-sm">Rows per page</p>
                 <Select
                   value={`${pageSize}`}
-                  onValueChange={handlePageSizeChange}
+                  onValueChange={(val) => { if (val) handlePageSizeChange(val) }}
                 >
                   <SelectTrigger className="h-8 w-18 data-size:h-8 border-border/40">
                     <SelectValue placeholder={pageSize} />
@@ -609,8 +606,10 @@ export function TransactionTable({
                 <PaginationContent className="gap-1">
                   {/* First Page */}
                   <PaginationItem>
-                    <PaginationFirst
+                    <PaginationLink
                       href="#"
+                      aria-label="Go to first page"
+                      size="icon"
                       onClick={(e) => {
                         e.preventDefault()
                         if (currentPage > 1 && !isPending) handlePageChange(1)
@@ -618,7 +617,9 @@ export function TransactionTable({
                       className={cn(
                         (currentPage <= 1 || isPending) && "pointer-events-none opacity-50"
                       )}
-                    />
+                    >
+                      <ChevronsLeft className="size-4" />
+                    </PaginationLink>
                   </PaginationItem>
 
                   {/* Previous Page */}
@@ -649,8 +650,10 @@ export function TransactionTable({
                     />
                   </PaginationItem>
                   <PaginationItem className="hidden sm:inline-block">
-                    <PaginationLast
+                    <PaginationLink
                       href="#"
+                      aria-label="Go to last page"
+                      size="icon"
                       onClick={(e) => {
                         e.preventDefault()
                         if (currentPage < totalPages && !isPending) handlePageChange(totalPages)
@@ -658,7 +661,9 @@ export function TransactionTable({
                       className={cn(
                         (currentPage >= totalPages || isPending) && "pointer-events-none opacity-50"
                       )}
-                    />
+                    >
+                      <ChevronsRight className="size-4" />
+                    </PaginationLink>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>

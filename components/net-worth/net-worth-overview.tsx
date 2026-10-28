@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { AssetDialog } from "./asset-dialog"
 import { AssetsListTab } from "./assets-list-tab"
 import { Landmark, Plus } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 // Modular Dashboard sub-cards
 import { SummaryCards } from "./overview/summary-cards"
@@ -124,12 +124,10 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Net Worth</h1>
-              <HoverCard openDelay={150}>
-                <HoverCardTrigger asChild>
-                  <Badge variant="outline" className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default">
+              <HoverCard>
+                <HoverCardTrigger render={<Badge variant="outline" className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default">
                     {viewModel.currency}
-                  </Badge>
-                </HoverCardTrigger>
+                  </Badge>} />
                 <HoverCardContent className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                   All figures are converted to your base currency ({viewModel.currency}) using the latest exchange rates available at calculation time.
                 </HoverCardContent>

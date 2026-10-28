@@ -8,33 +8,8 @@ function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
-function PopoverTrigger({
-  asChild = false,
-  render,
-  children,
-  ...props
-}: PopoverPrimitive.Trigger.Props & { asChild?: boolean }) {
-  const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
-  const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
-
-  return (
-    <PopoverPrimitive.Trigger
-      data-slot="popover-trigger"
-      render={resolvedRender}
-      {...props}
-    >
-      {resolvedChildren}
-    </PopoverPrimitive.Trigger>
-  )
-}
-
-function PopoverAnchor({
-  asChild,
-  virtualRef,
-  children,
-  ...props
-}: React.ComponentProps<"div"> & { asChild?: boolean; virtualRef?: any }) {
-  return <div data-slot="popover-anchor" {...props}>{children}</div>
+function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
+  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
 }
 
 function PopoverContent({
@@ -43,15 +18,12 @@ function PopoverContent({
   alignOffset = 0,
   side = "bottom",
   sideOffset = 4,
-  onOpenAutoFocus,
   ...props
 }: PopoverPrimitive.Popup.Props &
   Pick<
     PopoverPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
-  > & {
-    onOpenAutoFocus?: (event: any) => void
-  }) {
+  >) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Positioner
@@ -78,17 +50,17 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="popover-header"
-      className={cn("flex flex-col gap-1 text-sm font-semibold", className)}
+      className={cn("flex flex-col gap-1 text-sm", className)}
       {...props}
     />
   )
 }
 
-function PopoverTitle({ className, ...props }: React.ComponentProps<"h4">) {
+function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
   return (
-    <h4
+    <PopoverPrimitive.Title
       data-slot="popover-title"
-      className={cn("text-sm font-semibold leading-none tracking-tight", className)}
+      className={cn("text-base font-medium", className)}
       {...props}
     />
   )
@@ -97,27 +69,21 @@ function PopoverTitle({ className, ...props }: React.ComponentProps<"h4">) {
 function PopoverDescription({
   className,
   ...props
-}: React.ComponentProps<"p">) {
+}: PopoverPrimitive.Description.Props) {
   return (
-    <p
+    <PopoverPrimitive.Description
       data-slot="popover-description"
-      className={cn("text-xs text-muted-foreground", className)}
+      className={cn("text-muted-foreground", className)}
       {...props}
     />
   )
 }
 
-function PopoverClose({ ...props }: PopoverPrimitive.Close.Props) {
-  return <PopoverPrimitive.Close data-slot="popover-close" {...props} />
-}
-
 export {
   Popover,
-  PopoverTrigger,
-  PopoverAnchor,
   PopoverContent,
+  PopoverDescription,
   PopoverHeader,
   PopoverTitle,
-  PopoverDescription,
-  PopoverClose,
+  PopoverTrigger,
 }

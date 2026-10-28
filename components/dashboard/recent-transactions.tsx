@@ -12,7 +12,7 @@ import {
   TrendingUp,
 } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
 interface RecentTransactionsProps {
@@ -260,19 +260,16 @@ export async function RecentTransactions({ userId, className }: RecentTransactio
                     </TableCell>
 
                     <TableCell className="py-2.5 text-right pr-4">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        asChild
-                        className="size-6 rounded-md text-muted-foreground hover:text-foreground opacity-60 group-hover:opacity-100 group-hover:bg-muted transition-all"
+                      <Link
+                        href={itemHref}
+                        aria-label={`View ${tx.isInvestment ? "investment" : "transaction"} ${tx.description}`}
+                        className={cn(
+                          buttonVariants({ variant: "ghost", size: "icon" }),
+                          "size-6 rounded-md text-muted-foreground hover:text-foreground opacity-60 group-hover:opacity-100 group-hover:bg-muted transition-all"
+                        )}
                       >
-                        <Link
-                          href={itemHref}
-                          aria-label={`View ${tx.isInvestment ? "investment" : "transaction"} ${tx.description}`}
-                        >
-                          <ChevronRight className="size-3.5" />
-                        </Link>
-                      </Button>
+                        <ChevronRight className="size-3.5" />
+                      </Link>
                     </TableCell>
                   </TableRow>
                 )

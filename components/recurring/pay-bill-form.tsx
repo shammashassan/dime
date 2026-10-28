@@ -149,8 +149,7 @@ export function PayBillForm({ bill, rule, wallets, onSuccess }: PayBillFormProps
             name="paidDate"
             render={({ field }) => (
               <Popover>
-                <PopoverTrigger asChild>
-                  <Button
+                <PopoverTrigger render={<Button
                     type="button"
                     variant="outline"
                     aria-label="Pick date paid"
@@ -160,8 +159,7 @@ export function PayBillForm({ bill, rule, wallets, onSuccess }: PayBillFormProps
                     <span className="truncate flex-1 text-left">
                       {field.value ? format(field.value as Date, "PP") : "Pick a date"}
                     </span>
-                  </Button>
-                </PopoverTrigger>
+                  </Button>} />
                 <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                   <Calendar
                     mode="single"

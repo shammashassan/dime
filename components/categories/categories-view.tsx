@@ -141,45 +141,39 @@ export function CategoriesView({ categories }: CategoriesViewProps) {
                     {/* Buttons — size-8, icon size-3.5, always visible width reserved */}
                     <div className="flex items-center gap-0.5 shrink-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
+                        <TooltipTrigger render={<Button
                             variant="ghost" size="icon"
                             className="size-8 rounded-lg hover:bg-muted/70"
                             onClick={() => setEditingCategory(c)}
                           >
                             <Edit className="size-3.5 text-muted-foreground" />
-                          </Button>
-                        </TooltipTrigger>
+                          </Button>} />
                         <TooltipContent side="top" className="rounded-xl font-medium">
                           Edit category
                         </TooltipContent>
                       </Tooltip>
 
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
+                        <TooltipTrigger render={<Button
                             variant="ghost" size="icon"
                             className="size-8 rounded-lg text-amber-500 hover:bg-amber-500/10"
                             onClick={() => setMergingCategory(c)}
                           >
                             <ArrowRightLeft className="size-3.5" />
-                          </Button>
-                        </TooltipTrigger>
+                          </Button>} />
                         <TooltipContent side="top" className="rounded-xl font-medium">
                           Merge category
                         </TooltipContent>
                       </Tooltip>
 
                       <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
+                        <TooltipTrigger render={<Button
                             variant="ghost" size="icon"
                             className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
                             onClick={() => setDeletingCategoryId(c._id.toString())}
                           >
                             <Trash2 className="size-3.5" />
-                          </Button>
-                        </TooltipTrigger>
+                          </Button>} />
                         <TooltipContent side="top" className="rounded-xl font-medium">
                           Delete category
                         </TooltipContent>

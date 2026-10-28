@@ -1,16 +1,8 @@
-"use client"
-
 import * as React from "react"
 import { cn } from "cn"
 
 import { Button } from "@/components/ui/button"
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ChevronsLeftIcon,
-  ChevronsRightIcon,
-  MoreHorizontalIcon,
-} from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react"
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -70,24 +62,6 @@ function PaginationLink({
   )
 }
 
-function PaginationFirst({
-  className,
-  text = "First",
-  ...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
-  return (
-    <PaginationLink
-      aria-label="Go to first page"
-      size="default"
-      className={cn("pl-2!", className)}
-      {...props}
-    >
-      <ChevronsLeftIcon data-icon="inline-start" />
-      <span className="hidden sm:block">{text}</span>
-    </PaginationLink>
-  )
-}
-
 function PaginationPrevious({
   className,
   text = "Previous",
@@ -124,24 +98,6 @@ function PaginationNext({
   )
 }
 
-function PaginationLast({
-  className,
-  text = "Last",
-  ...props
-}: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
-  return (
-    <PaginationLink
-      aria-label="Go to last page"
-      size="default"
-      className={cn("pr-2!", className)}
-      {...props}
-    >
-      <span className="hidden sm:block">{text}</span>
-      <ChevronsRightIcon data-icon="inline-end" />
-    </PaginationLink>
-  )
-}
-
 function PaginationEllipsis({
   className,
   ...props
@@ -156,7 +112,8 @@ function PaginationEllipsis({
       )}
       {...props}
     >
-      <MoreHorizontalIcon />
+      <MoreHorizontalIcon
+      />
       <span className="sr-only">More pages</span>
     </span>
   )
@@ -166,9 +123,7 @@ export {
   Pagination,
   PaginationContent,
   PaginationEllipsis,
-  PaginationFirst,
   PaginationItem,
-  PaginationLast,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,

@@ -12,7 +12,7 @@ import {
   Repeat,
   PiggyBank,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import type { CoachStrategy } from "@/types"
 
 interface CoachStrategyCardProps {

@@ -7,16 +7,8 @@ function Slider({
   value,
   min = 0,
   max = 100,
-  onValueChange,
   ...props
-}: Omit<SliderPrimitive.Root.Props, "value" | "defaultValue" | "onValueChange"> & {
-  value?: number | number[]
-  defaultValue?: number | number[]
-  onValueChange?: (value: number[]) => void
-}) {
-  const normalizedValue = value !== undefined ? (Array.isArray(value) ? value : [value]) : undefined
-  const normalizedDefaultValue = defaultValue !== undefined ? (Array.isArray(defaultValue) ? defaultValue : [defaultValue]) : undefined
-
+}: SliderPrimitive.Root.Props) {
   const _values = Array.isArray(value)
     ? value
     : Array.isArray(defaultValue)
@@ -27,13 +19,8 @@ function Slider({
     <SliderPrimitive.Root
       className={cn("data-horizontal:w-full data-vertical:h-full", className)}
       data-slot="slider"
-      defaultValue={normalizedDefaultValue}
-      value={normalizedValue}
-      onValueChange={(val: number | readonly number[]) => {
-        if (onValueChange) {
-          onValueChange(Array.isArray(val) ? [...val] : [val])
-        }
-      }}
+      defaultValue={defaultValue}
+      value={value}
       min={min}
       max={max}
       thumbAlignment="edge"

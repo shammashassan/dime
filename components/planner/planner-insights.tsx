@@ -3,7 +3,7 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, AlertTriangle, CheckCircle2, Info } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { PlannerInsight } from "@/types"
 import { Item, ItemMedia, ItemGroup } from "@/components/ui/item"
 

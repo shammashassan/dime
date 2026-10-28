@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { BarChart3, CalendarDays, FileText, ClipboardList, Calendar } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 export function ReportsNavTabs() {
   const router = useRouter()
@@ -15,12 +15,12 @@ export function ReportsNavTabs() {
     rawTab === "review"
       ? "review"
       : rawTab === "heatmap"
-      ? "heatmap"
-      : rawTab === "quarterly"
-      ? "quarterly"
-      : rawTab === "annual"
-      ? "annual"
-      : "overview"
+        ? "heatmap"
+        : rawTab === "quarterly"
+          ? "quarterly"
+          : rawTab === "annual"
+            ? "annual"
+            : "overview"
 
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())

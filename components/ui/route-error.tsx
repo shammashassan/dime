@@ -3,7 +3,8 @@
 import * as React from "react"
 import Link from "next/link"
 import { AlertCircle, RotateCcw, Home } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import {
   Empty,
   EmptyHeader,
@@ -64,17 +65,16 @@ export function RouteError({
             <RotateCcw className="size-4" />
             Try Again
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className="rounded-xl font-bold gap-1.5 border-border/60"
+          <Link
+            href={backHref}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "rounded-xl font-bold gap-1.5 border-border/60"
+            )}
           >
-            <Link href={backHref}>
-              <Home className="size-4" />
-              {backLabel}
-            </Link>
-          </Button>
+            <Home className="size-4" />
+            {backLabel}
+          </Link>
         </EmptyContent>
       </Empty>
     </div>

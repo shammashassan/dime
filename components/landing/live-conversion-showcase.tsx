@@ -165,7 +165,7 @@ export function LiveConversionShowcase() {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="w-full sm:flex-1 flex flex-col gap-2">
                     <label htmlFor="landing-from-currency" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">From</label>
-                    <Select value={fromCurrency} onValueChange={setFromCurrency}>
+                    <Select value={fromCurrency} onValueChange={(val) => { if (val) setFromCurrency(val) }}>
                       <SelectTrigger id="landing-from-currency" className="w-full bg-input/30">
                         <SelectValue placeholder="USD" />
                       </SelectTrigger>
@@ -193,7 +193,7 @@ export function LiveConversionShowcase() {
 
                   <div className="w-full sm:flex-1 flex flex-col gap-2">
                     <label htmlFor="landing-to-currency" className="text-xs font-bold text-muted-foreground uppercase tracking-wider">To</label>
-                    <Select value={toCurrency} onValueChange={setToCurrency}>
+                    <Select value={toCurrency} onValueChange={(val) => { if (val) setToCurrency(val) }}>
                       <SelectTrigger id="landing-to-currency" className="w-full bg-input/30">
                         <SelectValue placeholder="EUR" />
                       </SelectTrigger>

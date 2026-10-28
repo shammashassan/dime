@@ -41,15 +41,13 @@ export function HealthClient({ data }: HealthClientProps) {
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Financial Health</h1>
-              <HoverCard openDelay={150}>
-                <HoverCardTrigger asChild>
-                  <Badge
+              <HoverCard>
+                <HoverCardTrigger render={<Badge
                     variant="outline"
                     className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default"
                   >
                     {data.currency}
-                  </Badge>
-                </HoverCardTrigger>
+                  </Badge>} />
                 <HoverCardContent className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                   Diagnostic figures are calculated in your base currency ({data.currency}) across liquidity, savings, debt, budget, and growth.
                 </HoverCardContent>

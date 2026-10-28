@@ -8,7 +8,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   Layers,
   Trophy,
@@ -34,14 +34,14 @@ const CATEGORIES: Array<{
   label: string
   icon: React.ComponentType<{ className?: string }>
 }> = [
-  { id: "all", label: "All Activity", icon: Layers },
-  { id: "milestones", label: "Milestones", icon: Trophy },
-  { id: "transactions", label: "Transactions", icon: ArrowLeftRight },
-  { id: "bills_subscriptions", label: "Bills & Subs", icon: Receipt },
-  { id: "investments", label: "Investments", icon: TrendingUp },
-  { id: "loans", label: "Loans & Debts", icon: HandCoins },
-  { id: "shared", label: "Shared", icon: Users2 },
-]
+    { id: "all", label: "All Activity", icon: Layers },
+    { id: "milestones", label: "Milestones", icon: Trophy },
+    { id: "transactions", label: "Transactions", icon: ArrowLeftRight },
+    { id: "bills_subscriptions", label: "Bills & Subs", icon: Receipt },
+    { id: "investments", label: "Investments", icon: TrendingUp },
+    { id: "loans", label: "Loans & Debts", icon: HandCoins },
+    { id: "shared", label: "Shared", icon: Users2 },
+  ]
 
 export function TimelineFilterChips({
   selectedCategory,

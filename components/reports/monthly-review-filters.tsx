@@ -63,7 +63,7 @@ export function MonthlyReviewFilters({
     <div className="flex items-center gap-2">
       {/* Month Selector Dropdown */}
       <div className="flex items-center">
-        <Select value={currentMonth} onValueChange={handleMonthChange}>
+        <Select value={currentMonth} onValueChange={(val) => { if (val) handleMonthChange(val) }}>
           <SelectTrigger className="w-40">
             <Calendar className="text-muted-foreground shrink-0" />
             <SelectValue placeholder="Select month" />

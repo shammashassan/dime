@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
 import { Notification } from "@/types"
 
-import { syncUserAlerts } from "@/lib/notification-sync"
+import { syncUserAlerts } from "@/lib/services/notification-sync"
 import { db } from "@/lib/db/client"
 
 export async function getNotificationsAction() {

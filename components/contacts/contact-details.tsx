@@ -6,7 +6,7 @@ import { Contact, Loan, LoanRepayment, SharedExpense, SharedSettlement } from "@
 import { deleteContact, deleteLoan, deleteRepayment } from "@/lib/actions/loans"
 import { ContactDialog } from "./contact-dialog"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -391,12 +391,11 @@ export function ContactDetails({
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" asChild className="h-9 rounded-xl font-bold border-border/50 bg-card">
-            <Link href={`/shared-expenses?contactId=${contact._id.toString()}`}>
+          <Link href={`/shared-expenses?contactId=${contact._id.toString()}`} className={cn(buttonVariants({ variant: "outline" }), "h-9 rounded-xl font-bold border-border/50 bg-card")}>
               <HandCoins className="size-4 mr-2 text-emerald-500" />
               Shared Expenses
+            
             </Link>
-          </Button>
 
           <ContactDialog
             initialContact={contact}
@@ -407,11 +406,9 @@ export function ContactDetails({
             }
           />
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="icon" className="size-9 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
+            <AlertDialogTrigger render={<Button variant="outline" size="icon" className="size-9 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
                 <Trash2 className="size-4" />
-              </Button>
-            </AlertDialogTrigger>
+              </Button>} />
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
@@ -542,13 +539,7 @@ export function ContactDetails({
                   {localLoans.map((loan) => {
                     const isLent = loan.type === "lent"
                     return (
-                      <Item
-                        key={`loan-${loan._id.toString()}`}
-                        asChild
-                        size="sm"
-                        className="cursor-pointer text-left"
-                      >
-                        <Link href={`/loans/${loan._id.toString()}`}>
+                      <Item key={`loan-${loan._id.toString()}`} size="sm" className="cursor-pointer text-left" render={<Link href={`/loans/${loan._id.toString()}`} />}>
                           <ItemMedia className={cn("size-7 rounded-lg", isLent ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500")}>
                             {isLent ? <ArrowUpRight className="size-3.5" /> : <ArrowDownLeft className="size-3.5" />}
                           </ItemMedia>
@@ -563,8 +554,7 @@ export function ContactDetails({
                           <ItemActions>
                             <ChevronRight className="size-3.5 text-muted-foreground" />
                           </ItemActions>
-                        </Link>
-                      </Item>
+                        </Item>
                     )
                   })}
                   {sharedExpenses.map((exp) => {
@@ -573,13 +563,7 @@ export function ContactDetails({
                     const userPaid = userP && exp.paidByParticipantId === userP.participantId
 
                     return (
-                      <Item
-                        key={`expense-${exp._id.toString()}`}
-                        asChild
-                        size="sm"
-                        className="cursor-pointer text-left"
-                      >
-                        <Link href={`/shared-expenses/${exp._id.toString()}`}>
+                      <Item key={`expense-${exp._id.toString()}`} size="sm" className="cursor-pointer text-left" render={<Link href={`/shared-expenses/${exp._id.toString()}`} />}>
                           <ItemMedia className="size-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
                             <Users2 className="size-3.5" />
                           </ItemMedia>
@@ -595,8 +579,7 @@ export function ContactDetails({
                           <ItemActions>
                             <ChevronRight className="size-3.5 text-muted-foreground" />
                           </ItemActions>
-                        </Link>
-                      </Item>
+                        </Item>
                     )
                   })}
                 </ItemGroup>
@@ -704,15 +687,13 @@ export function ContactDetails({
                             <div className="size-6 flex items-center justify-center">
                               {event.type === "repayment" && event.repaymentId && (
                                 <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <button
+                                  <AlertDialogTrigger render={<button
                                       type="button"
                                       aria-label="Delete repayment"
                                       className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                       <Trash2 className="size-3.5" />
-                                    </button>
-                                  </AlertDialogTrigger>
+                                    </button>} />
                                   <AlertDialogContent>
                                     <AlertDialogHeader>
                                       <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
@@ -739,15 +720,13 @@ export function ContactDetails({
 
                               {event.type === "loan_created" && (
                                 <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <button
+                                  <AlertDialogTrigger render={<button
                                       type="button"
                                       aria-label="Delete loan record"
                                       className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
                                       <Trash2 className="size-3.5" />
-                                    </button>
-                                  </AlertDialogTrigger>
+                                    </button>} />
                                   <AlertDialogContent>
                                     <AlertDialogHeader>
                                       <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
@@ -821,11 +800,10 @@ export function ContactDetails({
                           {formatCurrency(totalLentRepaid, baseCurrency)} / {formatCurrency(totalLentAmount, baseCurrency)}
                         </span>
                       </div>
-                      <Progress
+                      <Progress style={{ ['--progress-background' as any]: lentProgress >= 100 ? "#10b981" : "var(--primary)" }}
                         value={lentProgress}
-                        indicatorStyle={{ backgroundColor: lentProgress >= 100 ? "#10b981" : "var(--primary)" }}
-                        className="h-2 bg-muted/60"
-                      />
+                        className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/60"
+                       />
                     </div>
                   )}
 
@@ -839,11 +817,10 @@ export function ContactDetails({
                           {formatCurrency(totalBorrowedRepaid, baseCurrency)} / {formatCurrency(totalBorrowedAmount, baseCurrency)}
                         </span>
                       </div>
-                      <Progress
+                      <Progress style={{ ['--progress-background' as any]: borrowedProgress >= 100 ? "#10b981" : "var(--primary)" }}
                         value={borrowedProgress}
-                        indicatorStyle={{ backgroundColor: borrowedProgress >= 100 ? "#10b981" : "var(--primary)" }}
-                        className="h-2 bg-muted/60"
-                      />
+                        className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/60"
+                       />
                     </div>
                   )}
                 </>

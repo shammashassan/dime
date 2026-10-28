@@ -30,7 +30,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Contact, OwedSummaries } from "@/types"
 import { createLoanAction } from "@/lib/actions/loans"
 import { formatCurrency, cn } from "@/lib/utils"
-import { getCurrencySymbol } from "@/lib/denomination"
+import { getCurrencySymbol } from "@/lib/calculations/denomination"
 
 export interface LoanActionCardProps {
   contacts: Contact[]
@@ -203,7 +203,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
                 </Link>
               </div>
             ) : (
-              <Select value={contactId || undefined} onValueChange={setContactId} disabled={isPending}>
+              <Select value={contactId || undefined} onValueChange={(val) => { if (val) setContactId(val) }} disabled={isPending}>
                 <SelectTrigger className="h-9 text-xs w-full" aria-label="Select contact">
                   <SelectValue placeholder="Select contact" />
                 </SelectTrigger>
@@ -241,8 +241,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
 
             {/* Due Date picker */}
             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-              <PopoverTrigger asChild>
-                <Button
+              <PopoverTrigger render={<Button
                   variant="outline"
                   type="button"
                   disabled={isPending}
@@ -275,8 +274,7 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
                       <X className="size-3" />
                     </span>
                   )}
-                </Button>
-              </PopoverTrigger>
+                </Button>} />
               <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="end">
                 <Calendar
                   mode="single"

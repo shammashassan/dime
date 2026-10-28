@@ -60,27 +60,18 @@ function Item({
   className,
   variant = "default",
   size = "default",
-  asChild = false,
   render,
-  children,
   ...props
-}: useRender.ComponentProps<"div"> &
-  VariantProps<typeof itemVariants> & {
-    asChild?: boolean
-  }) {
-  const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
-  const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
-
+}: useRender.ComponentProps<"div"> & VariantProps<typeof itemVariants>) {
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
         className: cn(itemVariants({ variant, size, className })),
-        children: resolvedChildren,
       },
       props
     ),
-    render: resolvedRender,
+    render,
     state: {
       slot: "item",
       variant,
@@ -126,7 +117,7 @@ function ItemContent({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-content"
       className={cn(
-        "flex flex-1 flex-col gap-1 group-data-[size=xs]/item:gap-0.5",
+        "flex flex-1 flex-col gap-1 group-data-[size=xs]/item:gap-0.5 [&+[data-slot=item-content]]:flex-none",
         className
       )}
       {...props}
@@ -139,7 +130,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-title"
       className={cn(
-        "flex w-full items-center gap-2 font-medium leading-none group-data-[size=xs]/item:text-xs",
+        "line-clamp-1 flex w-fit items-center gap-2 text-sm leading-snug font-medium underline-offset-4",
         className
       )}
       {...props}
@@ -152,7 +143,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="item-description"
       className={cn(
-        "text-muted-foreground text-xs leading-normal group-data-[size=xs]/item:text-[0.8rem]",
+        "line-clamp-2 text-left text-sm font-normal text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
       )}
       {...props}
@@ -170,21 +161,14 @@ function ItemActions({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function ItemAction({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="item-action"
-      className={cn("flex items-center", className)}
-      {...props}
-    />
-  )
-}
-
 function ItemHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="item-header"
-      className={cn("flex basis-full items-center justify-between gap-2", className)}
+      className={cn(
+        "flex basis-full items-center justify-between gap-2",
+        className
+      )}
       {...props}
     />
   )
@@ -194,7 +178,10 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="item-footer"
-      className={cn("flex basis-full items-center justify-between gap-2", className)}
+      className={cn(
+        "flex basis-full items-center justify-between gap-2",
+        className
+      )}
       {...props}
     />
   )
@@ -202,14 +189,13 @@ function ItemFooter({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Item,
-  ItemAction,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemFooter,
-  ItemGroup,
-  ItemHeader,
   ItemMedia,
+  ItemContent,
+  ItemActions,
+  ItemGroup,
   ItemSeparator,
   ItemTitle,
+  ItemDescription,
+  ItemHeader,
+  ItemFooter,
 }

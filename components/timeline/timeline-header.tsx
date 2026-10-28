@@ -47,16 +47,14 @@ export function TimelineHeader({
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
               Financial Timeline
             </h1>
-            <HoverCard openDelay={150}>
-              <HoverCardTrigger asChild>
-                <Badge
+            <HoverCard>
+              <HoverCardTrigger render={<Badge
                   variant="outline"
                   tabIndex={0}
                   className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   {totalCount} event{totalCount !== 1 ? "s" : ""}
-                </Badge>
-              </HoverCardTrigger>
+                </Badge>} />
               <HoverCardContent
                 className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3"
                 align="start"
@@ -82,16 +80,14 @@ export function TimelineHeader({
 
         {/* Export Dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
+          <DropdownMenuTrigger render={<Button
               variant="outline"
               size="sm"
               className="h-10 gap-1.5 text-xs font-semibold rounded-xl border-border/40 bg-card hover:bg-muted/50 cursor-pointer shadow-sm"
             >
               <Download className="size-4 text-muted-foreground" />
               <span>Export</span>
-            </Button>
-          </DropdownMenuTrigger>
+            </Button>} />
           <DropdownMenuContent align="end" className="w-48 bg-popover border border-border/40 rounded-xl shadow-md">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="text-xs">Export Timeline</DropdownMenuLabel>

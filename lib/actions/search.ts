@@ -14,7 +14,7 @@ import {
   saveSearchSchema,
   deleteSearchSchema,
   SaveSearchInput,
-} from "@/lib/validations/search.schema"
+} from "@/lib/schemas/search.schema"
 import type {
   UniversalSearchResults,
   SerializedSavedSearch,

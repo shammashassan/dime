@@ -112,7 +112,7 @@ export function MergeDialog({ sourceCategory, categories, onSuccess }: MergeDial
         {/* Target Category Select */}
         <Field>
           <FieldLabel>Target Category</FieldLabel>
-          <Select value={targetId} onValueChange={setTargetId}>
+          <Select value={targetId} onValueChange={(val) => { if (val) setTargetId(val) }}>
             <SelectTrigger className="h-10 rounded-xl">
               <SelectValue placeholder="Select destination category" />
             </SelectTrigger>

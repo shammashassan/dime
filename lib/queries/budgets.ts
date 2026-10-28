@@ -6,7 +6,7 @@ import { getCategories } from "./categories"
 import { getWallets } from "./wallets"
 import { getCurrencyConverter } from "@/lib/currency"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { expandTransactions } from "@/lib/split-utils"
+import { expandTransactions } from "@/lib/calculations/split-utils"
 
 export interface BudgetWithSpending extends Budget {
   spent: number

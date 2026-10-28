@@ -6,8 +6,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { searchMarketTickersAction } from "@/lib/actions/market-prices"
-import type { TickerSearchResult } from "@/lib/ticker-search"
-import { cn } from "@/lib/utils"
+import type { TickerSearchResult } from "@/lib/services/ticker-search"
+import { cn } from "cn"
 
 export interface TickerSearchComboboxProps {
   value: string
@@ -99,8 +99,7 @@ export function TickerSearchCombobox({
 
   return (
     <Popover open={open && searchTerm.length > 0} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <div className="relative w-full">
+      <PopoverTrigger render={<div className="relative w-full">
           <Input
             id={id}
             value={searchTerm}
@@ -120,13 +119,12 @@ export function TickerSearchCombobox({
               <Search className="size-3.5 opacity-60" />
             )}
           </div>
-        </div>
-      </PopoverTrigger>
+        </div>} />
 
       <PopoverContent
         className="p-1 w-[320px] sm:w-[360px] rounded-2xl shadow-xl border-border/50 bg-popover"
         align="start"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        
       >
         <div className="max-h-[260px] overflow-y-auto space-y-0.5">
           {loading && results.length === 0 && (

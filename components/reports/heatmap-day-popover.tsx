@@ -2,16 +2,14 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
   PopoverHeader,
   PopoverTitle,
   PopoverDescription,
 } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -23,7 +21,7 @@ import {
   ItemDescription,
   ItemActions,
 } from "@/components/ui/item"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
 import type { HeatmapDaySummary, HeatmapMetric } from "@/lib/calculations/heatmaps"
 import { format, parseISO } from "date-fns"
 import { Sparkles, ArrowDownRight, ArrowUpRight, Percent, Receipt, ExternalLink } from "lucide-react"
@@ -43,13 +41,8 @@ export function HeatmapDayPopover({
   currency,
   metric,
 }: HeatmapDayPopoverProps) {
-  const virtualRef = React.useRef({
-    getBoundingClientRect: () => anchorRect || new DOMRect(),
-  })
-
-  // Update virtual ref whenever anchorRect changes
-  React.useEffect(() => {
-    virtualRef.current = {
+  const virtualElement = React.useMemo(() => {
+    return {
       getBoundingClientRect: () => anchorRect || new DOMRect(),
     }
   }, [anchorRect])
@@ -114,112 +107,118 @@ export function HeatmapDayPopover({
   }
 
   return (
-    <Popover open={Boolean(day)} onOpenChange={(open) => !open && onClose()}>
-      <PopoverAnchor virtualRef={virtualRef} />
-      <PopoverContent
-        side="top"
-        align="center"
-        sideOffset={6}
-        className="w-76 p-3 shadow-xl ring-1 ring-border/50 rounded-2xl"
-      >
-        {/* Header with Title, Badge, and Quick Icon Link */}
-        <PopoverHeader className="gap-1 pb-2 border-b border-border/40">
-          <div className="flex items-center justify-between gap-1.5">
-            <PopoverTitle className="text-xs font-semibold truncate text-foreground">
-              {formattedDate}
-            </PopoverTitle>
+    <PopoverPrimitive.Root open={Boolean(day)} onOpenChange={(open) => !open && onClose()}>
+      <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Positioner
+          anchor={virtualElement}
+          side="top"
+          align="center"
+          sideOffset={6}
+          className="isolate z-50"
+        >
+          <PopoverPrimitive.Popup
+            data-slot="popover-content"
+            className="z-50 flex w-76 origin-(--transform-origin) flex-col gap-4 rounded-2xl bg-popover p-3 text-sm text-popover-foreground shadow-xl ring-1 ring-border/50 outline-hidden duration-100 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+          >
+            {/* Header with Title, Badge, and Quick Icon Link */}
+            <PopoverHeader className="gap-1 pb-2 border-b border-border/40">
+              <div className="flex items-center justify-between gap-1.5">
+                <PopoverTitle className="text-xs font-semibold truncate text-foreground">
+                  {formattedDate}
+                </PopoverTitle>
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              {getMetricBadge()}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {getMetricBadge()}
 
-              {day.count > 0 && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="icon"
-                      className="size-6 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      <Link
-                        href={`/transactions?from=${day.date}&to=${day.date}`}
-                        onClick={onClose}
+                  {day.count > 0 && (
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Link
+                            href={`/transactions?from=${day.date}&to=${day.date}`}
+                            onClick={onClose}
+                            className={cn(
+                              buttonVariants({ variant: "ghost", size: "icon" }),
+                              "size-6 rounded-md text-muted-foreground hover:text-foreground cursor-pointer"
+                            )}
+                          >
+                            <ExternalLink className="size-3.5" />
+                            <span className="sr-only">View in Transactions</span>
+                          </Link>
+                        }
+                      />
+                      <TooltipContent side="top" className="text-xs">
+                        View in Transactions
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+              </div>
+              <PopoverDescription className="text-[11px] text-muted-foreground flex items-center justify-between">
+                <span>
+                  {day.count} {day.count === 1 ? "transaction" : "transactions"}
+                </span>
+                {day.count > 0 && metric !== "expense" && day.expense > 0 && (
+                  <span>Spend: {formatCurrency(day.expense, currency)}</span>
+                )}
+              </PopoverDescription>
+            </PopoverHeader>
+
+            {/* Transactions list using shadcn ScrollArea and Item primitives */}
+            <div className="pt-2">
+              {day.transactions.length === 0 ? (
+                <div className="py-3 text-center text-xs text-muted-foreground flex flex-col items-center justify-center gap-1">
+                  <span className="p-1.5 rounded-full bg-muted/40 text-muted-foreground">
+                    <Sparkles className="size-3.5 text-emerald-500" />
+                  </span>
+                  <p className="font-medium text-foreground text-xs">Zero-Spend Day</p>
+                  <p className="text-[10px]">No expenses recorded.</p>
+                </div>
+              ) : (
+                <ScrollArea className="max-h-36 w-full pr-1.5">
+                  <ItemGroup className="gap-1.5">
+                    {day.transactions.map((tx) => (
+                      <Item
+                        key={tx.id}
+                        variant="muted"
+                        size="xs"
+                        className="rounded-xl px-2 py-1.5 bg-muted/40 hover:bg-muted/70 transition-colors"
                       >
-                        <ExternalLink className="size-3.5" />
-                        <span className="sr-only">View in Transactions</span>
-                      </Link>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="text-xs">
-                    View in Transactions
-                  </TooltipContent>
-                </Tooltip>
+                        <ItemMedia>
+                          <span
+                            className="size-2 rounded-full shrink-0"
+                            style={{ backgroundColor: tx.categoryColor || "var(--primary)" }}
+                          />
+                        </ItemMedia>
+                        <ItemContent className="min-w-0">
+                          <ItemTitle className="text-xs font-medium text-foreground truncate max-w-[130px]">
+                            {tx.description}
+                          </ItemTitle>
+                          <ItemDescription className="text-[10px] text-muted-foreground truncate">
+                            {tx.categoryName} • {tx.walletName}
+                          </ItemDescription>
+                        </ItemContent>
+                        <ItemActions>
+                          <span
+                            className={`text-xs font-semibold shrink-0 ${
+                              tx.type === "income"
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {tx.type === "income" ? "+" : "-"}
+                            {formatCurrency(tx.amount, currency)}
+                          </span>
+                        </ItemActions>
+                      </Item>
+                    ))}
+                  </ItemGroup>
+                </ScrollArea>
               )}
             </div>
-          </div>
-          <PopoverDescription className="text-[11px] text-muted-foreground flex items-center justify-between">
-            <span>
-              {day.count} {day.count === 1 ? "transaction" : "transactions"}
-            </span>
-            {day.count > 0 && metric !== "expense" && day.expense > 0 && (
-              <span>Spend: {formatCurrency(day.expense, currency)}</span>
-            )}
-          </PopoverDescription>
-        </PopoverHeader>
-
-        {/* Transactions list using shadcn ScrollArea and Item primitives */}
-        <div className="pt-2">
-          {day.transactions.length === 0 ? (
-            <div className="py-3 text-center text-xs text-muted-foreground flex flex-col items-center justify-center gap-1">
-              <span className="p-1.5 rounded-full bg-muted/40 text-muted-foreground">
-                <Sparkles className="size-3.5 text-emerald-500" />
-              </span>
-              <p className="font-medium text-foreground text-xs">Zero-Spend Day</p>
-              <p className="text-[10px]">No expenses recorded.</p>
-            </div>
-          ) : (
-            <ScrollArea className="max-h-36 w-full pr-1.5">
-              <ItemGroup className="gap-1.5">
-                {day.transactions.map((tx) => (
-                  <Item
-                    key={tx.id}
-                    variant="muted"
-                    size="xs"
-                    className="rounded-xl px-2 py-1.5 bg-muted/40 hover:bg-muted/70 transition-colors"
-                  >
-                    <ItemMedia>
-                      <span
-                        className="size-2 rounded-full shrink-0"
-                        style={{ backgroundColor: tx.categoryColor || "var(--primary)" }}
-                      />
-                    </ItemMedia>
-                    <ItemContent className="min-w-0">
-                      <ItemTitle className="text-xs font-medium text-foreground truncate max-w-[130px]">
-                        {tx.description}
-                      </ItemTitle>
-                      <ItemDescription className="text-[10px] text-muted-foreground truncate">
-                        {tx.categoryName} • {tx.walletName}
-                      </ItemDescription>
-                    </ItemContent>
-                    <ItemActions>
-                      <span
-                        className={`text-xs font-semibold shrink-0 ${
-                          tx.type === "income"
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-foreground"
-                        }`}
-                      >
-                        {tx.type === "income" ? "+" : "-"}
-                        {formatCurrency(tx.amount, currency)}
-                      </span>
-                    </ItemActions>
-                  </Item>
-                ))}
-              </ItemGroup>
-            </ScrollArea>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+          </PopoverPrimitive.Popup>
+        </PopoverPrimitive.Positioner>
+      </PopoverPrimitive.Portal>
+    </PopoverPrimitive.Root>
   )
 }

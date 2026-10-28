@@ -142,9 +142,8 @@ export function HighImpactSignalsCard({
                 const href = ins.actionUrl || "/insights"
 
                 return (
-                  <HoverCard key={ins.id} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item className="p-2.5 hover:bg-muted/40 transition-colors rounded-xl border-transparent group overflow-hidden flex items-start gap-2.5 w-full min-w-0">
+                  <HoverCard key={ins.id}>
+                    <HoverCardTrigger render={<Item className="p-2.5 hover:bg-muted/40 transition-colors rounded-xl border-transparent group overflow-hidden flex items-start gap-2.5 w-full min-w-0">
                         <Link href={href} className="flex items-start gap-2.5 flex-1 min-w-0">
                           {/* Media Icon */}
                           <ItemMedia className={cn("size-7.5 rounded-lg border shrink-0 mt-0.5", iconColor)}>
@@ -188,8 +187,7 @@ export function HighImpactSignalsCard({
                         {/* Action controls: Star & Dismiss */}
                         <div className="flex items-center gap-0.5 shrink-0 self-end">
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
+                            <TooltipTrigger render={<Button
                                 variant="ghost"
                                 size="icon"
                                 aria-label={ins.isBookmarked ? "Remove bookmark" : "Bookmark signal"}
@@ -203,16 +201,14 @@ export function HighImpactSignalsCard({
                                 <Star
                                   className={cn("size-3.5", ins.isBookmarked ? "fill-amber-500 text-amber-500" : "")}
                                 />
-                              </Button>
-                            </TooltipTrigger>
+                              </Button>} />
                             <TooltipContent side="top" className="text-xs">
                               {ins.isBookmarked ? "Remove Bookmark" : "Bookmark Signal"}
                             </TooltipContent>
                           </Tooltip>
 
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
+                            <TooltipTrigger render={<Button
                                 variant="ghost"
                                 size="icon"
                                 aria-label="Dismiss signal"
@@ -224,15 +220,14 @@ export function HighImpactSignalsCard({
                                 }}
                               >
                                 <X className="size-3.5" />
-                              </Button>
-                            </TooltipTrigger>
+                              </Button>} />
                             <TooltipContent side="top" className="text-xs">
                               Dismiss Signal
                             </TooltipContent>
                           </Tooltip>
                         </div>
                       </Item>
-                    </HoverCardTrigger>
+                    } />
                     <HoverCardContent
                       className="w-72 max-w-[calc(100vw-2rem)] text-xs rounded-xl border border-border/40 shadow-lg p-3 bg-popover"
                       align="start"

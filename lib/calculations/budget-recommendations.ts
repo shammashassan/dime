@@ -1,7 +1,7 @@
 import { getCollection } from "@/lib/db/collections"
 import { getScopeFilter, getFinancialScope } from "@/lib/scope"
 import { Transaction, Loan, Wallet, TemplateRecommendation } from "@/types"
-import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates"
+import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/data"
 
 export type { TemplateRecommendation }
 

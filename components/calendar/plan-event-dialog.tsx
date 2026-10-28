@@ -140,7 +140,7 @@ export function PlanEventDialog({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Field>
                 <FieldLabel>Type</FieldLabel>
-                <Select value={flow} onValueChange={(val: "inflow" | "outflow") => setFlow(val)}>
+                <Select value={flow} onValueChange={(val) => { if (val === "inflow" || val === "outflow") setFlow(val) }}>
                   <SelectTrigger className="rounded-xl w-full h-10">
                     <SelectValue />
                   </SelectTrigger>
@@ -177,8 +177,7 @@ export function PlanEventDialog({
             <Field>
               <FieldLabel>Date</FieldLabel>
               <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-                <PopoverTrigger asChild>
-                  <Button
+                <PopoverTrigger render={<Button
                     variant="outline"
                     type="button"
                     className="w-full justify-start rounded-xl px-3 border border-input font-normal h-10 min-w-0 text-xs sm:text-sm"
@@ -187,8 +186,7 @@ export function PlanEventDialog({
                     <span className="truncate flex-1 text-left">
                       {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
                     </span>
-                  </Button>
-                </PopoverTrigger>
+                  </Button>} />
                 <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                   <Calendar
                     mode="single"

@@ -39,7 +39,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { TickerSearchCombobox } from "@/components/investments/ticker-search-combobox"
 
 const formSchema = z.object({
@@ -84,7 +84,7 @@ const LIABILITY_CATEGORIES = [
 
 interface AssetDialogProps {
   initialAsset?: Asset
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement | null
   onSuccess?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -208,8 +208,7 @@ export function AssetDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger !== null && (
-        <DialogTrigger asChild>
-          {trigger || (
+        <DialogTrigger render={trigger || (
             <Button size="sm" className="rounded-xl font-bold gap-2 shadow-xs">
               {isEditing ? (
                 <>
@@ -223,8 +222,7 @@ export function AssetDialog({
                 </>
               )}
             </Button>
-          )}
-        </DialogTrigger>
+          )} />
       )}
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
         <DialogHeader>
@@ -501,8 +499,7 @@ export function AssetDialog({
                 name="acquiredAt"
                 render={({ field }) => (
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         type="button"
                         variant="outline"
                         className={cn(
@@ -512,8 +509,7 @@ export function AssetDialog({
                       >
                         <CalendarIcon className="mr-2 size-4" />
                         {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent className="w-auto p-0 rounded-2xl shadow-xl" align="start">
                       <Calendar
                         mode="single"

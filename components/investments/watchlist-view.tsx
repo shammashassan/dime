@@ -154,12 +154,10 @@ export function WatchlistView({ watchlists }: WatchlistViewProps) {
         </div>
 
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-1.5 self-start sm:self-auto">
+          <DialogTrigger render={<Button size="sm" className="gap-1.5 self-start sm:self-auto">
               <Plus className="size-4" />
               <span>New Watchlist</span>
-            </Button>
-          </DialogTrigger>
+            </Button>} />
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Create Watchlist</DialogTitle>
@@ -330,7 +328,7 @@ export function WatchlistView({ watchlists }: WatchlistViewProps) {
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="item-type">Asset Type</Label>
-                <Select value={itemAssetType} onValueChange={setItemAssetType}>
+                <Select value={itemAssetType} onValueChange={(val) => { if (val) setItemAssetType(val) }}>
                   <SelectTrigger id="item-type">
                     <SelectValue />
                   </SelectTrigger>

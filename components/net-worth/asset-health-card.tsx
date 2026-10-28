@@ -145,14 +145,12 @@ export function AssetHealthDiagnosticsCard({
                 <Clock className="size-3 text-muted-foreground" />
                 Appraisal Freshness
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <button
+                  <PopoverTrigger render={<button
                       type="button"
                       className="text-muted-foreground/60 hover:text-foreground cursor-pointer"
                     >
                       <Info className="size-3" />
-                    </button>
-                  </PopoverTrigger>
+                    </button>} />
                   <PopoverContent
                     className="p-3 text-xs w-64 border border-border/40 shadow-lg rounded-xl"
                     align="start"
@@ -174,17 +172,14 @@ export function AssetHealthDiagnosticsCard({
                   : `${daysRemaining}d remaining in cycle`}
               </span>
             </div>
-            <Progress
-              value={freshnessPct}
-              className="h-1.5 bg-muted/50"
-              indicatorStyle={{
-                backgroundColor: isOverdue
+            <Progress style={{ ['--progress-background' as any]: isOverdue
                   ? "#f59e0b"
                   : daysSince <= 30
                   ? "#10b981"
-                  : "var(--primary)",
-              }}
-            />
+                  : "var(--primary)", }}
+              value={freshnessPct}
+              className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-1.5 bg-muted/50"
+             />
           </div>
 
           {/* Row 2: Category Benchmark Spread */}
@@ -194,14 +189,12 @@ export function AssetHealthDiagnosticsCard({
                 <Scale className="size-3 text-muted-foreground" />
                 Benchmark Spread ({ratePct}% vs {benchmarkRatePct}%/yr)
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <button
+                  <PopoverTrigger render={<button
                       type="button"
                       className="text-muted-foreground/60 hover:text-foreground cursor-pointer"
                     >
                       <Info className="size-3" />
-                    </button>
-                  </PopoverTrigger>
+                    </button>} />
                   <PopoverContent
                     className="p-3 text-xs w-64 border border-border/40 shadow-lg rounded-xl"
                     align="start"
@@ -226,7 +219,11 @@ export function AssetHealthDiagnosticsCard({
                 {benchmarkDeltaPct}% spread
               </span>
             </div>
-            <Progress
+            <Progress style={{ ['--progress-background' as any]: metrics.performance === "outperforming"
+                    ? "#10b981"
+                    : metrics.performance === "underperforming"
+                    ? "#f43f5e"
+                    : "#3b82f6", }}
               value={
                 metrics.performance === "outperforming"
                   ? Math.min(100, 60 + Math.abs(metrics.benchmarkDelta) * 200)
@@ -234,16 +231,8 @@ export function AssetHealthDiagnosticsCard({
                   ? Math.max(15, 50 - Math.abs(metrics.benchmarkDelta) * 200)
                   : 50
               }
-              className="h-1.5 bg-muted/50"
-              indicatorStyle={{
-                backgroundColor:
-                  metrics.performance === "outperforming"
-                    ? "#10b981"
-                    : metrics.performance === "underperforming"
-                    ? "#f43f5e"
-                    : "#3b82f6",
-              }}
-            />
+              className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-1.5 bg-muted/50"
+             />
           </div>
         </div>
 

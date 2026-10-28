@@ -2,8 +2,8 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getPortfolioHoldings } from "@/lib/queries/investments"
-import { syncHoldingPrices } from "@/lib/market-prices"
-import { searchMarketTickers, type TickerSearchResult } from "@/lib/ticker-search"
+import { syncHoldingPrices } from "@/lib/services/market-prices"
+import { searchMarketTickers, type TickerSearchResult } from "@/lib/services/ticker-search"
 import { revalidatePath, updateTag } from "next/cache"
 
 export async function syncMarketPricesAction(): Promise<{

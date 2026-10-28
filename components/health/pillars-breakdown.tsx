@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Item, ItemMedia, ItemGroup } from "@/components/ui/item"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   Droplet,
   PiggyBank,
@@ -109,11 +109,10 @@ export function PillarsBreakdown({ pillars, onOpenSimulator }: PillarsBreakdownP
                       <span className="text-muted-foreground text-[10px] font-normal">/ {pillar.maxScore} pts</span>
                     </span>
                   </div>
-                  <Progress
+                  <Progress style={{ ['--progress-background' as any]: conf.indicatorColor }}
                     value={progressPct}
-                    className="h-1.5 rounded-full"
-                    indicatorStyle={{ backgroundColor: conf.indicatorColor }}
-                  />
+                    className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-1.5 rounded-full"
+                   />
                 </div>
 
                 {/* Narrative Summary */}

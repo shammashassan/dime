@@ -328,7 +328,6 @@ export function WalletForm({ initialWallet, onSuccess }: WalletFormProps) {
                 name="color"
                 render={({ field }) => (
                   <ToggleGroup
-                    type="single"
                     value={field.value}
                     onValueChange={(val) => val && field.onChange(val)}
                     variant="outline"

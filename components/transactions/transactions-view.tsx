@@ -17,7 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
-import { expandTransactions } from "@/lib/split-utils"
+import { expandTransactions } from "@/lib/calculations/split-utils"
 
 interface TransactionsViewProps {
   transactions: Transaction[]
@@ -154,8 +154,7 @@ export function TransactionsView({
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 w-full lg:w-auto">
           <div className="flex items-center gap-2 w-full lg:w-auto">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
+              <DropdownMenuTrigger render={<Button
                   variant="outline"
                   size="sm"
                   className="flex-1 lg:flex-initial h-10 border-border/40 text-xs font-semibold gap-1.5 rounded-xl shadow-sm hover:bg-muted/50 cursor-pointer"
@@ -163,8 +162,7 @@ export function TransactionsView({
                 >
                   <Download className="size-4" />
                   Export CSV
-                </Button>
-              </DropdownMenuTrigger>
+                </Button>} />
               <DropdownMenuContent align="end" className="w-52 bg-popover border border-border/40 shadow-md">
                 <DropdownMenuItem onClick={handleExportSummaryCSV} className="text-xs gap-2 cursor-pointer">
                   Export Summary CSV

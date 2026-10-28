@@ -46,7 +46,7 @@ interface LoanDialogProps {
   wallets: Wallet[]
   contacts: Contact[]
   initialLoan?: Loan
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement | null
   onSuccess?: () => void
   open?: boolean
   onOpenChange?: (open: boolean) => void
@@ -212,7 +212,7 @@ export function LoanDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {trigger && <DialogTrigger render={trigger} />}
       
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
@@ -300,8 +300,7 @@ export function LoanDialog({
                 name="personName"
                 render={({ field }) => (
                   <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         type="button"
                         variant="outline"
                         role="combobox"
@@ -314,8 +313,7 @@ export function LoanDialog({
                       >
                         {field.value || "Select or enter contact name..."}
                         <Users className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent
                       className="w-(--anchor-width) min-w-[280px] p-0 border border-border/40 shadow-lg"
                       align="start"
@@ -435,11 +433,9 @@ export function LoanDialog({
               <FieldLabel className="flex items-center gap-1">
                 Interest Rate
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <button type="button" aria-label="Interest rate information" className="text-muted-foreground hover:text-foreground">
+                  <PopoverTrigger render={<button type="button" aria-label="Interest rate information" className="text-muted-foreground hover:text-foreground">
                       <Info className="size-3.5" />
-                    </button>
-                  </PopoverTrigger>
+                    </button>} />
                   <PopoverContent className="p-3 text-xs w-60 border border-border/40 shadow-lg">
                     Store an annual interest percentage for record-keeping. Simple interest calculations can be done on the detail page. Automatic accrual is not implemented yet.
                   </PopoverContent>
@@ -468,8 +464,7 @@ export function LoanDialog({
                 name="date"
                 render={({ field }) => (
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         variant="outline"
                         type="button"
                         className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
@@ -478,8 +473,7 @@ export function LoanDialog({
                         <span className="truncate flex-1 text-left">
                           {field.value ? format(field.value, "PP") : "Pick date"}
                         </span>
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                       <Calendar
                         mode="single"
@@ -502,8 +496,7 @@ export function LoanDialog({
                 name="dueDate"
                 render={({ field }) => (
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         variant="outline"
                         type="button"
                         className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
@@ -512,8 +505,7 @@ export function LoanDialog({
                         <span className="truncate flex-1 text-left">
                           {field.value ? format(field.value, "PP") : <span className="text-muted-foreground">None</span>}
                         </span>
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                       <Calendar
                         mode="single"

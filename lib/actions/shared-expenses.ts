@@ -17,7 +17,7 @@ import {
   CreateSharedExpenseInput,
   recordSettlementSchema,
   RecordSettlementInput,
-} from "@/lib/validations/shared-expenses"
+} from "@/lib/schemas/shared-expenses"
 import { validateExpenseSplits, buildSharedExpensesOverviewViewModel } from "@/lib/calculations/shared-expenses"
 import { getActiveBaseCurrency } from "@/lib/queries/loans"
 import { getCurrencyConverter } from "@/lib/currency"

@@ -60,7 +60,7 @@ export function QuickActionsCard({ accounts, holdings }: QuickActionsCardProps) 
         <div className="border-t border-border/30 pt-3 flex flex-col gap-2.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Update Price Snapshot</span>
           <div className="flex flex-col gap-2">
-            <Select value={selectedHoldingId} onValueChange={setSelectedHoldingId}>
+            <Select value={selectedHoldingId} onValueChange={(val) => { if (val) setSelectedHoldingId(val) }}>
               <SelectTrigger className="w-full rounded-xl border-border/40 bg-card h-9 text-xs">
                 <SelectValue placeholder="Select active holding" />
               </SelectTrigger>
@@ -92,14 +92,12 @@ export function QuickActionsCard({ accounts, holdings }: QuickActionsCardProps) 
               />
             ) : (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="w-full">
+                <TooltipTrigger render={<span className="w-full">
                     <Button disabled className="w-full rounded-xl text-xs font-bold h-9 gap-1.5">
                       <RefreshCw className="size-3.5" />
                       Update Market Price
                     </Button>
-                  </span>
-                </TooltipTrigger>
+                  </span>} />
                 <TooltipContent side="top">Select an active holding first</TooltipContent>
               </Tooltip>
             )}

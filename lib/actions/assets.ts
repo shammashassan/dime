@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
-import { assetSchema, AssetInput, assetValuationSchema, AssetValuationInput } from "@/lib/validations/asset.schema"
+import { assetSchema, AssetInput, assetValuationSchema, AssetValuationInput } from "@/lib/schemas/asset.schema"
 import { Asset, AssetValuation } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
@@ -383,7 +383,7 @@ export async function syncAssetMarketPriceAction(params: {
     if (asset.category === "crypto") assetType = "crypto"
     else if (asset.category === "gold") assetType = "commodity"
 
-    const { getMarketPrice } = await import("@/lib/market-prices")
+    const { getMarketPrice } = await import("@/lib/services/market-prices")
     const priceInCents = await getMarketPrice(params.symbol, assetType, undefined, asset.currency)
     if (priceInCents === null || priceInCents <= 0) {
       return { success: false, error: `Could not fetch live market quote for "${params.symbol}"` }

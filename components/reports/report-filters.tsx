@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns"
 import { DateRange } from "react-day-picker"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 export function ReportFilters() {
   const router = useRouter()
@@ -40,7 +40,7 @@ export function ReportFilters() {
       const to = new Date(paramCategoryTo)
       const diffTime = Math.abs(to.getTime() - from.getTime())
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      
+
       if (diffDays >= 28 && diffDays <= 32) return "last30days"
       if (from.getFullYear() === now.getFullYear() && from.getMonth() === 0 && from.getDate() === 1 && to.getMonth() === 11 && to.getDate() === 31) {
         return "thisyear"
@@ -112,8 +112,7 @@ export function ReportFilters() {
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
       {/* Date Range Popover */}
       <Popover>
-        <PopoverTrigger asChild>
-          <Button
+        <PopoverTrigger render={<Button
             variant="outline"
             className={cn(
               "h-10 px-3 justify-between font-medium rounded-xl border-border/40 shadow-xs hover:bg-muted/50",
@@ -134,8 +133,7 @@ export function ReportFilters() {
                 <span>Filter by date range</span>
               )}
             </span>
-          </Button>
-        </PopoverTrigger>
+          </Button>} />
         <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
           <Calendar
             initialFocus
@@ -149,7 +147,7 @@ export function ReportFilters() {
       </Popover>
 
       {/* Quick Select Dropdown */}
-      <Select value={getQuickSelectValue()} onValueChange={handleQuickSelect}>
+      <Select value={getQuickSelectValue()} onValueChange={(val) => { if (val) handleQuickSelect(val) }}>
         <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl border-border/40 shadow-xs">
           <SelectValue placeholder="Quick select" />
         </SelectTrigger>

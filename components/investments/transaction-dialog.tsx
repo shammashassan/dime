@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { investmentTransactionSchema, InvestmentTransactionInput } from "@/lib/validations/investment.schema"
+import { investmentTransactionSchema, InvestmentTransactionInput } from "@/lib/schemas/investment.schema"
 import { recordTransaction } from "@/lib/actions/investments"
 import { Wallet } from "@/types"
 import {
@@ -30,7 +30,7 @@ interface TransactionDialogProps {
   defaultAccountId?: string
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement | null
 }
 
 export function TransactionDialog({
@@ -96,14 +96,12 @@ export function TransactionDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger ? (
-        <DialogTrigger asChild>{trigger}</DialogTrigger>
+        <DialogTrigger render={trigger} />
       ) : !isControlled ? (
-        <DialogTrigger asChild>
-          <Button size="sm" className="rounded-xl font-bold gap-2 shadow-sm">
+        <DialogTrigger render={<Button size="sm" className="rounded-xl font-bold gap-2 shadow-sm">
             <Plus className="size-4" />
             Record Transaction
-          </Button>
-        </DialogTrigger>
+          </Button>} />
       ) : null}
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
         <DialogHeader>
@@ -123,7 +121,7 @@ export function TransactionDialog({
                 <FieldLabel htmlFor="inv-wallet-id" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Brokerage Account</FieldLabel>
                 <Select
                   value={currentWalletId || selectedAccountId}
-                  onValueChange={(v) => setValue("walletId", v)}
+                  onValueChange={(v) => { if (v) setValue("walletId", v) }}
                 >
                   <SelectTrigger id="inv-wallet-id" className="rounded-xl">
                     <SelectValue placeholder="Select account" />
@@ -249,8 +247,7 @@ export function TransactionDialog({
                   name="date"
                   render={({ field }) => (
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
+                      <PopoverTrigger render={<Button
                           id="inv-date-trigger"
                           variant="outline"
                           type="button"
@@ -260,8 +257,7 @@ export function TransactionDialog({
                           <span className="truncate flex-1 text-left text-xs font-semibold">
                             {field.value ? format(new Date(field.value), "PP") : "Pick date"}
                           </span>
-                        </Button>
-                      </PopoverTrigger>
+                        </Button>} />
                       <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                         <Calendar
                           mode="single"

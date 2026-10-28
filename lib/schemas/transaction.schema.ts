@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { validateSplits } from "../split-utils"
+import { validateSplits } from "@/lib/calculations/split-utils"
 
 export const transactionSchema = z
   .object({

@@ -129,14 +129,7 @@ export async function UpcomingRecurring({ userId, className }: UpcomingRecurring
                 const href = targetId ? `/recurring/${targetId}` : "/recurring"
 
                 return (
-                  <Item
-                    key={item.id}
-                    asChild
-                    variant="outline"
-                    size="xs"
-                    className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group w-full min-w-0 overflow-hidden"
-                  >
-                    <Link href={href} className="flex items-start gap-2.5 w-full min-w-0">
+                  <Item key={item.id} variant="outline" size="xs" className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group w-full min-w-0 overflow-hidden" render={<Link href={href} className="flex items-start gap-2.5 w-full min-w-0" />}>
                       <ItemMedia
                         className="size-6 rounded-md flex items-center justify-center shrink-0 mt-0.5 border border-border/50"
                         style={{
@@ -183,8 +176,7 @@ export async function UpcomingRecurring({ userId, className }: UpcomingRecurring
                           </div>
                         </div>
                       </div>
-                    </Link>
-                  </Item>
+                    </Item>
                 )
               })}
             </ItemGroup>

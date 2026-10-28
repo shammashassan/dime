@@ -104,8 +104,7 @@ export function SpaceSwitcher() {
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
+            <DropdownMenuTrigger render={<SidebarMenuButton
                 size="lg"
                 className="h-12 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
@@ -125,8 +124,7 @@ export function SpaceSwitcher() {
                   </span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
-              </SidebarMenuButton>
-            </DropdownMenuTrigger>
+              </SidebarMenuButton>} />
             <DropdownMenuContent
               className="w-(--anchor-width) min-w-56 rounded-lg"
               align="start"
@@ -175,14 +173,12 @@ export function SpaceSwitcher() {
                 </>
               )}
               <DropdownMenuSeparator />
-              <DialogTrigger asChild>
-                <DropdownMenuItem className="gap-2 p-2 cursor-pointer text-primary">
+              <DialogTrigger render={<DropdownMenuItem className="gap-2 p-2 cursor-pointer text-primary">
                   <div className="flex size-6 items-center justify-center rounded-md border border-primary/20 bg-primary/5">
                     <Plus className="size-4" />
                   </div>
                   <span className="font-medium">Create Space</span>
-                </DropdownMenuItem>
-              </DialogTrigger>
+                </DropdownMenuItem>} />
             </DropdownMenuContent>
           </SidebarMenuItem>
         </SidebarMenu>

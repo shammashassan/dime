@@ -500,9 +500,7 @@ const sidebarMenuButtonVariants = cva(
 )
 
 function SidebarMenuButton({
-  asChild = false,
   render,
-  children,
   isActive = false,
   variant = "default",
   size = "default",
@@ -511,24 +509,19 @@ function SidebarMenuButton({
   ...props
 }: useRender.ComponentProps<"button"> &
   React.ComponentProps<"button"> & {
-    asChild?: boolean
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
   } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const { isMobile, state } = useSidebar()
-  const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
-  const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
-
   const comp = useRender({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
         className: cn(sidebarMenuButtonVariants({ variant, size }), className),
-        children: resolvedChildren,
       },
       props
     ),
-    render: !tooltip ? resolvedRender : <TooltipTrigger render={resolvedRender} />,
+    render: !tooltip ? render : <TooltipTrigger render={render} />,
     state: {
       slot: "sidebar-menu-button",
       sidebar: "menu-button",
@@ -674,22 +667,16 @@ function SidebarMenuSubItem({
 }
 
 function SidebarMenuSubButton({
-  asChild = false,
   render,
-  children,
   size = "md",
   isActive = false,
   className,
   ...props
 }: useRender.ComponentProps<"a"> &
   React.ComponentProps<"a"> & {
-    asChild?: boolean
     size?: "sm" | "md"
     isActive?: boolean
   }) {
-  const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
-  const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
-
   return useRender({
     defaultTagName: "a",
     props: mergeProps<"a">(
@@ -698,11 +685,10 @@ function SidebarMenuSubButton({
           "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-sm data-[size=sm]:text-xs data-active:bg-sidebar-accent data-active:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
           className
         ),
-        children: resolvedChildren,
       },
       props
     ),
-    render: resolvedRender,
+    render,
     state: {
       slot: "sidebar-menu-sub-button",
       sidebar: "menu-sub-button",

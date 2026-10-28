@@ -107,8 +107,7 @@ export function PlannerControls({
           {/* Bills Pause Popover */}
           {recurringRules.length > 0 && (
             <Popover>
-              <PopoverTrigger asChild>
-                <Button
+              <PopoverTrigger render={<Button
                   variant="outline"
                   size="sm"
                   className="h-8 rounded-xl text-xs font-semibold gap-1.5 px-3 cursor-pointer border-border/40"
@@ -124,8 +123,7 @@ export function PlannerControls({
                     </Badge>
                   )}
                   <ChevronDown className="size-3 text-muted-foreground" />
-                </Button>
-              </PopoverTrigger>
+                </Button>} />
               <PopoverContent align="end" className="w-72 p-3 rounded-2xl border border-border/40 shadow-lg">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
                   Simulate Pausing Bills
@@ -317,7 +315,7 @@ function ControlTile({
           min={min}
           max={max}
           step={step}
-          onValueChange={onValueChange}
+          onValueChange={(val) => onValueChange(Array.isArray(val) ? [...val] : [val as number])}
           className="py-1 cursor-pointer"
         />
         <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground/70">

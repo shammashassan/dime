@@ -8,7 +8,7 @@ import { deleteContact } from "@/lib/actions/loans"
 import { ContactDialog } from "./contact-dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -56,7 +56,7 @@ import {
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { toast } from "@/components/ui/toast"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface ContactsViewProps {
   contacts: ContactWithSummary[]
@@ -113,9 +113,9 @@ export function ContactsView({ contacts }: ContactsViewProps) {
 
     if (search.trim()) {
       const q = search.toLowerCase()
-      if (!c.name.toLowerCase().includes(q) && 
-          !(c.email && c.email.toLowerCase().includes(q)) && 
-          !(c.phone && c.phone.includes(q))) {
+      if (!c.name.toLowerCase().includes(q) &&
+        !(c.email && c.email.toLowerCase().includes(q)) &&
+        !(c.phone && c.phone.includes(q))) {
         return false
       }
     }
@@ -248,41 +248,37 @@ export function ContactsView({ contacts }: ContactsViewProps) {
         <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "all"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             All ({tabCounts.all})
           </button>
           <button
             onClick={() => setActiveTab("borrowers")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "borrowers"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "borrowers"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Borrowers ({tabCounts.borrowers})
           </button>
           <button
             onClick={() => setActiveTab("lenders")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "lenders"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "lenders"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Lenders ({tabCounts.lenders})
           </button>
           <button
             onClick={() => setActiveTab("settled")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "settled"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "settled"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Settled ({tabCounts.settled})
           </button>
@@ -406,8 +402,7 @@ export function ContactsView({ contacts }: ContactsViewProps) {
                   <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5" onClick={(e) => e.stopPropagation()}>
                     {/* Edit Contact */}
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>
+                      <TooltipTrigger render={<span>
                           <ContactDialog
                             initialContact={contact as unknown as Contact}
                             trigger={
@@ -416,8 +411,7 @@ export function ContactsView({ contacts }: ContactsViewProps) {
                               </Button>
                             }
                           />
-                        </span>
-                      </TooltipTrigger>
+                        </span>} />
                       <TooltipContent side="top" className="rounded-xl font-medium">
                         Edit contact
                       </TooltipContent>
@@ -425,15 +419,13 @@ export function ContactsView({ contacts }: ContactsViewProps) {
 
                     {/* Delete Contact */}
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
+                      <TooltipTrigger render={<Button
                           variant="ghost" size="icon"
                           className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
                           onClick={() => setDeletingContactId(contact._id.toString())}
                         >
                           <Trash2 className="size-3.5" />
-                        </Button>
-                      </TooltipTrigger>
+                        </Button>} />
                       <TooltipContent side="top" className="rounded-xl font-medium">
                         Delete contact
                       </TooltipContent>
@@ -484,16 +476,15 @@ export function ContactsView({ contacts }: ContactsViewProps) {
                   </span>
 
                   {contact.loanCount > 0 ? (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      asChild
-                      className="h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
+                    <Link
+                      href={`/loans?search=${encodeURIComponent(contact.name)}`}
+                      className={cn(
+                        buttonVariants({ size: "sm", variant: "outline" }),
+                        "h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
+                      )}
                     >
-                      <Link href={`/loans?search=${encodeURIComponent(contact.name)}`}>
-                        View Loans
-                      </Link>
-                    </Button>
+                      View Loans
+                    </Link>
                   ) : null}
                 </CardFooter>
               </Card>

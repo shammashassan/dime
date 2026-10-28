@@ -28,7 +28,7 @@ import { EmptyMuted } from "@/components/notifications/notification-menu";
 import { toast } from "@/components/ui/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 interface NotificationsContentProps {
   initialNotifications: Notification[];
@@ -147,7 +147,7 @@ export function NotificationsContent({ initialNotifications }: NotificationsCont
                 key={idStr}
                 variant={!n.readAt ? "muted" : "outline"}
                 className="items-start md:items-center justify-between cursor-pointer rounded-2xl"
-                asChild={hasLink}
+                render={hasLink ? <Link href={n.link!} className="flex w-full items-center p-3" onClick={(e) => { if (!n.readAt) { e.preventDefault(); handleNotificationClick(idStr).then(() => { router.push(n.link!); }); } }} /> : undefined}
                 onClick={!hasLink ? () => handleNotificationClick(idStr) : undefined}
               >
                 {hasLink ? (

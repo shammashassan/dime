@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
@@ -116,8 +116,7 @@ export function ExpensesList({ expenses, currentUserId }: ExpensesListProps) {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
+                    <TooltipTrigger render={<Button
                         variant="ghost"
                         size="icon"
                         className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
@@ -125,8 +124,7 @@ export function ExpensesList({ expenses, currentUserId }: ExpensesListProps) {
                         disabled={deletingId === expense._id.toString()}
                       >
                         <Trash2 className="size-3.5" />
-                      </Button>
-                    </TooltipTrigger>
+                      </Button>} />
                     <TooltipContent side="top" className="rounded-xl font-medium">
                       Delete expense
                     </TooltipContent>
@@ -160,11 +158,10 @@ export function ExpensesList({ expenses, currentUserId }: ExpensesListProps) {
 
               {/* Progress Bar matching Loan Card */}
               <div>
-                <Progress
+                <Progress style={{ ['--progress-background' as any]: cardColor }}
                   value={progress}
-                  indicatorStyle={{ backgroundColor: cardColor }}
-                  className="h-1.5 rounded-full"
-                />
+                  className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-1.5 rounded-full"
+                 />
               </div>
             </CardContent>
 
@@ -177,16 +174,15 @@ export function ExpensesList({ expenses, currentUserId }: ExpensesListProps) {
               </span>
 
               <div className="flex items-center gap-1.5">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  asChild
-                  className="h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
+                <Link
+                  href={`/shared-expenses/${expense._id.toString()}`}
+                  className={cn(
+                    buttonVariants({ size: "sm", variant: "outline" }),
+                    "h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
+                  )}
                 >
-                  <Link href={`/shared-expenses/${expense._id.toString()}`}>
-                    Details <ChevronRight className="size-3.5 ml-0.5" />
-                  </Link>
-                </Button>
+                  Details <ChevronRight className="size-3.5 ml-0.5" />
+                </Link>
               </div>
             </CardFooter>
           </Card>

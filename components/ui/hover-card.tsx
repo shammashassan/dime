@@ -1,38 +1,15 @@
 "use client"
 
-import * as React from "react"
 import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card"
 import { cn } from "cn"
 
-function HoverCard({
-  openDelay,
-  ...props
-}: PreviewCardPrimitive.Root.Props & { openDelay?: number }) {
-  return (
-    <PreviewCardPrimitive.Root
-      data-slot="hover-card"
-      {...props}
-    />
-  )
+function HoverCard({ ...props }: PreviewCardPrimitive.Root.Props) {
+  return <PreviewCardPrimitive.Root data-slot="hover-card" {...props} />
 }
 
-function HoverCardTrigger({
-  asChild = false,
-  render,
-  children,
-  ...props
-}: PreviewCardPrimitive.Trigger.Props & { asChild?: boolean }) {
-  const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
-  const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
-
+function HoverCardTrigger({ ...props }: PreviewCardPrimitive.Trigger.Props) {
   return (
-    <PreviewCardPrimitive.Trigger
-      data-slot="hover-card-trigger"
-      render={resolvedRender}
-      {...props}
-    >
-      {resolvedChildren}
-    </PreviewCardPrimitive.Trigger>
+    <PreviewCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />
   )
 }
 

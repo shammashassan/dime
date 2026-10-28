@@ -54,14 +54,7 @@ export async function BudgetProgressList({ userId, className }: BudgetProgressLi
                 const href = b.id ? `/budgets/${b.id}` : "/budgets"
 
                 return (
-                  <Item
-                    key={b.id || b.name}
-                    asChild
-                    variant="outline"
-                    size="xs"
-                    className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group flex-col items-stretch gap-1.5 w-full min-w-0 overflow-hidden"
-                  >
-                    <Link href={href} className="flex flex-col w-full min-w-0 gap-1.5">
+                  <Item key={b.id || b.name} variant="outline" size="xs" className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group flex-col items-stretch gap-1.5 w-full min-w-0 overflow-hidden" render={<Link href={href} className="flex flex-col w-full min-w-0 gap-1.5" />}>
                       {/* Line 1: Budget Name (left) and Category (right) */}
                       <div className="flex items-center justify-between gap-1.5 min-w-0 w-full">
                         <span className="text-xs font-bold text-foreground truncate min-w-0 flex-1 group-hover:text-primary transition-colors">
@@ -108,8 +101,7 @@ export async function BudgetProgressList({ userId, className }: BudgetProgressLi
                           </span>
                         )}
                       </div>
-                    </Link>
-                  </Item>
+                    </Item>
                 )
               })}
             </ItemGroup>

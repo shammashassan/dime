@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection, loansCollection, loanRepaymentsCollection, contactsCollection, transactionsCollection, walletsCollection } from "@/lib/db/collections"
-import { loanSchema, LoanInput, repaymentSchema, RepaymentInput, contactSchema, ContactInput } from "@/lib/validations/loan.schema"
+import { loanSchema, LoanInput, repaymentSchema, RepaymentInput, contactSchema, ContactInput } from "@/lib/schemas/loan.schema"
 import { Loan, LoanRepayment, Contact, Transaction, Wallet, Category } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"

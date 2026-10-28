@@ -57,10 +57,8 @@ export function TopHoldingsCard({
                 const href = `/investments/${holding.walletId}/${holding.symbol}`
 
                 return (
-                  <HoverCard key={`${holding.walletId}_${holding.symbol}`} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item asChild className="cursor-pointer px-2.5 py-1.5 hover:bg-muted/60 transition-colors rounded-xl">
-                        <Link href={href}>
+                  <HoverCard key={`${holding.walletId}_${holding.symbol}`}>
+                    <HoverCardTrigger render={<Item className="cursor-pointer px-2.5 py-1.5 hover:bg-muted/60 transition-colors rounded-xl" render={<Link href={href} />}>
                           <ItemMedia className="size-7 rounded-lg border bg-purple-500/10 border-purple-500/20 text-purple-500 font-extrabold text-[9px] uppercase flex items-center justify-center">
                             {holding.symbol.slice(0, 3)}
                           </ItemMedia>
@@ -80,9 +78,7 @@ export function TopHoldingsCard({
                               {percentage}% of portfolio
                             </span>
                           </ItemActions>
-                        </Link>
-                      </Item>
-                    </HoverCardTrigger>
+                        </Item>} />
                     <HoverCardContent className="w-60 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                       <div className="flex items-center gap-2 mb-1.5">
                         <div className="size-6 rounded-lg border bg-purple-500/10 border-purple-500/20 text-purple-500 font-bold text-[10px] flex items-center justify-center uppercase">

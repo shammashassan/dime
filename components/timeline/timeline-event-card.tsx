@@ -6,7 +6,7 @@ import { format, parseISO } from "date-fns"
 import { formatCurrency, cn } from "@/lib/utils"
 import type { TimelineEvent } from "@/types"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Item,
   ItemMedia,
@@ -158,12 +158,11 @@ export function TimelineEventCard({ event }: TimelineEventCardProps) {
         )}
 
         {event.href && (
-          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground cursor-pointer">
-            <Link href={event.href} className="flex items-center gap-1">
+          <Link href={event.href} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-7 px-2 text-xs text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1")}>
               <span className="hidden sm:inline">Details</span>
               <ExternalLink className="size-3" />
+            
             </Link>
-          </Button>
         )}
       </ItemActions>
     </Item>

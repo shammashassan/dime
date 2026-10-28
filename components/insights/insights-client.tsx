@@ -23,7 +23,7 @@ import {
   Search,
 } from "lucide-react"
 import { toast } from "@/components/ui/toast"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   dismissInsightAction,
   undoDismissInsightAction,
@@ -219,16 +219,14 @@ export function InsightsClient({ data }: InsightsClientProps) {
               <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
                 AI Spending Insights
               </h1>
-              <HoverCard openDelay={150}>
-                <HoverCardTrigger asChild>
-                  <Badge
+              <HoverCard>
+                <HoverCardTrigger render={<Badge
                     variant="outline"
                     tabIndex={0}
                     className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                   >
                     {data.currency}
-                  </Badge>
-                </HoverCardTrigger>
+                  </Badge>} />
                 <HoverCardContent
                   className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3"
                   align="start"

@@ -2,9 +2,9 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
-import { transactionSchema, TransactionInput } from "@/lib/validations/transaction.schema"
+import { transactionSchema, TransactionInput } from "@/lib/schemas/transaction.schema"
 import { Wallet, Transaction, Category, AutomationRule, BillInstance } from "@/types"
-import { executeAutomationRules } from "@/lib/automation-engine"
+import { executeAutomationRules } from "@/lib/services/automation-engine"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"
 import { convertCurrency } from "@/lib/currency"
@@ -12,9 +12,9 @@ import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { FinancialScope } from "@/types/scope"
 import { db } from "@/lib/db/client"
 import { canCreateTransactions, canEditTransactions, canDeleteTransactions, Role } from "@/lib/permissions"
-import { generateSplitId } from "@/lib/split-utils"
+import { generateSplitId } from "@/lib/calculations/split-utils"
 import { getPreferences } from "@/lib/queries/preferences"
-import { syncUserAlerts } from "@/lib/notification-sync"
+import { syncUserAlerts } from "@/lib/services/notification-sync"
 
 // Helper to update a wallet's balance
 async function updateWalletBalance(scope: FinancialScope, walletId: string, amountChange: number) {

@@ -11,7 +11,7 @@ import {
   ItemTitle,
   ItemDescription,
 } from "@/components/ui/item"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   Compass,
   ArrowUpRight,
@@ -93,15 +93,8 @@ export async function CoachWidget({ userId, className }: CoachWidgetProps) {
 
         {/* Top Playbook / Strategy Action Item */}
         {topStrategy ? (
-          <HoverCard openDelay={200}>
-            <HoverCardTrigger asChild>
-              <Item
-                asChild
-                variant="outline"
-                size="xs"
-                className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group w-full overflow-hidden"
-              >
-                <Link href={topStrategy.actionUrl || "/coach"} className="flex items-center justify-between w-full min-w-0 gap-2 overflow-hidden">
+          <HoverCard>
+            <HoverCardTrigger render={<Item variant="outline" size="xs" className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group w-full overflow-hidden" render={<Link href={topStrategy.actionUrl || "/coach"} className="flex items-center justify-between w-full min-w-0 gap-2 overflow-hidden" />}>
                   <div className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
                     <ItemMedia className="size-7.5 rounded-lg flex items-center justify-center shrink-0 border border-border/50 bg-primary/10 text-primary">
                       <Compass className="size-3.5" />
@@ -125,9 +118,7 @@ export async function CoachWidget({ userId, className }: CoachWidgetProps) {
                       {topStrategy.impact}
                     </Badge>
                   )}
-                </Link>
-              </Item>
-            </HoverCardTrigger>
+                </Item>} />
             <HoverCardContent
               className="w-72 max-w-[calc(100vw-2rem)] text-xs rounded-xl border border-border/40 shadow-lg p-3 bg-popover"
               align="start"

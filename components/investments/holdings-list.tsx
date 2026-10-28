@@ -1,9 +1,9 @@
 "use client"
 
 import { InvestmentHolding } from "@/types"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -91,11 +91,10 @@ export function HoldingsList({ holdings, accountId, currency }: { holdings: Inve
                   </div>
                 </TableCell>
                 <TableCell className="py-3 text-right">
-                  <Button variant="ghost" size="icon" asChild className="size-7 rounded-lg text-muted-foreground hover:text-foreground">
-                    <Link href={linkHref}>
+                  <Link href={linkHref} className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-7 rounded-lg text-muted-foreground hover:text-foreground")}>
                       <ChevronRight className="size-4" />
+                    
                     </Link>
-                  </Button>
                 </TableCell>
               </TableRow>
             )

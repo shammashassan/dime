@@ -11,7 +11,7 @@ import {
   useCallback,
 } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 
 function useControllableState<T>({
   prop,
@@ -48,7 +48,7 @@ type BannerContextProps = {
 
 export const BannerContext = createContext<BannerContextProps>({
   show: true,
-  setShow: () => {},
+  setShow: () => { },
 });
 
 export type BannerProps = HTMLAttributes<HTMLDivElement> & {

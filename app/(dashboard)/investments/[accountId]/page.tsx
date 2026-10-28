@@ -17,7 +17,8 @@ import { TransactionDialog } from "@/components/investments/transaction-dialog"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
 import { formatCurrency, serializeData } from "@/lib/utils"
 import { ChevronLeft, TrendingUp, Coins, ArrowUpRight, ArrowDownRight, Layers } from "lucide-react"
 import Link from "next/link"
@@ -57,12 +58,14 @@ export default async function AccountDetailPage({
       {/* ── Header & Breadcrumbs ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <Button variant="outline" size="icon" asChild className="size-9 rounded-xl border-border/60 shrink-0">
-            <Link href="/investments" aria-label="Back to investments">
-              <ChevronLeft className="size-5" />
-              <span className="sr-only">Back to investments</span>
-            </Link>
-          </Button>
+          <Link
+            href="/investments"
+            aria-label="Back to investments"
+            className={cn(buttonVariants({ variant: "outline", size: "icon" }), "size-9 rounded-xl border-border/60 shrink-0")}
+          >
+            <ChevronLeft className="size-5" />
+            <span className="sr-only">Back to investments</span>
+          </Link>
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-extrabold tracking-tight">{serialized.wallet.name}</h1>
@@ -120,7 +123,7 @@ export default async function AccountDetailPage({
             Account Holdings ({serialized.holdings.length})
           </h2>
         </div>
-        <Suspense fallback={<Skeleton className="h-[300px] w-full rounded-2xl" />}>
+        <Suspense fallback={<Skeleton className="h-75 w-full rounded-2xl" />}>
           <HoldingsList holdings={serialized.holdings} accountId={accountId} currency={currency} />
         </Suspense>
       </div>

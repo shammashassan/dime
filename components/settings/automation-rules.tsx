@@ -30,8 +30,8 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
-import { AUTOMATION_TEMPLATES } from "@/lib/automation-templates"
-import { cn } from "@/lib/utils"
+import { AUTOMATION_TEMPLATES } from "@/lib/data"
+import { cn } from "cn"
 import {
   createAutomationRuleAction,
   updateAutomationRuleAction,
@@ -672,32 +672,28 @@ export function AutomationRulesSettings({ userId, wallets, categories, budgets }
                         {/* Inline actions — always visible on mobile, hover-revealed on desktop */}
                         <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
+                            <TooltipTrigger render={<Button
                                 variant="ghost"
                                 size="icon"
                                 className="size-8 rounded-lg hover:bg-muted/70"
                                 onClick={() => handleOpenEditDialog(rule)}
                               >
                                 <Edit className="size-3.5 text-muted-foreground" />
-                              </Button>
-                            </TooltipTrigger>
+                              </Button>} />
                             <TooltipContent side="top" className="rounded-xl font-semibold">
                               Edit automation
                             </TooltipContent>
                           </Tooltip>
 
                           <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
+                            <TooltipTrigger render={<Button
                                 variant="ghost"
                                 size="icon"
                                 className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
                                 onClick={() => setDeletingRuleId(rule._id.toString())}
                               >
                                 <Trash2 className="size-3.5" />
-                              </Button>
-                            </TooltipTrigger>
+                              </Button>} />
                             <TooltipContent side="top" className="rounded-xl font-semibold">
                               Delete rule
                             </TooltipContent>

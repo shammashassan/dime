@@ -22,7 +22,7 @@ import { formatCurrency } from "@/lib/utils"
 interface RepaymentDialogProps {
   loan: Loan
   wallets: Wallet[]
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement | null
   onSuccess?: () => void
 }
 
@@ -130,7 +130,7 @@ export function RepaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+      {trigger && <DialogTrigger render={trigger} />}
 
       <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
@@ -210,8 +210,7 @@ export function RepaymentDialog({
                 name="date"
                 render={({ field }) => (
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         variant="outline"
                         type="button"
                         className="w-full justify-start rounded-xl px-3 border border-input font-normal h-9 min-w-0"
@@ -220,8 +219,7 @@ export function RepaymentDialog({
                         <span className="truncate flex-1 text-left">
                           {field.value ? format(field.value, "PP") : "Pick date"}
                         </span>
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                       <Calendar
                         mode="single"

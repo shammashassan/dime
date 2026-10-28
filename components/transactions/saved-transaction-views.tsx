@@ -295,7 +295,7 @@ export function SavedTransactionViews({ defaultCurrency = "USD" }: SavedTransact
 
   return (
     <>
-      <Select value={activeValue} onValueChange={handleValueChange}>
+      <Select value={activeValue} onValueChange={(val) => { if (val) handleValueChange(val) }}>
         <SelectTrigger className="w-full h-9">
           <SelectValue placeholder="All Views" />
         </SelectTrigger>

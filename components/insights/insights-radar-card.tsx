@@ -4,7 +4,7 @@ import React from "react"
 import type { SpendingInsight, InsightSeverity } from "@/types"
 import { Badge } from "@/components/ui/badge"
 import { ShieldAlert, CheckCircle2, Flame, ArrowUpRight } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import Link from "next/link"
 
 interface InsightsRadarCardProps {

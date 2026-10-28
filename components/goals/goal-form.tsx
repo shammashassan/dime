@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { goalSchema, GoalInput } from "@/lib/validations/goal.schema"
+import { goalSchema, GoalInput } from "@/lib/schemas/goal.schema"
 import { Goal } from "@/types"
 import { createGoal, updateGoal } from "@/lib/actions/goals"
 import { toast } from "@/components/ui/toast"
@@ -249,8 +249,7 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
                   name="targetDate"
                   render={({ field }) => (
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
+                      <PopoverTrigger render={<Button
                           variant="outline"
                           type="button"
                           className="w-full justify-start font-normal min-w-0"
@@ -259,8 +258,7 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
                           <span className="truncate flex-1 text-left">
                             {field.value ? format(new Date(field.value), "PP") : "Pick a date"}
                           </span>
-                        </Button>
-                      </PopoverTrigger>
+                        </Button>} />
                       <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                         <Calendar
                           mode="single"

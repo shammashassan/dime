@@ -72,13 +72,8 @@ export function CategorySpikesCard({ insights, currency = "USD" }: CategorySpike
                 const secondaryLabel = spike.metricLabel ? spike.metricLabel : "vs baseline"
 
                 return (
-                  <HoverCard key={spike.id} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item
-                        asChild
-                        className="cursor-pointer px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl"
-                      >
-                        <Link href={href} className="w-full flex items-start 2xl:items-center justify-between gap-2.5 min-w-0">
+                  <HoverCard key={spike.id}>
+                    <HoverCardTrigger render={<Item className="cursor-pointer px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl" render={<Link href={href} className="w-full flex items-start 2xl:items-center justify-between gap-2.5 min-w-0" />}>
                           <ItemMedia className="size-7 rounded-lg border bg-rose-500/10 border-rose-500/20 text-rose-500 flex items-center justify-center shrink-0 mt-0.5 2xl:mt-0">
                             <AlertTriangle className="size-3.5" />
                           </ItemMedia>
@@ -110,9 +105,7 @@ export function CategorySpikesCard({ insights, currency = "USD" }: CategorySpike
                               {secondaryLabel}
                             </span>
                           </ItemActions>
-                        </Link>
-                      </Item>
-                    </HoverCardTrigger>
+                        </Item>} />
                     <HoverCardContent
                       className="w-72 max-w-[calc(100vw-2rem)] text-xs rounded-xl border border-border/40 shadow-lg p-3 bg-popover"
                       align="start"

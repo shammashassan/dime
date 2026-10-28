@@ -18,7 +18,7 @@ import {
   EmptyTitle,
   EmptyDescription,
 } from "@/components/ui/empty"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   Sparkles,
   CheckCircle2,
@@ -74,12 +74,7 @@ export function HealthRecommendations({ recommendations }: HealthRecommendations
                 const iconColor = pillarColorMap[rec.pillarId] || "text-primary bg-primary/10 border-primary/20"
 
                 return (
-                  <Item
-                    key={rec.id}
-                    asChild
-                    className="p-2.5 hover:bg-muted/40 transition-colors rounded-xl border-transparent group cursor-pointer"
-                  >
-                    <Link href={rec.actionUrl || "/health"} className="flex items-start gap-3 min-w-0 w-full">
+                  <Item key={rec.id} className="p-2.5 hover:bg-muted/40 transition-colors rounded-xl border-transparent group cursor-pointer" render={<Link href={rec.actionUrl || "/health"} className="flex items-start gap-3 min-w-0 w-full" />}>
                       <ItemMedia className={cn("size-8 rounded-lg border shrink-0 mt-0.5", iconColor)}>
                         <Icon className="size-4" />
                       </ItemMedia>
@@ -102,8 +97,7 @@ export function HealthRecommendations({ recommendations }: HealthRecommendations
                           {rec.description}
                         </ItemDescription>
                       </ItemContent>
-                    </Link>
-                  </Item>
+                    </Item>
                 )
               })}
             </ItemGroup>

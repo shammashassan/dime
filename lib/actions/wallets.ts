@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
-import { walletSchema, WalletInput } from "@/lib/validations/wallet.schema"
+import { walletSchema, WalletInput } from "@/lib/schemas/wallet.schema"
 import { Wallet, Transaction, Category } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"

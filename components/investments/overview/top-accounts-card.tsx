@@ -46,10 +46,8 @@ export function TopAccountsCard({
                 const isPositive = account.unrealizedGain >= 0
 
                 return (
-                  <HoverCard key={account.accountId} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item asChild className="cursor-pointer px-2.5 py-1.5 hover:bg-muted/60 transition-colors rounded-xl">
-                        <Link href={`/investments/${account.accountId}`}>
+                  <HoverCard key={account.accountId}>
+                    <HoverCardTrigger render={<Item className="cursor-pointer px-2.5 py-1.5 hover:bg-muted/60 transition-colors rounded-xl" render={<Link href={`/investments/${account.accountId}`} />}>
                           <ItemMedia
                             className="size-7 rounded-lg flex items-center justify-center shrink-0"
                             style={{ backgroundColor: color + "18", color }}
@@ -72,9 +70,7 @@ export function TopAccountsCard({
                               {isPositive ? '+' : ''}{formatCurrency(account.unrealizedGain, account.currency || currency)}
                             </span>
                           </ItemActions>
-                        </Link>
-                      </Item>
-                    </HoverCardTrigger>
+                        </Item>} />
                     <HoverCardContent className="w-60 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                       <div className="flex items-center gap-2 mb-1.5">
                         <div

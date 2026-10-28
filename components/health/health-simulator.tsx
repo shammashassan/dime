@@ -115,7 +115,7 @@ export function HealthSimulator({
               </div>
               <Slider
                 value={[extraSavings]}
-                onValueChange={(val) => setExtraSavings(val[0])}
+                onValueChange={(val) => setExtraSavings(Array.isArray(val) ? val[0] : (val as number))}
                 min={0}
                 max={1000}
                 step={25}
@@ -135,7 +135,7 @@ export function HealthSimulator({
               </div>
               <Slider
                 value={[debtPaydown]}
-                onValueChange={(val) => setDebtPaydown(val[0])}
+                onValueChange={(val) => setDebtPaydown(Array.isArray(val) ? val[0] : (val as number))}
                 min={0}
                 max={5000}
                 step={100}
@@ -155,7 +155,7 @@ export function HealthSimulator({
               </div>
               <Slider
                 value={[subscriptionTrim]}
-                onValueChange={(val) => setSubscriptionTrim(val[0])}
+                onValueChange={(val) => setSubscriptionTrim(Array.isArray(val) ? val[0] : (val as number))}
                 min={0}
                 max={200}
                 step={10}

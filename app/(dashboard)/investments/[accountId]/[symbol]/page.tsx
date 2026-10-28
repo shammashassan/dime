@@ -28,8 +28,8 @@ import {
 import { HoldingTaxLotsCard } from "@/components/investments/holding-tax-lots-card"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { formatCurrency, serializeData } from "@/lib/utils"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn, formatCurrency, serializeData } from "@/lib/utils"
 import {
   ChevronLeft,
   Coins,
@@ -101,12 +101,14 @@ export default async function HoldingDetailPage({
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <Button variant="outline" size="icon" asChild className="size-9 rounded-xl border-border/60 shrink-0">
-            <Link href={`/investments/${accountId}`} aria-label="Back to investment account">
-              <ChevronLeft className="size-5" />
-              <span className="sr-only">Back to investment account</span>
-            </Link>
-          </Button>
+          <Link
+            href={`/investments/${accountId}`}
+            aria-label="Back to investment account"
+            className={cn(buttonVariants({ variant: "outline", size: "icon" }), "size-9 rounded-xl border-border/60 shrink-0")}
+          >
+            <ChevronLeft className="size-5" />
+            <span className="sr-only">Back to investment account</span>
+          </Link>
           <div className="size-11 rounded-2xl bg-primary/10 text-primary font-black text-sm flex items-center justify-center shrink-0 border border-primary/20 uppercase">
             {holding.symbol.slice(0, 3)}
           </div>

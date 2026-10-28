@@ -135,15 +135,8 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
                 const href = ins.actionUrl || "/insights"
 
                 return (
-                  <HoverCard key={ins.id} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item
-                        asChild
-                        variant="outline"
-                        size="xs"
-                        className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors w-full min-w-0 max-w-full cursor-pointer no-underline group overflow-hidden"
-                      >
-                        <Link href={href} className="flex items-center justify-between w-full min-w-0 gap-2 overflow-hidden">
+                  <HoverCard key={ins.id}>
+                    <HoverCardTrigger render={<Item variant="outline" size="xs" className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors w-full min-w-0 max-w-full cursor-pointer no-underline group overflow-hidden" render={<Link href={href} className="flex items-center justify-between w-full min-w-0 gap-2 overflow-hidden" />}>
                           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                             <ItemMedia
                               className={cn(
@@ -184,9 +177,7 @@ export async function AIInsights({ userId, className = "" }: AIInsightsProps) {
                               {ins.category}
                             </Badge>
                           </ItemActions>
-                        </Link>
-                      </Item>
-                    </HoverCardTrigger>
+                        </Item>} />
                     <HoverCardContent
                       className="w-72 max-w-[calc(100vw-2rem)] text-xs rounded-xl border border-border/40 shadow-lg p-3 bg-popover"
                       align="start"

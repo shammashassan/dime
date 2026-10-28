@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getFinancialScope } from "@/lib/scope"
 import { coachMessagesCollection } from "@/lib/db/collections"
-import { askCoachSchema, AskCoachInput } from "@/lib/validations/coach.schema"
+import { askCoachSchema, AskCoachInput } from "@/lib/schemas/coach.schema"
 import { getCoachOverviewData } from "@/lib/queries/coach"
 import {
   generateCoachChatAnswer,

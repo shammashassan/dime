@@ -252,11 +252,9 @@ export function SharedExpenseDetails({
 
           {isOwner && (
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline" size="icon" className="size-10 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
+              <AlertDialogTrigger render={<Button variant="outline" size="icon" className="size-10 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
                   <Trash2 className="size-4" />
-                </Button>
-              </AlertDialogTrigger>
+                </Button>} />
               <AlertDialogContent className="rounded-2xl border border-border/40 p-6 shadow-xl">
                 <AlertDialogHeader>
                   <AlertDialogMedia>
@@ -330,11 +328,10 @@ export function SharedExpenseDetails({
           </span>
         </div>
 
-        <Progress
+        <Progress style={{ ['--progress-background' as any]: progressPct >= 100 ? "#10b981" : "var(--primary)" }}
           value={progressPct}
-          indicatorStyle={{ backgroundColor: progressPct >= 100 ? "#10b981" : "var(--primary)" }}
-          className="h-2.5 bg-muted/60"
-        />
+          className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2.5 bg-muted/60"
+         />
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
           <div className="flex flex-col gap-0.5 rounded-xl border border-border/30 bg-muted/20 px-3 py-2.5">
@@ -573,8 +570,7 @@ export function SharedExpenseDetails({
                 const href = getParticipantHref(p.participantId, p.participantType)
 
                 return (
-                  <Item key={p.participantId} size="sm" asChild className="cursor-pointer">
-                    <Link href={href}>
+                  <Item key={p.participantId} size="sm" className="cursor-pointer" render={<Link href={href} />}>
                       <ItemMedia className="size-8 rounded-xl border bg-primary/10 text-primary border-primary/20 font-black text-xs flex items-center justify-center">
                         {p.name[0]}
                       </ItemMedia>
@@ -613,8 +609,7 @@ export function SharedExpenseDetails({
                               : "Settled"}
                         </Badge>
                       </ItemActions>
-                    </Link>
-                  </Item>
+                    </Item>
                 )
               })}
             </ItemGroup>
@@ -766,8 +761,7 @@ export function SharedExpenseDetails({
                   const toLabel = s.toParticipantId === currentUserId ? "You" : (s.toParticipantName || expense.participants.find((p) => p.participantId === s.toParticipantId)?.name || "Partner")
 
                   return (
-                    <Item key={s._id.toString()} size="sm" asChild className="cursor-pointer">
-                      <Link href="#" onClick={(e) => e.preventDefault()}>
+                    <Item key={s._id.toString()} size="sm" className="cursor-pointer" render={<Link href="#" onClick={(e) => e.preventDefault()} />}>
                         <ItemMedia className="size-8 rounded-xl border bg-emerald-500/10 text-emerald-600 border-emerald-500/20 flex items-center justify-center">
                           <HandCoins className="size-3.5" />
                         </ItemMedia>
@@ -787,8 +781,7 @@ export function SharedExpenseDetails({
                             +{formatCurrency(s.amount, s.currency)}
                           </span>
                         </ItemActions>
-                      </Link>
-                    </Item>
+                      </Item>
                   )
                 })}
               </ItemGroup>

@@ -73,15 +73,13 @@ export function DashboardHeader() {
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link
+                <BreadcrumbLink render={<Link
                     href="/dashboard"
                     className="flex items-center gap-1.5 text-muted-foreground/60 transition-colors hover:text-foreground"
                   >
                     <Home className="size-4" />
                     Dime
-                  </Link>
-                </BreadcrumbLink>
+                  </Link>} />
               </BreadcrumbItem>
               <React.Suspense fallback={null}>
                 <HeaderBreadcrumb />

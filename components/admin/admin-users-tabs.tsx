@@ -74,7 +74,7 @@ export function AdminUsersTabs({
 
         {/* Mobile Select (visible on smaller screens) */}
         <div className="sm:hidden w-full">
-          <Select value={currentTab} onValueChange={setCurrentTab}>
+          <Select value={currentTab} onValueChange={(val) => { if (val) setCurrentTab(val) }}>
             <SelectTrigger aria-label="Select user category" className="w-full border-border/40 bg-card h-10">
               <SelectValue placeholder={tabNames[currentTab] || "Active Users"} />
             </SelectTrigger>

@@ -21,7 +21,7 @@ import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { RecurringForm } from "./recurring-form"
 import { PayBillForm } from "./pay-bill-form"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   Empty,
   EmptyDescription,
@@ -252,30 +252,22 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
           <div className="hidden @[300px]:flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
             {rule.cancellationUrl && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <a href={rule.cancellationUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center justify-center size-8 rounded-lg hover:bg-muted/70 text-muted-foreground hover:text-primary"><Ban className="size-3.5" /></a>
-                </TooltipTrigger>
+                <TooltipTrigger render={<a href={rule.cancellationUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex items-center justify-center size-8 rounded-lg hover:bg-muted/70 text-muted-foreground hover:text-primary"><Ban className="size-3.5" /></a>} />
                 <TooltipContent side="top" className="rounded-xl font-medium">Cancel Link</TooltipContent>
               </Tooltip>
             )}
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className={cn("size-8 rounded-lg", rule.isActive ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10")} onClick={(e) => { e.stopPropagation(); handleToggleActive(rule._id.toString()) }}>
+              <TooltipTrigger render={<Button variant="ghost" size="icon" className={cn("size-8 rounded-lg", rule.isActive ? "text-amber-500 hover:text-amber-600 hover:bg-amber-500/10" : "text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10")} onClick={(e) => { e.stopPropagation(); handleToggleActive(rule._id.toString()) }}>
                   {rule.isActive ? <Pause className="size-3.5 fill-amber-500/10" /> : <Play className="size-3.5 fill-emerald-500/10" />}
-                </Button>
-              </TooltipTrigger>
+                </Button>} />
               <TooltipContent side="top" className="rounded-xl font-medium">{rule.isActive ? "Pause rule" : "Resume rule"}</TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-muted/70" onClick={(e) => { e.stopPropagation(); setEditingRule(rule) }}><Edit className="size-3.5 text-muted-foreground" /></Button>
-              </TooltipTrigger>
+              <TooltipTrigger render={<Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-muted/70" onClick={(e) => { e.stopPropagation(); setEditingRule(rule) }}><Edit className="size-3.5 text-muted-foreground" /></Button>} />
               <TooltipContent side="top" className="rounded-xl font-medium">Edit rule</TooltipContent>
             </Tooltip>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10" onClick={(e) => { e.stopPropagation(); setDeletingRuleId(rule._id.toString()) }}><Trash2 className="size-3.5" /></Button>
-              </TooltipTrigger>
+              <TooltipTrigger render={<Button variant="ghost" size="icon" className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10" onClick={(e) => { e.stopPropagation(); setDeletingRuleId(rule._id.toString()) }}><Trash2 className="size-3.5" /></Button>} />
               <TooltipContent side="top" className="rounded-xl font-medium">Delete rule</TooltipContent>
             </Tooltip>
           </div>
@@ -283,11 +275,9 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
           {/* Compact Dropdown Menu: Only appears when card is narrow (< 300px in constrained columns) */}
           <div className="flex @[300px]:hidden items-center shrink-0 pt-0.5" onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
+              <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="size-8 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer">
                   <MoreVertical className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
+                </Button>} />
               <DropdownMenuContent align="end" className="w-44 rounded-xl border border-border/50">
                 <DropdownMenuItem onClick={() => handleToggleActive(rule._id.toString())}>
                   {rule.isActive ? <Pause className="size-3.5 mr-2 text-amber-500" /> : <Play className="size-3.5 mr-2 text-emerald-500" />}
@@ -298,12 +288,10 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
                   Edit rule
                 </DropdownMenuItem>
                 {rule.cancellationUrl && (
-                  <DropdownMenuItem asChild>
-                    <a href={rule.cancellationUrl} target="_blank" rel="noopener noreferrer">
+                  <DropdownMenuItem render={<a href={rule.cancellationUrl} target="_blank" rel="noopener noreferrer">
                       <Ban className="size-3.5 mr-2" />
                       Cancel link
-                    </a>
-                  </DropdownMenuItem>
+                    </a>} />
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setDeletingRuleId(rule._id.toString())} className="text-rose-500 focus:text-rose-500">

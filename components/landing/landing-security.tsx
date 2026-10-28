@@ -6,7 +6,8 @@ import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -180,12 +181,24 @@ export function LandingSecurity() {
                 </div>
 
                 <div className="relative z-10 flex flex-col sm:flex-row gap-3 w-full max-w-xs mt-2">
-                  <Button asChild variant="outline" size="lg" className="w-full sm:flex-1 rounded-full font-semibold bg-input/30 hover:bg-input/50 cursor-pointer">
-                    <Link href="/sign-in">Sign In</Link>
-                  </Button>
-                  <Button asChild size="lg" className="w-full sm:flex-1 rounded-full font-semibold shadow-md shadow-primary/20 hover:scale-105 transition-transform cursor-pointer">
-                    <Link href="/sign-up">Register</Link>
-                  </Button>
+                  <Link
+                    href="/sign-in"
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "lg" }),
+                      "w-full sm:flex-1 rounded-full font-semibold bg-input/30 hover:bg-input/50 cursor-pointer"
+                    )}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/sign-up"
+                    className={cn(
+                      buttonVariants({ size: "lg" }),
+                      "w-full sm:flex-1 rounded-full font-semibold shadow-md shadow-primary/20 hover:scale-105 transition-transform cursor-pointer"
+                    )}
+                  >
+                    Register
+                  </Link>
                 </div>
               </CardContent>
             </Card>

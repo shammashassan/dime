@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { CalendarIcon, Loader2, Plus, TrendingUp } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 const formSchema = z.object({
   assetId: z.string().min(1, "Asset ID is required"),
@@ -29,7 +29,7 @@ type FormInput = z.infer<typeof formSchema>
 interface ValuationDialogProps {
   assetId: string
   assetCurrency: string
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement | null
   open?: boolean
   onOpenChange?: (open: boolean) => void
   onSuccess?: () => void
@@ -112,14 +112,12 @@ export function ValuationDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger !== undefined ? (
-        trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>
+        trigger && <DialogTrigger render={trigger} />
       ) : (
-        <DialogTrigger asChild>
-          <Button className="rounded-xl font-semibold">
+        <DialogTrigger render={<Button className="rounded-xl font-semibold">
             <Plus className="size-4 mr-1.5" />
             Log Valuation
-          </Button>
-        </DialogTrigger>
+          </Button>} />
       )}
       <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto min-w-0">
         <DialogHeader>
@@ -149,8 +147,7 @@ export function ValuationDialog({
                 name="date"
                 render={({ field }) => (
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         type="button"
                         variant="outline"
                         aria-label="Pick valuation date"
@@ -161,8 +158,7 @@ export function ValuationDialog({
                       >
                         <CalendarIcon className="mr-2 h-4 size-4" />
                         {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent className="w-auto p-0 rounded-2xl shadow-xl" align="start">
                       <Calendar
                         mode="single"

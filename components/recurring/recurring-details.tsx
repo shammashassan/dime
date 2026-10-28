@@ -240,11 +240,9 @@ export function RecurringDetails({
             <Edit className="size-4 mr-2" /> Edit
           </Button>
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="icon" className="size-9 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
+            <AlertDialogTrigger render={<Button variant="outline" size="icon" className="size-9 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
                 <Trash2 className="size-4" />
-              </Button>
-            </AlertDialogTrigger>
+              </Button>} />
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
@@ -547,15 +545,13 @@ export function RecurringDetails({
                             )}
                             <div className="size-6 flex items-center justify-center shrink-0">
                               <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <button
+                                <AlertDialogTrigger render={<button
                                     type="button"
                                     aria-label="Delete bill"
                                     className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     <Trash2 className="size-3.5" />
-                                  </button>
-                                </AlertDialogTrigger>
+                                  </button>} />
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
@@ -603,15 +599,13 @@ export function RecurringDetails({
                           </span>
                           <div className="size-6 flex items-center justify-center shrink-0">
                             <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <button
+                              <AlertDialogTrigger render={<button
                                   type="button"
                                   aria-label="Delete transaction"
                                   className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <Trash2 className="size-3.5" />
-                                </button>
-                              </AlertDialogTrigger>
+                                </button>} />
                               <AlertDialogContent>
                                 <AlertDialogHeader>
                                   <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">

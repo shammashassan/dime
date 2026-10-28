@@ -12,7 +12,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { PiggyBank } from "lucide-react"
 import { formatCurrency, cn } from "@/lib/utils"
 
@@ -124,9 +124,7 @@ export function BudgetPerformanceChart({
                 Set up monthly spending targets for your categories to track adherence here.
               </p>
             </div>
-            <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs font-semibold">
-              <Link href="/budgets">Configure Budgets</Link>
-            </Button>
+            <Link href="/budgets" className={cn(buttonVariants({ size: "sm", variant: "outline" }), "rounded-lg h-8 text-xs font-semibold")}>Configure Budgets</Link>
           </div>
         )}
       </div>

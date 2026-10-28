@@ -28,7 +28,7 @@ import {
 import { toast } from "@/components/ui/toast"
 import { GoalFormDialog } from "./goal-form"
 import { GoalContributionDialog } from "./goal-contribution-dialog"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 const GOAL_ICONS: Record<string, React.ComponentType<any>> = {
@@ -117,30 +117,26 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
+              <TooltipTrigger render={<Button
                   variant="ghost" size="icon"
                   className="size-8 rounded-lg hover:bg-muted/70 cursor-pointer"
                   onClick={() => setEditOpen(true)}
                 >
                   <Edit className="size-3.5 text-muted-foreground" />
-                </Button>
-              </TooltipTrigger>
+                </Button>} />
               <TooltipContent side="top" className="rounded-xl font-medium">
                 Edit goal
               </TooltipContent>
             </Tooltip>
 
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
+              <TooltipTrigger render={<Button
                   variant="ghost" size="icon"
                   className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10 cursor-pointer"
                   onClick={onDeleteClick}
                 >
                   <Trash2 className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
+                </Button>} />
               <TooltipContent side="top" className="rounded-xl font-medium">
                 Delete goal
               </TooltipContent>
@@ -168,11 +164,10 @@ export function GoalCard({ goal, wallets, onDeleteClick }: GoalCardProps) {
 
           {/* Progress bar */}
           <div>
-            <Progress
+            <Progress style={{ ['--progress-background' as any]: barColor }}
               value={percentage}
-              indicatorStyle={{ backgroundColor: barColor }}
-              className="h-2 bg-muted/60"
-            />
+              className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/60"
+             />
             <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
               <span>
                 {remaining > 0 ? (

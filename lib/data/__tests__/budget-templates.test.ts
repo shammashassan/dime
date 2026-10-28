@@ -5,7 +5,7 @@ import {
   applyTemplateInputSchema,
   saveCurrentBudgetsSchema,
   createCustomTemplateSchema,
-} from "../validations/budget-template.schema"
+} from "@/lib/schemas/budget-template.schema"
 
 describe("Budget Templates System Presets", () => {
   it("includes exactly 8 curated system presets", () => {

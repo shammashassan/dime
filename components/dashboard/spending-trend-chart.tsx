@@ -102,9 +102,8 @@ export function SpendingTrendChart({
         </div>
         <div className="flex items-center gap-1.5 self-start sm:self-auto">
           <ToggleGroup
-            type="single"
-            value={timeRange}
-            onValueChange={(v) => v && setTimeRange(v)}
+            value={[timeRange]}
+            onValueChange={(v) => { if (v?.[0]) setTimeRange(v[0]) }}
             variant="outline"
             spacing={0}
             className="hidden *:data-[slot=toggle-group-item]:px-3! @[767px]/card:flex"
@@ -113,7 +112,7 @@ export function SpendingTrendChart({
             <ToggleGroupItem value="60d">60D</ToggleGroupItem>
             <ToggleGroupItem value="90d">90D</ToggleGroupItem>
           </ToggleGroup>
-          <Select value={timeRange} onValueChange={setTimeRange}>
+          <Select value={timeRange} onValueChange={(val) => { if (val) setTimeRange(val) }}>
             <SelectTrigger
               className="flex w-32 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"

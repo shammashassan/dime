@@ -3,7 +3,7 @@ import { getCollection } from "@/lib/db/collections"
 import { ObjectId, Filter } from "mongodb"
 import { Transaction, InvestmentTransaction, Wallet } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { parseSearchQuery } from "@/lib/search-parser"
+import { parseSearchQuery } from "./search-parser"
 import { getWallets } from "./wallets"
 
 export interface TransactionFilters {

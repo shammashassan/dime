@@ -1,7 +1,7 @@
 import { cache } from "react"
 import type { InvestmentPrice } from "@/types"
 import type { Collection } from "mongodb"
-import { convertCurrency } from "./currency"
+import { convertCurrency } from "@/lib/currency"
 
 const YAHOO_FINANCE_URL = "https://query1.finance.yahoo.com/v8/finance/quote"
 const COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
@@ -37,7 +37,7 @@ const CRYPTO_COINGECKO_IDS: Record<string, string> = {
 
 async function getPricesCollection(): Promise<Collection<InvestmentPrice> | null> {
   try {
-    const { getCollection } = await import("./db/collections")
+    const { getCollection } = await import("@/lib/db/collections")
     return await getCollection<InvestmentPrice>("investment_prices")
   } catch (err) {
     console.warn("[MarketPrice] Could not access investment_prices collection:", err)

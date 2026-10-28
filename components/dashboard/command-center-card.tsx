@@ -3,9 +3,9 @@
 import Link from "next/link"
 import { Search, PiggyBank, Target, Users, ArrowLeftRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Kbd } from "@/components/ui/kbd"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 export interface CommandCenterCardProps {
   className?: string
@@ -58,30 +58,26 @@ export function CommandCenterCard({ className }: CommandCenterCardProps = {}) {
         <span className="mr-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/50">
           quick actions
         </span>
-        <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs font-medium" asChild>
-          <Link href="/budgets">
+        <Link href="/budgets" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 gap-1.5 px-2.5 text-xs font-medium")}>
             <PiggyBank className="size-3.5" />
             New Budget
+          
           </Link>
-        </Button>
-        <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs font-medium" asChild>
-          <Link href="/goals">
+        <Link href="/goals" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 gap-1.5 px-2.5 text-xs font-medium")}>
             <Target className="size-3.5" />
             Add Goal
+          
           </Link>
-        </Button>
-        <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs font-medium" asChild>
-          <Link href="/shared-expenses">
+        <Link href="/shared-expenses" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 gap-1.5 px-2.5 text-xs font-medium")}>
             <Users className="size-3.5" />
             Settle Up
+          
           </Link>
-        </Button>
-        <Button variant="outline" size="sm" className="h-7 gap-1.5 px-2.5 text-xs font-medium" asChild>
-          <Link href="/wallets">
+        <Link href="/wallets" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 gap-1.5 px-2.5 text-xs font-medium")}>
             <ArrowLeftRight className="size-3.5" />
             Transfer
+          
           </Link>
-        </Button>
       </div>
     </Card>
   )

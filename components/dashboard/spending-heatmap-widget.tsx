@@ -135,7 +135,7 @@ export function SpendingHeatmapWidget({
 
       {/* Heatmap Graph */}
       <div className="flex-1 min-w-0 pt-3">
-        <TooltipProvider delayDuration={50}>
+        <TooltipProvider>
           <div className="overflow-x-auto no-scrollbar py-1">
             <ContributionGraph
               data={activities}
@@ -150,15 +150,13 @@ export function SpendingHeatmapWidget({
               <ContributionGraphCalendar title="Spending Rhythm Heatmap">
                 {({ activity, dayIndex, weekIndex }) => (
                   <Tooltip key={activity.date}>
-                    <TooltipTrigger asChild>
-                      <g className="cursor-pointer focus:outline-none">
+                    <TooltipTrigger render={<g className="cursor-pointer focus:outline-none">
                         <ContributionGraphBlock
                           activity={activity}
                           dayIndex={dayIndex}
                           weekIndex={weekIndex}
                         />
-                      </g>
-                    </TooltipTrigger>
+                      </g>} />
                     <TooltipContent side="top" className="text-xs py-1 px-2">
                       <p className="font-semibold">
                         {format(parseISO(activity.date), "EEE, MMM d, yyyy")}

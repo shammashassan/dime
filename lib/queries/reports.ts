@@ -12,7 +12,7 @@ import { calculateNetWorthHistory } from "@/lib/calculations/net-worth"
 import { Transaction, Category, LoanRepayment, Goal, Loan } from "@/types"
 import { subDays, subMonths, eachDayOfInterval, startOfMonth, startOfDay } from "date-fns"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { expandTransactions } from "@/lib/split-utils"
+import { expandTransactions } from "@/lib/calculations/split-utils"
 
 
 // 1. Income vs Expense Trend: Area (dual-line) - 3 / 6 / 12 months

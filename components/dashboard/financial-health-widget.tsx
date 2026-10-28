@@ -4,9 +4,9 @@ import { getFinancialHealthData } from "@/lib/queries/financial-health"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { HealthTier } from "@/types"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { Activity, ArrowRight, TrendingUp, TrendingDown, Sparkles } from "lucide-react"
 
 interface FinancialHealthWidgetProps {
@@ -103,17 +103,16 @@ export async function FinancialHealthWidget({ userId, className }: FinancialHeal
         )}
 
         {/* View Full Diagnostic Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          asChild
-          className="w-full rounded-xl font-medium justify-between text-xs hover:bg-primary/5 hover:text-primary transition-colors mt-1"
+        <Link
+          href="/health"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "w-full rounded-xl font-medium justify-between text-xs hover:bg-primary/5 hover:text-primary transition-colors mt-1"
+          )}
         >
-          <Link href="/health">
-            View Diagnostic & Simulator
-            <ArrowRight data-icon="inline-end" className="size-3.5" />
-          </Link>
-        </Button>
+          View Diagnostic & Simulator
+          <ArrowRight data-icon="inline-end" className="size-3.5" />
+        </Link>
       </CardContent>
     </Card>
   )

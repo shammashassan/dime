@@ -10,7 +10,7 @@ import {
   type CreateWatchlistInput,
   type AddWatchlistItemInput,
   type UpdateWatchlistItemInput,
-} from "@/lib/validations/watchlist.schema"
+} from "@/lib/schemas/watchlist.schema"
 import type { Watchlist, WatchlistItem } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"

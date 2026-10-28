@@ -62,9 +62,8 @@ export function TopPerformersCard({
             <div className="space-y-2 flex-1 flex flex-col justify-center">
               {/* Top #1 Position Card */}
               {topGainer && (
-                <HoverCard openDelay={200}>
-                  <HoverCardTrigger asChild>
-                    <Link
+                <HoverCard>
+                  <HoverCardTrigger render={<Link
                       href={`/investments/${topGainer.walletId}/${topGainer.symbol}`}
                       className="group block p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer"
                     >
@@ -98,8 +97,7 @@ export function TopPerformersCard({
                           {topGainer.gain >= 0 ? "+" : ""}{formatCurrency(topGainer.gain, topGainer.currency || currency)}
                         </span>
                       </div>
-                    </Link>
-                  </HoverCardTrigger>
+                    </Link>} />
                   <HoverCardContent side="top" className="w-60 text-xs rounded-xl border border-border/40 shadow-lg p-3">
                     <div className="flex items-center gap-2 mb-1">
                       <Sparkles className="size-4 text-amber-500" />
@@ -114,9 +112,8 @@ export function TopPerformersCard({
 
               {/* Top #2 Position Card */}
               {secondHolding && (
-                <HoverCard openDelay={200}>
-                  <HoverCardTrigger asChild>
-                    <Link
+                <HoverCard>
+                  <HoverCardTrigger render={<Link
                       href={`/investments/${secondHolding.walletId}/${secondHolding.symbol}`}
                       className={cn(
                         "group block p-3 rounded-xl border transition-all cursor-pointer",
@@ -163,8 +160,7 @@ export function TopPerformersCard({
                           {secondHolding.gain >= 0 ? "+" : ""}{formatCurrency(secondHolding.gain, secondHolding.currency || currency)}
                         </span>
                       </div>
-                    </Link>
-                  </HoverCardTrigger>
+                    </Link>} />
                   <HoverCardContent side="top" className="w-60 text-xs rounded-xl border border-border/40 shadow-lg p-3">
                     <p className="font-bold text-xs mb-1">{secondHolding.name} ({secondHolding.symbol})</p>
                     <p className="text-[11px] text-muted-foreground">

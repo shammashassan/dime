@@ -237,12 +237,14 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="size-8 p-0" disabled={isPending}>
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="ghost" size="icon" className="size-8 p-0" disabled={isPending}>
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="size-4" />
+            </Button>
+          }
+        />
         <DropdownMenuContent align="end" className="w-48 bg-popover border border-border/40 shadow-lg">
           <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => setShowProfile(true)} className="gap-2 text-xs">

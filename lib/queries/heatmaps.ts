@@ -5,7 +5,7 @@ import { getPreferences } from "./preferences"
 import { getCategories } from "./categories"
 import { getAllWalletsIncludingArchived } from "./wallets"
 import { getCurrencyConverter } from "@/lib/currency"
-import { expandTransactions } from "@/lib/split-utils"
+import { expandTransactions } from "@/lib/calculations/split-utils"
 import { Transaction, Category, Wallet } from "@/types"
 import {
   assignQuantileLevelsToDays,

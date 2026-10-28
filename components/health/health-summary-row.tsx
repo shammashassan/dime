@@ -4,7 +4,7 @@ import * as React from "react"
 import { FinancialHealthData } from "@/types"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Activity, Droplet, PiggyBank, Scale } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface HealthSummaryRowProps {
   data: FinancialHealthData
@@ -43,8 +43,8 @@ export function HealthSummaryRow({ data }: HealthSummaryRowProps) {
                 scoreDelta > 0
                   ? "text-emerald-500"
                   : scoreDelta < 0
-                  ? "text-rose-500"
-                  : "text-muted-foreground"
+                    ? "text-rose-500"
+                    : "text-muted-foreground"
               )}
             >
               ({deltaText})

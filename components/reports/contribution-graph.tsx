@@ -18,7 +18,7 @@ import {
   getYear,
   parseISO,
 } from "date-fns"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 export type Activity = {
   date: string
@@ -507,8 +507,8 @@ export const ContributionGraphTotalCount = ({
     <div className={cn("text-muted-foreground", className)} {...props}>
       {labels.totalCount
         ? labels.totalCount
-            .replace("{{count}}", String(totalCount))
-            .replace("{{year}}", String(year))
+          .replace("{{count}}", String(totalCount))
+          .replace("{{year}}", String(year))
         : `${totalCount} activities in ${year}`}
     </div>
   )

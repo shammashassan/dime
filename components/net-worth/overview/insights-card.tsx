@@ -3,7 +3,7 @@
 import { NetWorthOverviewViewModel } from "@/types"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sparkles, Info, CheckCircle, AlertTriangle } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import Link from "next/link"
 import {
   Item,
@@ -43,12 +43,7 @@ export function InsightsCard({ viewModel }: { viewModel: NetWorthOverviewViewMod
                 const Icon = iconsMap[insight.type] || Info
                 const iconColor = colorMap[insight.type]
                 return (
-                  <Item
-                    key={insight.id}
-                    asChild
-                    className="items-start px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl cursor-pointer"
-                  >
-                    <Link href={insight.href || "#"} className="w-full flex items-start gap-2.5">
+                  <Item key={insight.id} className="items-start px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl cursor-pointer" render={<Link href={insight.href || "#"} className="w-full flex items-start gap-2.5" />}>
                       <ItemMedia className={cn("size-7 rounded-lg border shrink-0 mt-0.5", iconColor)}>
                         <Icon className="size-3.5" />
                       </ItemMedia>
@@ -60,8 +55,7 @@ export function InsightsCard({ viewModel }: { viewModel: NetWorthOverviewViewMod
                           </ItemDescription>
                         )}
                       </ItemContent>
-                    </Link>
-                  </Item>
+                    </Item>
                 )
               })}
             </ItemGroup>

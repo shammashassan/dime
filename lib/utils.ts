@@ -51,5 +51,5 @@ export {
   getCurrencySymbol,
   isLakhCroreCurrency,
   type DenominationOptions,
-} from "./denomination"
+} from "./calculations/denomination"
 

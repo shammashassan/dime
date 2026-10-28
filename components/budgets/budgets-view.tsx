@@ -32,7 +32,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { BudgetForm } from "./budget-form"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Select,
@@ -162,8 +162,7 @@ function BudgetCard({
         {/* Action buttons — absolutely positioned to prevent layout space reservation */}
         <div className="absolute top-3.5 right-3 flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+            <TooltipTrigger render={<Button
                 type="button"
                 variant="ghost"
                 size="icon"
@@ -175,16 +174,14 @@ function BudgetCard({
                 }}
               >
                 <Edit className="size-3.5 text-muted-foreground" />
-              </Button>
-            </TooltipTrigger>
+              </Button>} />
             <TooltipContent side="top" className="rounded-xl font-medium">
               Edit budget
             </TooltipContent>
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+            <TooltipTrigger render={<Button
                 type="button"
                 variant="ghost"
                 size="icon"
@@ -196,8 +193,7 @@ function BudgetCard({
                 }}
               >
                 <Trash2 className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
+              </Button>} />
             <TooltipContent side="top" className="rounded-xl font-medium">
               Delete budget
             </TooltipContent>
@@ -225,11 +221,10 @@ function BudgetCard({
 
         {/* Progress bar */}
         <div>
-          <Progress
+          <Progress style={{ ['--progress-background' as any]: barColor }}
             value={Math.min(percent, 100)}
-            indicatorStyle={{ backgroundColor: barColor }}
-            className="h-2 bg-muted/60"
-          />
+            className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/60"
+           />
           <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
             <span className="text-foreground/60">{formatCurrency(remaining, b.currency)} remaining</span>
             <span>Limit: {formatCurrency(b.amount, b.currency)}</span>
@@ -295,7 +290,7 @@ export function BudgetsView({
     const isOver = b.spent > b.amount
     if (activeTab === "under" && isOver) return false
     if (activeTab === "over" && !isOver) return false
-    
+
     if (search.trim()) {
       const lowerSearch = search.toLowerCase()
       if (!b.name.toLowerCase().includes(lowerSearch)) return false
@@ -386,31 +381,28 @@ export function BudgetsView({
         <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
           <button
             onClick={() => setActiveTab("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "all"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             All ({tabCounts.all})
           </button>
           <button
             onClick={() => setActiveTab("under")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "under"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "under"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Under Budget ({tabCounts.under})
           </button>
           <button
             onClick={() => setActiveTab("over")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              activeTab === "over"
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "over"
                 ? "bg-background text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Over Budget ({tabCounts.over})
           </button>

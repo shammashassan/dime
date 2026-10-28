@@ -169,7 +169,7 @@ export function SpendingHeatmapView({
             <label className="text-[11px] font-medium text-muted-foreground">Metric</label>
             <Select
               value={activeMetric}
-              onValueChange={(val) => updateParam("metric", val)}
+              onValueChange={(val) => { if (val) updateParam("metric", val) }}
             >
               <SelectTrigger className="w-full h-9 text-xs rounded-xl">
                 <SelectValue placeholder="Metric" />
@@ -210,7 +210,7 @@ export function SpendingHeatmapView({
             <label className="text-[11px] font-medium text-muted-foreground">Timeframe</label>
             <Select
               value={activeTimeframe}
-              onValueChange={(val) => updateParam("timeframe", val)}
+              onValueChange={(val) => { if (val) updateParam("timeframe", val) }}
             >
               <SelectTrigger className="w-full h-9 text-xs rounded-xl">
                 <SelectValue placeholder="Timeframe" />
@@ -233,7 +233,7 @@ export function SpendingHeatmapView({
             <label className="text-[11px] font-medium text-muted-foreground">Wallet</label>
             <Select
               value={activeWallet}
-              onValueChange={(val) => updateParam("walletId", val)}
+              onValueChange={(val) => { if (val) updateParam("walletId", val) }}
             >
               <SelectTrigger className="w-full h-9 text-xs rounded-xl">
                 <SelectValue placeholder="All Wallets" />
@@ -256,7 +256,7 @@ export function SpendingHeatmapView({
             <label className="text-[11px] font-medium text-muted-foreground">Category</label>
             <Select
               value={activeCategory}
-              onValueChange={(val) => updateParam("categoryId", val)}
+              onValueChange={(val) => { if (val) updateParam("categoryId", val) }}
             >
               <SelectTrigger className="w-full h-9 text-xs rounded-xl">
                 <SelectValue placeholder="All Categories" />
@@ -311,7 +311,7 @@ export function SpendingHeatmapView({
         </CardHeader>
 
         <CardContent className="pt-6 pb-6 overflow-x-auto">
-          <TooltipProvider delayDuration={50}>
+          <TooltipProvider>
             <ContributionGraph
               data={activities}
               variant={activeMetric}
@@ -329,8 +329,7 @@ export function SpendingHeatmapView({
                   const dayData = (activity as unknown as HeatmapDaySummary)
                   return (
                     <Tooltip key={activity.date}>
-                      <TooltipTrigger asChild>
-                        <g
+                      <TooltipTrigger render={<g
                           tabIndex={0}
                           role="button"
                           aria-label={getHoverPreview(activity)}
@@ -353,8 +352,7 @@ export function SpendingHeatmapView({
                             dayIndex={dayIndex}
                             weekIndex={weekIndex}
                           />
-                        </g>
-                      </TooltipTrigger>
+                        </g>} />
                       <TooltipContent side="top" className="text-xs py-1 px-2.5">
                         <p>{getHoverPreview(activity)}</p>
                       </TooltipContent>

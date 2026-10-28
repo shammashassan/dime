@@ -13,7 +13,7 @@ import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Loader2, Check, ArrowDownRight, ArrowUpRight, ArrowLeftRight } from "lucide-react"
 import { toast } from "@/components/ui/toast"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { CATEGORY_ICON_MAP, CUSTOM_ICON_OPTIONS } from "./category-icon"
 
 const categoryFormSchema = z.object({

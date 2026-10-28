@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { userInsightStatesCollection } from "@/lib/db/collections"
-import { updateInsightStateSchema } from "@/lib/validations/insight.schema"
+import { updateInsightStateSchema } from "@/lib/schemas/insight.schema"
 import { getFinancialScope } from "@/lib/scope"
 import { revalidatePath } from "next/cache"
 

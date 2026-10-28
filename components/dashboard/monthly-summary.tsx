@@ -3,7 +3,7 @@ import { getIncomeExpenseTrend } from "@/lib/queries/reports"
 import { getPreferences } from "@/lib/queries/preferences"
 import { formatCurrency } from "@/lib/utils"
 import { ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface MonthlySummaryCardProps {
   userId: string
@@ -62,8 +62,8 @@ export async function MonthlySummary({ userId, className }: MonthlySummaryCardPr
               {/* Change Pill */}
               <div className={cn(
                 "flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border",
-                incomeDiff >= 0 
-                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400" 
+                incomeDiff >= 0
+                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400"
                   : "bg-destructive/10 border-destructive/25 text-destructive"
               )}>
                 {incomeDiff >= 0 ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
@@ -103,8 +103,8 @@ export async function MonthlySummary({ userId, className }: MonthlySummaryCardPr
               {/* Change Pill */}
               <div className={cn(
                 "flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border",
-                expenseDiff <= 0 
-                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400" 
+                expenseDiff <= 0
+                  ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400"
                   : "bg-destructive/10 border-destructive/25 text-destructive"
               )}>
                 {expenseDiff <= 0 ? <TrendingDown className="size-3" /> : <TrendingUp className="size-3" />}

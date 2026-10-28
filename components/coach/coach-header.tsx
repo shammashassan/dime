@@ -37,15 +37,13 @@ export function CoachHeader({
             </h1>
 
             {/* Currency Badge */}
-            <HoverCard openDelay={150}>
-              <HoverCardTrigger asChild>
-                <Badge
+            <HoverCard>
+              <HoverCardTrigger render={<Badge
                   variant="outline"
                   className="rounded-md border-primary/30 text-primary bg-primary/5 font-semibold text-[10px] h-5 cursor-default"
                 >
                   {currency}
-                </Badge>
-              </HoverCardTrigger>
+                </Badge>} />
               <HoverCardContent
                 className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3"
                 align="start"
@@ -57,15 +55,13 @@ export function CoachHeader({
 
             {/* Educational Guidance Disclaimer — Popover for reliable mobile touch + desktop click */}
             <Popover>
-              <PopoverTrigger asChild>
-                <Badge
+              <PopoverTrigger render={<Badge
                   variant="outline"
                   className="rounded-md border-border/50 text-muted-foreground hover:text-foreground bg-muted/30 font-medium text-[10px] h-5 gap-1 cursor-pointer transition-colors"
                 >
                   <ShieldAlert className="size-3 text-primary" />
                   <span>Guidance Only</span>
-                </Badge>
-              </PopoverTrigger>
+                </Badge>} />
               <PopoverContent
                 className="w-80 text-xs rounded-xl border border-border/40 shadow-lg p-3 bg-popover"
                 align="start"

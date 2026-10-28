@@ -102,10 +102,10 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
         </CardDescription>
         <CardAction>
           <ToggleGroup
-            type="single"
-            value={timeRange}
+            value={[timeRange]}
             onValueChange={(val) => {
-              if (val) setTimeRange(val)
+              const v = val[0]
+              if (v) setTimeRange(v)
             }}
             spacing={0}
             variant="outline"
@@ -115,7 +115,7 @@ export function WalletDetailChart({ initialData = [], currency }: WalletDetailCh
             <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
             <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
           </ToggleGroup>
-          <Select value={timeRange} onValueChange={setTimeRange}>
+          <Select value={timeRange} onValueChange={(val) => { if (val) setTimeRange(val) }}>
             <SelectTrigger
               className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
               size="sm"

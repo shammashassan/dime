@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
-import { recurringRuleSchema, RecurringRuleInput } from "@/lib/validations/recurring.schema"
+import { recurringRuleSchema, RecurringRuleInput } from "@/lib/schemas/recurring.schema"
 import { RecurringRule, Transaction, BillInstance } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"

@@ -8,8 +8,8 @@ import {
   saveCurrentBudgetsSchema,
   ApplyTemplateInput,
   SaveCurrentBudgetsInput,
-} from "@/lib/validations/budget-template.schema"
-import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates"
+} from "@/lib/schemas/budget-template.schema"
+import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/data"
 import { Budget, Category, BudgetTemplate, Notification } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"

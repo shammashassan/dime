@@ -217,17 +217,10 @@ function SidebarNav({
 
               return (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    isActive={isActive}
-                    className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
-                  >
-                    <Link href={item.href} onClick={onLinkClick}>
+                  <SidebarMenuButton tooltip={item.title} isActive={isActive} className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden" render={<Link href={item.href} onClick={onLinkClick}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                    </Link>} />
                 </SidebarMenuItem>
               )
             }
@@ -241,18 +234,10 @@ function SidebarNav({
             const isOpen = isCollapsed ? false : (openGroups[item.title] ?? isGroupActive ?? false)
 
             return (
-              <Collapsible
-                key={item.title}
-                asChild
-                open={isOpen}
-                onOpenChange={(open) => {
+              <Collapsible key={item.title} render={<SidebarMenuItem className="group/collapsible" />} open={isOpen} onOpenChange={(open) => {
                   setOpenGroups((prev) => ({ ...prev, [item.title]: open }))
-                }}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
+                }}>
+                  <CollapsibleTrigger render={<SidebarMenuButton
                       tooltip={item.title}
                       isActive={isGroupActive}
                       className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
@@ -266,8 +251,7 @@ function SidebarNav({
                       <item.icon />
                       <span>{item.title}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
+                    </SidebarMenuButton>} />
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => {
@@ -278,17 +262,14 @@ function SidebarNav({
 
                         return (
                           <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton asChild isActive={isSubActive}>
-                              <Link href={subItem.href} onClick={onLinkClick}>
+                            <SidebarMenuSubButton isActive={isSubActive} render={<Link href={subItem.href} onClick={onLinkClick}>
                                 <span>{subItem.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
+                              </Link>} />
                           </SidebarMenuSubItem>
                         )
                       })}
                     </SidebarMenuSub>
                   </CollapsibleContent>
-                </SidebarMenuItem>
               </Collapsible>
             )
           })}
@@ -300,17 +281,10 @@ function SidebarNav({
           <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarMenu className="group-data-[collapsible=icon]:items-center">
             <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="User Management"
-                isActive={pathname.startsWith("/admin")}
-                className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
-              >
-                <Link href="/admin/users" onClick={onLinkClick}>
+              <SidebarMenuButton tooltip="User Management" isActive={pathname.startsWith("/admin")} className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden" render={<Link href="/admin/users" onClick={onLinkClick}>
                   <Shield />
                   <span>User Management</span>
-                </Link>
-              </SidebarMenuButton>
+                </Link>} />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -337,53 +311,35 @@ function SidebarNavFallback({
             if (!hasSubItems && item.href) {
               return (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.title}
-                    isActive={false}
-                    className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
-                  >
-                    <Link href={item.href} onClick={onLinkClick}>
+                  <SidebarMenuButton tooltip={item.title} isActive={false} className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden" render={<Link href={item.href} onClick={onLinkClick}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                    </Link>} />
                 </SidebarMenuItem>
               )
             }
 
             return (
-              <Collapsible
-                key={item.title}
-                asChild
-                defaultOpen={true}
-                className="group/collapsible"
-              >
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
+              <Collapsible key={item.title} render={<SidebarMenuItem className="group/collapsible" />} defaultOpen={true}>
+                  <CollapsibleTrigger render={<SidebarMenuButton
                       tooltip={item.title}
                       className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
                     >
                       <item.icon />
                       <span>{item.title}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
+                    </SidebarMenuButton>} />
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild isActive={false}>
-                            <Link href={subItem.href} onClick={onLinkClick}>
+                          <SidebarMenuSubButton isActive={false} render={<Link href={subItem.href} onClick={onLinkClick}>
                               <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
+                            </Link>} />
                         </SidebarMenuSubItem>
                       ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
-                </SidebarMenuItem>
               </Collapsible>
             )
           })}
@@ -395,17 +351,10 @@ function SidebarNavFallback({
           <SidebarGroupLabel>Admin</SidebarGroupLabel>
           <SidebarMenu className="group-data-[collapsible=icon]:items-center">
             <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip="User Management"
-                isActive={false}
-                className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden"
-              >
-                <Link href="/admin/users" onClick={onLinkClick}>
+              <SidebarMenuButton tooltip="User Management" isActive={false} className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:[&>span]:hidden" render={<Link href="/admin/users" onClick={onLinkClick}>
                   <Shield />
                   <span>User Management</span>
-                </Link>
-              </SidebarMenuButton>
+                </Link>} />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
@@ -479,8 +428,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
           <SidebarMenuItem>
             {mounted && user ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton
+                <DropdownMenuTrigger render={<SidebarMenuButton
                     size="lg"
                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
@@ -495,8 +443,7 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                       <span className="truncate text-xs text-muted-foreground">{user.email}</span>
                     </div>
                     <ChevronsUpDown className="ml-auto size-4" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
+                  </SidebarMenuButton>} />
                 <DropdownMenuContent
                   className="w-(--anchor-width) min-w-56 rounded-lg"
                   side={isMobile ? "bottom" : "right"}
@@ -519,18 +466,14 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem asChild>
-                      <Link href="/notifications" onClick={handleLinkClick}>
+                    <DropdownMenuItem render={<Link href="/notifications" onClick={handleLinkClick}>
                         <Bell className="mr-2 h-4 w-4" />
                         Notifications
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/settings" onClick={handleLinkClick}>
+                      </Link>} />
+                    <DropdownMenuItem render={<Link href="/settings" onClick={handleLinkClick}>
                         <Cog className="mr-2 h-4 w-4" />
                         Settings
-                      </Link>
-                    </DropdownMenuItem>
+                      </Link>} />
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => setShowLogoutDialog(true)}>

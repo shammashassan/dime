@@ -161,7 +161,7 @@ export function CoachSimulatorSheet({
                 </div>
                 <Slider
                   value={[extraDebtPaydown]}
-                  onValueChange={(val) => setExtraDebtPaydown(val[0])}
+                  onValueChange={(val) => setExtraDebtPaydown(Array.isArray(val) ? val[0] : (val as number))}
                   min={0}
                   max={1000}
                   step={25}
@@ -185,7 +185,7 @@ export function CoachSimulatorSheet({
               </div>
               <Slider
                 value={[extraSavings]}
-                onValueChange={(val) => setExtraSavings(val[0])}
+                onValueChange={(val) => setExtraSavings(Array.isArray(val) ? val[0] : (val as number))}
                 min={0}
                 max={1000}
                 step={25}
@@ -208,7 +208,7 @@ export function CoachSimulatorSheet({
               </div>
               <Slider
                 value={[discretionaryTrimPercent]}
-                onValueChange={(val) => setDiscretionaryTrimPercent(val[0])}
+                onValueChange={(val) => setDiscretionaryTrimPercent(Array.isArray(val) ? val[0] : (val as number))}
                 min={0}
                 max={30}
                 step={5}

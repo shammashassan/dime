@@ -92,14 +92,7 @@ export function ActiveGoalsCard({
                 const goalCurrency = goal.currency || currency
 
                 return (
-                  <Item
-                    key={goalId || goal.name}
-                    asChild
-                    variant="outline"
-                    size="xs"
-                    className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group flex-col items-stretch gap-1.5 w-full min-w-0 overflow-hidden"
-                  >
-                    <Link href={href} className="flex flex-col w-full min-w-0 gap-1.5">
+                  <Item key={goalId || goal.name} variant="outline" size="xs" className="p-2.5 rounded-xl border-border/30 bg-muted/20 hover:bg-muted/50 transition-colors cursor-pointer no-underline group flex-col items-stretch gap-1.5 w-full min-w-0 overflow-hidden" render={<Link href={href} className="flex flex-col w-full min-w-0 gap-1.5" />}>
                       <div className="flex items-center justify-between gap-1.5 min-w-0 w-full text-xs">
                         <span className="font-semibold text-foreground truncate min-w-0 flex-1 group-hover:text-primary transition-colors">
                           {goal.name}
@@ -116,8 +109,7 @@ export function ActiveGoalsCard({
                         <span>{formatCurrency(current, goalCurrency)}</span>
                         <span>Target {formatCurrency(target, goalCurrency)}</span>
                       </div>
-                    </Link>
-                  </Item>
+                    </Item>
                 )
               })}
             </ItemGroup>

@@ -259,7 +259,7 @@ export function CreateExpenseDialog({
 
               <Field>
                 <FieldLabel htmlFor="currency">Currency</FieldLabel>
-                <Select value={currency} onValueChange={setCurrency}>
+                <Select value={currency} onValueChange={(val) => { if (val) setCurrency(val) }}>
                   <SelectTrigger id="currency" className="h-10 rounded-xl">
                     <SelectValue placeholder="Currency" />
                   </SelectTrigger>
@@ -279,6 +279,7 @@ export function CreateExpenseDialog({
               <Select
                 value={`${paidByType}:${paidById}`}
                 onValueChange={(val) => {
+                  if (!val) return
                   const [t, id] = val.split(":")
                   setPaidByType(t as ParticipantType)
                   setPaidById(id)
@@ -302,7 +303,7 @@ export function CreateExpenseDialog({
             {paidById === currentUserId && wallets.length > 0 && (
               <Field>
                 <FieldLabel htmlFor="paid-from-wallet">Paid From Wallet</FieldLabel>
-                <Select value={selectedWalletId} onValueChange={setSelectedWalletId}>
+                <Select value={selectedWalletId} onValueChange={(val) => { if (val) setSelectedWalletId(val) }}>
                   <SelectTrigger id="paid-from-wallet" className="h-10 rounded-xl">
                     <SelectValue placeholder="Select wallet to deduct funds from" />
                   </SelectTrigger>

@@ -1183,7 +1183,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                   <FieldGroup>
                     <Field>
                       <FieldLabel htmlFor="pref-currency">Default Currency</FieldLabel>
-                      <Select value={prefCurrency} onValueChange={setPrefCurrency}>
+                      <Select value={prefCurrency} onValueChange={(val) => { if (val) setPrefCurrency(val) }}>
                         <SelectTrigger className="rounded-xl border-border/40 focus:ring-primary">
                           <SelectValue placeholder="Select Currency" />
                         </SelectTrigger>
@@ -1202,7 +1202,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
 
                     <Field>
                       <FieldLabel htmlFor="pref-wallet">Default Active Wallet</FieldLabel>
-                      <Select value={prefWallet} onValueChange={setPrefWallet}>
+                      <Select value={prefWallet} onValueChange={(val) => { if (val) setPrefWallet(val) }}>
                         <SelectTrigger className="rounded-xl border-border/40 focus:ring-primary">
                           <SelectValue placeholder="Select Default Wallet" />
                         </SelectTrigger>
@@ -1221,9 +1221,8 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
                     <Field>
                       <FieldLabel htmlFor="pref-date">Date Format</FieldLabel>
                       <ToggleGroup
-                        type="single"
-                        value={prefDateFormat}
-                        onValueChange={(val) => val && setPrefDateFormat(val)}
+                        value={[prefDateFormat]}
+                        onValueChange={(val) => { const v = val[0]; if (v) setPrefDateFormat(v); }}
                         className="flex-wrap w-full justify-start gap-2"
                       >
                         <ToggleGroupItem value="DD/MM/YYYY" className="flex-1 sm:flex-initial min-w-[110px] justify-center rounded-xl border border-border/40">

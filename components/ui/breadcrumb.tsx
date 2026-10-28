@@ -40,24 +40,18 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 
 function BreadcrumbLink({
   className,
-  asChild = false,
   render,
-  children,
   ...props
-}: useRender.ComponentProps<"a"> & { asChild?: boolean }) {
-  const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
-  const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
-
+}: useRender.ComponentProps<"a">) {
   return useRender({
     defaultTagName: "a",
     props: mergeProps<"a">(
       {
         className: cn("transition-colors hover:text-foreground", className),
-        children: resolvedChildren,
       },
       props
     ),
-    render: resolvedRender,
+    render,
     state: {
       slot: "breadcrumb-link",
     },
@@ -112,7 +106,8 @@ function BreadcrumbEllipsis({
       )}
       {...props}
     >
-      <MoreHorizontalIcon />
+      <MoreHorizontalIcon
+      />
       <span className="sr-only">More</span>
     </span>
   )

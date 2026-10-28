@@ -25,7 +25,7 @@ type ContactFormInput = z.infer<typeof contactSchema>
 
 interface ContactDialogProps {
   initialContact?: Contact
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement
   onSuccess?: (contactId: string, contactName: string) => void
 }
 
@@ -110,8 +110,7 @@ export function ContactDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger || (
+      <DialogTrigger render={trigger || (
           <Button variant="outline" size="sm" className="rounded-xl font-semibold">
             {isEditing ? (
               <>
@@ -125,8 +124,7 @@ export function ContactDialog({
               </>
             )}
           </Button>
-        )}
-      </DialogTrigger>
+        )} />
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto min-w-0 rounded-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

@@ -4,7 +4,7 @@ import { AccountViewModel } from "@/lib/calculations/investments"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { formatCurrency, cn } from "@/lib/utils"
 import Link from "next/link"
@@ -109,11 +109,10 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
               </div>
 
               <div>
-                <Progress
+                <Progress style={{ ['--progress-background' as any]: walletColor }}
                   value={sharePct}
-                  indicatorStyle={{ backgroundColor: walletColor }}
-                  className="h-2 bg-muted/60"
-                />
+                  className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/60"
+                 />
                 <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
                   <span>Portfolio Share</span>
                   <span>{sharePct.toFixed(1)}% of portfolio</span>
@@ -129,17 +128,7 @@ export function AccountList({ accounts, currency }: { accounts: AccountViewModel
                 {account.currency || currency}
               </span>
 
-              <Button
-                size="sm"
-                variant="outline"
-                asChild
-                className="h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
-              >
-                <Link href={`/investments/${account.accountId}`}>
-                  <Eye className="size-3 mr-1" />
-                  View Account
-                </Link>
-              </Button>
+              <Link href={`/investments/${account.accountId}`} className={cn(buttonVariants({ size: "sm", variant: "outline" }), "h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0")}><Eye className="size-3 mr-1" />View Account</Link>
             </CardFooter>
           </Card>
         )

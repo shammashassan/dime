@@ -2,7 +2,7 @@ import { cache } from "react"
 import { getCollection } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
 import { BudgetTemplate, TemplateRecommendation } from "@/types"
-import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/budget-templates"
+import { SYSTEM_BUDGET_TEMPLATES } from "@/lib/data"
 import { computeTemplateRecommendation } from "@/lib/calculations/budget-recommendations"
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

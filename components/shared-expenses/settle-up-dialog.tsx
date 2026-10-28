@@ -173,6 +173,7 @@ export function SettleUpDialog({
                 <Select
                   value={fromId ? `${fromType}:${fromId}` : undefined}
                   onValueChange={(val) => {
+                    if (!val) return
                     const [t, id] = val.split(":")
                     setFromType(t as ParticipantType)
                     setFromId(id)
@@ -200,6 +201,7 @@ export function SettleUpDialog({
                 <Select
                   value={toId ? `${toType}:${toId}` : undefined}
                   onValueChange={(val) => {
+                    if (!val) return
                     const [t, id] = val.split(":")
                     setToType(t as ParticipantType)
                     setToId(id)
@@ -238,7 +240,7 @@ export function SettleUpDialog({
 
               <Field>
                 <FieldLabel htmlFor="payment-method">Payment Method</FieldLabel>
-                <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <Select value={paymentMethod} onValueChange={(val) => { if (val) setPaymentMethod(val) }}>
                   <SelectTrigger id="payment-method" className="h-10 rounded-xl">
                     <SelectValue placeholder="Method" />
                   </SelectTrigger>
@@ -268,7 +270,7 @@ export function SettleUpDialog({
                 {logWalletTx && (
                   <div className="pt-2">
                     <FieldLabel className="text-[10px]">Select Wallet</FieldLabel>
-                    <Select value={selectedWalletId} onValueChange={setSelectedWalletId}>
+                    <Select value={selectedWalletId} onValueChange={(val) => { if (val) setSelectedWalletId(val) }}>
                       <SelectTrigger className="h-10 mt-1 rounded-xl">
                         <SelectValue placeholder="Choose wallet" />
                       </SelectTrigger>

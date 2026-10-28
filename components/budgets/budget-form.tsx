@@ -15,7 +15,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2, Sun, CalendarRange, CalendarDays } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
 
@@ -252,33 +252,33 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
             control={control}
             name="period"
             render={({ field }) => (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
-                  {[
-                    { value: "daily", label: "Daily", icon: Sun },
-                    { value: "weekly", label: "Weekly", icon: CalendarRange },
-                    { value: "monthly", label: "Monthly", icon: CalendarIcon },
-                    { value: "yearly", label: "Yearly", icon: CalendarDays },
-                  ].map((p) => {
-                    const Icon = p.icon
-                    const isSelected = field.value === p.value
-                    return (
-                      <button
-                        key={p.value}
-                        type="button"
-                        onClick={() => field.onChange(p.value)}
-                        className={cn(
-                          "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-md transition-all text-center cursor-pointer min-w-0",
-                          isSelected
-                            ? "bg-background text-foreground shadow-xs font-bold"
-                            : "text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <Icon className="size-3.5 shrink-0" />
-                        <span className="truncate">{p.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-muted rounded-lg text-xs font-semibold">
+                {[
+                  { value: "daily", label: "Daily", icon: Sun },
+                  { value: "weekly", label: "Weekly", icon: CalendarRange },
+                  { value: "monthly", label: "Monthly", icon: CalendarIcon },
+                  { value: "yearly", label: "Yearly", icon: CalendarDays },
+                ].map((p) => {
+                  const Icon = p.icon
+                  const isSelected = field.value === p.value
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => field.onChange(p.value)}
+                      className={cn(
+                        "flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-md transition-all text-center cursor-pointer min-w-0",
+                        isSelected
+                          ? "bg-background text-foreground shadow-xs font-bold"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="size-3.5 shrink-0" />
+                      <span className="truncate">{p.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
             )}
           />
           {errors.period && <FieldError>{(errors.period as any).message}</FieldError>}
@@ -328,16 +328,14 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
               name="startDate"
               render={({ field }) => (
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
+                  <PopoverTrigger render={<Button
                       type="button"
                       variant="outline"
                       className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
                     >
                       <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
                       {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
+                    </Button>} />
                   <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                     <Calendar
                       mode="single"
@@ -359,16 +357,14 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
               name="endDate"
               render={({ field }) => (
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
+                  <PopoverTrigger render={<Button
                       type="button"
                       variant="outline"
                       className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
                     >
                       <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
                       {field.value ? format(field.value, "PPP") : <span>No end date</span>}
-                    </Button>
-                  </PopoverTrigger>
+                    </Button>} />
                   <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                     <Calendar
                       mode="single"

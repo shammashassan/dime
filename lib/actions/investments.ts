@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
-import { investmentTransactionSchema, InvestmentTransactionInput } from "@/lib/validations/investment.schema"
+import { investmentTransactionSchema, InvestmentTransactionInput } from "@/lib/schemas/investment.schema"
 import { InvestmentTransaction, InvestmentPrice } from "@/types"
 import { getFinancialScope } from "@/lib/scope"
 import { revalidatePath, updateTag } from "next/cache"

@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -51,12 +52,7 @@ export function QuickActionsCard({
       <div className="p-4 flex-1 flex flex-col gap-3.5 justify-between">
         {/* Action Buttons */}
         <div className="flex flex-col gap-2">
-          <Button
-            variant="outline"
-            asChild
-            className="w-full h-9 text-xs font-semibold rounded-xl bg-card border-border/40 hover:bg-muted/40 cursor-pointer active:scale-98 transition-all px-3"
-          >
-            <Link href="/recurring" className="w-full flex items-center justify-between min-w-0 gap-2">
+          <Link href="/recurring" className={cn(buttonVariants({ variant: "outline" }), "w-full h-9 text-xs font-semibold rounded-xl bg-card border-border/40 hover:bg-muted/40 cursor-pointer active:scale-98 transition-all px-3 flex items-center justify-between min-w-0 gap-2")}>
               <span className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                 <Repeat className="size-3.5 text-purple-500 shrink-0" />
                 <span className="truncate">
@@ -65,14 +61,8 @@ export function QuickActionsCard({
               </span>
               <ArrowUpRight className="size-3 text-muted-foreground shrink-0" />
             </Link>
-          </Button>
 
-          <Button
-            variant="outline"
-            asChild
-            className="w-full h-9 text-xs font-semibold rounded-xl bg-card border-border/40 hover:bg-muted/40 cursor-pointer active:scale-98 transition-all px-3"
-          >
-            <Link href="/budgets" className="w-full flex items-center justify-between min-w-0 gap-2">
+          <Link href="/budgets" className={cn(buttonVariants({ variant: "outline" }), "w-full h-9 text-xs font-semibold rounded-xl bg-card border-border/40 hover:bg-muted/40 cursor-pointer active:scale-98 transition-all px-3 flex items-center justify-between min-w-0 gap-2")}>
               <span className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                 <PieChart className="size-3.5 text-blue-500 shrink-0" />
                 <span className="truncate">
@@ -81,14 +71,8 @@ export function QuickActionsCard({
               </span>
               <ArrowUpRight className="size-3 text-muted-foreground shrink-0" />
             </Link>
-          </Button>
 
-          <Button
-            variant="outline"
-            asChild
-            className="w-full h-9 text-xs font-semibold rounded-xl bg-card border-border/40 hover:bg-muted/40 cursor-pointer active:scale-98 transition-all px-3"
-          >
-            <Link href="/transactions" className="w-full flex items-center justify-between min-w-0 gap-2">
+          <Link href="/transactions" className={cn(buttonVariants({ variant: "outline" }), "w-full h-9 text-xs font-semibold rounded-xl bg-card border-border/40 hover:bg-muted/40 cursor-pointer active:scale-98 transition-all px-3 flex items-center justify-between min-w-0 gap-2")}>
               <span className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
                 <Receipt className="size-3.5 text-emerald-500 shrink-0" />
                 <span className="truncate">
@@ -97,7 +81,6 @@ export function QuickActionsCard({
               </span>
               <ArrowUpRight className="size-3 text-muted-foreground shrink-0" />
             </Link>
-          </Button>
         </div>
 
         {/* Category Diagnostic Filter */}
@@ -105,7 +88,7 @@ export function QuickActionsCard({
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             Category Drilldown
           </span>
-          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+          <Select value={selectedCategory} onValueChange={(val) => { if (val) handleCategoryChange(val) }}>
             <SelectTrigger className="w-full rounded-xl border-border/40 bg-card h-9 text-xs">
               <SelectValue placeholder="Jump to flagged category" />
             </SelectTrigger>

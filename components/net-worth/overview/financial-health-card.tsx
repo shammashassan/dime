@@ -95,11 +95,9 @@ function RatioProgressRow({
           <Icon className="size-3.5" />
           {label}
           <Popover>
-            <PopoverTrigger asChild>
-              <button type="button" className="text-muted-foreground/60 hover:text-foreground">
+            <PopoverTrigger render={<button type="button" className="text-muted-foreground/60 hover:text-foreground">
                 <Info className="size-3" />
-              </button>
-            </PopoverTrigger>
+              </button>} />
             <PopoverContent className="p-3 text-xs w-56 border border-border/40 shadow-lg rounded-xl" align="start">
               {tooltip}
             </PopoverContent>
@@ -107,7 +105,7 @@ function RatioProgressRow({
         </span>
         <span className={cn("font-bold tabular-nums", textColorMap[color])}>{value}%</span>
       </div>
-      <Progress value={value} className="h-1.5" indicatorStyle={{ backgroundColor: colorMap[color] }} />
+      <Progress style={{ ['--progress-background' as any]: colorMap[color] }} value={value} className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-1.5"  />
     </div>
   )
 }

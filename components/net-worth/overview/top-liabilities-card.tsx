@@ -39,10 +39,8 @@ export function TopLiabilitiesCard({ viewModel }: { viewModel: NetWorthOverviewV
               {topLiabilities.map((liability) => {
                 const Icon = iconsMap[liability.icon] || HandCoins
                 return (
-                  <HoverCard key={liability.id} openDelay={200}>
-                    <HoverCardTrigger asChild>
-                      <Item asChild className="cursor-pointer px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl">
-                        <Link href={liability.href || "#"}>
+                  <HoverCard key={liability.id}>
+                    <HoverCardTrigger render={<Item className="cursor-pointer px-2.5 py-2 hover:bg-muted/60 transition-colors rounded-xl" render={<Link href={liability.href || "#"} />}>
                           <ItemMedia className="size-8 rounded-xl border bg-rose-500/10 border-rose-500/20 text-rose-500">
                             <Icon className="size-3.5" />
                           </ItemMedia>
@@ -62,9 +60,7 @@ export function TopLiabilitiesCard({ viewModel }: { viewModel: NetWorthOverviewV
                               {liability.percentage}% of obligations
                             </span>
                           </ItemActions>
-                        </Link>
-                      </Item>
-                    </HoverCardTrigger>
+                        </Item>} />
                     <HoverCardContent className="w-56 text-xs rounded-xl border border-border/40 shadow-lg p-3" align="start" side="top">
                       <div className="flex items-center gap-2 mb-1.5">
                         <div className="size-6 rounded-lg border bg-rose-500/10 border-rose-500/20 text-rose-500 flex items-center justify-center">

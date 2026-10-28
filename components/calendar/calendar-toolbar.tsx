@@ -8,7 +8,7 @@ import {
   Calendar,
   List,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { addMonths, format, parseISO } from "date-fns"
 
 interface CalendarToolbarProps {

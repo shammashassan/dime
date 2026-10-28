@@ -6,7 +6,7 @@ import { formatCurrency, cn } from "@/lib/utils"
 import { toast } from "@/components/ui/toast"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -294,8 +294,7 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>
+                      <TooltipTrigger render={<span>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -304,16 +303,14 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
                           >
                             <SquarePen className="size-3.5 text-muted-foreground" />
                           </Button>
-                        </span>
-                      </TooltipTrigger>
+                        </span>} />
                       <TooltipContent side="top" className="rounded-xl font-medium">
                         Edit item
                       </TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
+                      <TooltipTrigger render={<Button
                           variant="ghost"
                           size="icon"
                           className="size-8 rounded-lg hover:bg-muted/70"
@@ -327,24 +324,21 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
                           ) : (
                             <Archive className="size-3.5 text-muted-foreground" />
                           )}
-                        </Button>
-                      </TooltipTrigger>
+                        </Button>} />
                       <TooltipContent side="top" className="rounded-xl font-medium">
                         {asset.status === "archived" ? "Restore item" : "Archive item"}
                       </TooltipContent>
                     </Tooltip>
 
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
+                      <TooltipTrigger render={<Button
                           variant="ghost"
                           size="icon"
                           className="size-8 rounded-lg text-rose-500 hover:bg-rose-500/10"
                           onClick={() => setDeletingAssetId(asset._id.toString())}
                         >
                           <Trash2 className="size-3.5" />
-                        </Button>
-                      </TooltipTrigger>
+                        </Button>} />
                       <TooltipContent side="top" className="rounded-xl font-medium">
                         Delete item
                       </TooltipContent>
@@ -375,11 +369,10 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
                   </div>
 
                   <div>
-                    <Progress
+                    <Progress style={{ ['--progress-background' as any]: accent }}
                       value={ownershipPct}
-                      indicatorStyle={{ backgroundColor: accent }}
-                      className="h-2 bg-muted/60"
-                    />
+                      className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/60"
+                     />
                     <div className="flex justify-between text-[9px] font-medium text-muted-foreground mt-1">
                       <span>{formatCurrency(netOwnedValue / 100, asset.currency)} net owned</span>
                       <span className="capitalize">{asset.valuationMethod} valuation</span>
@@ -408,17 +401,7 @@ export function AssetsListTab({ assets }: AssetsListTabProps) {
                       onSuccess={() => router.refresh()}
                     />
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      asChild
-                      className="h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0"
-                    >
-                      <Link href={`/net-worth/assets/${asset._id.toString()}`}>
-                        <Eye className="size-3 mr-1" />
-                        Details
-                      </Link>
-                    </Button>
+                    <Link href={`/net-worth/assets/${asset._id.toString()}`} className={cn(buttonVariants({ size: "sm", variant: "outline" }), "h-7 rounded-lg text-xs font-bold px-3 cursor-pointer shrink-0")}><Eye className="size-3 mr-1" />Details</Link>
                   </div>
                 </CardFooter>
               </Card>

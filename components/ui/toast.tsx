@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Toast as ToastPrimitive } from "@base-ui/react/toast"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, Loader2, X } from "lucide-react"
 
 export interface ToastData {
@@ -158,12 +158,12 @@ function ToasterViewport({
   position = "bottom-right",
 }: {
   position?:
-    | "top-left"
-    | "top-right"
-    | "bottom-left"
-    | "bottom-right"
-    | "top-center"
-    | "bottom-center"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "top-center"
+  | "bottom-center"
 }) {
   const { toasts } = ToastPrimitive.useToastManager<ToastData>()
 
@@ -198,15 +198,15 @@ function ToasterViewport({
                 "bg-card/95 text-card-foreground border-border/60",
                 variant === "default" && "border-border/60",
                 variant === "success" &&
-                  "border-emerald-500/30 bg-emerald-500/[0.04] dark:bg-emerald-950/20 text-foreground",
+                "border-emerald-500/30 bg-emerald-500/[0.04] dark:bg-emerald-950/20 text-foreground",
                 variant === "error" &&
-                  "border-destructive/30 bg-destructive/[0.04] dark:bg-destructive/10 text-foreground",
+                "border-destructive/30 bg-destructive/[0.04] dark:bg-destructive/10 text-foreground",
                 variant === "warning" &&
-                  "border-amber-500/30 bg-amber-500/[0.04] dark:bg-amber-950/20 text-foreground",
+                "border-amber-500/30 bg-amber-500/[0.04] dark:bg-amber-950/20 text-foreground",
                 variant === "info" &&
-                  "border-sky-500/30 bg-sky-500/[0.04] dark:bg-sky-950/20 text-foreground",
+                "border-sky-500/30 bg-sky-500/[0.04] dark:bg-sky-950/20 text-foreground",
                 variant === "loading" &&
-                  "border-primary/30 bg-primary/[0.04] text-foreground"
+                "border-primary/30 bg-primary/[0.04] text-foreground"
               )}
             >
               <div className="shrink-0 pt-0.5">
@@ -282,12 +282,12 @@ export function Toaster({
   position = "bottom-right",
 }: {
   position?:
-    | "top-left"
-    | "top-right"
-    | "bottom-left"
-    | "bottom-right"
-    | "top-center"
-    | "bottom-center"
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right"
+  | "top-center"
+  | "bottom-center"
 }) {
   return (
     <ToastPrimitive.Provider toastManager={baseToast} limit={5}>

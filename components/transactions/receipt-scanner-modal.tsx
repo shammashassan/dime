@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SUPPORTED_CURRENCIES } from "@/lib/currencies"
+import { SUPPORTED_CURRENCIES } from "@/lib/currency"
 import { Sparkles, Upload, FileText, CheckCircle, RefreshCw } from "lucide-react"
 
 export interface ScannedReceiptData {
@@ -253,7 +253,7 @@ export function ReceiptScannerModal({
                     />
                     <Select
                       value={scannedData.currency}
-                      onValueChange={(val) => setScannedData({ ...scannedData, currency: val })}
+                      onValueChange={(val) => { if (val) setScannedData({ ...scannedData, currency: val }) }}
                     >
                       <SelectTrigger className="h-7 w-19 px-2 py-0 text-xs font-bold rounded-lg border-border/50 bg-background cursor-pointer">
                         <SelectValue />

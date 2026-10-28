@@ -10,7 +10,7 @@ import {
   updateCalendarPlanSchema,
   CreateCalendarPlanInput,
   UpdateCalendarPlanInput,
-} from "@/lib/validations/calendar.schema"
+} from "@/lib/schemas/calendar.schema"
 import { CalendarPlanEvent } from "@/types"
 
 export async function createCalendarPlanAction(input: CreateCalendarPlanInput) {

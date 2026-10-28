@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { Bar, BarChart, Cell, XAxis, YAxis } from "recharts"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Target } from "lucide-react"
 import {
@@ -189,12 +189,8 @@ export function CapitalAllocationChart({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs font-semibold">
-                <Link href="/goals">View Goals</Link>
-              </Button>
-              <Button asChild size="sm" variant="outline" className="rounded-lg h-8 text-xs font-semibold">
-                <Link href="/loans">View Loans</Link>
-              </Button>
+              <Link href="/goals" className={cn(buttonVariants({ size: "sm", variant: "outline" }), "rounded-lg h-8 text-xs font-semibold")}>View Goals</Link>
+              <Link href="/loans" className={cn(buttonVariants({ size: "sm", variant: "outline" }), "rounded-lg h-8 text-xs font-semibold")}>View Loans</Link>
             </div>
           </div>
         )}

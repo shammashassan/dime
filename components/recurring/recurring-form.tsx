@@ -17,7 +17,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { CalendarIcon, Loader2, Repeat, CreditCard, FileText, ArrowDownRight, ArrowUpRight } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 const clientRuleSchema = z
   .object({
@@ -403,15 +403,13 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
               name="startDate"
               render={({ field }) => (
                 <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
+                  <PopoverTrigger render={<Button
                       variant="outline"
                       className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
                     >
                       <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
                       {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
+                    </Button>} />
                   <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                     <Calendar
                       mode="single"
@@ -434,15 +432,13 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
                 name="endDate"
                 render={({ field }) => (
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         variant="outline"
                         className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
                       >
                         <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
                         {field.value ? format(field.value, "PPP") : <span>No end date</span>}
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                       <Calendar
                         mode="single"
@@ -464,15 +460,13 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
                 name="trialEndDate"
                 render={({ field }) => (
                   <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
+                    <PopoverTrigger render={<Button
                         variant="outline"
                         className="h-10 w-full justify-start text-left font-normal rounded-xl border border-input"
                       >
                         <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
                         {field.value ? format(field.value, "PPP") : <span>No trial</span>}
-                      </Button>
-                    </PopoverTrigger>
+                      </Button>} />
                     <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                       <Calendar
                         mode="single"

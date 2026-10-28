@@ -24,11 +24,9 @@ export function AddTransactionDialog({ categories, wallets, defaultWalletId }: A
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/95 gap-1.5 h-10 px-4">
+      <DialogTrigger render={<Button className="w-full rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/95 gap-1.5 h-10 px-4">
           <Plus className="size-4" /> Add Transaction
-        </Button>
-      </DialogTrigger>
+        </Button>} />
       <DialogContent className="max-w-lg overflow-y-auto max-h-[90vh] min-w-0">
         <DialogHeader className="pb-1">
           <DialogTitle>Add Transaction</DialogTitle>

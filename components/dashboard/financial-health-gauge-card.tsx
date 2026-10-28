@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Cell, Pie, PieChart } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import { HealthTier, PillarId, PillarScore } from "@/types"
 
 export interface FinancialHealthGaugeCardProps {

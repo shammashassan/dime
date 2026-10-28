@@ -2,7 +2,7 @@
 
 import { requireApprovedUser } from "@/lib/auth-guard"
 import { getCollection } from "@/lib/db/collections"
-import { budgetSchema, BudgetInput } from "@/lib/validations/budget.schema"
+import { budgetSchema, BudgetInput } from "@/lib/schemas/budget.schema"
 import { Budget } from "@/types"
 import { ObjectId } from "mongodb"
 import { revalidatePath, updateTag } from "next/cache"

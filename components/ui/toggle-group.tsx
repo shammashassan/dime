@@ -26,44 +26,13 @@ function ToggleGroup({
   size,
   spacing = 2,
   orientation = "horizontal",
-  type = "single",
-  value,
-  defaultValue,
-  onValueChange,
   children,
   ...props
-}: Omit<ToggleGroupPrimitive.Props, "value" | "defaultValue" | "onValueChange"> &
+}: ToggleGroupPrimitive.Props &
   VariantProps<typeof toggleVariants> & {
     spacing?: number
     orientation?: "horizontal" | "vertical"
-    type?: "single" | "multiple" | string
-    value?: any
-    defaultValue?: any
-    onValueChange?: (value: any) => void
   }) {
-  const isSingle = type === "single"
-
-  const normalizedValue = isSingle
-    ? value !== undefined
-      ? value ? [value] : []
-      : undefined
-    : value
-
-  const normalizedDefaultValue = isSingle
-    ? defaultValue !== undefined
-      ? defaultValue ? [defaultValue] : []
-      : undefined
-    : defaultValue
-
-  const handleValueChange = (val: any[]) => {
-    if (!onValueChange) return
-    if (isSingle) {
-      onValueChange(val[0] ?? "")
-    } else {
-      onValueChange(val)
-    }
-  }
-
   return (
     <ToggleGroupPrimitive
       data-slot="toggle-group"
@@ -71,9 +40,6 @@ function ToggleGroup({
       data-size={size}
       data-spacing={spacing}
       data-orientation={orientation}
-      value={normalizedValue}
-      defaultValue={normalizedDefaultValue}
-      onValueChange={handleValueChange}
       style={{ "--gap": spacing } as React.CSSProperties}
       className={cn(
         "group/toggle-group flex w-fit flex-row items-center gap-[--spacing(var(--gap))] data-[spacing=0]:data-[variant=outline]:rounded-4xl data-vertical:flex-col data-vertical:items-stretch",

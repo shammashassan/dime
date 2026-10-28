@@ -121,8 +121,7 @@ export function GoalContributionDialog({
               <Select
                 value={selectedWalletId}
                 onValueChange={(val) => {
-                  setSelectedWalletId(val)
-                  setError(null)
+                  if (val) { setSelectedWalletId(val); setError(null); }
                 }}
               >
                 <SelectTrigger className="rounded-xl">

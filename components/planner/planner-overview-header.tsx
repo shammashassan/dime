@@ -75,7 +75,7 @@ export function PlannerOverviewHeader({
         {/* Action Controls — default Select dropdowns like report page */}
         <div className="flex items-center gap-2 flex-wrap md:ml-auto md:justify-end">
           {/* Scenario Select Dropdown */}
-          <Select value={selectedScenarioId} onValueChange={(val) => onSelectScenario(val)}>
+          <Select value={selectedScenarioId} onValueChange={(val) => val && onSelectScenario(val)}>
             <SelectTrigger className="w-full sm:w-50 h-10 rounded-xl border-border/40 shadow-xs text-xs font-semibold">
               <SelectValue placeholder="Select Scenario" />
             </SelectTrigger>
@@ -92,7 +92,7 @@ export function PlannerOverviewHeader({
           {/* Horizon Select Dropdown */}
           <Select
             value={horizonMonths.toString()}
-            onValueChange={(val) => onHorizonChange(parseInt(val, 10))}
+            onValueChange={(val) => val && onHorizonChange(parseInt(val, 10))}
           >
             <SelectTrigger className="w-full sm:w-32.5 h-10 rounded-xl border-border/40 shadow-xs text-xs font-semibold">
               <SelectValue placeholder="Forecast Horizon" />

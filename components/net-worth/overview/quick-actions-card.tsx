@@ -58,7 +58,7 @@ export function QuickActionsCard({ assets }: { assets: Asset[] }) {
         <div className="border-t border-border/30 pt-3 flex flex-col gap-2.5">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Log Valuation</span>
           <div className="flex flex-col gap-2">
-            <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
+            <Select value={selectedAssetId} onValueChange={(val) => { if (val) setSelectedAssetId(val) }}>
               <SelectTrigger className="w-full rounded-xl border-border/40 bg-card h-9 text-xs">
                 <SelectValue placeholder="Select manual item" />
               </SelectTrigger>
@@ -89,14 +89,12 @@ export function QuickActionsCard({ assets }: { assets: Asset[] }) {
               />
             ) : (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="w-full">
+                <TooltipTrigger render={<span className="w-full">
                     <Button disabled className="w-full rounded-xl text-xs font-bold h-9 gap-1.5">
                       <RefreshCw className="size-3.5" />
                       Record Valuation
                     </Button>
-                  </span>
-                </TooltipTrigger>
+                  </span>} />
                 <TooltipContent side="top">Select a manually-valued item first</TooltipContent>
               </Tooltip>
             )}

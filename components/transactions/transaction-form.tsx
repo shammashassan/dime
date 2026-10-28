@@ -21,8 +21,8 @@ import { CalendarIcon, Loader2, Sparkles, Trash2, Plus, ArrowDownRight, ArrowUpR
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
 import { ReceiptScannerModal } from "@/components/transactions/receipt-scanner-modal"
-import { generateSplitId, validateSplits } from "@/lib/split-utils"
-import { cn } from "@/lib/utils"
+import { generateSplitId, validateSplits } from "@/lib/calculations/split-utils"
+import { cn } from "cn"
 import { refreshNotifications } from "@/components/notifications/notifications-provider"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
@@ -631,95 +631,66 @@ export function TransactionForm({
               </div>
             )}
 
-        <FieldGroup className="gap-4">
-          {/* Transaction Type */}
-          <Field>
-            <FieldLabel>Transaction Type</FieldLabel>
-            <Controller
-              control={control}
-              name="type"
-              render={({ field }) => (
-                <div className="grid grid-cols-3 gap-1 p-1 bg-muted/80 rounded-2xl text-xs font-semibold">
-                  {[
-                    { value: "expense", label: "Expense", icon: ArrowDownRight },
-                    { value: "income", label: "Income", icon: ArrowUpRight },
-                    { value: "transfer", label: "Transfer", icon: ArrowLeftRight },
-                  ].map((t) => {
-                    const Icon = t.icon
-                    const isSelected = field.value === t.value
-                    return (
-                      <button
-                        key={t.value}
-                        type="button"
-                        onClick={() => field.onChange(t.value)}
-                        className={cn(
-                          "flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all text-center cursor-pointer",
-                          isSelected
-                            ? "bg-background text-foreground shadow-xs font-bold"
-                            : "text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <Icon className="size-3.5 shrink-0" />
-                        {t.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            />
-          </Field>
-
-          {/* Source Wallet and Target Wallet (if transfer) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field data-invalid={!!errors.walletId}>
-              <FieldLabel>Wallet</FieldLabel>
-              <Controller
-                control={control}
-                name="walletId"
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={(val) => {
-                      field.onChange(val)
-                      // Update currency based on selected wallet
-                      const w = wallets.find((x) => x._id.toString() === val)
-                      if (w) setValue("currency", w.currency)
-                    }}
-                  >
-                    <SelectTrigger aria-invalid={!!errors.walletId} className="h-10 rounded-xl">
-                      <SelectValue placeholder="Select Wallet" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {wallets.map((w) => (
-                        <SelectItem key={w._id.toString()} value={w._id.toString()}>
-                          <div className="flex items-center gap-2">
-                            <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
-                            <span>{w.name} ({w.currency})</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.walletId && <FieldError>{(errors.walletId as any).message}</FieldError>}
-            </Field>
-
-            {type === "transfer" && (
-              <Field data-invalid={!!errors.targetWalletId}>
-                <FieldLabel>Destination Wallet</FieldLabel>
+            <FieldGroup className="gap-4">
+              {/* Transaction Type */}
+              <Field>
+                <FieldLabel>Transaction Type</FieldLabel>
                 <Controller
                   control={control}
-                  name="targetWalletId"
+                  name="type"
                   render={({ field }) => (
-                    <Select value={field.value || ""} onValueChange={field.onChange}>
-                      <SelectTrigger aria-invalid={!!errors.targetWalletId} className="h-10 rounded-xl">
-                        <SelectValue placeholder="Select Destination Wallet" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {wallets
-                          .filter((w) => w._id.toString() !== selectedWalletId)
-                          .map((w) => (
+                    <div className="grid grid-cols-3 gap-1 p-1 bg-muted/80 rounded-2xl text-xs font-semibold">
+                      {[
+                        { value: "expense", label: "Expense", icon: ArrowDownRight },
+                        { value: "income", label: "Income", icon: ArrowUpRight },
+                        { value: "transfer", label: "Transfer", icon: ArrowLeftRight },
+                      ].map((t) => {
+                        const Icon = t.icon
+                        const isSelected = field.value === t.value
+                        return (
+                          <button
+                            key={t.value}
+                            type="button"
+                            onClick={() => field.onChange(t.value)}
+                            className={cn(
+                              "flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all text-center cursor-pointer",
+                              isSelected
+                                ? "bg-background text-foreground shadow-xs font-bold"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <Icon className="size-3.5 shrink-0" />
+                            {t.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                />
+              </Field>
+
+              {/* Source Wallet and Target Wallet (if transfer) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field data-invalid={!!errors.walletId}>
+                  <FieldLabel>Wallet</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="walletId"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={(val) => {
+                          field.onChange(val)
+                          // Update currency based on selected wallet
+                          const w = wallets.find((x) => x._id.toString() === val)
+                          if (w) setValue("currency", w.currency)
+                        }}
+                      >
+                        <SelectTrigger aria-invalid={!!errors.walletId} className="h-10 rounded-xl">
+                          <SelectValue placeholder="Select Wallet" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {wallets.map((w) => (
                             <SelectItem key={w._id.toString()} value={w._id.toString()}>
                               <div className="flex items-center gap-2">
                                 <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
@@ -727,473 +698,499 @@ export function TransactionForm({
                               </div>
                             </SelectItem>
                           ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.targetWalletId && <FieldError>{(errors.targetWalletId as any).message}</FieldError>}
-              </Field>
-            )}
-          </div>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.walletId && <FieldError>{(errors.walletId as any).message}</FieldError>}
+                </Field>
 
-          {/* Split Switch Toggle */}
-          {type !== "transfer" && (
-            <FieldLabel htmlFor="switch-split" className="cursor-pointer">
-              <Field orientation="horizontal">
-                <FieldContent>
-                  <FieldTitle>Split Transaction</FieldTitle>
-                  <FieldDescription>
-                    Allocate this transaction to multiple categories
-                  </FieldDescription>
-                </FieldContent>
-                <Controller
-                  control={control}
-                  name="isSplit"
-                  render={({ field }) => (
-                    <Switch
-                      id="switch-split"
-                      checked={field.value}
-                      onCheckedChange={(val) => {
-                        field.onChange(val)
-                        if (val) {
-                          setValue("splits", [
-                            { id: generateSplitId(), categoryId: "", amount: 0, percentage: 50, notes: "" },
-                            { id: generateSplitId(), categoryId: "", amount: 0, percentage: 50, notes: "" },
-                          ], { shouldDirty: true })
-                        } else {
-                          setValue("splits", undefined, { shouldDirty: true })
-                        }
-                      }}
+                {type === "transfer" && (
+                  <Field data-invalid={!!errors.targetWalletId}>
+                    <FieldLabel>Destination Wallet</FieldLabel>
+                    <Controller
+                      control={control}
+                      name="targetWalletId"
+                      render={({ field }) => (
+                        <Select value={field.value || ""} onValueChange={field.onChange}>
+                          <SelectTrigger aria-invalid={!!errors.targetWalletId} className="h-10 rounded-xl">
+                            <SelectValue placeholder="Select Destination Wallet" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {wallets
+                              .filter((w) => w._id.toString() !== selectedWalletId)
+                              .map((w) => (
+                                <SelectItem key={w._id.toString()} value={w._id.toString()}>
+                                  <div className="flex items-center gap-2">
+                                    <span className="size-2.5 rounded-full" style={{ backgroundColor: w.color }} />
+                                    <span>{w.name} ({w.currency})</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      )}
                     />
-                  )}
-                />
-              </Field>
-            </FieldLabel>
-          )}
-
-          {/* Category and Date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field data-invalid={!!errors.categoryId}>
-              <FieldLabel>Category</FieldLabel>
-              <Controller
-                control={control}
-                name="categoryId"
-                render={({ field }) => (
-                  <Select
-                    disabled={isSplit}
-                    value={isSplit ? undefined : field.value}
-                    onValueChange={field.onChange}
-                  >
-                    <SelectTrigger disabled={isSplit} aria-invalid={!!errors.categoryId}>
-                      <SelectValue placeholder={isSplit ? "Splits Enabled" : "Select Category (Optional)"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="uncategorized">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <span className="size-2.5 rounded-full bg-muted-foreground/30 shrink-0" />
-                          <span className="font-semibold">Uncategorized</span>
-                        </div>
-                      </SelectItem>
-                      {filteredCategories.map((c) => (
-                        <SelectItem key={c._id.toString()} value={c._id.toString()}>
-                          <div className="flex items-center gap-2">
-                            <span className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
-                            <span>{c.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    {errors.targetWalletId && <FieldError>{(errors.targetWalletId as any).message}</FieldError>}
+                  </Field>
                 )}
-              />
-              {!isSplit && errors.categoryId && <FieldError>{(errors.categoryId as any).message}</FieldError>}
-            </Field>
+              </div>
 
-            <Field data-invalid={!!errors.date}>
-              <FieldLabel>Date</FieldLabel>
-              <Controller
-                control={control}
-                name="date"
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="justify-start"
+              {/* Split Switch Toggle */}
+              {type !== "transfer" && (
+                <FieldLabel htmlFor="switch-split" className="cursor-pointer">
+                  <Field orientation="horizontal">
+                    <FieldContent>
+                      <FieldTitle>Split Transaction</FieldTitle>
+                      <FieldDescription>
+                        Allocate this transaction to multiple categories
+                      </FieldDescription>
+                    </FieldContent>
+                    <Controller
+                      control={control}
+                      name="isSplit"
+                      render={({ field }) => (
+                        <Switch
+                          id="switch-split"
+                          checked={field.value}
+                          onCheckedChange={(val) => {
+                            field.onChange(val)
+                            if (val) {
+                              setValue("splits", [
+                                { id: generateSplitId(), categoryId: "", amount: 0, percentage: 50, notes: "" },
+                                { id: generateSplitId(), categoryId: "", amount: 0, percentage: 50, notes: "" },
+                              ], { shouldDirty: true })
+                            } else {
+                              setValue("splits", undefined, { shouldDirty: true })
+                            }
+                          }}
+                        />
+                      )}
+                    />
+                  </Field>
+                </FieldLabel>
+              )}
+
+              {/* Category and Date */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Field data-invalid={!!errors.categoryId}>
+                  <FieldLabel>Category</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <Select
+                        disabled={isSplit}
+                        value={isSplit ? undefined : field.value}
+                        onValueChange={field.onChange}
                       >
-                        <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
-                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={(val) => val && field.onChange(val)}
-                        initialFocus
+                        <SelectTrigger disabled={isSplit} aria-invalid={!!errors.categoryId}>
+                          <SelectValue placeholder={isSplit ? "Splits Enabled" : "Select Category (Optional)"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="uncategorized">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <span className="size-2.5 rounded-full bg-muted-foreground/30 shrink-0" />
+                              <span className="font-semibold">Uncategorized</span>
+                            </div>
+                          </SelectItem>
+                          {filteredCategories.map((c) => (
+                            <SelectItem key={c._id.toString()} value={c._id.toString()}>
+                              <div className="flex items-center gap-2">
+                                <span className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                                <span>{c.name}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {!isSplit && errors.categoryId && <FieldError>{(errors.categoryId as any).message}</FieldError>}
+                </Field>
+
+                <Field data-invalid={!!errors.date}>
+                  <FieldLabel>Date</FieldLabel>
+                  <Controller
+                    control={control}
+                    name="date"
+                    render={({ field }) => (
+                      <Popover>
+                        <PopoverTrigger render={<Button
+                            variant="outline"
+                            className="justify-start"
+                          >
+                            <CalendarIcon className="mr-2 size-4 text-muted-foreground" />
+                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                          </Button>} />
+                        <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={(val) => val && field.onChange(val)}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  />
+                  {errors.date && <FieldError>{(errors.date as any).message}</FieldError>}
+                </Field>
+              </div>
+
+              {/* Amount */}
+              <Field data-invalid={!!errors.amount}>
+                <FieldLabel>Amount</FieldLabel>
+                <InputGroup>
+                  <InputGroupAddon align="inline-start">
+                    <InputGroupText>{walletCurrency}</InputGroupText>
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    aria-invalid={!!errors.amount}
+                    className="text-base font-semibold"
+                    {...register("amount", { valueAsNumber: true })}
+                  />
+                </InputGroup>
+                {errors.amount && <FieldError>{(errors.amount as any).message}</FieldError>}
+              </Field>
+
+              {/* Splits Builder */}
+              {isSplit && type !== "transfer" && (
+                <div className="p-4 sm:p-5 rounded-2xl border border-border/40 bg-muted/10 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/20">
+                    <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      Category Splits Breakdown
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <Controller
+                        control={control}
+                        name="splitMode"
+                        render={({ field }) => (
+                          <ToggleGroup
+                            value={field.value}
+                            onValueChange={(val) => {
+                              if (val) field.onChange(val)
+                            }}
+                            variant="outline"
+                            spacing={0}
+                            className="flex"
+                          >
+                            <ToggleGroupItem value="amount" className="px-2.5 py-1 text-[10px] font-bold rounded-none rounded-l-lg h-7">
+                              Amount
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="percentage" className="px-2.5 py-1 text-[10px] font-bold rounded-none h-7">
+                              Percent
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="equal" className="px-2.5 py-1 text-[10px] font-bold rounded-none rounded-r-lg h-7">
+                              Equal
+                            </ToggleGroupItem>
+                          </ToggleGroup>
+                        )}
                       />
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />
-              {errors.date && <FieldError>{(errors.date as any).message}</FieldError>}
-            </Field>
-          </div>
+                    </div>
+                  </div>
 
-          {/* Amount */}
-          <Field data-invalid={!!errors.amount}>
-            <FieldLabel>Amount</FieldLabel>
-            <InputGroup>
-              <InputGroupAddon align="inline-start">
-                <InputGroupText>{walletCurrency}</InputGroupText>
-              </InputGroupAddon>
-              <InputGroupInput
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                aria-invalid={!!errors.amount}
-                className="text-base font-semibold"
-                {...register("amount", { valueAsNumber: true })}
-              />
-            </InputGroup>
-            {errors.amount && <FieldError>{(errors.amount as any).message}</FieldError>}
-          </Field>
+                  {/* Splits List */}
+                  <div className="space-y-4">
+                    {fields.map((fieldItem, idx) => {
+                      const splitError = (errors.splits as any)?.[idx]
+                      return (
+                        <div key={fieldItem.id} className="flex flex-col gap-3.5 p-4 bg-background border border-border/85 rounded-2xl shadow-xs relative">
+                          {/* Card Header Row */}
+                          <div className="flex items-center justify-between pb-2 border-b border-border/40">
+                            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                              Split {idx + 1}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              disabled={fields.length <= 2}
+                              onClick={() => remove(idx)}
+                              className="size-7 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-500 hover:text-rose-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer shrink-0"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </Button>
+                          </div>
 
-          {/* Splits Builder */}
-          {isSplit && type !== "transfer" && (
-            <div className="p-4 sm:p-5 rounded-2xl border border-border/40 bg-muted/10 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/20">
-                <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  Category Splits Breakdown
-                </h4>
+                          {/* Input fields in equal-width 2-column grid */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* Split Category Select */}
+                            <div className="flex flex-col gap-1 text-left">
+                              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
+                                Category
+                              </label>
+                              <Controller
+                                control={control}
+                                name={`splits.${idx}.categoryId`}
+                                render={({ field }) => (
+                                  <Select value={field.value} onValueChange={field.onChange}>
+                                    <SelectTrigger className="h-10 rounded-xl text-xs w-full border-border/60">
+                                      <SelectValue placeholder="Select Category" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {filteredCategories.map((c) => (
+                                        <SelectItem key={c._id.toString()} value={c._id.toString()}>
+                                          <div className="flex items-center gap-2">
+                                            <span className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                                            <span>{c.name}</span>
+                                          </div>
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                )}
+                              />
+                            </div>
+
+                            {/* Split Value Input (Amount or Percentage) */}
+                            <div className="flex flex-col gap-1 text-left">
+                              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
+                                {splitMode === "percentage" ? "Percentage" : "Amount"}
+                              </label>
+                              <InputGroup>
+                                <InputGroupAddon>
+                                  <InputGroupText className="text-xs">
+                                    {splitMode === "percentage" ? "%" : walletCurrency}
+                                  </InputGroupText>
+                                </InputGroupAddon>
+                                {splitMode === "percentage" ? (
+                                  <InputGroupInput
+                                    type="number"
+                                    step="any"
+                                    placeholder="0"
+                                    className="text-xs text-left pr-3"
+                                    {...register(`splits.${idx}.percentage`, { valueAsNumber: true })}
+                                  />
+                                ) : (
+                                  <InputGroupInput
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    className="text-xs text-left pr-3"
+                                    disabled={splitMode === "equal"}
+                                    {...register(`splits.${idx}.amount`, { valueAsNumber: true })}
+                                  />
+                                )}
+                              </InputGroup>
+                            </div>
+                          </div>
+
+                          {/* Optional Notes for this Split */}
+                          <div className="flex flex-col gap-1 text-left">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
+                              Split Notes
+                            </label>
+                            <InputGroup className="h-9 rounded-xl border-border/60 bg-muted/5">
+                              <InputGroupInput
+                                placeholder="Add split notes (optional)..."
+                                className="h-9 text-xs"
+                                {...register(`splits.${idx}.notes`)}
+                              />
+                            </InputGroup>
+                          </div>
+
+                          {/* Display calculated values when in percentage mode */}
+                          {splitMode === "percentage" && (
+                            <div className="text-[10px] text-muted-foreground pl-1.5 mt-0.5 text-left font-medium">
+                              Calculated Amount: {walletCurrency} {((totalAmount * (watch(`splits.${idx}.percentage`) || 0)) / 100).toFixed(2)}
+                            </div>
+                          )}
+
+                          {/* Individual split errors */}
+                          {splitError && (
+                            <div className="text-[10px] text-destructive font-semibold mt-1 text-left">
+                              {splitError.categoryId?.message || splitError.amount?.message || splitError.percentage?.message}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Splits Footer Status */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-border/20">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => append({ id: generateSplitId(), categoryId: "", amount: 0, percentage: 0, notes: "" })}
+                      className="rounded-xl h-9 text-xs font-semibold gap-1 hover:bg-muted/50 cursor-pointer w-full sm:w-auto"
+                    >
+                      <Plus className="size-3.5" /> Add Split Category
+                    </Button>
+
+                    {/* Status Indicator */}
+                    <div className="flex items-center justify-end gap-2.5">
+                      {splitMode === "percentage" ? (
+                        (() => {
+                          const sumPct = splits.reduce((acc: number, s: any) => acc + (parseFloat(s.percentage) || 0), 0)
+                          const diff = 100 - sumPct
+                          return (
+                            <Badge
+                              variant="outline"
+                              className={`text-xs px-2.5 py-1 font-bold ${Math.abs(diff) < 0.01
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                }`}
+                            >
+                              {Math.abs(diff) < 0.01 ? "Balanced (100%)" : `Total: ${sumPct}% (Need ${diff > 0 ? "+" : ""}${diff.toFixed(1)}%)`}
+                            </Badge>
+                          )
+                        })()
+                      ) : splitMode === "equal" ? (
+                        <Badge variant="outline" className="text-xs px-2.5 py-1 font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                          Auto Balanced (Equal)
+                        </Badge>
+                      ) : (
+                        (() => {
+                          const sumAmt = splits.reduce((acc: number, s: any) => acc + (parseFloat(s.amount) || 0), 0)
+                          const diff = totalAmount - sumAmt
+                          return (
+                            <Badge
+                              variant="outline"
+                              className={`text-xs px-2.5 py-1 font-bold ${Math.abs(diff) < 0.015
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                                : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                }`}
+                            >
+                              {Math.abs(diff) < 0.015 ? "Balanced" : `Remaining: ${walletCurrency} ${diff.toFixed(2)}`}
+                            </Badge>
+                          )
+                        })()
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Splits General Errors */}
+                  {errors.splits && !Array.isArray(errors.splits) && (
+                    <div className="text-xs font-semibold text-destructive mt-1">
+                      {(errors.splits as any).message}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Description */}
+              <Field data-invalid={!!errors.description}>
+                <FieldLabel>Description</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    placeholder="e.g. Grocery shopping"
+                    aria-invalid={!!errors.description}
+                    {...register("description")}
+                  />
+                </InputGroup>
+                {errors.description && <FieldError>{(errors.description as any).message}</FieldError>}
+              </Field>
+
+              {/* Notes */}
+              <Field data-invalid={!!errors.notes}>
+                <FieldLabel>Notes (Optional)</FieldLabel>
+                <InputGroup>
+                  <InputGroupTextarea
+                    placeholder="Additional details..."
+                    aria-invalid={!!errors.notes}
+                    rows={3}
+                    {...register("notes")}
+                  />
+                </InputGroup>
+                {errors.notes && <FieldError>{(errors.notes as any).message}</FieldError>}
+              </Field>
+
+              {/* Tags */}
+              <Field data-invalid={!!errors.tags}>
+                <FieldLabel>Tags (Comma-separated)</FieldLabel>
+                <InputGroup>
+                  <InputGroupInput
+                    placeholder="e.g. food, weekly, essential"
+                    aria-invalid={!!errors.tags}
+                    {...register("tags")}
+                  />
+                </InputGroup>
+                {errors.tags && <FieldError>{(errors.tags as any).message}</FieldError>}
+              </Field>
+
+              {/* Is Recurring */}
+              <div className="flex flex-wrap items-center gap-6 py-2">
                 <div className="flex items-center gap-2">
                   <Controller
                     control={control}
-                    name="splitMode"
+                    name="isRecurring"
                     render={({ field }) => (
-                      <ToggleGroup
-                        type="single"
-                        value={field.value}
-                        onValueChange={(val) => {
-                          if (val) field.onChange(val)
-                        }}
-                        variant="outline"
-                        spacing={0}
-                        className="flex"
-                      >
-                        <ToggleGroupItem value="amount" className="px-2.5 py-1 text-[10px] font-bold rounded-none rounded-l-lg h-7">
-                          Amount
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="percentage" className="px-2.5 py-1 text-[10px] font-bold rounded-none h-7">
-                          Percent
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="equal" className="px-2.5 py-1 text-[10px] font-bold rounded-none rounded-r-lg h-7">
-                          Equal
-                        </ToggleGroupItem>
-                      </ToggleGroup>
+                      <Checkbox
+                        id="isRecurring"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
                     )}
                   />
+                  <label
+                    htmlFor="isRecurring"
+                    className="text-sm font-medium leading-none cursor-pointer"
+                  >
+                    This is a recurring transaction
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Controller
+                    control={control}
+                    name="isFlagged"
+                    render={({ field }) => (
+                      <Checkbox
+                        id="isFlagged"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <label
+                    htmlFor="isFlagged"
+                    className="text-sm font-medium leading-none cursor-pointer text-rose-600 dark:text-rose-400"
+                  >
+                    Flag transaction
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Controller
+                    control={control}
+                    name="needsReview"
+                    render={({ field }) => (
+                      <Checkbox
+                        id="needsReview"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <label
+                    htmlFor="needsReview"
+                    className="text-sm leading-none cursor-pointer text-amber-600 dark:text-amber-400 font-semibold"
+                  >
+                    Mark needs review
+                  </label>
                 </div>
               </div>
+            </FieldGroup>
 
-              {/* Splits List */}
-              <div className="space-y-4">
-                {fields.map((fieldItem, idx) => {
-                  const splitError = (errors.splits as any)?.[idx]
-                  return (
-                    <div key={fieldItem.id} className="flex flex-col gap-3.5 p-4 bg-background border border-border/85 rounded-2xl shadow-xs relative">
-                      {/* Card Header Row */}
-                      <div className="flex items-center justify-between pb-2 border-b border-border/40">
-                        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                          Split {idx + 1}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          disabled={fields.length <= 2}
-                          onClick={() => remove(idx)}
-                          className="size-7 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-500 hover:text-rose-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer shrink-0"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
-                      </div>
-
-                      {/* Input fields in equal-width 2-column grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Split Category Select */}
-                        <div className="flex flex-col gap-1 text-left">
-                          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
-                            Category
-                          </label>
-                          <Controller
-                            control={control}
-                            name={`splits.${idx}.categoryId`}
-                            render={({ field }) => (
-                              <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger className="h-10 rounded-xl text-xs w-full border-border/60">
-                                  <SelectValue placeholder="Select Category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {filteredCategories.map((c) => (
-                                    <SelectItem key={c._id.toString()} value={c._id.toString()}>
-                                      <div className="flex items-center gap-2">
-                                        <span className="size-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
-                                        <span>{c.name}</span>
-                                      </div>
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            )}
-                          />
-                        </div>
-
-                        {/* Split Value Input (Amount or Percentage) */}
-                        <div className="flex flex-col gap-1 text-left">
-                          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
-                            {splitMode === "percentage" ? "Percentage" : "Amount"}
-                          </label>
-                          <InputGroup>
-                            <InputGroupAddon>
-                              <InputGroupText className="text-xs">
-                                {splitMode === "percentage" ? "%" : walletCurrency}
-                              </InputGroupText>
-                            </InputGroupAddon>
-                            {splitMode === "percentage" ? (
-                              <InputGroupInput
-                                type="number"
-                                step="any"
-                                placeholder="0"
-                                className="text-xs text-left pr-3"
-                                {...register(`splits.${idx}.percentage`, { valueAsNumber: true })}
-                              />
-                            ) : (
-                              <InputGroupInput
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                className="text-xs text-left pr-3"
-                                disabled={splitMode === "equal"}
-                                {...register(`splits.${idx}.amount`, { valueAsNumber: true })}
-                              />
-                            )}
-                          </InputGroup>
-                        </div>
-                      </div>
-
-                      {/* Optional Notes for this Split */}
-                      <div className="flex flex-col gap-1 text-left">
-                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
-                          Split Notes
-                        </label>
-                        <InputGroup className="h-9 rounded-xl border-border/60 bg-muted/5">
-                          <InputGroupInput
-                            placeholder="Add split notes (optional)..."
-                            className="h-9 text-xs"
-                            {...register(`splits.${idx}.notes`)}
-                          />
-                        </InputGroup>
-                      </div>
-
-                      {/* Display calculated values when in percentage mode */}
-                      {splitMode === "percentage" && (
-                        <div className="text-[10px] text-muted-foreground pl-1.5 mt-0.5 text-left font-medium">
-                          Calculated Amount: {walletCurrency} {((totalAmount * (watch(`splits.${idx}.percentage`) || 0)) / 100).toFixed(2)}
-                        </div>
-                      )}
-
-                      {/* Individual split errors */}
-                      {splitError && (
-                        <div className="text-[10px] text-destructive font-semibold mt-1 text-left">
-                          {splitError.categoryId?.message || splitError.amount?.message || splitError.percentage?.message}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Splits Footer Status */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-border/20">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => append({ id: generateSplitId(), categoryId: "", amount: 0, percentage: 0, notes: "" })}
-                  className="rounded-xl h-9 text-xs font-semibold gap-1 hover:bg-muted/50 cursor-pointer w-full sm:w-auto"
-                >
-                  <Plus className="size-3.5" /> Add Split Category
-                </Button>
-
-                {/* Status Indicator */}
-                <div className="flex items-center justify-end gap-2.5">
-                  {splitMode === "percentage" ? (
-                    (() => {
-                      const sumPct = splits.reduce((acc: number, s: any) => acc + (parseFloat(s.percentage) || 0), 0)
-                      const diff = 100 - sumPct
-                      return (
-                        <Badge
-                          variant="outline"
-                          className={`text-xs px-2.5 py-1 font-bold ${Math.abs(diff) < 0.01
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                            }`}
-                        >
-                          {Math.abs(diff) < 0.01 ? "Balanced (100%)" : `Total: ${sumPct}% (Need ${diff > 0 ? "+" : ""}${diff.toFixed(1)}%)`}
-                        </Badge>
-                      )
-                    })()
-                  ) : splitMode === "equal" ? (
-                    <Badge variant="outline" className="text-xs px-2.5 py-1 font-bold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                      Auto Balanced (Equal)
-                    </Badge>
-                  ) : (
-                    (() => {
-                      const sumAmt = splits.reduce((acc: number, s: any) => acc + (parseFloat(s.amount) || 0), 0)
-                      const diff = totalAmount - sumAmt
-                      return (
-                        <Badge
-                          variant="outline"
-                          className={`text-xs px-2.5 py-1 font-bold ${Math.abs(diff) < 0.015
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                            }`}
-                        >
-                          {Math.abs(diff) < 0.015 ? "Balanced" : `Remaining: ${walletCurrency} ${diff.toFixed(2)}`}
-                        </Badge>
-                      )
-                    })()
-                  )}
-                </div>
-              </div>
-
-              {/* Splits General Errors */}
-              {errors.splits && !Array.isArray(errors.splits) && (
-                <div className="text-xs font-semibold text-destructive mt-1">
-                  {(errors.splits as any).message}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Description */}
-          <Field data-invalid={!!errors.description}>
-            <FieldLabel>Description</FieldLabel>
-            <InputGroup>
-              <InputGroupInput
-                placeholder="e.g. Grocery shopping"
-                aria-invalid={!!errors.description}
-                {...register("description")}
-              />
-            </InputGroup>
-            {errors.description && <FieldError>{(errors.description as any).message}</FieldError>}
-          </Field>
-
-          {/* Notes */}
-          <Field data-invalid={!!errors.notes}>
-            <FieldLabel>Notes (Optional)</FieldLabel>
-            <InputGroup>
-              <InputGroupTextarea
-                placeholder="Additional details..."
-                aria-invalid={!!errors.notes}
-                rows={3}
-                {...register("notes")}
-              />
-            </InputGroup>
-            {errors.notes && <FieldError>{(errors.notes as any).message}</FieldError>}
-          </Field>
-
-          {/* Tags */}
-          <Field data-invalid={!!errors.tags}>
-            <FieldLabel>Tags (Comma-separated)</FieldLabel>
-            <InputGroup>
-              <InputGroupInput
-                placeholder="e.g. food, weekly, essential"
-                aria-invalid={!!errors.tags}
-                {...register("tags")}
-              />
-            </InputGroup>
-            {errors.tags && <FieldError>{(errors.tags as any).message}</FieldError>}
-          </Field>
-
-          {/* Is Recurring */}
-          <div className="flex flex-wrap items-center gap-6 py-2">
-            <div className="flex items-center gap-2">
-              <Controller
-                control={control}
-                name="isRecurring"
-                render={({ field }) => (
-                  <Checkbox
-                    id="isRecurring"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <label
-                htmlFor="isRecurring"
-                className="text-sm font-medium leading-none cursor-pointer"
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/20">
+              <Button
+                type="submit"
+                disabled={loading || !isDirty}
+                className="w-full md:w-auto px-8 rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/95 flex items-center justify-center gap-2"
               >
-                This is a recurring transaction
-              </label>
+                {loading && <Loader2 className="size-4 animate-spin" />}
+                {isEditing ? "Save Changes" : "Create Transaction"}
+              </Button>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Controller
-                control={control}
-                name="isFlagged"
-                render={({ field }) => (
-                  <Checkbox
-                    id="isFlagged"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <label
-                htmlFor="isFlagged"
-                className="text-sm font-medium leading-none cursor-pointer text-rose-600 dark:text-rose-400"
-              >
-                Flag transaction
-              </label>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Controller
-                control={control}
-                name="needsReview"
-                render={({ field }) => (
-                  <Checkbox
-                    id="needsReview"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <label
-                htmlFor="needsReview"
-                className="text-sm leading-none cursor-pointer text-amber-600 dark:text-amber-400 font-semibold"
-              >
-                Mark needs review
-              </label>
-            </div>
-          </div>
-        </FieldGroup>
-
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/20">
-          <Button
-            type="submit"
-            disabled={loading || !isDirty}
-            className="w-full md:w-auto px-8 rounded-xl font-bold bg-primary text-primary-foreground hover:bg-primary/95 flex items-center justify-center gap-2"
-          >
-            {loading && <Loader2 className="size-4 animate-spin" />}
-            {isEditing ? "Save Changes" : "Create Transaction"}
-          </Button>
-        </div>
-      </TabsContent>
-    </Tabs>
-  </form>
+          </TabsContent>
+        </Tabs>
+      </form>
 
       {!isEditing && (
         <ReceiptScannerModal

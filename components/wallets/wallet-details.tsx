@@ -7,7 +7,7 @@ import { toggleArchiveWallet, deleteWallet } from "@/lib/actions/wallets"
 import { deleteTransaction } from "@/lib/actions/transactions"
 import { WalletForm } from "./wallet-form"
 import { WalletDetailChart } from "./wallet-detail-chart"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { MetricCard } from "@/components/ui/metric-card"
 import { Badge } from "@/components/ui/badge"
@@ -226,11 +226,9 @@ export function WalletDetails({
                             <Edit className="size-4 mr-2" /> Edit
                         </Button>
                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="icon" className="size-9 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
+                            <AlertDialogTrigger render={<Button variant="outline" size="icon" className="size-9 rounded-xl text-rose-500 hover:bg-rose-500/10 hover:text-rose-500">
                                     <Trash2 className="size-4" />
-                                </Button>
-                            </AlertDialogTrigger>
+                                </Button>} />
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
@@ -296,11 +294,10 @@ export function WalletDetails({
                     </div>
                     <span className="text-xs font-bold tabular-nums text-primary">{incomeShare.toFixed(0)}% income</span>
                 </div>
-                <Progress
+                <Progress style={{ ['--progress-background' as any]: "#10b981" }}
                     value={incomeShare}
-                    indicatorStyle={{ backgroundColor: "#10b981" }}
-                    className="h-2.5 bg-rose-500/30"
-                />
+                    className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2.5 bg-rose-500/30"
+                 />
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                     <div className="flex flex-col gap-0.5 rounded-xl border border-border/30 bg-muted/20 px-3 py-2.5">
                         <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">Transactions</span>
@@ -408,9 +405,7 @@ export function WalletDetails({
                                 <Receipt className="size-3.5 text-muted-foreground" />
                                 <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Recent Transactions</span>
                             </div>
-                            <Button variant="outline" size="sm" asChild className="h-7 rounded-lg text-xs font-bold border-border/50">
-                                <Link href={`/transactions?wallets=${wallet._id.toString()}`}>View All</Link>
-                            </Button>
+                            <Link href={`/transactions?wallets=${wallet._id.toString()}`} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 rounded-lg text-xs font-bold border-border/50")}>View All</Link>
                         </div>
 
                         {localTransactions.length === 0 ? (
@@ -476,15 +471,13 @@ export function WalletDetails({
 
                                                     <div className="size-6 flex items-center justify-center shrink-0">
                                                         <AlertDialog>
-                                                            <AlertDialogTrigger asChild>
-                                                                <button
+                                                            <AlertDialogTrigger render={<button
                                                                     type="button"
                                                                     aria-label="Delete transaction"
                                                                     className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
                                                                 >
                                                                     <Trash2 className="size-3.5" />
-                                                                </button>
-                                                            </AlertDialogTrigger>
+                                                                </button>} />
                                                             <AlertDialogContent>
                                                                 <AlertDialogHeader>
                                                                     <AlertDialogMedia className="bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">

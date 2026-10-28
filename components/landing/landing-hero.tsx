@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
 import { ArrowRight, Sparkles, Wallet, ShieldCheck, CheckCircle2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSession } from "@/lib/auth-client"
 
@@ -123,24 +124,25 @@ export function LandingHero({ startAnimation }: { startAnimation: boolean }) {
             className="mt-6 sm:mt-7 flex flex-wrap justify-center gap-3 sm:gap-4"
             style={{ opacity: 0 }}
           >
-            <Button
-              asChild
-              size="lg"
-              className="sm:h-11 sm:px-6 sm:text-base font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+            <Link
+              href={session ? "/dashboard" : "/sign-up"}
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "sm:h-11 sm:px-6 sm:text-base font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+              )}
             >
-              <Link href={session ? "/dashboard" : "/sign-up"}>
-                {session ? "Go to Dashboard" : "Create Free Account"}
-                <ArrowRight data-icon="inline-end" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="sm:h-11 sm:px-6 sm:text-base font-bold hover:bg-muted/50 backdrop-blur-sm cursor-pointer transition-all"
+              {session ? "Go to Dashboard" : "Create Free Account"}
+              <ArrowRight data-icon="inline-end" />
+            </Link>
+            <Link
+              href="#features"
+              className={cn(
+                buttonVariants({ size: "lg", variant: "outline" }),
+                "sm:h-11 sm:px-6 sm:text-base font-bold hover:bg-muted/50 backdrop-blur-sm cursor-pointer transition-all"
+              )}
             >
-              <Link href="#features">Explore Features</Link>
-            </Button>
+              Explore Features
+            </Link>
           </div>
         </div>
 
@@ -149,100 +151,100 @@ export function LandingHero({ startAnimation }: { startAnimation: boolean }) {
           ref={cardsRef}
           className="grid max-w-5xl w-full grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-5 px-2 sm:px-4 z-20 pointer-events-none select-none"
         >
-        {/* Card 1 — Multi-Currency Liquid Account */}
-        <Card className="floating-card rounded-2xl border border-border/50 bg-card/75 shadow-xl backdrop-blur-xl text-left transition-colors">
-          <CardHeader className="p-4 sm:p-5 pb-2.5 sm:pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
-                  <Wallet className="size-4 sm:size-4.5" />
+          {/* Card 1 — Multi-Currency Liquid Account */}
+          <Card className="floating-card rounded-2xl border border-border/50 bg-card/75 shadow-xl backdrop-blur-xl text-left transition-colors">
+            <CardHeader className="p-4 sm:p-5 pb-2.5 sm:pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
+                    <Wallet className="size-4 sm:size-4.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <CardDescription className="text-[11px] font-semibold text-muted-foreground truncate">Chase Checking</CardDescription>
+                    <CardTitle className="text-base sm:text-lg font-bold truncate">$24,850.00</CardTitle>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <CardDescription className="text-[11px] font-semibold text-muted-foreground truncate">Chase Checking</CardDescription>
-                  <CardTitle className="text-base sm:text-lg font-bold truncate">$24,850.00</CardTitle>
+                <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full shrink-0 font-mono">
+                  +4.2% mo
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-5 pt-0">
+              <div className="h-px bg-border/40 w-full mb-2.5" />
+              <div className="flex justify-between items-center text-[11px] text-muted-foreground font-mono">
+                <span className="flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Sync
+                </span>
+                <div className="flex items-center gap-2">
+                  <span>€12,400</span>
+                  <span>·</span>
+                  <span>£4,150</span>
                 </div>
               </div>
-              <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full shrink-0 font-mono">
-                +4.2% mo
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-5 pt-0">
-            <div className="h-px bg-border/40 w-full mb-2.5" />
-            <div className="flex justify-between items-center text-[11px] text-muted-foreground font-mono">
-              <span className="flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Sync
-              </span>
-              <div className="flex items-center gap-2">
-                <span>€12,400</span>
-                <span>·</span>
-                <span>£4,150</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Card 2 — Real-time AI OCR & Instant Split (Center Stage) */}
-        <Card className="floating-card rounded-2xl border border-primary/30 bg-card/85 shadow-2xl backdrop-blur-xl text-left ring-1 ring-primary/20">
-          <CardHeader className="p-4 sm:p-5 pb-2.5 sm:pb-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/30 flex items-center gap-1">
-                <Sparkles className="size-3" /> AI Extracted
-              </span>
-              <span className="text-[10px] text-muted-foreground font-mono">99.8% Match</span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-5 pt-0 flex flex-col gap-1.5">
-            <div className="flex items-baseline justify-between">
-              <div>
-                <CardDescription className="text-[11px] text-muted-foreground font-medium">Apple Fifth Avenue</CardDescription>
-                <CardTitle className="text-sm sm:text-base font-bold truncate text-foreground">Hardware &amp; Tech</CardTitle>
+          {/* Card 2 — Real-time AI OCR & Instant Split (Center Stage) */}
+          <Card className="floating-card rounded-2xl border border-primary/30 bg-card/85 shadow-2xl backdrop-blur-xl text-left ring-1 ring-primary/20">
+            <CardHeader className="p-4 sm:p-5 pb-2.5 sm:pb-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2.5 py-0.5 rounded-full bg-primary/15 border border-primary/30 flex items-center gap-1">
+                  <Sparkles className="size-3" /> AI Extracted
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono">99.8% Match</span>
               </div>
-              <span className="text-base sm:text-lg font-bold text-red-500 font-mono">−$149.00</span>
-            </div>
-            <div className="flex items-center justify-between pt-1 text-[10px] text-muted-foreground border-t border-border/30">
-              <span className="flex items-center gap-1 text-primary font-medium">
-                <CheckCircle2 className="size-3 text-primary" />
-                Split 50% with Sarah
-              </span>
-              <span className="font-mono">Auto-Categorized</span>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-5 pt-0 flex flex-col gap-1.5">
+              <div className="flex items-baseline justify-between">
+                <div>
+                  <CardDescription className="text-[11px] text-muted-foreground font-medium">Apple Fifth Avenue</CardDescription>
+                  <CardTitle className="text-sm sm:text-base font-bold truncate text-foreground">Hardware &amp; Tech</CardTitle>
+                </div>
+                <span className="text-base sm:text-lg font-bold text-red-500 font-mono">−$149.00</span>
+              </div>
+              <div className="flex items-center justify-between pt-1 text-[10px] text-muted-foreground border-t border-border/30">
+                <span className="flex items-center gap-1 text-primary font-medium">
+                  <CheckCircle2 className="size-3 text-primary" />
+                  Split 50% with Sarah
+                </span>
+                <span className="font-mono">Auto-Categorized</span>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Card 3 — Financial Health & Runway Buffer */}
-        <Card className="floating-card rounded-2xl border border-border/50 bg-card/75 shadow-xl backdrop-blur-xl text-left transition-colors">
-          <CardHeader className="p-4 sm:p-5 pb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
-                  <ShieldCheck className="size-4 sm:size-4.5" />
+          {/* Card 3 — Financial Health & Runway Buffer */}
+          <Card className="floating-card rounded-2xl border border-border/50 bg-card/75 shadow-xl backdrop-blur-xl text-left transition-colors">
+            <CardHeader className="p-4 sm:p-5 pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex size-8 sm:size-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
+                    <ShieldCheck className="size-4 sm:size-4.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <CardDescription className="text-[11px] font-semibold text-muted-foreground truncate">Health Score</CardDescription>
+                    <CardTitle className="text-base sm:text-lg font-bold truncate">88 / 100</CardTitle>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <CardDescription className="text-[11px] font-semibold text-muted-foreground truncate">Health Score</CardDescription>
-                  <CardTitle className="text-base sm:text-lg font-bold truncate">88 / 100</CardTitle>
-                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 px-2 py-0.5 rounded-full bg-emerald-500/10">
+                  Optimal
+                </span>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 px-2 py-0.5 rounded-full bg-emerald-500/10">
-                Optimal
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-5 pt-0">
-            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mt-1 mb-2 flex">
-              <div className="h-full bg-emerald-500" style={{ width: "35%" }} />
-              <div className="h-full bg-primary" style={{ width: "40%" }} />
-              <div className="h-full bg-amber-500" style={{ width: "25%" }} />
-            </div>
-            <div className="flex justify-between items-center text-[10px] text-muted-foreground font-mono">
-              <span>Runway: 8.2 mo</span>
-              <span className="text-emerald-500 font-semibold">Savings: 35%</span>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-5 pt-0">
+              <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mt-1 mb-2 flex">
+                <div className="h-full bg-emerald-500" style={{ width: "35%" }} />
+                <div className="h-full bg-primary" style={{ width: "40%" }} />
+                <div className="h-full bg-amber-500" style={{ width: "25%" }} />
+              </div>
+              <div className="flex justify-between items-center text-[10px] text-muted-foreground font-mono">
+                <span>Runway: 8.2 mo</span>
+                <span className="text-emerald-500 font-semibold">Savings: 35%</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
   )
 }

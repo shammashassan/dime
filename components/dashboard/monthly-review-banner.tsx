@@ -81,17 +81,16 @@ export function MonthlyReviewBanner({
       </BannerTitle>
       <div className="flex items-center gap-1.5 shrink-0">
         <BannerAction
-          asChild
+          render={
+            <Link href={`/reports?tab=review&month=${summary.monthKey}`} onClick={handleDismiss}>
+              <span>View Review</span>
+              <ArrowRight className="size-3 ml-1" />
+            </Link>
+          }
           variant="outline"
           size="sm"
           className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/20 h-7 text-xs px-2.5"
-          onClick={handleDismiss}
-        >
-          <Link href={`/reports?tab=review&month=${summary.monthKey}`}>
-            <span>View Review</span>
-            <ArrowRight className="size-3 ml-1" />
-          </Link>
-        </BannerAction>
+        />
         <BannerClose
           onClick={handleDismiss}
           className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/20 size-7"

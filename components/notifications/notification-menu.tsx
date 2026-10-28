@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { cn } from "cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -160,8 +160,7 @@ export function NotificationMenu() {
 
   return (
     <DropdownMenu onOpenChange={handleOpenChange}>
-      <DropdownMenuTrigger asChild>
-        <Button
+      <DropdownMenuTrigger render={<Button
           aria-label={unreadCount > 0 ? `Open notifications (${unreadCount} unread)` : "Open notifications"}
           size="icon"
           variant="ghost"
@@ -172,8 +171,7 @@ export function NotificationMenu() {
           ) : (
             <BellIcon className="size-4.5 text-muted-foreground" aria-hidden="true" />
           )}
-        </Button>
-      </DropdownMenuTrigger>
+        </Button>} />
 
       <DropdownMenuContent className="w-80 rounded-2xl shadow-xl border border-border/40 bg-popover z-50" align="end">
         {/* Header */}
@@ -204,15 +202,10 @@ export function NotificationMenu() {
 
                 if (hasLink) {
                   return (
-                    <DropdownMenuItem
-                      key={idStr}
-                      asChild
-                      className={cn(
+                    <DropdownMenuItem key={idStr} className={cn(
                         "cursor-pointer rounded-xl transition-colors",
                         !notification.readAt ? "bg-muted/80 hover:bg-muted" : "hover:bg-muted/50"
-                      )}
-                    >
-                      <Link
+                      )} render={<Link
                         href={notification.link!}
                         onClick={(e) => {
                           if (!notification.readAt) {
@@ -256,8 +249,7 @@ export function NotificationMenu() {
                             </span>
                           </ItemContent>
                         </Item>
-                      </Link>
-                    </DropdownMenuItem>
+                      </Link>} />
                   );
                 }
 

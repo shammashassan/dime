@@ -90,7 +90,7 @@ export function CoachPlaybooksView({
 
       {/* Mobile Select */}
       <div className="sm:hidden w-full">
-        <Select value={activeTab} onValueChange={setActiveTab}>
+        <Select value={activeTab} onValueChange={(val) => { if (val) setActiveTab(val) }}>
           <SelectTrigger className="w-full border-border/40 bg-card h-10 rounded-xl">
             <SelectValue />
           </SelectTrigger>

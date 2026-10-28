@@ -2,7 +2,7 @@
 
 import { organizationSettingsCollection } from "@/lib/db/collections";
 import { getFinancialScope } from "@/lib/scope";
-import { organizationSettingsSchema } from "@/lib/validations/organization.schema";
+import { organizationSettingsSchema } from "@/lib/schemas/organization.schema";
 import { updateTag } from "next/cache";
 
 export async function updateOrganizationSettings(input: unknown) {

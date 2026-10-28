@@ -108,7 +108,7 @@ export function PeriodReviewFilters({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Year Dropdown */}
-      <Select value={String(currentYear)} onValueChange={handleYearChange}>
+      <Select value={String(currentYear)} onValueChange={(val) => { if (val) handleYearChange(val) }}>
         <SelectTrigger className="w-28">
           <Calendar className="text-muted-foreground shrink-0 size-4" />
           <SelectValue placeholder="Year" />
@@ -126,7 +126,7 @@ export function PeriodReviewFilters({
 
       {/* Quarter Dropdown (only for quarterly review) */}
       {period === "quarterly" && (
-        <Select value={String(currentQuarter)} onValueChange={handleQuarterChange}>
+        <Select value={String(currentQuarter)} onValueChange={(val) => { if (val) handleQuarterChange(val) }}>
           <SelectTrigger className="w-36">
             <SelectValue placeholder="Quarter" />
           </SelectTrigger>

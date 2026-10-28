@@ -22,7 +22,7 @@ import {
 } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 import { useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface ApplyTemplateStepProps {
   template: BudgetTemplate
@@ -233,13 +233,10 @@ export function ApplyTemplateStep({
             {totalPercentage}% Allocated {isBalanced ? "✓" : `(${100 - totalPercentage > 0 ? `+${100 - totalPercentage}% remaining` : `${totalPercentage - 100}% over`})`}
           </span>
         </div>
-        <Progress
+        <Progress style={{ ['--progress-background' as any]: isBalanced ? "#10b981" : totalPercentage > 100 ? "#f43f5e" : "#f59e0b", }}
           value={Math.min(totalPercentage, 100)}
-          indicatorStyle={{
-            backgroundColor: isBalanced ? "#10b981" : totalPercentage > 100 ? "#f43f5e" : "#f59e0b",
-          }}
-          className="h-2 bg-muted/80"
-        />
+          className="[&_[data-slot=progress-indicator]]:bg-(--progress-background) h-2 bg-muted/80"
+         />
       </div>
 
       {/* ── Allocation Table / List ── */}

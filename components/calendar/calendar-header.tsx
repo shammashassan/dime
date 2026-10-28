@@ -27,16 +27,14 @@ export function CalendarHeader({
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               Cash Flow Calendar
             </h1>
-            <HoverCard openDelay={150}>
-              <HoverCardTrigger asChild>
-                <Badge
+            <HoverCard>
+              <HoverCardTrigger render={<Badge
                   variant="outline"
                   tabIndex={0}
                   className="rounded-md border-primary/30 text-primary bg-primary/5 font-medium text-[10px] h-5 cursor-default focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                 >
                   {currency}
-                </Badge>
-              </HoverCardTrigger>
+                </Badge>} />
               <HoverCardContent
                 className="w-64 text-xs rounded-xl border border-border/40 shadow-lg p-3"
                 align="start"

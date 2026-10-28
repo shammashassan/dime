@@ -171,8 +171,7 @@ export function BulkActionsToolbar({
 
           {/* Change Category Popover */}
           <Popover open={categoryOpen} onOpenChange={setCategoryOpen}>
-            <PopoverTrigger asChild>
-              <Button
+            <PopoverTrigger render={<Button
                 variant="ghost"
                 size="sm"
                 disabled={isPending}
@@ -180,8 +179,7 @@ export function BulkActionsToolbar({
               >
                 <FolderInput className="size-3.5 text-muted-foreground" />
                 <span className="hidden sm:inline">Category</span>
-              </Button>
-            </PopoverTrigger>
+              </Button>} />
             <PopoverContent className="w-56 p-0" align="center" side="top" sideOffset={12}>
               <Command>
                 <CommandInput placeholder="Search category..." className="h-9 text-xs" />
@@ -212,8 +210,7 @@ export function BulkActionsToolbar({
 
           {/* Move Wallet Popover */}
           <Popover open={walletOpen} onOpenChange={setWalletOpen}>
-            <PopoverTrigger asChild>
-              <Button
+            <PopoverTrigger render={<Button
                 variant="ghost"
                 size="sm"
                 disabled={isPending}
@@ -221,8 +218,7 @@ export function BulkActionsToolbar({
               >
                 <WalletIcon className="size-3.5 text-muted-foreground" />
                 <span className="hidden sm:inline">Move Wallet</span>
-              </Button>
-            </PopoverTrigger>
+              </Button>} />
             <PopoverContent className="w-56 p-0" align="center" side="top" sideOffset={12}>
               <Command>
                 <CommandInput placeholder="Search wallet..." className="h-9 text-xs" />
@@ -256,8 +252,7 @@ export function BulkActionsToolbar({
 
           {/* Add Tags Popover */}
           <Popover open={tagsOpen} onOpenChange={setTagsOpen}>
-            <PopoverTrigger asChild>
-              <Button
+            <PopoverTrigger render={<Button
                 variant="ghost"
                 size="sm"
                 disabled={isPending}
@@ -265,8 +260,7 @@ export function BulkActionsToolbar({
               >
                 <Tag className="size-3.5 text-muted-foreground" />
                 <span className="hidden sm:inline">Add Tags</span>
-              </Button>
-            </PopoverTrigger>
+              </Button>} />
             <PopoverContent className="w-64 p-3" align="center" side="top" sideOffset={12}>
               <div className="flex flex-col gap-2.5">
                 <div className="text-xs font-semibold text-foreground">Add Tags</div>

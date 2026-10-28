@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import {
   Dialog,
   DialogContent,
@@ -268,14 +268,12 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
         <CardFooter className="px-2.5 py-1 flex items-center justify-between mt-auto bg-muted/20" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-0.5">
             <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
+              <TooltipTrigger render={<span>
                   <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                     onClick={() => router.push(`/wallets/${w._id.toString()}`)}>
                     <Eye className="size-3" />
                   </Button>
-                </span>
-              </TooltipTrigger>
+                </span>} />
               <TooltipContent side="top" className="rounded-xl font-medium">
                 View transactions
               </TooltipContent>
@@ -283,14 +281,12 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
 
             {isOwner && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
+                <TooltipTrigger render={<span>
                     <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                       onClick={() => setEditingWallet(w)}>
                       <Edit className="size-3" />
                     </Button>
-                  </span>
-                </TooltipTrigger>
+                  </span>} />
                 <TooltipContent side="top" className="rounded-xl font-medium">
                   Edit wallet
                 </TooltipContent>
@@ -299,14 +295,12 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
 
             {isOwner && (
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <span>
+                <TooltipTrigger render={<span>
                     <Button variant="ghost" size="icon" className="size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                       onClick={() => handleToggleArchive(w._id.toString())} disabled={isPending}>
                       <Archive className="size-3" />
                     </Button>
-                  </span>
-                </TooltipTrigger>
+                  </span>} />
                 <TooltipContent side="top" className="rounded-xl font-medium">
                   Archive wallet
                 </TooltipContent>
@@ -315,15 +309,13 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
           </div>
           {isOwner && (
             <Tooltip>
-              <TooltipTrigger asChild>
-                <span>
+              <TooltipTrigger render={<span>
                   <Button variant="ghost" size="icon"
                     className="size-6 rounded-md text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10 opacity-100 translate-x-0 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 lg:translate-x-1 lg:group-hover:translate-x-0"
                     onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
                     <Trash2 className="size-3" />
                   </Button>
-                </span>
-              </TooltipTrigger>
+                </span>} />
               <TooltipContent side="top" className="rounded-xl font-medium">
                 Delete wallet
               </TooltipContent>
@@ -350,9 +342,7 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
           </div>
         </div>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
-          <DialogTrigger asChild>
-            <Button className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform"><Plus className="size-4" />Add Wallet</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button className="rounded-xl font-bold gap-2 shadow-sm active:scale-95 transition-transform"><Plus className="size-4" />Add Wallet</Button>} />
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 shadow-xl">
             <DialogHeader><DialogTitle className="text-xl font-extrabold">Add Wallet</DialogTitle></DialogHeader>
             <div className="py-2"><WalletForm onSuccess={() => setAddOpen(false)} /></div>
@@ -372,8 +362,8 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
           <button
             onClick={() => setActiveTab("all")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
+              ? "bg-background text-foreground shadow-xs"
+              : "text-muted-foreground hover:text-foreground"
               }`}
           >
             All ({tabCounts.all})
@@ -381,8 +371,8 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
           <button
             onClick={() => setActiveTab("active")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "active"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
+              ? "bg-background text-foreground shadow-xs"
+              : "text-muted-foreground hover:text-foreground"
               }`}
           >
             Active ({tabCounts.active})
@@ -390,8 +380,8 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
           <button
             onClick={() => setActiveTab("archived")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "archived"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
+              ? "bg-background text-foreground shadow-xs"
+              : "text-muted-foreground hover:text-foreground"
               }`}
           >
             Archived ({tabCounts.archived})
@@ -472,14 +462,12 @@ export function WalletsView({ wallets, baseCurrency, exchangeRates }: WalletsVie
                     <ArchiveRestore className="size-3" />Restore
                   </Button>
                   <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
+                    <TooltipTrigger render={<span>
                         <Button variant="ghost" size="icon" className="size-6 rounded-md text-rose-500/60 hover:text-rose-500 hover:bg-rose-500/10"
                           onClick={() => setDeletingWalletId(w._id.toString())} disabled={isPending}>
                           <Trash2 className="size-3" />
                         </Button>
-                      </span>
-                    </TooltipTrigger>
+                      </span>} />
                     <TooltipContent side="top" className="rounded-xl font-medium">
                       Delete wallet
                     </TooltipContent>

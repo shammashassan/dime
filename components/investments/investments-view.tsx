@@ -52,7 +52,7 @@ import {
   Compass,
   Calendar,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 import type { Watchlist, WatchlistItem } from "@/types"
 
 interface InvestmentsViewProps {
@@ -140,8 +140,8 @@ export function InvestmentsView({
         activeTab === "accounts" ||
         activeTab === "holdings" ||
         activeTab === "watchlists") && (
-        <PortfolioSummary data={portfolioData} currency={currency} />
-      )}
+          <PortfolioSummary data={portfolioData} currency={currency} />
+        )}
       {activeTab === "benchmarks" && (
         <BenchmarkSummaryCards
           holdings={holdings}

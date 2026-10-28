@@ -6,7 +6,7 @@ import Link from "next/link"
 import type { SpendingInsight, InsightCategory, InsightSeverity } from "@/types"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn, formatCurrency, formatDate } from "@/lib/utils"
@@ -126,8 +126,7 @@ export function InsightCard({
         {/* Action Controls (Star & Dismiss) */}
         <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200 shrink-0 pt-0.5">
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+            <TooltipTrigger render={<Button
                 variant="ghost"
                 size="icon"
                 onClick={(e) => {
@@ -144,16 +143,14 @@ export function InsightCard({
                   )}
                   aria-hidden="true"
                 />
-              </Button>
-            </TooltipTrigger>
+              </Button>} />
             <TooltipContent side="top" className="rounded-xl font-medium">
               {insight.isBookmarked ? "Remove Bookmark" : "Bookmark Signal"}
             </TooltipContent>
           </Tooltip>
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+            <TooltipTrigger render={<Button
                 variant="ghost"
                 size="icon"
                 onClick={(e) => {
@@ -164,8 +161,7 @@ export function InsightCard({
                 className="size-8 rounded-lg text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 cursor-pointer"
               >
                 <X className="size-3.5" aria-hidden="true" />
-              </Button>
-            </TooltipTrigger>
+              </Button>} />
             <TooltipContent side="top" className="rounded-xl font-medium">
               Dismiss Signal
             </TooltipContent>
@@ -257,17 +253,7 @@ export function InsightCard({
       {/* ── Card Footer ── */}
       <CardFooter className="px-3 py-2.5 mt-auto bg-muted/20">
         {insight.actionUrl && insight.actionLabel ? (
-          <Button
-            asChild
-            variant="outline"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full h-8 rounded-xl text-xs font-bold gap-2 border-border/50 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200"
-          >
-            <Link href={insight.actionUrl}>
-              <span>{insight.actionLabel}</span>
-              <ArrowUpRight className="size-3.5" />
-            </Link>
-          </Button>
+          <Link href={insight.actionUrl} onClick={(e) => e.stopPropagation()} className={cn(buttonVariants({ variant: "outline" }), "w-full h-8 rounded-xl text-xs font-bold gap-2 border-border/50 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200")}><span>{insight.actionLabel}</span><ArrowUpRight className="size-3.5" /></Link>
         ) : (
           <Button
             disabled

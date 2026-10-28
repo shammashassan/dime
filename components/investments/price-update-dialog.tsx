@@ -18,7 +18,7 @@ import { Loader2, RefreshCw } from "lucide-react"
 interface PriceUpdateDialogProps {
   holdingId: string
   currentPrice: number
-  trigger?: React.ReactNode
+  trigger?: React.ReactElement | null
 }
 
 export function PriceUpdateDialog({ holdingId, currentPrice, trigger }: PriceUpdateDialogProps) {
@@ -47,14 +47,12 @@ export function PriceUpdateDialog({ holdingId, currentPrice, trigger }: PriceUpd
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger ? (
-        <DialogTrigger asChild>{trigger}</DialogTrigger>
+        <DialogTrigger render={trigger} />
       ) : (
-        <DialogTrigger asChild>
-          <Button size="sm" variant="outline" className="rounded-xl font-bold gap-2">
+        <DialogTrigger render={<Button size="sm" variant="outline" className="rounded-xl font-bold gap-2">
             <RefreshCw className="size-3.5" />
             Update Price
-          </Button>
-        </DialogTrigger>
+          </Button>} />
       )}
       <DialogContent className="max-w-sm rounded-2xl border border-border/50 shadow-xl">
         <DialogHeader>

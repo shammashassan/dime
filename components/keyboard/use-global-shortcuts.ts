@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { SHORTCUTS } from "@/lib/shortcuts-config"
+import { SHORTCUTS } from "@/lib/data"
 
 interface UseGlobalShortcutsOptions {
   onOpenShortcutsHelp?: () => void

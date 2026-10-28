@@ -8,7 +8,8 @@ import { Menu, X } from "lucide-react"
 import { LogoMark } from "@/components/brand/logo-mark"
 import { authClient } from "@/lib/auth-client"
 import { ModeToggle } from "@/components/layout/mode-toggle"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
 
 export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
   const { data: session } = authClient.useSession()
@@ -95,11 +96,12 @@ export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
           {/* Right Action Button & Theme */}
           <div ref={actionsRef} className="hidden md:flex items-center gap-4">
             <ModeToggle />
-            <Button asChild className="rounded-full shadow-md shadow-primary/20 cursor-pointer font-semibold">
-              <Link href={session ? "/dashboard" : "/sign-in"}>
-                {session ? "Open Workspace" : "Sign In"}
-              </Link>
-            </Button>
+            <Link
+              href={session ? "/dashboard" : "/sign-in"}
+              className={cn(buttonVariants(), "rounded-full shadow-md shadow-primary/20 cursor-pointer font-semibold")}
+            >
+              {session ? "Open Workspace" : "Sign In"}
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -140,11 +142,13 @@ export function LandingHeader({ startAnimation }: { startAnimation: boolean }) {
               FAQ
             </a>
             <div className="mt-4 pt-2">
-              <Button asChild size="lg" className="rounded-full cursor-pointer font-semibold w-full shadow-md shadow-primary/20">
-                <Link href={session ? "/dashboard" : "/sign-in"} onClick={() => setMobileMenuOpen(false)}>
-                  {session ? "Open Workspace" : "Sign In"}
-                </Link>
-              </Button>
+              <Link
+                href={session ? "/dashboard" : "/sign-in"}
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(buttonVariants({ size: "lg" }), "rounded-full cursor-pointer font-semibold w-full shadow-md shadow-primary/20")}
+              >
+                {session ? "Open Workspace" : "Sign In"}
+              </Link>
             </div>
           </div>
         )}

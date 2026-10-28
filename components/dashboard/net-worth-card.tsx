@@ -3,7 +3,7 @@ import { getWallets } from "@/lib/queries/wallets"
 import { getPreferences } from "@/lib/queries/preferences"
 import { convertCurrency } from "@/lib/currency"
 import { formatCurrency } from "@/lib/utils"
-import { cn } from "@/lib/utils"
+import { cn } from "cn"
 
 interface NetWorthCardProps {
   userId: string

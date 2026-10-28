@@ -13,7 +13,7 @@ import {
   goalsCollection,
 } from "@/lib/db/collections"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
-import { parseSearchQuery } from "@/lib/search-parser"
+import { parseSearchQuery } from "./search-parser"
 import type {
   SearchResultItem,
   SearchEntityType,
