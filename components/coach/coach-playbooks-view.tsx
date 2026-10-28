@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn, formatCurrency } from "@/lib/utils"
 import {
   Select,
@@ -71,21 +72,16 @@ export function CoachPlaybooksView({
   return (
     <div className="flex flex-col gap-3.5 w-full">
       {/* Desktop Tabs */}
-      <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-        {TABS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-              activeTab === tab.value
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {tab.label} ({counts[tab.countKey]})
-          </button>
-        ))}
+      <div className="hidden sm:flex shrink-0">
+        <Tabs value={activeTab} onValueChange={(val) => { if (val) setActiveTab(val) }}>
+          <TabsList>
+            {TABS.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label} ({counts[tab.countKey]})
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Mobile Select */}

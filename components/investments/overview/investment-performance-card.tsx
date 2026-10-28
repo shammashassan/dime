@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InvestmentHolding, InvestmentTransaction } from "@/types"
 import { formatCurrency } from "@/lib/utils"
 import { LineChart } from "lucide-react"
@@ -110,26 +111,16 @@ export function InvestmentPerformanceCard({
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Portfolio Performance Trajectory</span>
         </div>
 
-        <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border/30">
-          <button
-            onClick={() => setMetricMode("gain")}
-            className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer ${metricMode === "gain"
-              ? "bg-background text-foreground shadow-2xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Unrealized Gain
-          </button>
-          <button
-            onClick={() => setMetricMode("dividends")}
-            className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer ${metricMode === "dividends"
-              ? "bg-background text-foreground shadow-2xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Dividends
-          </button>
-        </div>
+        <Tabs value={metricMode} onValueChange={(v) => { if (v) setMetricMode(v as "gain" | "dividends") }}>
+          <TabsList variant="subtle" className="h-6 p-0.5 rounded-lg gap-0.5">
+            <TabsTrigger value="gain" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+              Unrealized Gain
+            </TabsTrigger>
+            <TabsTrigger value="dividends" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+              Dividends
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Body: Stat Highlights + Area Chart */}

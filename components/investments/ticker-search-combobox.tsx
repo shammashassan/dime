@@ -99,27 +99,32 @@ export function TickerSearchCombobox({
 
   return (
     <Popover open={open && searchTerm.length > 0} onOpenChange={setOpen}>
-      <PopoverTrigger render={<div className="relative w-full">
-          <Input
-            id={id}
-            value={searchTerm}
-            onChange={handleInputChange}
-            onFocus={() => {
-              if (searchTerm.trim().length > 0) setOpen(true)
-            }}
-            placeholder={placeholder}
-            disabled={disabled}
-            className={cn("uppercase font-mono font-medium rounded-xl pr-8", className)}
-            autoComplete="off"
-          />
-          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin text-primary" />
-            ) : (
-              <Search className="size-3.5 opacity-60" />
-            )}
+      <PopoverTrigger
+        nativeButton={false}
+        render={
+          <div className="relative w-full">
+            <Input
+              id={id}
+              value={searchTerm}
+              onChange={handleInputChange}
+              onFocus={() => {
+                if (searchTerm.trim().length > 0) setOpen(true)
+              }}
+              placeholder={placeholder}
+              disabled={disabled}
+              className={cn("uppercase font-mono font-medium rounded-xl pr-8", className)}
+              autoComplete="off"
+            />
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+              {loading ? (
+                <Loader2 className="size-3.5 animate-spin text-primary" />
+              ) : (
+                <Search className="size-3.5 opacity-60" />
+              )}
+            </div>
           </div>
-        </div>} />
+        }
+      />
 
       <PopoverContent
         className="p-1 w-[320px] sm:w-[360px] rounded-2xl shadow-xl border-border/50 bg-popover"

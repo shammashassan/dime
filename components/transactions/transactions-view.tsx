@@ -15,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { expandTransactions } from "@/lib/calculations/split-utils"
@@ -164,12 +165,14 @@ export function TransactionsView({
                   Export CSV
                 </Button>} />
               <DropdownMenuContent align="end" className="w-52 bg-popover border border-border/40 shadow-md">
-                <DropdownMenuItem onClick={handleExportSummaryCSV} className="text-xs gap-2 cursor-pointer">
-                  Export Summary CSV
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportExpandedCSV} className="text-xs gap-2 cursor-pointer">
-                  Export Expanded Splits CSV
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={handleExportSummaryCSV} className="text-xs gap-2 cursor-pointer">
+                    Export Summary CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportExpandedCSV} className="text-xs gap-2 cursor-pointer">
+                    Export Expanded Splits CSV
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
             {wallets.length > 0 && (

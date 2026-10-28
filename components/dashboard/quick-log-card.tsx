@@ -7,6 +7,7 @@ import { PlusCircle, Loader2, ArrowRight } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 
 import { Card } from "@/components/ui/card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Input } from "@/components/ui/input"
@@ -128,32 +129,16 @@ export function QuickLogCard({
           quick log
         </span>
         <div className="flex items-center gap-1.5">
-          <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border/30">
-            <button
-              type="button"
-              onClick={() => setType("expense")}
-              className={cn(
-                "px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer",
-                type === "expense"
-                  ? "bg-background text-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Expense
-            </button>
-            <button
-              type="button"
-              onClick={() => setType("income")}
-              className={cn(
-                "px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer",
-                type === "income"
-                  ? "bg-background text-foreground shadow-2xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Income
-            </button>
-          </div>
+          <Tabs value={type} onValueChange={(v) => { if (v) setType(v as "expense" | "income") }}>
+            <TabsList variant="subtle" className="h-6 p-0.5 rounded-lg gap-0.5">
+              <TabsTrigger value="expense" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+                Expense
+              </TabsTrigger>
+              <TabsTrigger value="income" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+                Income
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           <Tooltip>
             <TooltipTrigger render={

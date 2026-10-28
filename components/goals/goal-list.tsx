@@ -6,6 +6,7 @@ import { Goal, Wallet } from "@/types"
 import { GoalCard } from "./goal-card"
 import { GoalFormDialog } from "./goal-form"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Target, Sparkles, Loader2, Trash2, Search, Activity, Trophy } from "lucide-react"
 import { deleteGoal } from "@/lib/actions/goals"
 import { toast } from "@/components/ui/toast"
@@ -192,37 +193,20 @@ export function GoalList({ initialGoals, wallets, baseCurrency, exchangeRates }:
 
       <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-          <button
-            onClick={() => setFilter("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              filter === "all"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            All Goals ({tabCounts.all})
-          </button>
-          <button
-            onClick={() => setFilter("active")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              filter === "active"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Active ({tabCounts.active})
-          </button>
-          <button
-            onClick={() => setFilter("completed")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              filter === "completed"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Completed ({tabCounts.completed})
-          </button>
+        <div className="hidden sm:flex shrink-0">
+          <Tabs value={filter} onValueChange={(v) => { if (v) setFilter(v as any) }}>
+            <TabsList>
+              <TabsTrigger value="all">
+                All Goals ({tabCounts.all})
+              </TabsTrigger>
+              <TabsTrigger value="active">
+                Active ({tabCounts.active})
+              </TabsTrigger>
+              <TabsTrigger value="completed">
+                Completed ({tabCounts.completed})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Mobile Filter (visible on smaller screens) */}

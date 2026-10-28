@@ -45,29 +45,17 @@ export function AdminUsersTabs({
         className="w-full space-y-4"
       >
         {/* Desktop Tabs List */}
-        <TabsList className="hidden sm:inline-flex h-10 bg-muted/60 p-1 border border-border/40 rounded-xl">
-          <TabsTrigger
-            value="active"
-            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
-          >
+        <TabsList variant="subtle" className="hidden sm:inline-flex">
+          <TabsTrigger value="active">
             Active Users
           </TabsTrigger>
-          <TabsTrigger
-            value="banned"
-            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
-          >
+          <TabsTrigger value="banned">
             Banned Users
           </TabsTrigger>
-          <TabsTrigger
-            value="admins"
-            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
-          >
+          <TabsTrigger value="admins">
             Administrators
           </TabsTrigger>
-          <TabsTrigger
-            value="all"
-            className="rounded-lg px-4 text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all"
-          >
+          <TabsTrigger value="all">
             All Users
           </TabsTrigger>
         </TabsList>

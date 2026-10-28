@@ -3,6 +3,7 @@
 import * as React from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 import { authClient } from "@/lib/auth-client"
 import {
   LayoutDashboard,
@@ -53,17 +54,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 import {
   Avatar,
   AvatarFallback,
@@ -250,7 +240,13 @@ function SidebarNav({
                     >
                       <item.icon />
                       <span>{item.title}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+                      <ChevronRight
+                        className={cn(
+                          "ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden",
+                          "group-data-[open]/collapsible:rotate-90 group-data-[state=open]/collapsible:rotate-90 group-data-[panel-open]:rotate-90",
+                          isOpen && "rotate-90"
+                        )}
+                      />
                     </SidebarMenuButton>} />
                   <CollapsibleContent>
                     <SidebarMenuSub>
@@ -327,7 +323,12 @@ function SidebarNavFallback({
                     >
                       <item.icon />
                       <span>{item.title}</span>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
+                      <ChevronRight
+                        className={cn(
+                          "ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden",
+                          "group-data-[open]/collapsible:rotate-90 group-data-[state=open]/collapsible:rotate-90 group-data-[panel-open]:rotate-90"
+                        )}
+                      />
                     </SidebarMenuButton>} />
                   <CollapsibleContent>
                     <SidebarMenuSub>
@@ -371,7 +372,6 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
     () => true,
     () => false
   )
-  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false)
   const [isSigningOut, setIsSigningOut] = React.useState(false)
 
   const handleLinkClick = React.useCallback(() => {
@@ -383,24 +383,34 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
   const user = session?.user as SidebarUser | undefined
   const isAdmin = user?.role === "admin"
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    if (isSigningOut) return
     setIsSigningOut(true)
 
-    const signOutPromise = authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          window.location.href = "/sign-in"
+    try {
+      const signOutPromise = authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.href = "/sign-in"
+          },
         },
-      },
-    }).finally(() => {
-      setIsSigningOut(false)
-    })
+      })
 
-    toast.promise(signOutPromise, {
-      loading: "Signing out...",
-      success: "Signed out successfully",
-      error: "Failed to sign out",
-    })
+      toast.promise(signOutPromise, {
+        loading: "Signing out...",
+        success: "Signed out successfully",
+        error: "Failed to sign out",
+      })
+
+      const res = await signOutPromise
+      if (res?.data) {
+        window.location.href = "/sign-in"
+      }
+    } catch {
+      toast.error("Failed to sign out")
+    } finally {
+      setIsSigningOut(false)
+    }
   }
 
   return (
@@ -450,20 +460,22 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   align="end"
                   sideOffset={4}
                 >
-                  <DropdownMenuLabel className="p-0 font-normal">
-                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                      <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage src={user.image || ""} alt={user.name ?? "User"} />
-                        <AvatarFallback className="rounded-lg">
-                          {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-medium">{user.name}</span>
-                        <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="p-0 font-normal">
+                      <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                        <Avatar className="h-8 w-8 rounded-lg">
+                          <AvatarImage src={user.image || ""} alt={user.name ?? "User"} />
+                          <AvatarFallback className="rounded-lg">
+                            {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="grid flex-1 text-left text-sm leading-tight">
+                          <span className="truncate font-medium">{user.name}</span>
+                          <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                        </div>
                       </div>
-                    </div>
-                  </DropdownMenuLabel>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem render={<Link href="/notifications" onClick={handleLinkClick}>
@@ -476,10 +488,16 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
                       </Link>} />
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => setShowLogoutDialog(true)}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      disabled={isSigningOut}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {isSigningOut ? "Logging out..." : "Log out"}
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -488,33 +506,6 @@ export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sideb
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-
-      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
-        <AlertDialogContent className="rounded-2xl border border-border/50 shadow-xl">
-          <AlertDialogHeader>
-            <AlertDialogMedia>
-              <LogOut />
-            </AlertDialogMedia>
-            <AlertDialogTitle>Log out of Dime?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You will need to sign in again to access your dashboard and financial data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl font-semibold" disabled={isSigningOut}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              className="rounded-xl font-semibold"
-            >
-              Log out
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </Sidebar>
   )
 }

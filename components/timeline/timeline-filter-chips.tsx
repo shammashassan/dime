@@ -1,6 +1,7 @@
 "use client"
 
 import React from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { TimelineEventCategory } from "@/types"
 import {
   InputGroup,
@@ -53,44 +54,38 @@ export function TimelineFilterChips({
   return (
     <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-start sm:items-center justify-between w-full min-w-0">
       {/* Scrollable Tab Bar (Adaptive width matching Insights page) */}
-      <div className="w-full sm:w-auto min-w-0 rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
-        <div className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon
-            const isMilestone = cat.id === "milestones"
-            const count = counts?.[cat.id]
-            const isSelected = selectedCategory === cat.id
+      <div className="w-full sm:w-auto min-w-0">
+        <Tabs
+          value={selectedCategory}
+          onValueChange={(val) => {
+            if (val) onSelectCategory(val as TimelineEventCategory)
+          }}
+        >
+          <TabsList variant="bordered" className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+            {CATEGORIES.map((cat) => {
+              const Icon = cat.icon
+              const isMilestone = cat.id === "milestones"
+              const count = counts?.[cat.id]
 
-            return (
-              <button
-                key={cat.id}
-                onClick={() => onSelectCategory(cat.id)}
-                className={cn(
-                  "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5",
-                  isSelected
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon className="size-3.5" />
-                <span>{cat.label}</span>
-                {count !== undefined && (
-                  <span
-                    className={cn(
-                      "text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold leading-tight",
-                      isSelected
-                        ? "bg-muted text-foreground"
-                        : "bg-muted/60 text-muted-foreground"
-                    )}
-                  >
-                    {count}
-                  </span>
-                )}
-                {isMilestone && <span className="text-[10px]">⭐</span>}
-              </button>
-            )
-          })}
-        </div>
+              return (
+                <TabsTrigger
+                  key={cat.id}
+                  value={cat.id}
+                  className="shrink-0 flex items-center gap-1.5"
+                >
+                  <Icon className="size-3.5" />
+                  <span>{cat.label}</span>
+                  {count !== undefined && (
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold leading-tight bg-muted-foreground/10">
+                      {count}
+                    </span>
+                  )}
+                  {isMilestone && <span className="text-[10px]">⭐</span>}
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Search Bar on the same line */}

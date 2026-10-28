@@ -1,16 +1,18 @@
 import type { Metadata } from "next"
 import { requireApprovedUser } from "@/lib/auth-guard"
-
-export const metadata: Metadata = {
-  title: "Transaction Details",
-  description: "Detailed view of transaction info, category, and receipts.",
-}
 import { getTransactionById } from "@/lib/queries/transactions"
 import { getCategoryById, getCategories } from "@/lib/queries/categories"
 import { getWalletById } from "@/lib/queries/wallets"
 import { notFound, unstable_rethrow } from "next/navigation"
 import { TransactionDetailsModal } from "./transaction-details-modal"
 import { serializeData } from "@/lib/utils"
+
+export const metadata: Metadata = {
+  title: "Transaction Details",
+  description: "Detailed view of transaction info, category, and receipts.",
+}
+
+export const instant = false
 
 export default async function InterceptedTransactionPage({
   params,
@@ -71,4 +73,3 @@ export default async function InterceptedTransactionPage({
     />
   )
 }
-

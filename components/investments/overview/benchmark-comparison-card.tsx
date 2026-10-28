@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import {
   Select,
@@ -218,21 +219,15 @@ export function BenchmarkComparisonCard({
             <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
               Horizon
             </span>
-            <div className="flex rounded-xl bg-muted/80 p-1 gap-0.5">
-              {TIMEFRAMES.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTimeframe(t)}
-                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all duration-150 ${
-                    timeframe === t
-                      ? "bg-background text-foreground shadow-xs"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
+            <Tabs value={timeframe} onValueChange={(v) => { if (v) setTimeframe(v as Timeframe) }}>
+              <TabsList className="gap-0.5">
+                {TIMEFRAMES.map((t) => (
+                  <TabsTrigger key={t} value={t} className="px-2.5 py-1">
+                    {t}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
 
           {/* Comparative Progress Bars */}

@@ -161,24 +161,23 @@ function AttachmentAction({
 
 function AttachmentTrigger({
   className,
-  asChild = false,
   render,
   type,
   ...props
-}: useRender.ComponentProps<"button"> & {
-  asChild?: boolean
-}) {
+}: useRender.ComponentProps<"button">) {
   return useRender({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
-        type: type ?? "button",
+        type: render ? type : (type ?? "button"),
         className: cn("absolute inset-0 z-10 outline-none", className),
       },
       props
     ),
-    render: render ?? (asChild && React.isValidElement(props.children) ? (props.children as React.ReactElement<any>) : undefined),
-    state: { slot: "attachment-trigger" },
+    render,
+    state: {
+      slot: "attachment-trigger",
+    },
   })
 }
 

@@ -8,6 +8,7 @@ import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/h
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AssetDialog } from "./asset-dialog"
 import { AssetsListTab } from "./assets-list-tab"
 import { Landmark, Plus } from "lucide-react"
@@ -165,25 +166,17 @@ export function NetWorthOverview({ viewModel, historyData, assets }: NetWorthOve
 
       {/* ── Tab Selector ── */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start">
-          <button
-            onClick={() => setActiveTab("overview")}
-            className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-              activeTab === "overview" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveTab("assets-list")}
-            className={cn(
-              "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap",
-              activeTab === "assets-list" ? "bg-background text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Assets &amp; Liabilities ({assets.length})
-          </button>
+        <div className="hidden sm:flex shrink-0">
+          <Tabs value={activeTab} onValueChange={(val) => { if (val) setActiveTab(val as any) }}>
+            <TabsList>
+              <TabsTrigger value="overview">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="assets-list">
+                Assets &amp; Liabilities ({assets.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="sm:hidden w-full">

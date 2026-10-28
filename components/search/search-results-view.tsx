@@ -26,6 +26,7 @@ import {
   Play,
 } from "lucide-react"
 import { toast } from "@/components/ui/toast"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -391,32 +392,28 @@ export function SearchResultsView({
       </div>
 
       {/* ── 4. Unified Tab Switcher (Horizontally scrollable on small screens, never overflows) ── */}
-      <div className="w-full min-w-0 rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
-        <div className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0">
-          {tabs.map((tab) => {
-            const TabIcon = tab.icon
-            const isActive = activeTab === tab.id
+      <div className="w-full min-w-0">
+        <Tabs value={activeTab} onValueChange={(val) => { if (val) setActiveTab(val) }}>
+          <TabsList variant="bordered" className="w-full overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+            {tabs.map((tab) => {
+              const TabIcon = tab.icon
 
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5",
-                  isActive
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <TabIcon className="size-3.5" />
-                <span>{tab.label}</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 bg-muted-foreground/10 rounded-md">
-                  {tab.count}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+              return (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="shrink-0 flex items-center gap-1.5"
+                >
+                  <TabIcon className="size-3.5" />
+                  <span>{tab.label}</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 bg-muted-foreground/10 rounded-md">
+                    {tab.count}
+                  </span>
+                </TabsTrigger>
+              )
+            })}
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* ── 5. Main Tab Content ── */}

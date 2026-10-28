@@ -859,14 +859,14 @@ export function LoanDetails({
               <div className="p-4 flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <Tabs value={msgChannel} onValueChange={(v) => setMsgChannel(v as any)} className="flex-1 min-w-[240px]">
-                    <TabsList className="w-full h-9 rounded-xl bg-muted/80 p-1 grid grid-cols-3">
-                      <TabsTrigger value="whatsapp" className="rounded-lg text-xs font-semibold gap-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs">
+                    <TabsList className="w-full grid grid-cols-3">
+                      <TabsTrigger value="whatsapp">
                         <MessageCircle className="size-3.5" /> WhatsApp
                       </TabsTrigger>
-                      <TabsTrigger value="sms" className="rounded-lg text-xs font-semibold gap-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs">
+                      <TabsTrigger value="sms">
                         <MessageSquare className="size-3.5" /> SMS
                       </TabsTrigger>
-                      <TabsTrigger value="email" className="rounded-lg text-xs font-semibold gap-1.5 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs">
+                      <TabsTrigger value="email">
                         <MailIcon className="size-3.5" /> Email
                       </TabsTrigger>
                     </TabsList>

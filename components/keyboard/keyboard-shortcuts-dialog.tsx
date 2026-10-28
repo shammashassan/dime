@@ -71,12 +71,12 @@ export function KeyboardShortcutsDialog({
         {/* Category Tabs */}
         <div className="px-5 pt-3 pb-2 border-b border-border/30 bg-muted/20">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="h-8 p-1 bg-muted/60 rounded-xl gap-1 w-full flex">
+            <TabsList variant="subtle" className="h-8 w-full flex">
               {categories.map((cat) => (
                 <TabsTrigger
                   key={cat}
                   value={cat}
-                  className="text-xs flex-1 h-6 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-xs font-medium cursor-pointer"
+                  className="h-6 flex-1 px-2 text-xs"
                 >
                   {cat}
                 </TabsTrigger>

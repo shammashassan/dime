@@ -55,13 +55,18 @@ export function CoachHeader({
 
             {/* Educational Guidance Disclaimer — Popover for reliable mobile touch + desktop click */}
             <Popover>
-              <PopoverTrigger render={<Badge
-                  variant="outline"
-                  className="rounded-md border-border/50 text-muted-foreground hover:text-foreground bg-muted/30 font-medium text-[10px] h-5 gap-1 cursor-pointer transition-colors"
-                >
-                  <ShieldAlert className="size-3 text-primary" />
-                  <span>Guidance Only</span>
-                </Badge>} />
+              <PopoverTrigger
+                nativeButton={false}
+                render={
+                  <Badge
+                    variant="outline"
+                    className="rounded-md border-border/50 text-muted-foreground hover:text-foreground bg-muted/30 font-medium text-[10px] h-5 gap-1 cursor-pointer transition-colors"
+                  >
+                    <ShieldAlert className="size-3 text-primary" />
+                    <span>Guidance Only</span>
+                  </Badge>
+                }
+              />
               <PopoverContent
                 className="w-80 text-xs rounded-xl border border-border/40 shadow-lg p-3 bg-popover"
                 align="start"

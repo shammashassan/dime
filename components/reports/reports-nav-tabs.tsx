@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { BarChart3, CalendarDays, FileText, ClipboardList, Calendar } from "lucide-react"
-import { cn } from "cn"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export function ReportsNavTabs() {
   const router = useRouter()
@@ -33,69 +33,31 @@ export function ReportsNavTabs() {
   }
 
   return (
-    <div className="w-full sm:w-auto min-w-0 rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
-      <div className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0">
-        <button
-          onClick={() => handleTabChange("overview")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
-            currentTab === "overview"
-              ? "bg-background text-foreground shadow-xs font-semibold"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <BarChart3 className="size-3.5 text-primary" />
-          <span>Overview & Trends</span>
-        </button>
-        <button
-          onClick={() => handleTabChange("heatmap")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
-            currentTab === "heatmap"
-              ? "bg-background text-foreground shadow-xs font-semibold"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <CalendarDays className="size-3.5 text-rose-500" />
-          <span>Activity Heatmap</span>
-        </button>
-        <button
-          onClick={() => handleTabChange("review")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
-            currentTab === "review"
-              ? "bg-background text-foreground shadow-xs font-semibold"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <FileText className="size-3.5 text-amber-500" />
-          <span>Monthly Review</span>
-        </button>
-        <button
-          onClick={() => handleTabChange("quarterly")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
-            currentTab === "quarterly"
-              ? "bg-background text-foreground shadow-xs font-semibold"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <ClipboardList className="size-3.5 text-violet-500" />
-          <span>Quarterly Review</span>
-        </button>
-        <button
-          onClick={() => handleTabChange("annual")}
-          className={cn(
-            "rounded-lg px-3 py-1.5 text-xs font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0",
-            currentTab === "annual"
-              ? "bg-background text-foreground shadow-xs font-semibold"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          <Calendar className="size-3.5 text-blue-500" />
-          <span>Annual Review</span>
-        </button>
-      </div>
+    <div className="w-full sm:w-auto min-w-0">
+      <Tabs value={currentTab} onValueChange={(v) => { if (v) handleTabChange(v) }}>
+        <TabsList variant="bordered" className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+          <TabsTrigger value="overview">
+            <BarChart3 className="size-3.5 text-primary" />
+            <span>Overview &amp; Trends</span>
+          </TabsTrigger>
+          <TabsTrigger value="heatmap">
+            <CalendarDays className="size-3.5 text-rose-500" />
+            <span>Activity Heatmap</span>
+          </TabsTrigger>
+          <TabsTrigger value="review">
+            <FileText className="size-3.5 text-amber-500" />
+            <span>Monthly Review</span>
+          </TabsTrigger>
+          <TabsTrigger value="quarterly">
+            <ClipboardList className="size-3.5 text-violet-500" />
+            <span>Quarterly Review</span>
+          </TabsTrigger>
+          <TabsTrigger value="annual">
+            <Calendar className="size-3.5 text-blue-500" />
+            <span>Annual Review</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
     </div>
   )
 }

@@ -131,22 +131,24 @@ export function SpaceSwitcher() {
               side="bottom"
               sideOffset={4}
             >
-              <DropdownMenuLabel className="text-xs text-muted-foreground">
-                Spaces
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                className="gap-2 p-2 cursor-pointer"
-                onClick={() => handleSwitchSpace(null)}
-              >
-                <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                  <User className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-xs">
-                  <span className="font-medium">Personal Space</span>
-                  <span className="text-muted-foreground">Private ledger</span>
-                </div>
-                {!activeOrgId && <span className="ml-auto text-xs font-bold text-primary">✓</span>}
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  Spaces
+                </DropdownMenuLabel>
+                <DropdownMenuItem
+                  className="gap-2 p-2 cursor-pointer"
+                  onClick={() => handleSwitchSpace(null)}
+                >
+                  <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                    <User className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-xs">
+                    <span className="font-medium">Personal Space</span>
+                    <span className="text-muted-foreground">Private ledger</span>
+                  </div>
+                  {!activeOrgId && <span className="ml-auto text-xs font-bold text-primary">✓</span>}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
               {orgs && orgs.length > 0 && (
                 <>
                   <DropdownMenuSeparator />
@@ -173,12 +175,19 @@ export function SpaceSwitcher() {
                 </>
               )}
               <DropdownMenuSeparator />
-              <DialogTrigger render={<DropdownMenuItem className="gap-2 p-2 cursor-pointer text-primary">
-                  <div className="flex size-6 items-center justify-center rounded-md border border-primary/20 bg-primary/5">
-                    <Plus className="size-4" />
-                  </div>
-                  <span className="font-medium">Create Space</span>
-                </DropdownMenuItem>} />
+              <DropdownMenuGroup>
+                <DialogTrigger
+                  nativeButton={false}
+                  render={
+                    <DropdownMenuItem className="gap-2 p-2 cursor-pointer text-primary">
+                      <div className="flex size-6 items-center justify-center rounded-md border border-primary/20 bg-primary/5">
+                        <Plus className="size-4" />
+                      </div>
+                      <span className="font-medium">Create Space</span>
+                    </DropdownMenuItem>
+                  }
+                />
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </SidebarMenuItem>
         </SidebarMenu>

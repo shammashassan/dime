@@ -7,6 +7,7 @@ import { BudgetWithSpending } from "@/lib/queries/budgets"
 import { BudgetTemplatesDialog } from "./budget-templates-dialog"
 import { deleteBudget } from "@/lib/actions/budgets"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -378,34 +379,20 @@ export function BudgetsView({
 
       <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            All ({tabCounts.all})
-          </button>
-          <button
-            onClick={() => setActiveTab("under")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "under"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Under Budget ({tabCounts.under})
-          </button>
-          <button
-            onClick={() => setActiveTab("over")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "over"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Over Budget ({tabCounts.over})
-          </button>
+        <div className="hidden sm:flex shrink-0">
+          <Tabs value={activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
+            <TabsList>
+              <TabsTrigger value="all">
+                All ({tabCounts.all})
+              </TabsTrigger>
+              <TabsTrigger value="under">
+                Under Budget ({tabCounts.under})
+              </TabsTrigger>
+              <TabsTrigger value="over">
+                Over Budget ({tabCounts.over})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Mobile Filter (visible on smaller screens) */}

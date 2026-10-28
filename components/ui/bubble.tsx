@@ -62,13 +62,10 @@ function Bubble({
 }
 
 function BubbleContent({
-  asChild = false,
   className,
   render,
   ...props
-}: useRender.ComponentProps<"div"> & {
-  asChild?: boolean
-}) {
+}: useRender.ComponentProps<"div">) {
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
@@ -80,8 +77,10 @@ function BubbleContent({
       },
       props
     ),
-    render: render ?? (asChild && React.isValidElement(props.children) ? (props.children as React.ReactElement<any>) : undefined),
-    state: { slot: "bubble-content" },
+    render,
+    state: {
+      slot: "bubble-content",
+    },
   })
 }
 

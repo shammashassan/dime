@@ -308,20 +308,20 @@ export function LoansList({
         {/* Desktop Filter (visible on sm and larger screens) */}
         <div className="hidden sm:flex shrink-0">
           <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="h-9 p-1 rounded-xl bg-muted/80">
-              <TabsTrigger value="active" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg">
+            <TabsList>
+              <TabsTrigger value="active">
                 Active ({openCount})
               </TabsTrigger>
-              <TabsTrigger value="overdue" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg gap-1.5">
+              <TabsTrigger value="overdue">
                 Overdue ({overdueCount})
                 {overdueCount > 0 && (
                   <span className="size-1.5 rounded-full bg-destructive" />
                 )}
               </TabsTrigger>
-              <TabsTrigger value="repaid" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg">
+              <TabsTrigger value="repaid">
                 Repaid ({repaidCount})
               </TabsTrigger>
-              <TabsTrigger value="all" className="cursor-pointer text-xs font-semibold px-3.5 rounded-lg">
+              <TabsTrigger value="all">
                 All ({loans.length})
               </TabsTrigger>
             </TabsList>

@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react"
 import { BudgetTemplate, Category, Wallet, TemplateRecommendation } from "@/types"
 import { saveCurrentBudgetsAsTemplateAction, deleteCustomTemplateAction } from "@/lib/actions/budget-templates"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
@@ -256,67 +257,26 @@ export function BudgetTemplatesDialog({
 
               {/* ── Filter Bar & Search ── */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 min-w-0">
-                <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide p-1 bg-muted/60 rounded-xl min-w-0 max-w-full">
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("all")}
-                    className={cn(
-                      "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                      activeTab === "all"
-                        ? "bg-background text-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    All ({tabCounts.all})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("framework")}
-                    className={cn(
-                      "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                      activeTab === "framework"
-                        ? "bg-background text-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    Frameworks ({tabCounts.framework})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("lifestyle")}
-                    className={cn(
-                      "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                      activeTab === "lifestyle"
-                        ? "bg-background text-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    Lifestyles ({tabCounts.lifestyle})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("goals")}
-                    className={cn(
-                      "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                      activeTab === "goals"
-                        ? "bg-background text-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    Debt & Goals ({tabCounts.goals})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("custom")}
-                    className={cn(
-                      "px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                      activeTab === "custom"
-                        ? "bg-background text-foreground shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    My Templates ({tabCounts.custom})
-                  </button>
+                <div className="flex items-center min-w-0 max-w-full">
+                  <Tabs value={activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
+                    <TabsList variant="subtle" className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0 max-w-full">
+                      <TabsTrigger value="all" className="px-2.5 sm:px-3 py-1">
+                        All ({tabCounts.all})
+                      </TabsTrigger>
+                      <TabsTrigger value="framework" className="px-2.5 sm:px-3 py-1">
+                        Frameworks ({tabCounts.framework})
+                      </TabsTrigger>
+                      <TabsTrigger value="lifestyle" className="px-2.5 sm:px-3 py-1">
+                        Lifestyles ({tabCounts.lifestyle})
+                      </TabsTrigger>
+                      <TabsTrigger value="goals" className="px-2.5 sm:px-3 py-1">
+                        Debt &amp; Goals ({tabCounts.goals})
+                      </TabsTrigger>
+                      <TabsTrigger value="custom" className="px-2.5 sm:px-3 py-1">
+                        My Templates ({tabCounts.custom})
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
 
                 <div className="flex items-center gap-2 min-w-0 shrink-0">

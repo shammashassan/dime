@@ -490,18 +490,12 @@ export function TransactionForm({
         >
           {!isEditing && (
             <div className="flex justify-center w-full mb-2">
-              <TabsList className="inline-flex h-auto p-1 bg-muted/80 rounded-2xl gap-1 border border-border/20">
-                <TabsTrigger
-                  value="simple"
-                  className="flex items-center justify-center gap-1.5 rounded-xl px-5 py-2 text-xs font-semibold transition-all cursor-pointer border-0 shadow-none data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:font-bold data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground dark:data-[state=active]:bg-background dark:data-[state=active]:text-foreground"
-                >
+              <TabsList variant="bordered" className="inline-flex">
+                <TabsTrigger value="simple" className="px-5 py-2">
                   <Zap className="size-3.5 shrink-0" />
                   Quick Add
                 </TabsTrigger>
-                <TabsTrigger
-                  value="detailed"
-                  className="flex items-center justify-center gap-1.5 rounded-xl px-5 py-2 text-xs font-semibold transition-all cursor-pointer border-0 shadow-none data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:font-bold data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground dark:data-[state=active]:bg-background dark:data-[state=active]:text-foreground"
-                >
+                <TabsTrigger value="detailed" className="px-5 py-2">
                   <SlidersHorizontal className="size-3.5 shrink-0" />
                   Detailed
                 </TabsTrigger>

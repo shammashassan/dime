@@ -9,6 +9,7 @@ import { ContactDialog } from "./contact-dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -245,43 +246,23 @@ export function ContactsView({ contacts }: ContactsViewProps) {
       {/* 2. Controls & Search Row */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            All ({tabCounts.all})
-          </button>
-          <button
-            onClick={() => setActiveTab("borrowers")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "borrowers"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Borrowers ({tabCounts.borrowers})
-          </button>
-          <button
-            onClick={() => setActiveTab("lenders")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "lenders"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Lenders ({tabCounts.lenders})
-          </button>
-          <button
-            onClick={() => setActiveTab("settled")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "settled"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Settled ({tabCounts.settled})
-          </button>
+        <div className="hidden sm:flex shrink-0">
+          <Tabs value={activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
+            <TabsList>
+              <TabsTrigger value="all">
+                All ({tabCounts.all})
+              </TabsTrigger>
+              <TabsTrigger value="borrowers">
+                Borrowers ({tabCounts.borrowers})
+              </TabsTrigger>
+              <TabsTrigger value="lenders">
+                Lenders ({tabCounts.lenders})
+              </TabsTrigger>
+              <TabsTrigger value="settled">
+                Settled ({tabCounts.settled})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Mobile Filter (visible on smaller screens) */}

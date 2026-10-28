@@ -188,44 +188,24 @@ export function PlannerClient({ baseline, savedScenarios }: PlannerClientProps) 
       {/* ── Forecast Visualizations & View Tabs ── */}
       <div className="flex flex-col gap-4 w-full">
         <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
-          {/* Desktop Tab Selector (matches Net Worth / Contacts / Goals / Loans) */}
-          <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={cn(
-                "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2",
-                activeTab === "dashboard"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <LayoutDashboard className="size-3.5" />
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab("milestones")}
-              className={cn(
-                "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2",
-                activeTab === "milestones"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Target className="size-3.5" />
-              Goals &amp; Debt
-            </button>
-            <button
-              onClick={() => setActiveTab("table")}
-              className={cn(
-                "rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2",
-                activeTab === "table"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <TableIcon className="size-3.5" />
-              Monthly Table
-            </button>
+          {/* Desktop Tab Selector */}
+          <div className="hidden sm:flex shrink-0">
+            <Tabs value={activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
+              <TabsList>
+                <TabsTrigger value="dashboard">
+                  <LayoutDashboard className="size-3.5" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="milestones">
+                  <Target className="size-3.5" />
+                  Goals &amp; Debt
+                </TabsTrigger>
+                <TabsTrigger value="table">
+                  <TableIcon className="size-3.5" />
+                  Monthly Table
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           {/* Mobile Tab Selector */}

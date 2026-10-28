@@ -372,7 +372,7 @@ export function TransactionFilters({
       </div>
 
       {/* Secondary Filters (Collapsible Content) */}
-      <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up pt-3 border-t border-border/40 mt-3">
+      <CollapsibleContent className="overflow-hidden data-[open]:animate-collapsible-down data-[closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up pt-3 border-t border-border/40 mt-3">
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Wallet Select */}
           <div className="w-full sm:w-44">

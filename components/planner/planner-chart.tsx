@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LineChart, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { formatCurrency, cn } from "@/lib/utils"
 import { ForecastPoint } from "@/types"
@@ -42,26 +43,16 @@ export function PlannerChart({ points, currency, horizonMonths }: PlannerChartPr
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Financial Forecast Trajectory</span>
         </div>
 
-        <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border/30">
-          <button
-            onClick={() => setMetricMode("netWorth")}
-            className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer ${metricMode === "netWorth"
-              ? "bg-background text-foreground shadow-2xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Net Worth
-          </button>
-          <button
-            onClick={() => setMetricMode("liquidCash")}
-            className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer ${metricMode === "liquidCash"
-              ? "bg-background text-foreground shadow-2xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Liquid Cash
-          </button>
-        </div>
+        <Tabs value={metricMode} onValueChange={(v) => { if (v) setMetricMode(v as "netWorth" | "liquidCash") }}>
+          <TabsList variant="subtle" className="h-6 p-0.5 rounded-lg gap-0.5">
+            <TabsTrigger value="netWorth" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+              Net Worth
+            </TabsTrigger>
+            <TabsTrigger value="liquidCash" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+              Liquid Cash
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Body: Stat Highlights + Area Chart */}

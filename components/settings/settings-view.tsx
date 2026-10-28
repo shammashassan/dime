@@ -759,30 +759,30 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
         className="flex flex-col lg:flex-row gap-6 items-start w-full"
       >
         {/* Navigation Tabs List */}
-        <TabsList className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-visible w-full lg:w-60 lg:shrink-0 border border-border/40 bg-card rounded-2xl p-1.5 shadow-md space-x-1 lg:space-x-0 space-y-0 lg:space-y-0.5 scrollbar-none">
-          <TabsTrigger value="profile" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+        <TabsList className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-visible w-full lg:w-60 lg:shrink-0 border border-border/40 bg-card rounded-2xl p-1.5 shadow-md gap-1 scrollbar-none">
+          <TabsTrigger value="profile">
             <User className="size-4" />
             Profile Details
           </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+          <TabsTrigger value="security">
             <Shield className="size-4" />
             Security & Login
           </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+          <TabsTrigger value="preferences">
             <SettingsIcon className="size-4" />
             Preferences
           </TabsTrigger>
-          <TabsTrigger value="rules" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+          <TabsTrigger value="rules">
             <Zap className="size-4" />
             Automation Rules
           </TabsTrigger>
           {activeOrgId && (
-            <TabsTrigger value="space" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+            <TabsTrigger value="space">
               <Building className="size-4" />
               Space Settings
             </TabsTrigger>
           )}
-          <TabsTrigger value="invitations" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold">
+          <TabsTrigger value="invitations">
             <Mail className="size-4" />
             Invitations
             {userInvitations.length > 0 && (
@@ -791,7 +791,7 @@ export function SettingsView({ preferences: initialPreferences, wallets, categor
               </Badge>
             )}
           </TabsTrigger>
-          <TabsTrigger value="data" className="flex items-center gap-2 justify-center lg:justify-start w-auto lg:w-full whitespace-nowrap px-4 py-2.5 text-xs lg:text-sm font-semibold text-rose-500 hover:text-rose-600 dark:hover:text-rose-400">
+          <TabsTrigger value="data" className="text-rose-500 hover:text-rose-600 dark:hover:text-rose-400">
             <Database className="size-4" />
             Data Management
           </TabsTrigger>

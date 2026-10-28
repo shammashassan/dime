@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { requireApprovedUser } from "@/lib/auth-guard"
-import TransactionDetailLoading from "./loading"
 
 export const metadata: Metadata = {
   title: "Transaction Details",

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -550,20 +551,24 @@ export function TransactionTable({
                                 <MoreHorizontal className="size-4" />
                               </Button>} />
                             <DropdownMenuContent align="end" className="w-40 bg-popover border border-border/40 shadow-md">
-                              <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
-                              <DropdownMenuItem className="gap-2 text-xs" render={<Link href={`/transactions/${tx._id.toString()}`}>
-                                  <Eye className="size-3.5" /> View Details
-                                </Link>} />
-                              <DropdownMenuItem onClick={() => onEditClick(tx)} className="gap-2 text-xs">
-                                <Edit className="size-3.5" /> Edit Details
-                              </DropdownMenuItem>
+                              <DropdownMenuGroup>
+                                <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
+                                <DropdownMenuItem className="gap-2 text-xs" render={<Link href={`/transactions/${tx._id.toString()}`}>
+                                    <Eye className="size-3.5" /> View Details
+                                  </Link>} />
+                                <DropdownMenuItem onClick={() => onEditClick(tx)} className="gap-2 text-xs">
+                                  <Edit className="size-3.5" /> Edit Details
+                                </DropdownMenuItem>
+                              </DropdownMenuGroup>
                               <DropdownMenuSeparator className="border-border/40" />
-                              <DropdownMenuItem
-                                onClick={() => setDeletingTxId(tx._id.toString())}
-                                className="gap-2 text-xs text-rose-600 dark:text-rose-400 focus:bg-destructive/15 focus:text-destructive"
-                              >
-                                <Trash2 className="size-3.5" /> Delete
-                              </DropdownMenuItem>
+                              <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                  onClick={() => setDeletingTxId(tx._id.toString())}
+                                  className="gap-2 text-xs text-rose-600 dark:text-rose-400 focus:bg-destructive/15 focus:text-destructive"
+                                >
+                                  <Trash2 className="size-3.5" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuGroup>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>

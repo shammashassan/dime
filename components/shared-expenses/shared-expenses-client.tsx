@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -220,25 +221,17 @@ export function SharedExpensesClient({
 
       {/* ── Control & Filter Bar matching reference ── */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-          <button
-            onClick={() => setActiveTab("expenses")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "expenses"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Expenses ({viewModel.recentExpenses.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("simplified")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "simplified" || activeTab === "pairwise"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Group Balances ({viewModel.simplifiedTransfers.length})
-          </button>
+        <div className="hidden sm:flex shrink-0">
+          <Tabs value={activeTab === "pairwise" ? "simplified" : activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
+            <TabsList>
+              <TabsTrigger value="expenses">
+                Expenses ({viewModel.recentExpenses.length})
+              </TabsTrigger>
+              <TabsTrigger value="simplified">
+                Group Balances ({viewModel.simplifiedTransfers.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Mobile Filter (visible on smaller screens) */}

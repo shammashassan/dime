@@ -6,6 +6,7 @@ import { RecurringRule, Category, Wallet, BillInstance } from "@/types"
 import { deleteRecurringRule, toggleRecurringRuleActive, processRecurringRuleNow } from "@/lib/actions/recurring"
 import { skipBillInstance } from "@/lib/actions/bills"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
@@ -44,6 +45,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
@@ -279,25 +281,29 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
                   <MoreVertical className="size-4" />
                 </Button>} />
               <DropdownMenuContent align="end" className="w-44 rounded-xl border border-border/50">
-                <DropdownMenuItem onClick={() => handleToggleActive(rule._id.toString())}>
-                  {rule.isActive ? <Pause className="size-3.5 mr-2 text-amber-500" /> : <Play className="size-3.5 mr-2 text-emerald-500" />}
-                  {rule.isActive ? "Pause rule" : "Resume rule"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setEditingRule(rule)}>
-                  <Edit className="size-3.5 mr-2" />
-                  Edit rule
-                </DropdownMenuItem>
-                {rule.cancellationUrl && (
-                  <DropdownMenuItem render={<a href={rule.cancellationUrl} target="_blank" rel="noopener noreferrer">
-                      <Ban className="size-3.5 mr-2" />
-                      Cancel link
-                    </a>} />
-                )}
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => handleToggleActive(rule._id.toString())}>
+                    {rule.isActive ? <Pause className="size-3.5 mr-2 text-amber-500" /> : <Play className="size-3.5 mr-2 text-emerald-500" />}
+                    {rule.isActive ? "Pause rule" : "Resume rule"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setEditingRule(rule)}>
+                    <Edit className="size-3.5 mr-2" />
+                    Edit rule
+                  </DropdownMenuItem>
+                  {rule.cancellationUrl && (
+                    <DropdownMenuItem render={<a href={rule.cancellationUrl} target="_blank" rel="noopener noreferrer">
+                        <Ban className="size-3.5 mr-2" />
+                        Cancel link
+                      </a>} />
+                  )}
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setDeletingRuleId(rule._id.toString())} className="text-rose-500 focus:text-rose-500">
-                  <Trash2 className="size-3.5 mr-2" />
-                  Delete rule
-                </DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setDeletingRuleId(rule._id.toString())} className="text-rose-500 focus:text-rose-500">
+                    <Trash2 className="size-3.5 mr-2" />
+                    Delete rule
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -522,43 +528,23 @@ export function RecurringView({ rules, categories, wallets, billInstances = [] }
 
       <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-stretch sm:items-center justify-between w-full">
         {/* Desktop Filter (visible on sm and larger screens) */}
-        <div className="hidden sm:flex rounded-xl bg-muted/80 p-1 self-start max-w-full overflow-x-auto scrollbar-hide shrink-0">
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "all"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            All ({tabCounts.all})
-          </button>
-          <button
-            onClick={() => setActiveTab("recurring")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "recurring"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Recurring ({tabCounts.recurring})
-          </button>
-          <button
-            onClick={() => setActiveTab("subscription")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "subscription"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Subscriptions ({tabCounts.subscription})
-          </button>
-          <button
-            onClick={() => setActiveTab("bill")}
-            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${activeTab === "bill"
-              ? "bg-background text-foreground shadow-xs"
-              : "text-muted-foreground hover:text-foreground"
-              }`}
-          >
-            Bills ({tabCounts.bill})
-          </button>
+        <div className="hidden sm:flex shrink-0">
+          <Tabs value={activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
+            <TabsList>
+              <TabsTrigger value="all">
+                All ({tabCounts.all})
+              </TabsTrigger>
+              <TabsTrigger value="recurring">
+                Recurring ({tabCounts.recurring})
+              </TabsTrigger>
+              <TabsTrigger value="subscription">
+                Subscriptions ({tabCounts.subscription})
+              </TabsTrigger>
+              <TabsTrigger value="bill">
+                Bills ({tabCounts.bill})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Mobile Filter (visible on smaller screens) */}

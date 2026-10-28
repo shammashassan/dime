@@ -8,6 +8,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { formatCurrency } from "@/lib/utils"
 import { LineChart, TrendingUp, TrendingDown } from "lucide-react"
 import type { PriceHistoryPoint, InvestmentTransaction, InvestmentHolding } from "@/types"
@@ -272,41 +273,19 @@ export function PriceHistoryChart({
         </div>
 
         {/* Mode switcher capsule pill */}
-        <div className="flex items-center gap-1 bg-muted/60 p-0.5 rounded-lg border border-border/30">
-          <button
-            type="button"
-            onClick={() => setMetricMode("price")}
-            className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer ${
-              metricMode === "price"
-                ? "bg-background text-foreground shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Market Price
-          </button>
-          <button
-            type="button"
-            onClick={() => setMetricMode("value")}
-            className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer ${
-              metricMode === "value"
-                ? "bg-background text-foreground shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Holding Value
-          </button>
-          <button
-            type="button"
-            onClick={() => setMetricMode("gain")}
-            className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-md transition-all cursor-pointer ${
-              metricMode === "gain"
-                ? "bg-background text-foreground shadow-2xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Unrealized P&L
-          </button>
-        </div>
+        <Tabs value={metricMode} onValueChange={(v) => { if (v) setMetricMode(v as any) }}>
+          <TabsList variant="subtle" className="h-6 p-0.5 rounded-lg gap-0.5">
+            <TabsTrigger value="price" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+              Market Price
+            </TabsTrigger>
+            <TabsTrigger value="value" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+              Holding Value
+            </TabsTrigger>
+            <TabsTrigger value="gain" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
+              Unrealized P&amp;L
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Body: Stat Highlights + Area Chart */}

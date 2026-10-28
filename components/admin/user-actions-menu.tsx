@@ -246,10 +246,12 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
           }
         />
         <DropdownMenuContent align="end" className="w-48 bg-popover border border-border/40 shadow-lg">
-          <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setShowProfile(true)} className="gap-2 text-xs">
-            <Eye className="size-3.5" /> View Profile
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="text-xs text-muted-foreground">Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => setShowProfile(true)} className="gap-2 text-xs">
+              <Eye className="size-3.5" /> View Profile
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
 
           {!isSelf && (
             <>
@@ -283,19 +285,23 @@ export function UserActionsMenu({ user, currentUserRole, currentUserId }: UserAc
           )}
 
           <DropdownMenuSeparator className="border-border/40" />
-          <DropdownMenuItem onClick={handleRevokeSessions} className="gap-2 text-xs">
-            <Key className="size-3.5" /> Revoke Sessions
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuItem onClick={handleRevokeSessions} className="gap-2 text-xs">
+              <Key className="size-3.5" /> Revoke Sessions
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
 
           {!isSelf && (
             <>
               <DropdownMenuSeparator className="border-border/40" />
-              <DropdownMenuItem
-                onClick={() => setShowDeleteDialog(true)}
-                className="gap-2 text-xs text-rose-600 dark:text-rose-400 focus:bg-destructive/15 focus:text-destructive"
-              >
-                <Trash2 className="size-3.5" /> Delete User
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="gap-2 text-xs text-rose-600 dark:text-rose-400 focus:bg-destructive/15 focus:text-destructive"
+                >
+                  <Trash2 className="size-3.5" /> Delete User
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
             </>
           )}
         </DropdownMenuContent>

@@ -1,6 +1,7 @@
 "use client"
 
 import React from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import {
   ChevronLeft,
@@ -86,58 +87,24 @@ export function CalendarToolbar({
       {/* ── Right: Cash Mode & View Toggle Pills ── */}
       <div className="flex items-center gap-2">
         {/* Liquid vs All Accounts Toggle */}
-        <div className="flex items-center rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
-          <button
-            onClick={() => onWalletModeChange("liquid")}
-            className={cn(
-              "rounded-lg px-3 py-1 text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
-              walletMode === "liquid"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Liquid Cash
-          </button>
-          <button
-            onClick={() => onWalletModeChange("all")}
-            className={cn(
-              "rounded-lg px-3 py-1 text-xs font-medium transition-all cursor-pointer whitespace-nowrap",
-              walletMode === "all"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            All Accounts
-          </button>
-        </div>
+        <Tabs value={walletMode} onValueChange={(v) => { if (v) onWalletModeChange(v as "liquid" | "all") }}>
+          <TabsList variant="bordered">
+            <TabsTrigger value="liquid">Liquid Cash</TabsTrigger>
+            <TabsTrigger value="all">All Accounts</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {/* Grid vs Agenda Toggle */}
-        <div className="flex items-center rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
-          <button
-            onClick={() => onViewModeChange("grid")}
-            aria-label="Calendar Grid View"
-            className={cn(
-              "size-7 rounded-lg flex items-center justify-center transition-all cursor-pointer",
-              viewMode === "grid"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Calendar className="size-3.5" />
-          </button>
-          <button
-            onClick={() => onViewModeChange("agenda")}
-            aria-label="Agenda Feed View"
-            className={cn(
-              "size-7 rounded-lg flex items-center justify-center transition-all cursor-pointer",
-              viewMode === "agenda"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <List className="size-3.5" />
-          </button>
-        </div>
+        <Tabs value={viewMode} onValueChange={(v) => { if (v) onViewModeChange(v as "grid" | "agenda") }}>
+          <TabsList variant="bordered">
+            <TabsTrigger value="grid" aria-label="Calendar Grid View" className="size-7 p-0 flex-none">
+              <Calendar className="size-3.5" />
+            </TabsTrigger>
+            <TabsTrigger value="agenda" aria-label="Agenda Feed View" className="size-7 p-0 flex-none">
+              <List className="size-3.5" />
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
     </div>
   )

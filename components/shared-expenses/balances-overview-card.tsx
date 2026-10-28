@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -53,27 +54,17 @@ export function BalancesOverviewCard({
         </div>
 
         {/* View Toggle */}
-        <div className="flex items-center rounded-xl bg-muted/80 p-1 self-start sm:self-auto shrink-0">
-          <button
-            onClick={() => setCurrentMode("simplified")}
-            className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              currentMode === "simplified"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Simplified ({simplifiedTransfers.length})
-          </button>
-          <button
-            onClick={() => setCurrentMode("pairwise")}
-            className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              currentMode === "pairwise"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Direct ({pairwiseBalances.length})
-          </button>
+        <div className="flex items-center self-start sm:self-auto shrink-0">
+          <Tabs value={currentMode} onValueChange={(v) => { if (v) setCurrentMode(v as any) }}>
+            <TabsList>
+              <TabsTrigger value="simplified">
+                Simplified ({simplifiedTransfers.length})
+              </TabsTrigger>
+              <TabsTrigger value="pairwise">
+                Direct ({pairwiseBalances.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </CardHeader>
 

@@ -13,6 +13,7 @@ import { QuickActionsCard } from "./overview/quick-actions-card"
 import { CategorySpikesCard } from "./overview/category-spikes-card"
 import { RecurringRadarCard } from "./overview/recurring-radar-card"
 import { SavingsOpportunitiesCard } from "./overview/savings-opportunities-card"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
@@ -262,78 +263,37 @@ export function InsightsClient({ data }: InsightsClientProps) {
       {/* ── 3. Unified Tab Switcher (Horizontally scrollable on smaller screens, never overflows) ── */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap md:flex-nowrap gap-3 items-start sm:items-center justify-between w-full min-w-0">
         {/* Scrollable Tab Bar */}
-        <div className="w-full sm:w-auto min-w-0 rounded-2xl bg-muted/80 p-1 border border-border/40 shadow-2xs">
-          <div className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0">
-            <button
-              onClick={() => {
-                setActiveTab("overview")
-                setCategoryFilter("")
-              }}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                activeTab === "overview"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab("all")}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                activeTab === "all"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              All Signals ({insights.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("anomalies")}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                activeTab === "anomalies"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Anomalies ({anomalies.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("subscriptions")}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                activeTab === "subscriptions"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Subscriptions ({subscriptions.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("savings")}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                activeTab === "savings"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Savings &amp; Wins ({savings.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("bookmarked")}
-              className={cn(
-                "rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0",
-                activeTab === "bookmarked"
-                  ? "bg-background text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Bookmarked ({bookmarked.length})
-            </button>
-          </div>
+        <div className="w-full sm:w-auto min-w-0">
+          <Tabs
+            value={activeTab}
+            onValueChange={(val) => {
+              if (val) {
+                setActiveTab(val)
+                if (val === "overview") setCategoryFilter("")
+              }
+            }}
+          >
+            <TabsList variant="bordered" className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+              <TabsTrigger value="overview">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="all">
+                All Signals ({insights.length})
+              </TabsTrigger>
+              <TabsTrigger value="anomalies">
+                Anomalies ({anomalies.length})
+              </TabsTrigger>
+              <TabsTrigger value="subscriptions">
+                Subscriptions ({subscriptions.length})
+              </TabsTrigger>
+              <TabsTrigger value="savings">
+                Savings &amp; Wins ({savings.length})
+              </TabsTrigger>
+              <TabsTrigger value="bookmarked">
+                Bookmarked ({bookmarked.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Search Bar for Signal Feeds */}

@@ -606,7 +606,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                   <span className="flex items-center gap-2">
                     <Plus data-icon="inline-start" /> Invite Collaborator
                   </span>
-                  <ChevronDown className="inline-end transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                  <ChevronDown className="inline-end transition-transform duration-200 group-data-[open]/collapsible:rotate-180 group-data-[state=open]/collapsible:rotate-180" />
                 </Button>} />
               <CollapsibleContent className="pt-4">
                 <form onSubmit={handleInviteMember}>
@@ -616,7 +616,7 @@ export function SpaceSettings({ initialSettings, orgSettings }: SpaceSettingsPro
                         <FieldLabel htmlFor="invite-username">Username</FieldLabel>
                         <FieldContent>
                           <Popover open={showUserPreview} onOpenChange={setShowUserPreview}>
-                            <PopoverTrigger render={<div className="w-full" />} nativeButton={false}>
+                            <PopoverTrigger nativeButton={false} render={<div className="w-full" />}>
                               <InputGroup>
                                 <InputGroupAddon align="inline-start">
                                   <Search />
