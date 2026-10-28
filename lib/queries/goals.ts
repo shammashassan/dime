@@ -4,6 +4,7 @@ import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { Goal, Transaction } from "@/types"
 import { getFinancialScope } from "@/lib/scope"
+import { serializeData } from "@/lib/utils"
 
 async function fetchGoals(userId: string, orgId?: string | null): Promise<Goal[]> {
   "use cache"
@@ -17,7 +18,8 @@ async function fetchGoals(userId: string, orgId?: string | null): Promise<Goal[]
         $or: [{ organizationId: null }, { organizationId: { $exists: false } }],
       }
   const goalsColl = await getCollection<Goal>("goals")
-  return goalsColl.find(filter).sort({ targetDate: 1 }).toArray()
+  const docs = await goalsColl.find(filter).sort({ targetDate: 1 }).toArray()
+  return serializeData(docs)
 }
 
 export const getGoals = cache(async (userId: string): Promise<Goal[]> => {
@@ -38,7 +40,8 @@ async function fetchGoalById(userId: string, id: string, orgId?: string | null):
           $or: [{ organizationId: null }, { organizationId: { $exists: false } }],
         }
     const goalsColl = await getCollection<Goal>("goals")
-    return goalsColl.findOne({ _id: new ObjectId(id), ...filter })
+    const doc = await goalsColl.findOne({ _id: new ObjectId(id), ...filter })
+    return doc ? serializeData(doc) : null
   } catch {
     return null
   }

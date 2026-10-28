@@ -47,6 +47,7 @@ function Button({
   asChild = false,
   render,
   children,
+  nativeButton,
   ...props
 }: ButtonPrimitive.Props &
   VariantProps<typeof buttonVariants> & {
@@ -55,11 +56,19 @@ function Button({
   const resolvedRender = render ?? (asChild && React.isValidElement(children) ? (children as React.ReactElement<any>) : undefined)
   const resolvedChildren = asChild && React.isValidElement(children) ? undefined : children
 
+  const isNonButton = Boolean(
+    resolvedRender &&
+      (typeof resolvedRender !== "object" ||
+        (resolvedRender as any).type !== "button")
+  )
+  const computedNativeButton = nativeButton ?? (isNonButton ? false : undefined)
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       render={resolvedRender}
+      nativeButton={computedNativeButton}
       {...props}
     >
       {resolvedChildren}

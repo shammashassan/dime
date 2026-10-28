@@ -4,6 +4,7 @@ import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { Wallet, Transaction } from "@/types"
 import { getFinancialScope, getScopeFilter } from "@/lib/scope"
+import { serializeData } from "@/lib/utils"
 import { endOfMonth, subMonths, startOfMonth, format, endOfDay, subDays, startOfDay } from "date-fns"
 
 async function fetchWallets(userId: string, orgId?: string | null): Promise<Wallet[]> {
@@ -19,13 +20,15 @@ async function fetchWallets(userId: string, orgId?: string | null): Promise<Wall
       }
   const walletsColl = await getCollection<Wallet>("wallets")
 
-  return walletsColl
+  const docs = await walletsColl
     .find({
       ...filter,
       isArchived: false,
     })
     .sort({ name: 1 })
     .toArray()
+
+  return serializeData(docs)
 }
 
 export const getWallets = cache(async (userId: string): Promise<Wallet[]> => {
@@ -46,7 +49,8 @@ async function fetchAllWalletsIncludingArchived(userId: string, orgId?: string |
       }
   const walletsColl = await getCollection<Wallet>("wallets")
 
-  return walletsColl.find(filter).sort({ isArchived: 1, name: 1 }).toArray()
+  const docs = await walletsColl.find(filter).sort({ isArchived: 1, name: 1 }).toArray()
+  return serializeData(docs)
 }
 
 export const getAllWalletsIncludingArchived = cache(async (userId: string): Promise<Wallet[]> => {
@@ -68,10 +72,11 @@ async function fetchWalletById(userId: string, walletId: string, orgId?: string 
         }
     const walletsColl = await getCollection<Wallet>("wallets")
 
-    return walletsColl.findOne({
+    const doc = await walletsColl.findOne({
       _id: new ObjectId(walletId),
       ...filter,
     })
+    return doc ? serializeData(doc) : null
   } catch {
     return null
   }

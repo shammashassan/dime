@@ -4,6 +4,7 @@ import { getCollection } from "@/lib/db/collections"
 import { ObjectId } from "mongodb"
 import { Category } from "@/types"
 import { getFinancialScope } from "@/lib/scope"
+import { serializeData } from "@/lib/utils"
 
 async function fetchCategories(userId: string, orgId?: string | null): Promise<Category[]> {
   "use cache"
@@ -25,7 +26,8 @@ async function fetchCategories(userId: string, orgId?: string | null): Promise<C
     ],
   }
 
-  return categoriesColl.find(filter).sort({ name: 1 }).toArray()
+  const docs = await categoriesColl.find(filter).sort({ name: 1 }).toArray()
+  return serializeData(docs)
 }
 
 export const getCategories = cache(async (userId: string): Promise<Category[]> => {
@@ -59,7 +61,8 @@ async function fetchCategoryById(
       ],
     }
 
-    return categoriesColl.findOne(filter)
+    const doc = await categoriesColl.findOne(filter)
+    return doc ? serializeData(doc) : null
   } catch {
     return null
   }

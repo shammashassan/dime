@@ -16,7 +16,14 @@ async function fetchPreferences(userId: string): Promise<UserPreferences> {
 
   const prefColl = await getCollection<UserPreferences>("preferences")
   const pref = await prefColl.findOne({ userId })
-  if (pref) return pref
+  if (pref) {
+    return {
+      userId: pref.userId,
+      defaultCurrency: pref.defaultCurrency,
+      defaultWalletId: pref.defaultWalletId ? pref.defaultWalletId.toString() : undefined,
+      dateFormat: pref.dateFormat,
+    }
+  }
   return {
     userId,
     defaultCurrency: "USD",
