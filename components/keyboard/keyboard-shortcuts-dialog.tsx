@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import { Kbd } from "@/components/ui/kbd"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Command, Keyboard } from "lucide-react"
@@ -71,7 +71,7 @@ export function KeyboardShortcutsDialog({
         {/* Category Tabs */}
         <div className="px-5 pt-3 pb-2 border-b border-border/30 bg-muted/20">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList variant="subtle" className="h-8 w-full flex">
+            <TabsList className="h-8 w-full flex">
               {categories.map((cat) => (
                 <TabsTrigger
                   key={cat}

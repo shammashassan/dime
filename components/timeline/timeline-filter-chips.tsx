@@ -61,7 +61,7 @@ export function TimelineFilterChips({
             if (val) onSelectCategory(val as TimelineEventCategory)
           }}
         >
-          <TabsList variant="bordered" className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+          <TabsList className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon
               const isMilestone = cat.id === "milestones"

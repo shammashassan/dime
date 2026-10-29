@@ -422,7 +422,6 @@ export function TransactionFilters({
               <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
                 <div className="p-1">
                   <Calendar
-                    initialFocus
                     mode="range"
                     defaultMonth={dateRange?.from}
                     selected={dateRange}

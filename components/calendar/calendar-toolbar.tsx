@@ -88,7 +88,7 @@ export function CalendarToolbar({
       <div className="flex items-center gap-2">
         {/* Liquid vs All Accounts Toggle */}
         <Tabs value={walletMode} onValueChange={(v) => { if (v) onWalletModeChange(v as "liquid" | "all") }}>
-          <TabsList variant="bordered">
+          <TabsList>
             <TabsTrigger value="liquid">Liquid Cash</TabsTrigger>
             <TabsTrigger value="all">All Accounts</TabsTrigger>
           </TabsList>
@@ -96,7 +96,7 @@ export function CalendarToolbar({
 
         {/* Grid vs Agenda Toggle */}
         <Tabs value={viewMode} onValueChange={(v) => { if (v) onViewModeChange(v as "grid" | "agenda") }}>
-          <TabsList variant="bordered">
+          <TabsList>
             <TabsTrigger value="grid" aria-label="Calendar Grid View" className="size-7 p-0 flex-none">
               <Calendar className="size-3.5" />
             </TabsTrigger>

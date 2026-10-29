@@ -27,7 +27,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import {
     AlertDialog,
     AlertDialogAction,

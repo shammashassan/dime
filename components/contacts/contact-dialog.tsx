@@ -10,7 +10,7 @@ import { createContact, updateContact } from "@/lib/actions/loans"
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupInput, InputGroupTextarea } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/shared/responsive-dialog"
 import { Loader2, UserPlus, Pencil, Users } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 

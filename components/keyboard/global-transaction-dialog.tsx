@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import { TransactionForm } from "@/components/transactions/transaction-form"
 import { getQuickTransactionMeta } from "@/lib/actions/transactions"
 import { Loader2, Plus } from "lucide-react"

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import { Button } from "@/components/ui/button"
 import {
   InputGroup,
@@ -197,7 +197,6 @@ export function PlanEventDialog({
                         setDatePopoverOpen(false)
                       }
                     }}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>

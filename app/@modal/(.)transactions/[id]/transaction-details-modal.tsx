@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/shared/responsive-dialog"
 import { TransactionDetails } from "@/components/transactions/transaction-details"
 import { Transaction, Category, Wallet } from "@/types"
 

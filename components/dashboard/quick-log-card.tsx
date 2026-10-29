@@ -132,7 +132,7 @@ export function QuickLogCard({
         </span>
         <div className="flex items-center gap-1.5">
           <Tabs value={type} onValueChange={(v) => { if (v) setType(v as "expense" | "income") }}>
-            <TabsList variant="subtle" className="h-6 p-0.5 rounded-lg gap-0.5">
+            <TabsList className="h-6 p-0.5 rounded-lg gap-0.5">
               <TabsTrigger value="expense" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
                 Expense
               </TabsTrigger>

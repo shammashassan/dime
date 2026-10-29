@@ -136,7 +136,6 @@ export function ReportFilters() {
           </Button>} />
         <PopoverContent className="w-auto p-0 border border-border/40 shadow-lg" align="start">
           <Calendar
-            initialFocus
             mode="range"
             defaultMonth={dateRange?.from || new Date()}
             selected={dateRange}

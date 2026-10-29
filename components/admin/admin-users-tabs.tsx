@@ -45,7 +45,7 @@ export function AdminUsersTabs({
         className="w-full space-y-4"
       >
         {/* Desktop Tabs List */}
-        <TabsList variant="subtle" className="hidden sm:inline-flex">
+        <TabsList className="hidden sm:inline-flex">
           <TabsTrigger value="active">
             Active Users
           </TabsTrigger>

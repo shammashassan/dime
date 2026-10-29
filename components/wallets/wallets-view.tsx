@@ -24,7 +24,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import {
   Empty,
   EmptyDescription,

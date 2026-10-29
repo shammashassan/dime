@@ -11,7 +11,7 @@ import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/shared/responsive-dialog"
 import { CalendarIcon, Loader2, Plus, TrendingUp } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
@@ -164,7 +164,6 @@ export function ValuationDialog({
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>

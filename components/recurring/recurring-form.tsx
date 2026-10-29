@@ -415,7 +415,6 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
                       mode="single"
                       selected={field.value}
                       onSelect={(val) => val && field.onChange(val)}
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -444,7 +443,6 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
                         mode="single"
                         selected={field.value || undefined}
                         onSelect={(val) => field.onChange(val || null)}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>
@@ -472,7 +470,6 @@ export function RecurringForm({ categories, wallets, initialRule, onSuccess }: R
                         mode="single"
                         selected={field.value || undefined}
                         onSelect={(val) => field.onChange(val || null)}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>

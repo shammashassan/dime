@@ -44,7 +44,7 @@ export function PlannerChart({ points, currency, horizonMonths }: PlannerChartPr
         </div>
 
         <Tabs value={metricMode} onValueChange={(v) => { if (v) setMetricMode(v as "netWorth" | "liquidCash") }}>
-          <TabsList variant="subtle" className="h-6 p-0.5 rounded-lg gap-0.5">
+          <TabsList className="h-6 p-0.5 rounded-lg gap-0.5">
             <TabsTrigger value="netWorth" className="px-2 py-0.5 text-[10px] font-bold rounded-md">
               Net Worth
             </TabsTrigger>

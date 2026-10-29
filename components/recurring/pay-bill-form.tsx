@@ -165,7 +165,6 @@ export function PayBillForm({ bill, rule, wallets, onSuccess }: PayBillFormProps
                     mode="single"
                     selected={field.value as Date}
                     onSelect={(val) => val && field.onChange(val)}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>

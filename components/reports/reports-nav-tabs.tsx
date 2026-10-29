@@ -35,7 +35,7 @@ export function ReportsNavTabs() {
   return (
     <div className="w-full sm:w-auto min-w-0">
       <Tabs value={currentTab} onValueChange={(v) => { if (v) handleTabChange(v) }}>
-        <TabsList variant="bordered" className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+        <TabsList className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
           <TabsTrigger value="overview">
             <BarChart3 className="size-3.5 text-primary" />
             <span>Overview &amp; Trends</span>

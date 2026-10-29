@@ -13,7 +13,7 @@ import { Field, FieldLabel, FieldError, FieldGroup } from "@/components/ui/field
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/shared/responsive-dialog"
 import { CalendarIcon, Loader2, Landmark, Coins, HandCoins } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
@@ -225,7 +225,6 @@ export function RepaymentDialog({
                         mode="single"
                         selected={field.value}
                         onSelect={(val) => val && field.onChange(val)}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>

@@ -341,7 +341,6 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
                       mode="single"
                       selected={field.value}
                       onSelect={(val) => val && field.onChange(val)}
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -370,7 +369,6 @@ export function BudgetForm({ categories, wallets, initialBudget, onSuccess }: Bu
                       mode="single"
                       selected={field.value || undefined}
                       onSelect={(val) => field.onChange(val || null)}
-                      initialFocus
                     />
                   </PopoverContent>
                 </Popover>

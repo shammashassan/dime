@@ -34,7 +34,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import {
   Empty,
   EmptyDescription,
@@ -177,7 +177,7 @@ export function InvestmentsView({
               if (val) setActiveTab(val as any)
             }}
           >
-            <TabsList variant="bordered" className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+            <TabsList className="w-full sm:w-auto overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
               <TabsTrigger value="overview">
                 Overview
               </TabsTrigger>

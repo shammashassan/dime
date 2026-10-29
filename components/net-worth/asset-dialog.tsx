@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import {
   CalendarIcon,
   Loader2,
@@ -515,7 +515,6 @@ export function AssetDialog({
                         mode="single"
                         selected={field.value || undefined}
                         onSelect={field.onChange}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>

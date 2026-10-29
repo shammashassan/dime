@@ -282,7 +282,6 @@ export function LoanActionCard({ contacts, owedSummary, className }: LoanActionC
                     setDueDate(selected)
                     setIsDatePickerOpen(false)
                   }}
-                  initialFocus
                 />
                 {dueDate && (
                   <div className="p-2 border-t border-border/30 text-center">

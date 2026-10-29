@@ -8,7 +8,7 @@ import { WalletForm } from "@/components/wallets/wallet-form"
 import { Wallet, InvestmentHolding } from "@/types"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/shared/responsive-dialog"
 import { PlusCircle, RefreshCw, Zap } from "lucide-react"
 
 interface QuickActionsCardProps {

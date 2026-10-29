@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import { Button } from "@/components/ui/button"
 import { FieldGroup, Field, FieldLabel, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -263,7 +263,6 @@ export function TransactionDialog({
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
                           onSelect={(val) => val && field.onChange(val)}
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>

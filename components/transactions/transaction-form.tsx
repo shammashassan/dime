@@ -490,7 +490,7 @@ export function TransactionForm({
         >
           {!isEditing && (
             <div className="flex justify-center w-full mb-2">
-              <TabsList variant="bordered" className="inline-flex">
+              <TabsList className="inline-flex">
                 <TabsTrigger value="simple" className="px-5 py-2">
                   <Zap className="size-3.5 shrink-0" />
                   Quick Add
@@ -822,7 +822,6 @@ export function TransactionForm({
                             mode="single"
                             selected={field.value}
                             onSelect={(val) => val && field.onChange(val)}
-                            initialFocus
                           />
                         </PopoverContent>
                       </Popover>

@@ -394,7 +394,7 @@ export function SearchResultsView({
       {/* ── 4. Unified Tab Switcher (Horizontally scrollable on small screens, never overflows) ── */}
       <div className="w-full min-w-0">
         <Tabs value={activeTab} onValueChange={(val) => { if (val) setActiveTab(val) }}>
-          <TabsList variant="bordered" className="w-full overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
+          <TabsList className="w-full overflow-x-auto scrollbar-hide flex items-center justify-start gap-1">
             {tabs.map((tab) => {
               const TabIcon = tab.icon
 

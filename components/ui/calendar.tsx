@@ -21,11 +21,9 @@ function Calendar({
   locale,
   formatters,
   components,
-  initialFocus,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-  initialFocus?: boolean
 }) {
   const defaultClassNames = getDefaultClassNames()
 
@@ -198,7 +196,6 @@ function CalendarDayButton({
 
   return (
     <Button
-      ref={ref}
       variant="ghost"
       size="icon"
       data-day={day.date.toLocaleDateString(locale?.code)}

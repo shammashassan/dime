@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/shared/responsive-dialog"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { TransactionForm } from "./transaction-form"

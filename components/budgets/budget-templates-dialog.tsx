@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from "react"
 import { BudgetTemplate, Category, Wallet, TemplateRecommendation } from "@/types"
 import { saveCurrentBudgetsAsTemplateAction, deleteCustomTemplateAction } from "@/lib/actions/budget-templates"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/shared/responsive-dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -259,7 +259,7 @@ export function BudgetTemplatesDialog({
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 min-w-0">
                 <div className="flex items-center min-w-0 max-w-full">
                   <Tabs value={activeTab} onValueChange={(v) => { if (v) setActiveTab(v as any) }}>
-                    <TabsList variant="subtle" className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0 max-w-full">
+                    <TabsList className="overflow-x-auto scrollbar-hide flex items-center gap-1 min-w-0 max-w-full">
                       <TabsTrigger value="all" className="px-2.5 sm:px-3 py-1">
                         All ({tabCounts.all})
                       </TabsTrigger>

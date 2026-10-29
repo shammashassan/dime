@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/shared/responsive-dialog"
 import { CalendarIcon, Loader2, Plus, Users, HandCoins, Mail, Phone, Percent, Info, ArrowUpRight, ArrowDownLeft } from "lucide-react"
 import { format } from "date-fns"
 import { toast } from "@/components/ui/toast"
@@ -479,7 +479,6 @@ export function LoanDialog({
                         mode="single"
                         selected={field.value}
                         onSelect={(val) => val && field.onChange(val)}
-                        initialFocus
                       />
                     </PopoverContent>
                   </Popover>
@@ -511,7 +510,6 @@ export function LoanDialog({
                         mode="single"
                         selected={field.value || undefined}
                         onSelect={(val) => field.onChange(val || null)}
-                        initialFocus
                       />
                       {field.value && (
                         <div className="p-2 border-t border-border/30 text-center">

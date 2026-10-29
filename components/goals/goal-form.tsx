@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/shared/responsive-dialog"
 import { Button } from "@/components/ui/button"
 import { InputGroup, InputGroupInput } from "@/components/ui/input-group"
 import { 
@@ -264,7 +264,6 @@ export function GoalFormDialog({ open, onOpenChange, goal }: GoalFormDialogProps
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
                           onSelect={(val) => val && field.onChange(val)}
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>
